@@ -2,8 +2,8 @@
 Blade syntax highlighting for Netbeans.
 Experimental version.
 Inspired by :
-https://github.com/ravijajal/netbeans_blade
-https://github.com/sebhoerl/Twig-netbeans
+- https://github.com/ravijajal/netbeans_blade
+- https://github.com/sebhoerl/Twig-netbeans
 
 Installation
 ============
