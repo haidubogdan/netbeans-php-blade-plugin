@@ -84,7 +84,12 @@ public class BladeCompletionHandler implements CodeCompletionHandler2 {
     private static final Set<BladeElement> DIRECTIVES = new HashSet<>();   
     static {
         BladeDocumentationFactory documentationFactory = DirectiveDocumentationFactory.getInstance();
-        DIRECTIVES.add(BladeElement.Factory.create("for", documentationFactory, "for (${$array} as ${$item})\n\n@endfor")); //NOI18N
+        DIRECTIVES.add(BladeElement.Factory.create("for", documentationFactory, "for(${$i}; ${$i} < 10; ${$i}++)\n\n@endfor")); //NOI18N
+        DIRECTIVES.add(BladeElement.Factory.create("foreach", documentationFactory, "foreach(${$array} as ${$item})\n\n@endforeach")); //NOI18N
+        DIRECTIVES.add(BladeElement.Factory.create("if", documentationFactory, "if(${$test})\n\n@endif")); //NOI18N
+        DIRECTIVES.add(BladeElement.Factory.create("extends", documentationFactory, "extends('${template}')")); //NOI18N
+        DIRECTIVES.add(BladeElement.Factory.create("section", documentationFactory, "section('${content}')\n\n@endsection")); //NOI18N
+        DIRECTIVES.add(BladeElement.Factory.create("section_inline", documentationFactory, "section('${content}', '${value}')")); //NOI18N
     }
     @Override
     public CodeCompletionResult complete(CodeCompletionContext codeCompletionContext) {
