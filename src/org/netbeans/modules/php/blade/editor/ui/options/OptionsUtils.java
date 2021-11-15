@@ -54,15 +54,15 @@ public final class OptionsUtils {
 
     private static final AtomicBoolean INITED = new AtomicBoolean(false);
 
-    public static final String AUTO_COMPLETION_SMART_QUOTES = "bladeAutoCompletionSmartQuotes"; // NOI18N
-    public static final String AUTO_COMPLETION_SMART_DELIMITERS = "bladeAutoCompletionSmartDelimiters"; // NOI18N
+    public static final String AUTO_COMPLETION_ECHO_DELIMITERS = "bladeAutoCompletionEchoDelimiters"; // NOI18N
+    public static final String AUTO_COMPLETION_ESCAPED_ECHO_DELIMITERS = "bladeAutoCompletionEscapedEchoDelimiters"; // NOI18N
 
-    private static Boolean autoCompletionSmartQuotes = null;
-    private static Boolean autoCompletionSmartDelimiters = null;
+    private static Boolean autoCompletionEchoDelimiter = null;
+    private static Boolean autoCompletionEscapedEchoDelimiter = null;
 
     // default values
-    public static final boolean AUTO_COMPLETION_SMART_QUOTES_DEFAULT = true;
-    public static final boolean AUTO_COMPLETION_SMART_DELIMITERS_DEFAULT = true;
+    public static final boolean AUTO_COMPLETION_ECHO_DELIMITER_DEFAULT = true;
+    public static final boolean AUTO_COMPLETION_ESCAPED_ECHO_DELIMITER_DEFAULT = true;
 
     private static Preferences PREFERENCES;
 
@@ -71,15 +71,13 @@ public final class OptionsUtils {
         public void preferenceChange(PreferenceChangeEvent evt) {
             String settingName = evt == null ? null : evt.getKey();
 
-            if (settingName == null || AUTO_COMPLETION_SMART_QUOTES.equals(settingName)) {
-                autoCompletionSmartQuotes = PREFERENCES.getBoolean(
-                        AUTO_COMPLETION_SMART_QUOTES,
-                        AUTO_COMPLETION_SMART_QUOTES_DEFAULT);
+            if (settingName == null || AUTO_COMPLETION_ECHO_DELIMITERS.equals(settingName)) {
+                autoCompletionEchoDelimiter = PREFERENCES.getBoolean(AUTO_COMPLETION_ECHO_DELIMITERS,
+                        AUTO_COMPLETION_ECHO_DELIMITER_DEFAULT);
             }
-            if (settingName == null || AUTO_COMPLETION_SMART_DELIMITERS.equals(settingName)) {
-                autoCompletionSmartDelimiters = PREFERENCES.getBoolean(
-                        AUTO_COMPLETION_SMART_DELIMITERS,
-                        AUTO_COMPLETION_SMART_DELIMITERS_DEFAULT);
+            if (settingName == null || AUTO_COMPLETION_ESCAPED_ECHO_DELIMITERS.equals(settingName)) {
+                autoCompletionEscapedEchoDelimiter = PREFERENCES.getBoolean(AUTO_COMPLETION_ESCAPED_ECHO_DELIMITERS,
+                        AUTO_COMPLETION_ESCAPED_ECHO_DELIMITER_DEFAULT);
             }
         }
     };
@@ -87,16 +85,16 @@ public final class OptionsUtils {
     private OptionsUtils() {
     }
 
-    public static boolean autoCompletionSmartQuotes() {
+    public static boolean autoCompletionEchoDelimiter() {
         lazyInit();
-        assert autoCompletionSmartQuotes != null;
-        return autoCompletionSmartQuotes;
+        assert autoCompletionEchoDelimiter != null;
+        return autoCompletionEchoDelimiter;
     }
 
-    public static boolean autoCompletionSmartDelimiters() {
+    public static boolean autoCompletionEscapedEchoDelimiter() {
         lazyInit();
-        assert autoCompletionSmartDelimiters != null;
-        return autoCompletionSmartDelimiters;
+        assert autoCompletionEscapedEchoDelimiter != null;
+        return autoCompletionEscapedEchoDelimiter;
     }
 
     private static void lazyInit() {

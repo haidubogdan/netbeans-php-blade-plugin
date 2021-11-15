@@ -42,6 +42,7 @@
 package org.netbeans.modules.php.blade.editor.ui.options;
 
 import org.netbeans.modules.php.api.util.UiUtils;
+import org.netbeans.modules.php.blade.editor.actions.ToggleBlockCommentAction;
 //import org.netbeans.modules.php.blade.editor.actions.ToggleBlockCommentAction;
 import org.netbeans.spi.options.OptionsPanelController;
 import org.openide.util.NbBundle;
@@ -67,12 +68,12 @@ final class BladePanel extends javax.swing.JPanel {
     }
     
     private void setDefaultValues() {
-//        ToggleBlockCommentAction.ToggleCommentType toggleCommentType = BladeOptions.getInstance().getToggleCommentType();
-//        if (toggleCommentType == ToggleBlockCommentAction.ToggleCommentType.AS_BLADE_EVERYWHERE) {
-//            asBladeEverywhereRadioButton.setSelected(true);
-//        } else {
-//            languageSensitiveRadioButton.setSelected(true);
-//        }
+        ToggleBlockCommentAction.ToggleCommentType toggleCommentType = BladeOptions.getInstance().getToggleCommentType();
+        if (toggleCommentType == ToggleBlockCommentAction.ToggleCommentType.AS_BLADE_EVERYWHERE) {
+            asBladeEverywhereRadioButton.setSelected(true);
+        } else {
+            languageSensitiveRadioButton.setSelected(true);
+        }
     }
 
     /**
@@ -92,6 +93,7 @@ final class BladePanel extends javax.swing.JPanel {
 
         toggleCommentButtonGroup.add(asBladeEverywhereRadioButton);
         asBladeEverywhereRadioButton.setMnemonic('t');
+        asBladeEverywhereRadioButton.setSelected(true);
         org.openide.awt.Mnemonics.setLocalizedText(asBladeEverywhereRadioButton, org.openide.util.NbBundle.getMessage(BladePanel.class, "BladePanel.asBladeEverywhereRadioButton.text")); // NOI18N
         asBladeEverywhereRadioButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -135,23 +137,23 @@ final class BladePanel extends javax.swing.JPanel {
     void load() {
         if(firstOpening || !changed()) { // if panel is not modified by the user and he switches back to this panel, set to default
             firstOpening = false;
-//            ToggleBlockCommentAction.ToggleCommentType toggleCommentType = BladeOptions.getInstance().getToggleCommentType();
-//            if (toggleCommentType == ToggleBlockCommentAction.ToggleCommentType.AS_BLADE_EVERYWHERE) {
-//                asBladeEverywhereRadioButton.setSelected(true);
-//            } else {
-//                languageSensitiveRadioButton.setSelected(true);
-//            }
+            ToggleBlockCommentAction.ToggleCommentType toggleCommentType = BladeOptions.getInstance().getToggleCommentType();
+            if (toggleCommentType == ToggleBlockCommentAction.ToggleCommentType.AS_BLADE_EVERYWHERE) {
+                asBladeEverywhereRadioButton.setSelected(true);
+            } else {
+                languageSensitiveRadioButton.setSelected(true);
+            }
         }
     }
 
     void store() {
-//        ToggleBlockCommentAction.ToggleCommentType toggleCommentType;
-//        if (asBladeEverywhereRadioButton.isSelected()) {
-//            toggleCommentType = ToggleBlockCommentAction.ToggleCommentType.AS_BLADE_EVERYWHERE;
-//        } else {
-//            toggleCommentType = ToggleBlockCommentAction.ToggleCommentType.LANGUAGE_SENSITIVE;
-//        }
-//        BladeOptions.getInstance().setToggleCommentType(toggleCommentType);
+        ToggleBlockCommentAction.ToggleCommentType toggleCommentType;
+        if (asBladeEverywhereRadioButton.isSelected()) {
+            toggleCommentType = ToggleBlockCommentAction.ToggleCommentType.AS_BLADE_EVERYWHERE;
+        } else {
+            toggleCommentType = ToggleBlockCommentAction.ToggleCommentType.LANGUAGE_SENSITIVE;
+        }
+        BladeOptions.getInstance().setToggleCommentType(toggleCommentType);
     }
 
     boolean valid() {
@@ -161,19 +163,19 @@ final class BladePanel extends javax.swing.JPanel {
     
     void cancel() {
         if (changed()) { // if panel is modified by the user and options window closes, discard any changes
-//            ToggleBlockCommentAction.ToggleCommentType toggleCommentType = BladeOptions.getInstance().getToggleCommentType();
-//            if (toggleCommentType == ToggleBlockCommentAction.ToggleCommentType.AS_BLADE_EVERYWHERE) {
-//                asBladeEverywhereRadioButton.setSelected(true);
-//            } else {
-//                languageSensitiveRadioButton.setSelected(true);
-//            }
+            ToggleBlockCommentAction.ToggleCommentType toggleCommentType = BladeOptions.getInstance().getToggleCommentType();
+            if (toggleCommentType == ToggleBlockCommentAction.ToggleCommentType.AS_BLADE_EVERYWHERE) {
+                asBladeEverywhereRadioButton.setSelected(true);
+            } else {
+                languageSensitiveRadioButton.setSelected(true);
+            }
         }
     }
 
     boolean changed() {
-//        if (BladeOptions.getInstance().getToggleCommentType() == ToggleBlockCommentAction.ToggleCommentType.AS_BLADE_EVERYWHERE) {
-//            return !asBladeEverywhereRadioButton.isSelected();
-//        } 
+        if (BladeOptions.getInstance().getToggleCommentType() == ToggleBlockCommentAction.ToggleCommentType.AS_BLADE_EVERYWHERE) {
+            return !asBladeEverywhereRadioButton.isSelected();
+        } 
         return !languageSensitiveRadioButton.isSelected();
     }
     

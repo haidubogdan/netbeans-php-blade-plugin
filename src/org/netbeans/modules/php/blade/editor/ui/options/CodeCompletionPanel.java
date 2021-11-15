@@ -53,7 +53,6 @@ import org.openide.util.HelpCtx;
  */
 @org.netbeans.api.annotations.common.SuppressWarnings({"SE_BAD_FIELD_STORE"})
 public class CodeCompletionPanel extends javax.swing.JPanel {
-    //??
     private static final long serialVersionUID = -3783460333563884705L;
 
     private final Preferences preferences;
@@ -75,25 +74,23 @@ public class CodeCompletionPanel extends javax.swing.JPanel {
     }
 
     private void initAutoCompletion() {
-        boolean codeCompletionSmartQuotes = preferences.getBoolean(
-                OptionsUtils.AUTO_COMPLETION_SMART_QUOTES,
-                OptionsUtils.AUTO_COMPLETION_SMART_QUOTES_DEFAULT
+        boolean codeCompletionEchoDelimiters = preferences.getBoolean(OptionsUtils.AUTO_COMPLETION_ECHO_DELIMITERS,
+                OptionsUtils.AUTO_COMPLETION_ECHO_DELIMITER_DEFAULT
         );
-        boolean codeCompletionSmartDelimiters = preferences.getBoolean(
-                OptionsUtils.AUTO_COMPLETION_SMART_DELIMITERS,
-                OptionsUtils.AUTO_COMPLETION_SMART_DELIMITERS_DEFAULT
+        boolean codeCompletionEscapedEchoDelimiters = preferences.getBoolean(OptionsUtils.AUTO_COMPLETION_ESCAPED_ECHO_DELIMITERS,
+                OptionsUtils.AUTO_COMPLETION_ESCAPED_ECHO_DELIMITER_DEFAULT
         );
-        autoCompletionSmartQuotesCheckBox.setSelected(codeCompletionSmartQuotes);
-        autoCompletionSmartQuotesCheckBox.addItemListener(defaultCheckBoxListener);
-        autoCompletionSmartDelimitersCheckBox.setSelected(codeCompletionSmartDelimiters);
-        autoCompletionSmartDelimitersCheckBox.addItemListener(defaultCheckBoxListener);
-        id2Saved.put(OptionsUtils.AUTO_COMPLETION_SMART_QUOTES, autoCompletionSmartQuotesCheckBox.isSelected());
-        id2Saved.put(OptionsUtils.AUTO_COMPLETION_SMART_DELIMITERS, autoCompletionSmartDelimitersCheckBox.isSelected());
+        autoCompletionEchoDelimiterCheckBox.setSelected(codeCompletionEchoDelimiters);
+        autoCompletionEchoDelimiterCheckBox.addItemListener(defaultCheckBoxListener);
+        autoCompletionEscapedEchoDelimitersCheckBox.setSelected(codeCompletionEscapedEchoDelimiters);
+        autoCompletionEscapedEchoDelimitersCheckBox.addItemListener(defaultCheckBoxListener);
+        id2Saved.put(OptionsUtils.AUTO_COMPLETION_ECHO_DELIMITERS, autoCompletionEchoDelimiterCheckBox.isSelected());
+        id2Saved.put(OptionsUtils.AUTO_COMPLETION_ESCAPED_ECHO_DELIMITERS, autoCompletionEscapedEchoDelimitersCheckBox.isSelected());
     }
 
     void validateData() {
-        preferences.putBoolean(OptionsUtils.AUTO_COMPLETION_SMART_QUOTES, autoCompletionSmartQuotesCheckBox.isSelected());
-        preferences.putBoolean(OptionsUtils.AUTO_COMPLETION_SMART_DELIMITERS, autoCompletionSmartDelimitersCheckBox.isSelected());
+        preferences.putBoolean(OptionsUtils.AUTO_COMPLETION_ECHO_DELIMITERS, autoCompletionEchoDelimiterCheckBox.isSelected());
+        preferences.putBoolean(OptionsUtils.AUTO_COMPLETION_ESCAPED_ECHO_DELIMITERS, autoCompletionEscapedEchoDelimitersCheckBox.isSelected());
     }
 
     /**
@@ -106,14 +103,14 @@ public class CodeCompletionPanel extends javax.swing.JPanel {
     private void initComponents() {
 
         autoCompletionSmartQuotesDelimitersLabel = new javax.swing.JLabel();
-        autoCompletionSmartDelimitersCheckBox = new javax.swing.JCheckBox();
-        autoCompletionSmartQuotesCheckBox = new javax.swing.JCheckBox();
+        autoCompletionEscapedEchoDelimitersCheckBox = new javax.swing.JCheckBox();
+        autoCompletionEchoDelimiterCheckBox = new javax.swing.JCheckBox();
 
         org.openide.awt.Mnemonics.setLocalizedText(autoCompletionSmartQuotesDelimitersLabel, org.openide.util.NbBundle.getMessage(CodeCompletionPanel.class, "CodeCompletionPanel.autoCompletionSmartQuotesDelimitersLabel.text")); // NOI18N
 
-        org.openide.awt.Mnemonics.setLocalizedText(autoCompletionSmartDelimitersCheckBox, org.openide.util.NbBundle.getMessage(CodeCompletionPanel.class, "CodeCompletionPanel.autoCompletionSmartDelimitersCheckBox.text")); // NOI18N
+        org.openide.awt.Mnemonics.setLocalizedText(autoCompletionEscapedEchoDelimitersCheckBox, org.openide.util.NbBundle.getMessage(CodeCompletionPanel.class, "CodeCompletionPanel.autoCompletionEscapedEchoDelimitersCheckBox.text")); // NOI18N
 
-        org.openide.awt.Mnemonics.setLocalizedText(autoCompletionSmartQuotesCheckBox, org.openide.util.NbBundle.getMessage(CodeCompletionPanel.class, "CodeCompletionPanel.autoCompletionSmartQuotesCheckBox.text")); // NOI18N
+        org.openide.awt.Mnemonics.setLocalizedText(autoCompletionEchoDelimiterCheckBox, org.openide.util.NbBundle.getMessage(CodeCompletionPanel.class, "CodeCompletionPanel.autoCompletionEchoDelimiterCheckBox.text")); // NOI18N
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
@@ -123,8 +120,8 @@ public class CodeCompletionPanel extends javax.swing.JPanel {
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(autoCompletionSmartQuotesDelimitersLabel)
-                    .addComponent(autoCompletionSmartDelimitersCheckBox)
-                    .addComponent(autoCompletionSmartQuotesCheckBox))
+                    .addComponent(autoCompletionEscapedEchoDelimitersCheckBox)
+                    .addComponent(autoCompletionEchoDelimiterCheckBox))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
@@ -133,17 +130,17 @@ public class CodeCompletionPanel extends javax.swing.JPanel {
                 .addContainerGap()
                 .addComponent(autoCompletionSmartQuotesDelimitersLabel)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(autoCompletionSmartQuotesCheckBox)
+                .addComponent(autoCompletionEchoDelimiterCheckBox)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(autoCompletionSmartDelimitersCheckBox)
+                .addComponent(autoCompletionEscapedEchoDelimitersCheckBox)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
     }// </editor-fold>//GEN-END:initComponents
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JCheckBox autoCompletionSmartDelimitersCheckBox;
-    private javax.swing.JCheckBox autoCompletionSmartQuotesCheckBox;
+    private javax.swing.JCheckBox autoCompletionEchoDelimiterCheckBox;
+    private javax.swing.JCheckBox autoCompletionEscapedEchoDelimitersCheckBox;
     private javax.swing.JLabel autoCompletionSmartQuotesDelimitersLabel;
     // End of variables declaration//GEN-END:variables
 

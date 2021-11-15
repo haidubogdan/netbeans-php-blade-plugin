@@ -146,7 +146,7 @@ public class BladeDeletedTextInterceptor implements DeletedTextInterceptor {
 
         @Override
         public boolean beforeRemove(Context context) throws BadLocationException {
-            if (OptionsUtils.autoCompletionSmartDelimiters()) {
+            if (OptionsUtils.autoCompletionEscapedEchoDelimiter()) {
                 int dotPos = context.getOffset();
                 Document document = context.getDocument();
                 TokenSequence<? extends BladeTopTokenId> ts = BladeLexerUtils.getBladeTokenSequence(document, dotPos);
@@ -308,7 +308,7 @@ public class BladeDeletedTextInterceptor implements DeletedTextInterceptor {
 
         @Override
         public void remove(Context context) throws BadLocationException {
-            if (OptionsUtils.autoCompletionSmartQuotes()) {
+            if (OptionsUtils.autoCompletionEchoDelimiter()) {
                 BaseDocument doc = (BaseDocument) context.getDocument();
                 int dotPos = context.getOffset() - 1;
                 TokenSequence<? extends TokenId> ts = BladeLexerUtils.getBladeMarkupTokenSequence(doc, dotPos);

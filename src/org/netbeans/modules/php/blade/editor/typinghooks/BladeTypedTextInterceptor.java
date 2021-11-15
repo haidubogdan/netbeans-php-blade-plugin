@@ -205,6 +205,7 @@ public class BladeTypedTextInterceptor implements TypedTextInterceptor {
         int dotPos = context.getOffset();
         int tokenEndPos = dotPos + 1;
         char ch = context.getText().charAt(0);
+        //for debug
         String contextText = context.getText();
         char[] validChars = new char[] {'{','!'};
         boolean isValidChar = new String(validChars).indexOf(ch) >= 0;
@@ -214,7 +215,11 @@ public class BladeTypedTextInterceptor implements TypedTextInterceptor {
         }
 
         switch (ch) {
-            case '{': // no break
+            case '{': 
+                if (!OptionsUtils.autoCompletionEchoDelimiter()){
+                    return;
+                }
+                // no break
             case '!':
                 String mimeType = getMimeType();
                 // do nothing in {!! !!} and {{ }}
@@ -236,9 +241,9 @@ public class BladeTypedTextInterceptor implements TypedTextInterceptor {
                 HTMLTokenId id = token.id();
                 CharSequence tokenText = token.text();
                 //maybe have custom tokens
-                if (ch == '{' && id == HTMLTokenId.EL_OPEN_DELIMITER ) {
+                if (ch == '{' && id == HTMLTokenId.EL_OPEN_DELIMITER || (id == HTMLTokenId.TEXT && tokenText.toString().contains("{{"))) {
                     completeOpeningDelimiter(doc, tokenEndPos, tokenEndPos + 1, caret, "  }}");
-                } else if (id == HTMLTokenId.TEXT && tokenText.toString().contains("{!!")){
+                } else if (OptionsUtils.autoCompletionEscapedEchoDelimiter() && id == HTMLTokenId.TEXT && tokenText.toString().contains("{!!")){
                     completeOpeningDelimiter(doc, tokenEndPos, tokenEndPos + 1, caret, "  !!}");
                 }
                 break;
@@ -322,12 +327,12 @@ public class BladeTypedTextInterceptor implements TypedTextInterceptor {
     }
 
     private static boolean doNotAutoCompleteQuotesAndBrackets(char c) {
-        return (isQuote(c) && !OptionsUtils.autoCompletionSmartQuotes())
+        return (isQuote(c) && !OptionsUtils.autoCompletionEchoDelimiter())
                 || (isBracket(c) && !TypingHooksUtils.isInsertMatchingEnabled());
     }
 
     private static boolean doNotAutoCompleteDelimiters(char c) {
-        return TypingHooksUtils.isOpeningDelimiterChar(c) && !OptionsUtils.autoCompletionSmartDelimiters();
+        return TypingHooksUtils.isOpeningDelimiterChar(c) && !OptionsUtils.autoCompletionEscapedEchoDelimiter();
     }
 
     private static boolean isClosingBracketMissing(BaseDocument docment, char open, char close, int dotPos) throws BadLocationException {

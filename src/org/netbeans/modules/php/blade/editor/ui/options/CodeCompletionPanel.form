@@ -20,8 +20,8 @@
               <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="0" attributes="0">
                   <Component id="autoCompletionSmartQuotesDelimitersLabel" alignment="0" min="-2" max="-2" attributes="0"/>
-                  <Component id="autoCompletionSmartDelimitersCheckBox" alignment="0" min="-2" max="-2" attributes="0"/>
-                  <Component id="autoCompletionSmartQuotesCheckBox" alignment="0" min="-2" max="-2" attributes="0"/>
+                  <Component id="autoCompletionEscapedEchoDelimitersCheckBox" alignment="0" min="-2" max="-2" attributes="0"/>
+                  <Component id="autoCompletionEchoDelimiterCheckBox" alignment="0" min="-2" max="-2" attributes="0"/>
               </Group>
               <EmptySpace max="32767" attributes="0"/>
           </Group>
@@ -33,9 +33,9 @@
               <EmptySpace max="-2" attributes="0"/>
               <Component id="autoCompletionSmartQuotesDelimitersLabel" min="-2" max="-2" attributes="0"/>
               <EmptySpace max="-2" attributes="0"/>
-              <Component id="autoCompletionSmartQuotesCheckBox" min="-2" max="-2" attributes="0"/>
+              <Component id="autoCompletionEchoDelimiterCheckBox" min="-2" max="-2" attributes="0"/>
               <EmptySpace max="-2" attributes="0"/>
-              <Component id="autoCompletionSmartDelimitersCheckBox" min="-2" max="-2" attributes="0"/>
+              <Component id="autoCompletionEscapedEchoDelimitersCheckBox" min="-2" max="-2" attributes="0"/>
               <EmptySpace max="32767" attributes="0"/>
           </Group>
       </Group>
@@ -49,17 +49,17 @@
         </Property>
       </Properties>
     </Component>
-    <Component class="javax.swing.JCheckBox" name="autoCompletionSmartDelimitersCheckBox">
+    <Component class="javax.swing.JCheckBox" name="autoCompletionEscapedEchoDelimitersCheckBox">
       <Properties>
         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-          <ResourceString bundle="org/netbeans/modules/php/twig/editor/ui/options/Bundle.properties" key="CodeCompletionPanel.autoCompletionSmartDelimitersCheckBox.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
+          <ResourceString bundle="org/netbeans/modules/php/blade/editor/ui/options/Bundle.properties" key="CodeCompletionPanel.autoCompletionEscapedEchoDelimitersCheckBox.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
         </Property>
       </Properties>
     </Component>
-    <Component class="javax.swing.JCheckBox" name="autoCompletionSmartQuotesCheckBox">
+    <Component class="javax.swing.JCheckBox" name="autoCompletionEchoDelimiterCheckBox">
       <Properties>
         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-          <ResourceString bundle="org/netbeans/modules/php/twig/editor/ui/options/Bundle.properties" key="CodeCompletionPanel.autoCompletionSmartQuotesCheckBox.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
+          <ResourceString bundle="org/netbeans/modules/php/blade/editor/ui/options/Bundle.properties" key="CodeCompletionPanel.autoCompletionEchoDelimiterCheckBox.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
         </Property>
       </Properties>
     </Component>
