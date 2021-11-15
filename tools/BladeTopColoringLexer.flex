@@ -75,7 +75,7 @@ import org.netbeans.modules.web.common.api.ByteStack;
     private LexerInput input;
     private int parenBalanceInDirective = 0; //for directive arguments
 
-    public BladeTopColoringLexer(LexerRestartInfo info) {
+    public BladeTopColoringLexer(LexerRestartInfo<?> info) {
         this.input = info.input();
         if(info.state() != null) {
             //reset state

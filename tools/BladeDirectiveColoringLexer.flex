@@ -42,7 +42,6 @@
 
 package org.netbeans.modules.php.blade.editor.lexer;
 
-import java.util.Objects;
 import org.netbeans.spi.lexer.LexerInput;
 import org.netbeans.spi.lexer.LexerRestartInfo;
 import org.netbeans.modules.web.common.api.ByteStack;
@@ -86,7 +85,7 @@ import org.netbeans.modules.web.common.api.ByteStack;
     private LexerInput input;
     private int parenBalanceInDirective = 0; //for directive arguments
 
-    public BladeDirectiveColoringLexer(LexerRestartInfo info) {
+    public BladeDirectiveColoringLexer(LexerRestartInfo<?> info) {
         this.input = info.input();
         if(info.state() != null) {
             //reset state

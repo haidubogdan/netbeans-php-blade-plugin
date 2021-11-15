@@ -116,7 +116,7 @@ public enum BladeTopTokenId implements TokenId {
                 @Override
                 protected LanguageEmbedding<?> embedding(Token<BladeTopTokenId> token,
                         LanguagePath languagePath, InputAttributes inputAttributes) {
-                    Language lang = null;
+                    Language<?> lang = null;
                     boolean join_sections = false;
                     BladeTopTokenId id = token.id();
 
