@@ -51,7 +51,6 @@ import org.netbeans.modules.csl.api.ElementHandle;
 import org.netbeans.modules.csl.api.ElementKind;
 import org.netbeans.modules.csl.api.HtmlFormatter;
 import org.netbeans.modules.csl.api.Modifier;
-import org.openide.util.ImageUtilities;
 import org.openide.util.NbBundle;
 
 /**

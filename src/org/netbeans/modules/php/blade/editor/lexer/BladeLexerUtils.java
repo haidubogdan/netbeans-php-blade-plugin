@@ -56,7 +56,6 @@ import org.netbeans.api.lexer.TokenSequence;
 import org.netbeans.editor.BaseDocument;
 import org.netbeans.modules.csl.api.OffsetRange;
 import org.netbeans.modules.parsing.api.Snapshot;
-import org.netbeans.modules.php.editor.lexer.PHPTokenId;
 
 /**
  *
