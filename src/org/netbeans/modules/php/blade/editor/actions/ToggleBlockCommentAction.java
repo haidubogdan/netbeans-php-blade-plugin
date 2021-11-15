@@ -47,6 +47,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.JTextComponent;
+import org.netbeans.api.editor.document.LineDocumentUtils;
 import org.netbeans.modules.php.blade.editor.lexer.BladeLexerUtils;
 import org.netbeans.api.lexer.Token;
 import org.netbeans.api.lexer.TokenSequence;
@@ -234,8 +235,8 @@ public class ToggleBlockCommentAction extends BaseAction {
                 offsetCommentStart = getStart();
                 offsetCommentEnd = getEnd();
             } else {
-                offsetCommentStart = Utilities.getRowStart(baseDocument, getStart());
-                offsetCommentEnd = Utilities.getRowEnd(baseDocument, getEnd());
+                offsetCommentStart = LineDocumentUtils.getLineStart(baseDocument, getStart());
+                offsetCommentEnd = LineDocumentUtils.getLineEnd(baseDocument, getEnd());
             }
             baseDocument.insertString(offsetCommentStart, BladeTopLexer.OPEN_COMMENT, null);
             baseDocument.insertString(offsetCommentEnd + BladeTopLexer.OPEN_COMMENT.length(), BladeTopLexer.CLOSE_COMMENT, null);
