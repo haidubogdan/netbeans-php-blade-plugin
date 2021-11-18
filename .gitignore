@@ -1,2 +1,4 @@
 build/
 nbproject/private
+tools/*.java
+tools/*.java~
