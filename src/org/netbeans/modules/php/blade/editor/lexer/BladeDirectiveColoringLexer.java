@@ -728,6 +728,10 @@ public class BladeDirectiveColoringLexer {
         if (yytext.endsWith("@endphp")){
             if (yylength() >8){
             yypushback(8);
+        }else if (yytext.trim().equals("@endphp")){
+            stack.clear();
+            pushState(YYINITIAL);
+            return BladeTokenId.T_BLADE_DIRECTIVE;
         }
         pushState(ST_CLOSE_BLADE_PHP);
         }
