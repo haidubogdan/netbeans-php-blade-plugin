@@ -46,7 +46,12 @@
                     <file name="org-netbeans-lib-editor-codetemplates-CodeTemplateCompletionProvider.instance"/>
                 </folder>
                 <folder name="CodeTemplateFilterFactories">
-                    <file name="org-modules-php-blade-editor-codetemplate-BladeCodeTemplateFilter$Factory.instance"/>
+                    <file name="org-modules-php-blade-editor-codetemplate-BladeCodeTemplateFilter$Factory.instance">
+                        <attr name="position" intvalue="0"/>
+                    </file>
+                    <file name="org-netbeans-modules-csl-editor-codetemplates-GsfCodeTemplateFilter$Factory.instance">
+                        <attr name="position" intvalue="0"/>
+                    </file>
                 </folder>
                 <folder name="CodeTemplates">
                     <folder name="Defaults">
@@ -76,9 +81,6 @@
                 <folder name="UpToDateStatusProvider">
                     <file name="org-netbeans-modules-csl-hints-GsfUpToDateStateProviderFactory.instance"/>
                 </folder>
-                <folder name="UpToDateStatusProvider">
-                    <file name="org-netbeans-modules-csl-hints-GsfUpToDateStateProviderFactory.instance"/>
-                </folder>
                 <folder name="BracesMatchers">
                     <file name="org-netbeans-modules-html-editor-HtmlBracesMatching.instance">
                         <attr name="position" intvalue="50"/>
@@ -104,12 +106,8 @@
                 <folder name="CodeTemplateProcessorFactories">
                     <file name="org-netbeans-modules-csl-editor-codetemplates-GsfCodeTemplateProcessor$Factory.instance"/>
                 </folder>
-                <folder name="CodeTemplateFilterFactories">
-                    <file name="org-netbeans-modules-csl-editor-codetemplates-GsfCodeTemplateFilter$Factory.instance"/>
-                </folder>  
             </folder>
             <folder name="blade-markup">
-                <attr name="displayName" bundlevalue="org.netbeans.modules.php.blade.resources.Bundle#Editors/text/blade-markup"/>
                 <file name="language.instance">
                     <attr name="instanceCreate" methodvalue="org.netbeans.modules.php.blade.editor.lexer.BladeTokenId.language"/>
                     <attr name="instanceOf" stringvalue="org.netbeans.api.lexer.Language"/>
@@ -140,42 +138,6 @@
             <folder name="x-blade">
                 <attr name="iconBase" stringvalue="org/netbeans/modules/php/blade/resources/icon.png"/>
                 <folder name="Actions">
-                    <file name="org-openide-actions-CopyAction.shadow">
-                        <attr name="originalFile" stringvalue="Actions/Edit/org-openide-actions-CopyAction.instance"/>
-                        <attr name="position" intvalue="400"/>
-                    </file>
-                    <file name="org-openide-actions-CutAction.shadow">
-                        <attr name="originalFile" stringvalue="Actions/Edit/org-openide-actions-CutAction.instance"/>
-                        <attr name="position" intvalue="300"/>
-                    </file>
-                    <file name="org-openide-actions-DeleteAction.shadow">
-                        <attr name="originalFile" stringvalue="Actions/Edit/org-openide-actions-DeleteAction.instance"/>
-                        <attr name="position" intvalue="600"/>
-                    </file>
-                    <file name="org-openide-actions-FileSystemAction.shadow">
-                        <attr name="originalFile" stringvalue="Actions/System/org-openide-actions-FileSystemAction.instance"/>
-                        <attr name="position" intvalue="1100"/>
-                    </file>
-                    <file name="org-openide-actions-OpenAction.shadow">
-                        <attr name="originalFile" stringvalue="Actions/System/org-openide-actions-OpenAction.instance"/>
-                        <attr name="position" intvalue="100"/>
-                    </file>
-                    <file name="org-openide-actions-PropertiesAction.shadow">
-                        <attr name="originalFile" stringvalue="Actions/System/org-openide-actions-PropertiesAction.instance"/>
-                        <attr name="position" intvalue="1400"/>
-                    </file>
-                    <file name="org-openide-actions-RenameAction.shadow">
-                        <attr name="originalFile" stringvalue="Actions/System/org-openide-actions-RenameAction.instance"/>
-                        <attr name="position" intvalue="700"/>
-                    </file>
-                    <file name="org-openide-actions-SaveAsTemplateAction.shadow">
-                        <attr name="originalFile" stringvalue="Actions/System/org-openide-actions-SaveAsTemplateAction.instance"/>
-                        <attr name="position" intvalue="900"/>
-                    </file>
-                    <file name="org-openide-actions-ToolsAction.shadow">
-                        <attr name="originalFile" stringvalue="Actions/System/org-openide-actions-ToolsAction.instance"/>
-                        <attr name="position" intvalue="1300"/>
-                    </file>
                     <file name="sep-1.instance">
                         <attr name="instanceClass" stringvalue="javax.swing.JSeparator"/>
                         <attr name="position" intvalue="200"/>
