@@ -8,7 +8,7 @@ Inspired by :
 Installation
 ============
 
-Required Netbeans version **12.0**, **12.2**, **12.3**, **12.5**
+Required Netbeans version **12.0**, **12.2**, **12.3**, **12.5**, **12.6**
 
 
 Installing from package
@@ -18,7 +18,7 @@ The plugin is not uploaded on netbeans site as it is still in experimental versi
 There are two export nbm files available in the folder **nbm** 
 
 1. In Netbeans open Tools -> Plugins, select Downloaded tab.
-2. Click "Add plugins" and select the file from the nbm folder coresponding to the netbeans version (12.0, 12.2, 12.3, 12.5).
+2. Click "Add plugins" and select the file from the nbm folder coresponding to the netbeans version (12.0, 12.2, 12.3, 12.5, 12.6).
 3. Select the checkbox next to the "Blade for Netbeans" plugin and click Install.
 4. Restart the IDE when demanded and enjoy your new plugin.
 
