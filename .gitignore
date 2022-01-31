@@ -2,3 +2,5 @@ build/
 nbproject/private
 tools/*.java
 tools/*.java~
+lib
+pom.xml.asc

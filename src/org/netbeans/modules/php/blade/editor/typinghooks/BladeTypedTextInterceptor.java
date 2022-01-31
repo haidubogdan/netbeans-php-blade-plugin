@@ -39,39 +39,30 @@
  */
 package org.netbeans.modules.php.blade.editor.typinghooks;
 
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.text.BadLocationException;
-import javax.swing.text.Caret;
 import javax.swing.text.Document;
-import javax.swing.text.JTextComponent;
-import org.netbeans.modules.php.blade.editor.embeddings.BladeEmbeddingProvider;
-import org.netbeans.modules.php.blade.editor.gsf.BladeLanguage;
-import org.netbeans.modules.php.blade.editor.lexer.BladeLexerUtils;
+import org.netbeans.modules.php.blade.editor.BladeLanguage;
 import org.netbeans.modules.php.blade.editor.lexer.BladeTokenId;
-import org.netbeans.modules.php.blade.editor.lexer.BladeTopTokenId;
 import org.netbeans.modules.php.blade.editor.ui.options.OptionsUtils;
 import org.netbeans.api.editor.mimelookup.MimePath;
 import org.netbeans.api.editor.mimelookup.MimeRegistration;
 import org.netbeans.api.editor.mimelookup.MimeRegistrations;
-import org.netbeans.api.html.lexer.HTMLTokenId;
 import org.netbeans.api.lexer.Token;
-import org.netbeans.api.lexer.TokenId;
+import org.netbeans.api.lexer.TokenHierarchy;
 import org.netbeans.api.lexer.TokenSequence;
 import org.netbeans.editor.BaseDocument;
 
-
 import org.netbeans.spi.editor.typinghooks.TypedTextInterceptor;
+import org.openide.util.Exceptions;
 
 public class BladeTypedTextInterceptor implements TypedTextInterceptor {
 
-    private final MimePath mimePath;
     private final boolean isBlade;
     private boolean codeTemplateEditing;
     private static final Logger LOGGER = Logger.getLogger(BladeTypedTextInterceptor.class.getName());
 
     private BladeTypedTextInterceptor(MimePath mimePath) {
-        this.mimePath = mimePath;
         String path = mimePath.getPath();
         isBlade = path.contains(BladeLanguage.BLADE_MIME_TYPE);
     }
@@ -94,53 +85,79 @@ public class BladeTypedTextInterceptor implements TypedTextInterceptor {
         if (doNotAutoCompleteQuotesAndBrackets(ch) || caretOffset == 0) {
             return;
         }
-        TokenSequence<? extends TokenId> ts = BladeLexerUtils.getBladeMarkupTokenSequence(doc, caretOffset);
+        TokenHierarchy<Document> th = TokenHierarchy.get(document);
+        TokenSequence<BladeTokenId> ts = th.tokenSequence(BladeTokenId.language());
+
         if (ts == null) {
-            // {{}} or {!!!!} there is no text between delimiters
-            ts = BladeLexerUtils.getBladeTokenSequence(document, caretOffset);
-            if (ts == null) {
-                return;
-            }
+            return;
         }
         ts.move(caretOffset);
         if (!ts.moveNext() && !ts.movePrevious()) {
             return;
         }
 
-        Token<? extends TokenId> token = ts.token();
-        TokenId id = token.id();
-        int tokenOffset = ts.offset();
         boolean skipQuote = false;
         boolean isInString = false;
 
-        if (id instanceof BladeTokenId) {
-            // complete quote or bracket
-            if (isOpeningBracket(ch) || isQuote(ch)) {
-                if (selection != null && selection.length() > 0) {
-                    surroundSelectionWithChars(selection, ch, context);
-                } else {
-                    completeQuoteAndBracket(context, ch);
+        // complete quote or bracket
+        if (isOpeningBracket(ch) || isQuote(ch)) {
+            if (selection != null && selection.length() > 0) {
+                surroundSelectionWithChars(selection, ch, context);
+            } else {
+                completeQuoteAndBracket(context, ch);
+            }
+        }
+
+        // skip the same closing char
+        if ((isClosingBracket(ch) || isQuote(ch))
+                && TypingHooksUtils.sameAsExistingChar(doc, ch, caretOffset)) {
+            if (isInString) {
+                if (!skipQuote && isQuote(ch) && !TypingHooksUtils.isEscapeSequence(doc, caretOffset)) {
+                    skipNextChar(context, ch, document, caretOffset);
                 }
+            } else {
+                if (!skipQuote && !isClosingBracketMissing(ch)) {
+                    skipNextChar(context, ch, document, caretOffset);
+                }
+            }
+        } else if (ch == ' ') {
+            Token<?> token = ts.token();
+            if (token.id().equals(BladeTokenId.T_BLADE_PHP_ECHO) || 
+                    (token.id().equals(BladeTokenId.T_BLADE_COMMENT) && token.text().toString().length() > 4)){
+                //we are inside an existing echo or comment
+                return;
             }
 
-            // skip the same closing char
-            if ((isClosingBracket(ch) || isQuote(ch))
-                    && TypingHooksUtils.sameAsExistingChar(doc, ch, caretOffset)) {
-                if (isInString) {
-                    if (!skipQuote && isQuote(ch) && !TypingHooksUtils.isEscapeSequence(doc, caretOffset)) {
-                        skipNextChar(context, ch, document, caretOffset);
-                    }
-                } else {
-                    if (!skipQuote && !isClosingBracketMissing(doc, matching(ch), ch, caretOffset)) {
-                        skipNextChar(context, ch, document, caretOffset);
-                    }
+            /**
+            * blade bracket completer
+            * one directional only 
+            * for 
+            * echo {{ }}
+            * echo escaped {!! !!}
+            * comment {{-- --}}
+            * 
+            */
+
+            try {
+                String s = doc.getText(caretOffset - 2, 2);
+                String expectedBracket = "{{";
+                
+                if ("!!".equals(s) && caretOffset > 3) {
+                    s = doc.getText(caretOffset - 3, 3);
+                    expectedBracket = "{!!";
+                } else if ("--".equals(s) && caretOffset > 4) {
+                    s = doc.getText(caretOffset - 4, 4);
+                    expectedBracket = "{{--";
                 }
-            }
-        } else if(id == BladeTopTokenId.T_HTML) {
-            // {{}} or {!!!!}
-            if ((isOpeningBracket(ch) || isQuote(ch))
-                    && tokenOffset != caretOffset) {
-                completeQuoteAndBracket(context, ch);
+                if (expectedBracket.equals(s)) { // NOI18N
+                    StringBuilder sb = new StringBuilder();
+                    sb.append("  ");
+                    String completeBracket = matching(expectedBracket);
+                    sb.append(completeBracket);
+                    context.setText(sb.toString(), 1);
+                }
+            } catch (BadLocationException ble) {
+                Exceptions.printStackTrace(ble);
             }
         }
     }
@@ -152,11 +169,7 @@ public class BladeTypedTextInterceptor implements TypedTextInterceptor {
         }
         BaseDocument doc = (BaseDocument) context.getDocument();
         doc.runAtomicAsUser(() -> {
-            try {
-                afterInsertUnderWriteLock(context);
-            } catch (BadLocationException ex) {
-                LOGGER.log(Level.FINE, null, ex);
-            }
+            //do other magic
         });
     }
 
@@ -166,8 +179,8 @@ public class BladeTypedTextInterceptor implements TypedTextInterceptor {
 
     /**
      * Surround the selected text with chars("", '', (), {}, []).
-     * <b>NOTE:</b> Replace the surrounding chars if the text is already surrounded with
-     * chars.
+     * <b>NOTE:</b> Replace the surrounding chars if the text is already
+     * surrounded with chars.
      *
      * @param selection the selected text
      * @param ch the opening bracket
@@ -198,65 +211,6 @@ public class BladeTypedTextInterceptor implements TypedTextInterceptor {
         document.remove(dotPos, 1);
     }
 
-    private void afterInsertUnderWriteLock(Context context) throws BadLocationException {
-        JTextComponent target = context.getComponent();
-        Caret caret = target.getCaret();
-        BaseDocument doc = (BaseDocument) context.getDocument();
-        int dotPos = context.getOffset();
-        int tokenEndPos = dotPos + 1;
-        char ch = context.getText().charAt(0);
-        //for debug
-        String contextText = context.getText();
-        char[] validChars = new char[] {'{','!'};
-        boolean isValidChar = new String(validChars).indexOf(ch) >= 0;
-        if (!isValidChar || dotPos == 0
-                || tokenEndPos > doc.getLength()) {
-            return;
-        }
-
-        switch (ch) {
-            case '{': 
-                if (!OptionsUtils.autoCompletionEchoDelimiter()){
-                    return;
-                }
-                // no break
-            case '!':
-                String mimeType = getMimeType();
-                // do nothing in {!! !!} and {{ }}
-                if (mimeType.equals(BladeLanguage.BLADE_MIME_TYPE) // in case of {{^
-                        || mimeType.equals(BladeTokenId.BLADE_MIME_TYPE)
-                       ) {
-                    return;
-                }
-                TokenSequence<? extends HTMLTokenId> ts = BladeLexerUtils.getHtmlTokenSequence(doc, tokenEndPos);
-                if (ts == null) {
-                    return;
-                }
-                ts.move(tokenEndPos);
-                if (!ts.movePrevious() && !ts.moveNext()) {
-                    return;
-                }
-
-                Token<? extends HTMLTokenId> token = ts.token();
-                HTMLTokenId id = token.id();
-                CharSequence tokenText = token.text();
-                //maybe have custom tokens
-                if (ch == '{' && id == HTMLTokenId.EL_OPEN_DELIMITER || (id == HTMLTokenId.TEXT && tokenText.toString().contains("{{"))) {
-                    completeOpeningDelimiter(doc, tokenEndPos, tokenEndPos + 1, caret, "  }}");
-                } else if (OptionsUtils.autoCompletionEscapedEchoDelimiter() && id == HTMLTokenId.TEXT && tokenText.toString().contains("{!!")){
-                    completeOpeningDelimiter(doc, tokenEndPos, tokenEndPos + 1, caret, "  !!}");
-                }
-                break;
-            default:
-                break;
-        }
-    }
-
-    private void completeOpeningDelimiter(Document doc, int tokenEndPos, int dotPos, Caret caret, String closingDelimiter) throws BadLocationException {
-        doc.insertString(tokenEndPos, closingDelimiter, null);
-        caret.setDot(dotPos);
-    }
-
     private void completeQuoteAndBracket(MutableContext context, char bracket) throws BadLocationException {
         if (codeTemplateEditing) {
             String text = context.getText() + bracket;
@@ -269,14 +223,6 @@ public class BladeTypedTextInterceptor implements TypedTextInterceptor {
         sb.append(matching(bracket));
         String text = sb.toString();
         context.setText(text, 1);
-    }
-
-    private String getMimeType() {
-        int size = mimePath.size();
-        if (size <= 0) {
-            return ""; // NOI18N
-        }
-        return mimePath.getMimeType(size - 1);
     }
 
     private static boolean isBracket(char c) {
@@ -325,27 +271,35 @@ public class BladeTypedTextInterceptor implements TypedTextInterceptor {
                 return c;
         }
     }
+    
+    private static String matching(String token) {
+        switch (token) {
+            case "{{":
+                return "}}";
+            case "{!!":
+                return "!!}";
+            case "{{--":
+                return "--}}";
+            default:
+                return token;
+        }
+    }
 
     private static boolean doNotAutoCompleteQuotesAndBrackets(char c) {
         return (isQuote(c) && !OptionsUtils.autoCompletionEchoDelimiter())
                 || (isBracket(c) && !TypingHooksUtils.isInsertMatchingEnabled());
     }
-
-    private static boolean doNotAutoCompleteDelimiters(char c) {
-        return TypingHooksUtils.isOpeningDelimiterChar(c) && !OptionsUtils.autoCompletionEscapedEchoDelimiter();
-    }
-
-    private static boolean isClosingBracketMissing(BaseDocument docment, char open, char close, int dotPos) throws BadLocationException {
+    
+    private static boolean isClosingBracketMissing(char close) throws BadLocationException {
         if (!isClosingBracket(close)) {
             return false;
         }
-        return BladeLexerUtils.getTokenBalance(docment, open, close, dotPos) > 0;
+        return false;
     }
 
     @MimeRegistrations(value = {
         @MimeRegistration(mimeType = "text/html", service = TypedTextInterceptor.Factory.class),
-        @MimeRegistration(mimeType = BladeLanguage.BLADE_MIME_TYPE, service = TypedTextInterceptor.Factory.class),
-        @MimeRegistration(mimeType = BladeTokenId.BLADE_MIME_TYPE, service = TypedTextInterceptor.Factory.class)
+        @MimeRegistration(mimeType = BladeLanguage.BLADE_MIME_TYPE, service = TypedTextInterceptor.Factory.class)
     })
     public static class Factory implements TypedTextInterceptor.Factory {
 

@@ -41,59 +41,147 @@
  */
 package org.netbeans.modules.php.blade.editor.completion;
 
-import org.netbeans.modules.php.blade.editor.lexer.BladeLexerUtils;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
 import org.netbeans.modules.php.blade.editor.lexer.BladeTokenId;
 import org.netbeans.modules.php.blade.editor.parsing.BladeParserResult;
 import org.netbeans.api.lexer.Token;
-import org.netbeans.api.lexer.TokenId;
+import org.netbeans.api.lexer.TokenHierarchy;
 import org.netbeans.api.lexer.TokenSequence;
+import org.netbeans.modules.php.blade.editor.BladeSyntax;
+import org.netbeans.modules.php.blade.editor.lexer.BladeLexerUtils;
 
 /**
  *
  * @author Haidu Bogdan
  */
 public class BladeCompletionContextFinder {
+
     public static enum CompletionContext {
-        ECHO,
+        BLADE_ECHO,
         DIRECTIVE,
+        PATH, //@extends or @include paths
+        SECTION_LABEL, //@section paths
+        SECTION,
         FILTER,
+        PHP,
         NONE,
         ALL;
     }
+
+    private final static Collection<BladeTokenId> CTX_DELIMITERS = Arrays.asList(
+            BladeTokenId.T_BLADE_DIRECTIVE_PREFIX, BladeTokenId.T_BLADE_DIRECTIVE,
+            BladeTokenId.T_BLADE_IF, BladeTokenId.T_BLADE_FOR, BladeTokenId.T_BLADE_FOREACH
+    );
+
+    private final static Collection<BladeTokenId> PATH_KEYWORDS_TOKEN = Arrays.asList(
+            BladeTokenId.T_BLADE_INCLUDE, BladeTokenId.T_BLADE_EXTENDS
+    );
+
+    private final static Collection<BladeTokenId> SECTION_KEYWORDS_TOKEN = Arrays.asList(
+            BladeTokenId.T_BLADE_SECTION
+    );
+
+    private final static Collection<BladeTokenId> PHP_KEYWORDS_TOKEN = Arrays.asList(
+            BladeTokenId.T_BLADE_PHP_OPEN, BladeTokenId.T_BLADE_PHP
+    );
     
-    public static CompletionContext find(final BladeParserResult parserResult, final int offset) {
-        assert parserResult != null;
+    static enum KeywordCompletionType {
+        SIMPLE, WITH_ARG, WITH_ARG_AND_ENDTAG, WITH_ENDTAG
+    };
+    
+    public static CompletionContext find(final BladeParserResult info, final int offset) {
+        assert info != null;
         CompletionContext result = CompletionContext.NONE;
-        TokenSequence<? extends TokenId> tokenSequence = BladeLexerUtils.getBladeMarkupTokenSequence(parserResult.getSnapshot(), offset);
-        if (tokenSequence != null) {
-            tokenSequence.move(offset);
-            if (!tokenSequence.moveNext()) {
-                tokenSequence.movePrevious();
+        TokenHierarchy<?> th = info.getSnapshot().getTokenHierarchy();
+
+        if (th == null) {
+            return result;
+        }
+
+        TokenSequence<BladeTokenId> ts = th.tokenSequence(BladeTokenId.language());
+
+        ts.move(offset);
+        final boolean moveNextSucces = ts.moveNext();
+        if (!moveNextSucces && !ts.movePrevious()) {
+            return CompletionContext.NONE;
+        }
+
+        Token<BladeTokenId> token = ts.token();
+        BladeTokenId id = token.id();
+
+        if (PATH_KEYWORDS_TOKEN.contains(id)) {
+            return CompletionContext.PATH; //@include or @extends
+        }
+        if (SECTION_KEYWORDS_TOKEN.contains(id)) {
+            return CompletionContext.SECTION;
+        }
+        if (CTX_DELIMITERS.contains(id)) {
+            //TODO have a scope offset range impl to detect if in 
+            return CompletionContext.DIRECTIVE; //standard blade directive
+        }
+
+        if (PHP_KEYWORDS_TOKEN.contains(id)) {
+            return CompletionContext.PHP;
+        }
+        
+        if (id.equals(BladeTokenId.T_BLADE_PHP_ECHO)){
+            return CompletionContext.BLADE_ECHO;
+        }
+        
+        boolean isStringParameter = id == BladeTokenId.BLADE_PHP_STRING;
+
+        int tokenIdOffset = ts.token().offset(th);
+        result = findOffsetContext(token, (offset - tokenIdOffset), ts); //search for the previous context
+        
+        if (isStringParameter) { //we are in a expression with string parameter
+            switch (result) {
+                case SECTION: {
+                    result = CompletionContext.SECTION_LABEL;
+                    break;
+                }
+                case PATH: {
+                    result =  CompletionContext.PATH;
+                    break;
+                }
+                default: {
+                    result = CompletionContext.NONE;
+                }
             }
-            result = findContext(tokenSequence);
+        }
+        
+        return result;
+    }
+
+    /**
+     * 
+     * @param BladeTokenId token
+     * @param int tokenOffset
+     * @param TokenSequence<BladeTokenId> tokenSequence
+     * @return 
+     */
+    private static CompletionContext findOffsetContext(Token<BladeTokenId> token, int tokenOffset, TokenSequence<BladeTokenId> tokenSequence) {
+        CompletionContext result = CompletionContext.NONE;
+
+        List<? extends Token<BladeTokenId>> preceedingLineTokens = BladeLexerUtils.getPreceedingLineTokens(token, tokenOffset, tokenSequence);
+
+        for (int i = 0; i < preceedingLineTokens.size(); i++) {
+            Token<BladeTokenId> cToken = preceedingLineTokens.get(i);
+            BladeTokenId id = cToken.id();
+            String tText = cToken.text().toString().trim();
+            if (id.equals(BladeTokenId.T_BLADE_SECTION)){
+                return CompletionContext.SECTION;
+            } else if (BladeSyntax.DIRECTIVES_WITH_VIEW_PATH.contains(tText)){
+                return CompletionContext.PATH;
+            } else if (id.equals(BladeTokenId.T_BLADE_DIRECTIVE) || id.equals(BladeTokenId.T_BLADE_DIRECTIVE_PREFIX)) {
+                return CompletionContext.DIRECTIVE;
+            } else if (PHP_KEYWORDS_TOKEN.contains(id)) {
+                //we are inside brakets from an expression
+                return CompletionContext.PHP;
+            }
         }
         return result;
     }
-    
-    private static CompletionContext findContext(TokenSequence<? extends TokenId> tokenSequence) {
-        CompletionContext result = CompletionContext.ALL;
-        do {
-            Token<? extends TokenId> token = tokenSequence.token();
-            if (token == null) {
-                break;
-            }
-            TokenId tokenId = token.id();
-            if (BladeTokenId.T_BLADE_OTHER.equals(tokenId)) {
-                result = CompletionContext.NONE;
-                break;
-            } else if (BladeTokenId.T_BLADE_ECHO.equals(tokenId)) {
-                result = CompletionContext.ECHO;
-                break;
-            } else if (BladeTokenId.T_BLADE_DIRECTIVE.equals(tokenId)) {
-                result = CompletionContext.DIRECTIVE;
-                break;
-            }
-        } while (tokenSequence.movePrevious());
-        return result;
-    }
+
 }

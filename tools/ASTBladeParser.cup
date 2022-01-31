@@ -1,0 +1,473 @@
+/* Minijava Grammar */
+package org.netbeans.modules.php.blade.editor.parsing;
+
+import java.util.*;
+import org.netbeans.modules.csl.api.OffsetRange;
+import org.openide.util.Pair;
+import org.netbeans.modules.php.blade.editor.parsing.astnodes.*;
+import org.netbeans.modules.php.editor.parser.ParserErrorHandler;
+import org.netbeans.modules.php.editor.parser.astnodes.Program;
+
+parser code {:
+
+    private ErrorStrategy defaultStrategy = new DefaultErrorStrategy();;
+    private ErrorStrategy errorStrategy = defaultStrategy;
+
+    private String fileName = null;
+    private ParserErrorHandler errorHandler = null;
+
+    public void setErrorHandler (ParserErrorHandler handler) {
+        this.errorHandler = handler;
+    }
+
+    public ParserErrorHandler getErrorHandler () {
+        return this.errorHandler;
+    }
+
+    public String getFileName() {
+        return fileName;
+    }
+
+    public void setFileName(String fileName) {
+        assert fileName != null;
+        this.fileName = fileName;
+    }
+
+
+    interface ErrorStrategy {
+        public boolean errorRecovery(boolean debug) throws Exception;
+    }
+
+    class DefaultErrorStrategy implements ErrorStrategy {
+
+        public boolean errorRecovery(boolean debug) throws Exception {
+            return ASTBladeParser.super.error_recovery(debug);
+        }
+    }
+
+    /**
+     * Attempt to recover from a syntax error.  This returns false if recovery fails,
+     * true if it succeeds.
+     * @param debug should we produce debugging messages as we parse.
+     */
+    protected boolean error_recovery(boolean debug) throws java.lang.Exception {
+        return errorStrategy.errorRecovery(debug);
+    }
+
+    /**
+     * Report a non fatal error (or warning).  This method takes a message
+     * string and an additional object (to be used by specializations implemented in subclasses).
+     * The super class prints the message to System.err.
+     * @param message an error message.
+     * @param info    an extra object reserved for use by specialized subclasses.
+     */
+    public void report_error(String message, Object info) {
+        System.out.print("report_eror"  + message);
+    }
+
+    /**
+     * This method is called when a syntax error has been detected and recovery is about to be invoked.
+     * The super class just emit a "Syntax error" error message.
+     * @param cur_token the current lookahead Symbol.
+     */
+    public void syntax_error(java_cup.runtime.Symbol cur_token) {
+        java_cup.runtime.Symbol symbol = (java_cup.runtime.Symbol)stack.peek();
+        int state = symbol.parse_state;
+        short[] rowOfProbe = action_tab[state];
+        if (errorHandler != null) {
+            errorHandler.handleError(ParserErrorHandler.Type.SYNTAX_ERROR, rowOfProbe, cur_token, symbol);
+        }
+     }
+
+    /**
+     * Report a fatal error.  This method takes a message string and an additional object
+     * (to be used by specializations implemented in subclasses).
+     * The super class reports the error then throws an exception.
+     * @param message an error message.
+     * @param info    an extra object reserved for use by specialized subclasses.
+     */
+    public void report_fatal_error(String message, Object info) throws Exception {
+        if (errorHandler != null) {
+            errorHandler.handleError(ParserErrorHandler.Type.FATAL_PARSER_ERROR, null, cur_token, null);
+        }
+    }
+
+    protected int error_sync_size() {
+        return 1;
+    }
+:}; 
+
+terminal T_INLINE_HTML, T_INLINE_PHP;
+terminal T_BLADE_COMMENT, T_BLADE_OPEN_ECHO, T_BLADE_CLOSE_ECHO;
+terminal T_BLADE_INLINE_PHP;
+terminal T_BLADE_INCLUDE;
+terminal T_BLADE_SECTION;
+terminal T_BLADE_ENDSECTION, T_BLADE_STOP;
+terminal T_BLADE_SHOW;
+terminal T_BLADE_EXTENDS;
+terminal T_BLADE_YIELD;
+
+terminal T_BLADE_FOREACH;
+terminal T_BLADE_ENDFOREACH;
+terminal T_BLADE_FOR;
+terminal T_BLADE_ENDFOR;
+terminal T_BLADE_IF, T_BLADE_CONDITION_OPEN_TAG;
+terminal T_BLADE_ELSEIF;
+terminal T_BLADE_ENDIF;
+terminal T_BLADE_SWITCH, T_BLADE_ENDSWITCH;
+terminal T_BLADE_DIRECTIVE;
+terminal T_PHP_LOOP_EXPRESSION, T_BLADE_PHP_ECHO;
+terminal T_PHP_CONDITION_EXPRESSION;
+terminal T_PHP_PARAMETER_EXPRESSION;
+
+terminal String T_STRING;
+terminal String T_VARIABLE;
+
+terminal T_COMMA;
+terminal T_NEKUDA;
+terminal T_OPEN_PARENTHESE,T_CLOSE_PARENTHESE;
+
+
+/* Non terminals */
+non terminal end_section;
+non terminal BladeProgram thestart;
+non terminal List top_statement_list;
+non terminal Statement top_statement;
+non terminal Statement statement;
+non terminal List inner_statement_list;
+non terminal Expression path_expression;
+non terminal Expression path;
+non terminal Expression yield_label_expression;
+non terminal Expression yield_label;
+non terminal Variable variable;
+non terminal section_param;
+non terminal List[] elseif_list;
+
+non terminal Statement directive_statement;
+non terminal directive_identifier;
+
+non terminal BladeSectionStatement d_section_statement;
+non terminal d_if_statement;
+
+precedence left T_BLADE_INCLUDE, T_BLADE_SECTION, T_BLADE_EXTENDS, T_BLADE_FOREACH, T_BLADE_FOR, T_BLADE_IF, T_BLADE_ELSEIF, T_BLADE_CONDITION_OPEN_TAG;
+precedence left T_INLINE_HTML, T_INLINE_PHP, T_BLADE_OPEN_ECHO;
+precedence left T_COMMA;
+precedence left T_NEKUDA;
+precedence right T_PHP_LOOP_EXPRESSION, T_PHP_CONDITION_EXPRESSION, T_PHP_PARAMETER_EXPRESSION;
+
+
+thestart ::=
+top_statement_list:statementList
+{:
+    ASTBladeScanner bladeAstLexer = (ASTBladeScanner) parser.getScanner();
+    int endOfProgram = statementListright > bladeAstLexer.getWhitespaceEndPosition() ? statementListright : bladeAstLexer.getWhitespaceEndPosition();
+    BladeProgram program = new BladeProgram(statementListleft, endOfProgram, statementList, bladeAstLexer.getPhpParserResult());
+    RESULT = program;
+:}
+;
+
+
+top_statement_list ::=
+top_statement_list:sList top_statement:statement
+{:
+    //check for extends
+    if(statement != null) {
+        sList.add(statement);
+    }
+    RESULT = sList;
+:}
+
+| /* empty */
+{:
+    RESULT = new LinkedList();
+:}
+;
+
+inner_statement_list ::=
+inner_statement_list:statementList top_statement:statement
+{:
+    // Ignore null statements
+    if(statement != null) {
+        statementList.add(statement);
+    }
+    RESULT = statementList;
+:}
+
+| /* empty */
+{:
+    RESULT = new LinkedList();
+:}
+;
+
+top_statement ::=
+statement:statement
+{:
+    RESULT = statement;
+:}
+;
+
+statement ::=
+directive_statement:stm {:
+	RESULT = stm;
+:}
+| T_BLADE_EXTENDS:exts path_expression:path {:
+    //for the moment until we find to make use of <<EOL>>
+    Block block = null;
+    DirectiveName directive = new DirectiveName(extsleft, extsright, exts.toString());
+    RESULT = new BladeExtendsStatement(extsleft, pathright, directive, path, block);
+:}
+| T_BLADE_YIELD:d T_OPEN_PARENTHESE yield_label:s T_CLOSE_PARENTHESE:end {:
+    String strPath = "";
+    if (s != null){
+        strPath = s.toString();
+    }
+    //to be refactored to handle parameter directly
+
+    DirectiveName directive = new DirectiveName(dleft, dright, d.toString());
+    SectionName label = new SectionName(sleft, sright, strPath);
+    RESULT = new BladeYieldStatement(dleft, endright, directive, label);
+:}
+| T_BLADE_YIELD:d T_OPEN_PARENTHESE yield_label:s T_COMMA T_PHP_PARAMETER_EXPRESSION:p T_CLOSE_PARENTHESE:end {:
+    String strPath = "";
+    if (s != null){
+        strPath = s.toString();
+    }
+    DirectiveName directive = new DirectiveName(dleft, dright, d.toString());
+    SectionName label = new SectionName(sleft, sright, strPath);
+    RESULT = new BladeYieldStatement(dleft, endright, directive, label);
+:}
+| T_BLADE_INCLUDE:d T_OPEN_PARENTHESE:start variable:s T_CLOSE_PARENTHESE:end {:
+	String strPath = "";
+    
+    if (s != null){
+        strPath = s.toString();
+    }
+
+    DirectiveName directive = new DirectiveName(dleft, dright, d.toString());
+    PathExpression label = new PathExpression(sleft, sright, strPath);
+    RESULT = new BladeIncludeStatement(dleft, endright, directive, label);
+:}
+| T_BLADE_INCLUDE:d T_OPEN_PARENTHESE variable:s T_COMMA T_PHP_PARAMETER_EXPRESSION:p T_CLOSE_PARENTHESE:end {:
+    String strPath = "";
+    String strV = "";
+    if (s != null){
+        strPath = s.toString();
+    }
+    PathExpression label = new PathExpression(sleft, sright, strPath);
+    DirectiveName directive = new DirectiveName(dleft, dright, d.toString());
+    Variable variable = new Variable(0, 1, strV);
+    RESULT = new BladeIncludeStatement(dleft, endright, directive, label, variable);
+:}
+| T_BLADE_FOREACH:d T_PHP_LOOP_EXPRESSION:s inner_statement_list:statementList T_BLADE_ENDFOREACH:end {:
+    Block block = new Block(statementListleft, statementListright, statementList);
+    PhpExpression loopExpr = new PhpExpression(sleft, sright, s.toString());
+    DirectiveName directive = new DirectiveName(dleft, dright, d.toString());
+    RESULT = new BladeForeachStatement(dleft, endright, directive, loopExpr, block);
+:}
+| T_BLADE_FOR:d T_PHP_LOOP_EXPRESSION:s inner_statement_list:statementList T_BLADE_ENDFOR:end {:
+    Block block = new Block(statementListleft, statementListright, statementList);
+    PhpExpression loopExpr = new PhpExpression(sleft, sright, s.toString());
+    DirectiveName directive = new DirectiveName(dleft, dright, d.toString());
+    RESULT = new BladeForStatement(dleft, endright, directive, loopExpr, block);
+:}
+| T_BLADE_IF:d T_PHP_CONDITION_EXPRESSION:s inner_statement_list:statementList elseif_list:elseif T_BLADE_ENDIF:end {:
+
+	for (int i=0 ; i < elseif[0].size() ; i++) {
+			//TODO add a else logic
+        //int debug = 3;
+    }
+
+    Block block = new Block(statementListleft, statementListright, statementList);
+    PhpExpression loopExpr = new PhpExpression(sleft, sright, s.toString());
+    DirectiveName directive = new DirectiveName(dleft, dright, d.toString());
+    RESULT = new BladeIfStatement(dleft, endright, directive, loopExpr, block);
+:}
+| T_BLADE_CONDITION_OPEN_TAG:d T_PHP_CONDITION_EXPRESSION:expr inner_statement_list:statementList T_BLADE_ENDIF:end {:
+    Block block = new Block(statementListleft, statementListright, statementList);
+    PhpExpression phpExpression = new PhpExpression(exprleft, exprright, expr.toString());
+    DirectiveName directive = new DirectiveName(dleft, dright, d.toString());
+    RESULT = new BladeConditionStatement(dleft, endright, directive, phpExpression, block);
+:}
+| T_BLADE_SWITCH:d T_OPEN_PARENTHESE T_PHP_PARAMETER_EXPRESSION:expr T_CLOSE_PARENTHESE inner_statement_list:statementList T_BLADE_ENDSWITCH:end {:
+    Block block = new Block(statementListleft, statementListright, statementList);
+    PhpExpression phpExpression = new PhpExpression(exprleft, exprright, expr.toString());
+    DirectiveName directive = new DirectiveName(dleft, dright, d.toString());
+    RESULT = new BladeSwitchStatement(dleft, endright, directive, phpExpression, block);
+:}
+|  T_BLADE_DIRECTIVE:d T_OPEN_PARENTHESE T_PHP_PARAMETER_EXPRESSION:expr T_CLOSE_PARENTHESE {:
+	//TODO store expression expression
+    //directive statement with arguments
+    DirectiveName directive = new DirectiveName(dleft, dright, d.toString());
+    RESULT = new BladeConstDirectiveStatement(dleft, exprright, directive);
+:}
+| T_BLADE_DIRECTIVE:d {:
+    DirectiveName directive = new DirectiveName(dleft, dright, d.toString());
+    RESULT = new BladeConstDirectiveStatement(dleft, dright, directive);
+:}
+| T_BLADE_OPEN_ECHO:token T_BLADE_PHP_ECHO:php T_BLADE_CLOSE_ECHO:end {:
+    Expression expr = new PhpExpression(phpleft, phpright, php.toString());
+    RESULT = new BladeEchoStatement(tokenleft, endright, token.toString(), expr);
+:}
+| T_INLINE_HTML:html {:
+    InLineHtml inLineHtml = new InLineHtml(htmlleft, htmlright, html.toString());
+    RESULT = inLineHtml;
+:}
+| T_INLINE_PHP:php {:
+    InLinePhp inLinePhp = new InLinePhp(phpleft, phpright, php.toString());
+    RESULT = inLinePhp;
+:}
+| T_BLADE_INLINE_PHP:php {:
+    InLinePhp inLinePhp = new InLinePhp(phpleft, phpright, php.toString());
+    RESULT = inLinePhp;
+:}
+| T_STRING:html {:
+    //unkown string
+    InLineHtml inLineHtml = new InLineHtml(htmlleft, htmlright, html);
+    RESULT = inLineHtml;
+:}
+| T_NEKUDA:html {:
+	//stray element
+    InLineHtml inLineHtml = new InLineHtml(htmlleft, htmlright, ":");
+    RESULT = inLineHtml;
+:}
+| T_BLADE_COMMENT {:
+    /* comment */
+:}
+
+| error:theError /* error statement */
+{:
+    ASTError error = new ASTError(theErrorleft, theErrorright);
+    RESULT = error;
+:}
+;
+
+
+directive_statement ::= 
+d_section_statement:stm{:
+	RESULT = stm;
+:};
+
+d_section_statement ::= 
+T_BLADE_SECTION:d T_OPEN_PARENTHESE yield_label:label T_COMMA T_PHP_PARAMETER_EXPRESSION:p T_CLOSE_PARENTHESE:end {:
+    Variable value = new Variable(0, 0, "");
+    Block block = new Block(0, 0, value);
+    DirectiveName directive = new DirectiveName(dleft, dright, d.toString());
+    RESULT = new BladeSectionStatement(dleft, endright, directive, label, block, BladeSectionStatement.Type.INLINE);
+:}
+| T_BLADE_SECTION:d yield_label_expression:label inner_statement_list:statementList end_section:end{:
+    Block block = new Block(statementListleft, statementListright, statementList);
+    DirectiveName directive = new DirectiveName(dleft, dright, d.toString());
+    RESULT = new BladeSectionStatement(dleft, endright, directive, label, block, BladeSectionStatement.Type.BLOCK);
+:};
+
+
+end_section ::=
+T_BLADE_ENDSECTION:token{: 
+    RESULT = token;
+:}
+| T_BLADE_SHOW:token {:
+    RESULT = token;
+:}
+| T_BLADE_STOP:token {:
+    RESULT = token;
+:} 
+;
+
+yield_label_expression ::=
+T_OPEN_PARENTHESE yield_label:label T_CLOSE_PARENTHESE {:
+    RESULT = label;
+:}
+;
+
+yield_label ::=
+T_STRING:label {:
+    if (label == null) {
+        label = "";
+    } else if (label.length() > 2) {
+    	//remove quotes
+    	label = label.substring(1, label.length() -1);
+    }
+	RESULT = new SectionName(labelleft, labelright, label.toString());
+:}
+| error:expr
+{:
+    RESULT = new ASTErrorExpression(exprleft, exprright);
+:}
+;
+
+variable ::=
+T_VARIABLE:var {:
+    if (var == null) {
+        var = "";
+    }
+    RESULT = new Variable(varleft, varright, var.toString());
+:}
+| T_STRING:var {:
+    if (var == null) {
+        var = "";
+    }
+    else if (var.length() > 2) {
+    	//remove quotes
+    	var = var.substring(1, var.length() -1);
+    }
+    RESULT = new Variable(varleft, varright, var.toString());    
+:}
+| variable:expr1 T_NEKUDA variable:expr2 {:
+    //we will force just one string
+    String expr1Str = "";
+                if (expr1 != null){
+                    expr1Str = expr1.toString();
+                }
+    RESULT = new Variable(expr1left, expr1right, expr1Str);
+:}
+;
+
+path_expression ::=
+T_OPEN_PARENTHESE path:path T_CLOSE_PARENTHESE {:
+	RESULT = path;
+:}
+| error:expr
+{:
+    RESULT = new ASTErrorExpression(exprleft, exprright);
+:}
+;
+
+path ::=
+T_STRING:path {:
+    if (path == null) {
+        path = "";
+    }
+    else if (path.length() > 2) {
+    	//remove quotes
+    	path = path.substring(1, path.length() -1);
+    }
+	RESULT = new PathExpression(pathleft, pathright, path);
+:}
+| error:expr
+{:
+    RESULT = new ASTErrorExpression(exprleft, exprright);
+:}
+;
+
+/* else if */
+elseif_list ::=
+/* empty */
+{:
+    List listConditions = new LinkedList();
+    List listStatements = new LinkedList();
+    List listTokens = new LinkedList();
+
+    List[] returnList = new List[] { listConditions, listStatements, listTokens };
+
+    RESULT = returnList;
+:}
+
+| elseif_list:elseifList T_BLADE_ELSEIF:d T_PHP_CONDITION_EXPRESSION inner_statement_list:statementList
+{:
+    Block block = new Block(statementListleft, statementListright, statementList);
+//    ((LinkedList)elseifList[0]).addFirst(condition);
+    ((LinkedList)elseifList[1]).addFirst(block);
+
+    RESULT = elseifList;
+:}
+;

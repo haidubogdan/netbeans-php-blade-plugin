@@ -41,39 +41,41 @@
  */
 package org.netbeans.modules.php.blade.editor;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
+import java.util.Collection;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.regex.Matcher;
+import java.util.logging.Level;
 import javax.swing.text.AbstractDocument;
 import javax.swing.text.BadLocationException;
-import javax.swing.text.Document;
 import org.netbeans.modules.php.blade.editor.lexer.BladeLexerUtils;
 import org.netbeans.modules.php.blade.editor.lexer.BladeTokenId;
-import org.netbeans.modules.php.blade.editor.lexer.BladeTopLexer;
-import org.netbeans.modules.php.blade.editor.lexer.BladeTopTokenId;
-import org.netbeans.api.editor.mimelookup.MimeRegistration;
 import org.netbeans.api.lexer.Token;
-import org.netbeans.api.lexer.TokenHierarchy;
 import org.netbeans.api.lexer.TokenSequence;
-import org.netbeans.editor.BaseDocument;
 import org.netbeans.modules.csl.api.OffsetRange;
-import org.netbeans.modules.parsing.api.Source;
+import org.netbeans.modules.php.blade.editor.lexer.BladeLexer;
 import org.netbeans.spi.editor.bracesmatching.BracesMatcher;
 import org.netbeans.spi.editor.bracesmatching.BracesMatcherFactory;
 import org.netbeans.spi.editor.bracesmatching.MatcherContext;
-import org.netbeans.spi.editor.bracesmatching.support.BracesMatcherSupport;
 
 /**
- *
+ * highlight block tags directives
+ * TODO do bi-directional highlighting
+ * TODO maybe use a block scope impl
+ * 
  * @author Haidu Bogdan
  */
-
 public class BladeBracesMatcher implements BracesMatcher {
 
-    private MatcherContext context;
-
+    private final MatcherContext context;
+    
+    private static Collection<BladeTokenId> TOKENS_WITH_ENDTAGS = Arrays.asList(
+            BladeTokenId.T_BLADE_PHP_OPEN,
+            BladeTokenId.T_BLADE_IF,
+            BladeTokenId.T_BLADE_FOR,
+            BladeTokenId.T_BLADE_FOREACH,
+            BladeTokenId.T_BLADE_SECTION
+    );
+    
     private BladeBracesMatcher(MatcherContext context) {
         this.context = context;
     }
@@ -83,13 +85,12 @@ public class BladeBracesMatcher implements BracesMatcher {
         int searchOffset = context.getSearchOffset();
         ((AbstractDocument) context.getDocument()).readLock();
         try {
-            TokenSequence<? extends BladeTopTokenId> ts = BladeLexerUtils.getBladeTokenSequence(context.getDocument(), searchOffset);
-            //TokenHierarchy<Document> th = TokenHierarchy.get(context.getDocument());
+            TokenSequence<BladeTokenId> ts = BladeLexerUtils.getBladeTokenSequence(context.getDocument());
 
             while (searchOffset != context.getLimitOffset()) {
                 int diff = ts.move(searchOffset);
                 searchOffset = searchOffset + (context.isSearchingBackward() ? -1 : +1);
-                
+
                 if (diff == 0 && context.isSearchingBackward()) {
                     //we are searching backward and the offset is at the token boundary
                     if (!ts.movePrevious()) {
@@ -100,25 +101,30 @@ public class BladeBracesMatcher implements BracesMatcher {
                         continue;
                     }
                 }
-                Token<? extends BladeTopTokenId> t = ts.token();
-                if (t.id() == BladeTopTokenId.T_BLADE){
-                    String tsText = t.text().toString();
-                    int toffs = ts.offset();
-                    if (tsText.startsWith(BladeTopLexer.OPEN_ECHO)){
-                        return new int[] {toffs, toffs + 2};
+                Token<? extends BladeTokenId> t = ts.token();
+                int toffs = ts.offset();
+                String tText = t.text().toString();
+                BladeTokenId id = t.id();
+                if (id == BladeTokenId.T_BLADE_OPEN_ECHO) {
+                    return new int[]{toffs, toffs + tText.length()};
+                } else if (id == BladeTokenId.T_BLADE_OPEN_ECHO_ESCAPED) {
+                    return new int[]{toffs, toffs + tText.length()};
+                } else if (id == BladeTokenId.T_BLADE_COMMENT && tText.equals(BladeLexer.OPEN_COMMENT)) {
+                    return new int[]{toffs, toffs + tText.length()};
+                } else if (TOKENS_WITH_ENDTAGS.contains(id)) {
+                    return new int[]{toffs, toffs + tText.trim().length()};
+                } else if (BladeSyntax.DIRECTIVES_WITH_ENDTAGS.contains(tText.trim())) {
+                    return new int[]{toffs, toffs + tText.trim().length()};
+                } else if (id == BladeTokenId.BLADE_PHP_TOKEN && tText.trim().equals("(")){
+                    ts.move(searchOffset - 1);
+                    if (!ts.movePrevious()) {
+                        continue;
                     }
-                    if (tsText.startsWith(BladeTopLexer.OPEN_ECHO_ESCAPED)){
-                        return new int[] {toffs, toffs + 3};
-                    }
-                    
-                } else if (t.id() == BladeTopTokenId.T_DIRECTIVE){
-                    String tsText = t.text().toString();
-                    int toffs = ts.offset();
-                    if (tsText.startsWith("@if")){
-                        return new int[] {toffs, toffs + 3};
-                    }
-                    if (tsText.startsWith("@php")){
-                        return new int[] {toffs, toffs + 4};
+                    Token<? extends BladeTokenId> dToken = ts.token();
+                    int directiveOffs = ts.offset();
+                    String dText = dToken.text().toString();
+                    if (TOKENS_WITH_ENDTAGS.contains(dToken.id())) {
+                        return new int[]{directiveOffs, directiveOffs + dText.trim().length()};
                     }
                 }
             }
@@ -130,63 +136,48 @@ public class BladeBracesMatcher implements BracesMatcher {
 
     @Override
     public int[] findMatches() throws InterruptedException, BadLocationException {
-        final Source source = Source.create(context.getDocument());
-        if (source == null) {
-            return null;
-        }
+        int searchOffset = context.getSearchOffset();
+        ((AbstractDocument) context.getDocument()).readLock();
+        try {
+            TokenSequence<BladeTokenId> ts = BladeLexerUtils.getBladeTokenSequence(context.getDocument());
 
-        Document document = context.getDocument();
-        final AtomicReference<int[]> result = new AtomicReference<>();
-        document.render(new Runnable() {
-            @Override
-            public void run() {
-                TokenSequence<? extends BladeTopTokenId> ts = BladeLexerUtils.getBladeTokenSequence(context.getDocument(), context.getSearchOffset());
-                if (ts != null) {
-                    int searchOffset = context.getSearchOffset();
-                    while (searchOffset != context.getLimitOffset()) {
-                        int diff = ts.move(searchOffset);
-                        searchOffset = searchOffset + (context.isSearchingBackward() ? -1 : +1);
+            while (searchOffset != context.getLimitOffset()) {
+                int diff = ts.move(searchOffset);
+                searchOffset = searchOffset + (context.isSearchingBackward() ? -1 : +1);
 
-                        if (diff == 0 && context.isSearchingBackward()) {
-                            //we are searching backward and the offset is at the token boundary
-                            if (!ts.movePrevious()) {
-                                continue;
-                            }
-                        } else {
-                            if (!ts.moveNext()) {
-                                continue;
-                            }
-                        }
-                        Token<? extends BladeTopTokenId> t = ts.token();
-                        if (t.id() == BladeTopTokenId.T_BLADE){
-                            String tsText = t.text().toString();
-                            int toffs = ts.offset();
-                            if (tsText.endsWith(BladeTopLexer.CLOSE_ECHO)){
-                                result.set(new int[] {toffs + tsText.length() - 2, toffs + tsText.length()});
-                            } else if (tsText.endsWith(BladeTopLexer.CLOSE_ECHO_ESCAPED)){
-                                result.set(new int[] {toffs + tsText.length() - 3, toffs + tsText.length()});
-                            }
-                        } else if (t.id() == BladeTopTokenId.T_DIRECTIVE){
-                            String tsText = t.text().toString();
-                            int toffs = ts.offset();
-                            if (tsText.endsWith("@endif")){
-                                result.set(new int[] {toffs + tsText.length() - 6, toffs + tsText.length()});
-                            } else if (tsText.endsWith("@endphp")){
-                                result.set(new int[] {toffs + tsText.length() - 7, toffs + tsText.length()});
-                            }
-                        }
-                        
-                        return;
+                if (diff == 0 && context.isSearchingBackward()) {
+                    //we are searching backward and the offset is at the token boundary
+                    if (!ts.movePrevious()) {
+                        continue;
+                    }
+                } else {
+                    if (!ts.moveNext()) {
+                        continue;
                     }
                 }
+                OffsetRange r;
+                Token<? extends BladeTokenId> t = ts.token();
+                String tText = t.text().toString();
+                if (t.id() == BladeTokenId.T_BLADE_OPEN_ECHO) {
+                    r = BladeLexerUtils.findFwd(ts, BladeTokenId.T_BLADE_CLOSE_ECHO, "}}");
+                    return new int[]{r.getStart(), r.getEnd()};
+                } else if (t.id() == BladeTokenId.T_BLADE_OPEN_ECHO_ESCAPED) {
+                    r = BladeLexerUtils.findFwd(ts, BladeTokenId.T_BLADE_CLOSE_ECHO_ESCAPED, "!!}");
+                    return new int[]{r.getStart(), r.getEnd()};
+                } else if (t.id() == BladeTokenId.T_BLADE_COMMENT && tText.equals(BladeLexer.OPEN_COMMENT)) {
+                    //we just need the end token occurence
+                    r = BladeLexerUtils.findEndFwd(ts, BladeTokenId.T_BLADE_COMMENT, BladeLexer.CLOSE_COMMENT);
+                    return new int[]{r.getStart(), r.getEnd()};
+                } else if (TOKENS_WITH_ENDTAGS.contains(t.id()) || BladeSyntax.DIRECTIVES_WITH_ENDTAGS.contains(tText.trim())) {
+                    String name = tText.trim().substring(1);
+                    r = BladeLexerUtils.findFwd(ts, "@end" + name, tText.trim());
+                    return new int[]{r.getStart(), r.getEnd()};
+                } 
             }
-        });
-        
-        if (result.get() != null) {
-            return result.get();
+            return null;
+        } finally {
+            ((AbstractDocument) context.getDocument()).readUnlock();
         }
-                
-        return null;
     }
 
     //factory

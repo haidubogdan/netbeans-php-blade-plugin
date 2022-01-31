@@ -41,9 +41,9 @@
  */
 package org.netbeans.modules.php.blade.editor.gsf;
 
+import org.netbeans.modules.php.blade.editor.BladeLanguage;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -58,66 +58,98 @@ import org.netbeans.modules.csl.api.OffsetRange;
 import org.netbeans.modules.csl.api.StructureItem;
 import org.netbeans.modules.csl.api.StructureScanner;
 import org.netbeans.modules.csl.spi.ParserResult;
-        
-        
+import org.netbeans.modules.parsing.api.Snapshot;
+import org.netbeans.modules.php.blade.editor.parsing.astnodes.ASTErrorExpression;
+import org.netbeans.modules.php.blade.editor.parsing.astnodes.BladeConstDirectiveStatement;
+import org.netbeans.modules.php.blade.editor.parsing.astnodes.DirectiveBladeBlock;
+import org.netbeans.modules.php.blade.editor.parsing.astnodes.BladeProgram;
+import org.netbeans.modules.php.blade.editor.parsing.astnodes.Block;
+import org.netbeans.modules.php.blade.editor.parsing.astnodes.InLineBladePhp;
+import org.netbeans.modules.php.blade.editor.parsing.astnodes.Statement;
+import org.netbeans.modules.php.blade.editor.parsing.astnodes.StructureModelItem;
+import org.netbeans.modules.php.blade.editor.parsing.astnodes.BladeExtendsStatement;
+import org.netbeans.modules.php.blade.editor.parsing.astnodes.Expression;
+import org.netbeans.modules.php.blade.editor.parsing.astnodes.InlineDirectiveStatement;
+import org.openide.filesystems.FileObject;
+import org.openide.util.ImageUtilities;
+
 /**
  *
  * @author Haidu Bogdan
  */
 public class BladeStructureScanner implements StructureScanner {
+    private static final String ICON_BASE = "org/netbeans/modules/php/blade/resources/";
+    List<OffsetRange> ranges = new ArrayList<OffsetRange>();
 
     @Override
     public List<? extends StructureItem> scan(ParserResult info) {
         BladeParserResult result = (BladeParserResult) info;
-        List<BladeParserResult.Directive> directives = new ArrayList<BladeParserResult.Directive>();
-        List<BladeStructureItem> items = new ArrayList<BladeStructureItem>();
+        List<BaseBladeStructureItem> items = new ArrayList<BaseBladeStructureItem>();
 
-        for (BladeParserResult.Directive item : result.getDirectives()) {
-            directives.add(item);
-        }
+        BladeProgram program = result.getProgram();
 
-        boolean isTopLevel = false;
-
-        for (BladeParserResult.Directive item : directives) {
-
-            isTopLevel = true;
-
-            for (BladeParserResult.Directive check : directives) {
-
-                if (item.getOffset() > check.getOffset()
-                        && item.getOffset() + item.getLength() < check.getOffset() + check.getLength()) {
-                    isTopLevel = false;
-                    break;
+        if (program != null) {
+            List<Statement> statements = program.getStatements();
+            for (Statement statement : statements) {
+                if (statement instanceof StructureModelItem) {
+                    if (statement instanceof InLineBladePhp) {
+                        items.add(new BaseBladeStructureItem(statement, result.getSnapshot(), "php"));
+                    } else if (statement instanceof DirectiveBladeBlock) {
+                        Block body = ((DirectiveBladeBlock) statement).getBody();
+                        items.add(new BaseBladeStructureItem(statement, result.getSnapshot(), body, "bl"));
+                    } else if (statement instanceof InlineDirectiveStatement) {
+                        Expression label = ((InlineDirectiveStatement) statement).getLabel();
+                        if (!(label instanceof ASTErrorExpression)) {
+                            items.add(new InlineBladeStructureItem(statement, result.getSnapshot()));
+                        }
+                    } else if (statement instanceof BladeConstDirectiveStatement){
+                        items.add(new InlineBladeStructureItem(statement, result.getSnapshot()));
+                    }
+                } else if (statement instanceof BladeExtendsStatement) {
+                    Expression label = ((BladeExtendsStatement) statement).getLabel();
+                    if (!(label instanceof ASTErrorExpression)) {
+                        Block body = ((DirectiveBladeBlock) statement).getBody();
+                        items.add(new ExtendsBladeStructureItem(statement, result.getSnapshot(), body));
+                    }
                 }
-
             }
-
-            if (isTopLevel) {
-                items.add(new BladeStructureItem(result.getSnapshot(), item, directives));
-            }
-
         }
 
         return items;
-
     }
 
     @Override
     public Map<String, List<OffsetRange>> folds(ParserResult info) {
-
         BladeParserResult result = (BladeParserResult) info;
-        List<OffsetRange> ranges = new ArrayList<OffsetRange>();
+        ranges = new ArrayList<OffsetRange>();
+        BladeProgram program = result.getProgram();
 
-        for (BladeParserResult.Directive directive : result.getDirectives()) {
-
-            ranges.add(new OffsetRange(
-                    directive.getOffset(), directive.getOffset() + directive.getLength()
-            ));
-
+        if (program != null) {
+            List<Statement> statements = program.getStatements();
+            addFolds(statements);
         }
 
         return Collections.singletonMap("tags", ranges);
+    }
 
+    public void addFolds(List<Statement> statements) {
+        for (Statement statement : statements) {
+            if (statement instanceof StructureModelItem) {
+                if (statement instanceof InLineBladePhp) {
+                    ranges.add(new OffsetRange(
+                            statement.getStartOffset(), statement.getEndOffset()
+                    ));
+                } else if (statement instanceof DirectiveBladeBlock) {
+                    Block body = ((DirectiveBladeBlock) statement).getBody();
+                    ranges.add(new OffsetRange(
+                            body.getStartOffset(), body.getEndOffset()
+                    ));
+                    if (!body.getStatements().isEmpty()) {
+                        addFolds(body.getStatements());
+                    }
+                }
+            }
+        }
     }
 
     @Override
@@ -125,4 +157,193 @@ public class BladeStructureScanner implements StructureScanner {
         return null;
     }
 
+    private class BaseBladeStructureItem implements StructureItem {
+
+        private final Statement statement;
+        private final List<? extends StructureItem> children;
+        private final String sortPrefix;
+        Snapshot snapshot;
+
+        public BaseBladeStructureItem(Statement elementHandle, Snapshot snapshot, String sortPrefix) {
+            this.statement = elementHandle;
+            this.sortPrefix = sortPrefix;
+            this.children = Collections.emptyList();
+            this.snapshot = snapshot;
+        }
+
+        public BaseBladeStructureItem(Statement elementHandle, Snapshot snapshot, Block body, String sortPrefix) {
+            this.statement = elementHandle;
+            this.sortPrefix = sortPrefix;
+            this.snapshot = snapshot;
+
+            if (body != null) {
+                List<StructureItem> items = new ArrayList<>();
+                for (Statement st : body.getStatements()) {
+                    if (st instanceof InLineBladePhp) {
+                        items.add(new BaseBladeStructureItem(st, snapshot, "php"));
+                    }  else if (st instanceof DirectiveBladeBlock) {
+                        Block block = ((DirectiveBladeBlock) st).getBody();
+                        items.add(new BaseBladeStructureItem(st, snapshot, block, "bl"));
+                    } else if (st instanceof InlineDirectiveStatement) {
+                        items.add(new BaseBladeStructureItem(st, snapshot, "inl"));
+                    }
+                }
+                this.children = items;
+            } else {
+                this.children = Collections.emptyList();
+            }
+        }
+
+        @Override
+        public String getName() {
+            return statement.toString();
+        }
+
+        @Override
+        public String getSortText() {
+            return getPosition() + sortPrefix + getName();
+        }
+
+        @Override
+        public String getHtml(HtmlFormatter hf) {
+            return "- " + getName();
+        }
+
+        @Override
+        public BladeElementHandle getElementHandle() {
+            return new BladeElementHandle(statement, snapshot);
+        }
+
+        @Override
+        public ElementKind getKind() {
+            return ElementKind.TAG;
+        }
+
+        @Override
+        public Set<Modifier> getModifiers() {
+            return Collections.emptySet();
+        }
+
+        @Override
+        public boolean isLeaf() {
+            return false;
+        }
+
+        @Override
+        public List<? extends StructureItem> getNestedItems() {
+            return children;
+        }
+
+        @Override
+        public long getPosition() {
+            return statement.getStartOffset();
+        }
+
+        @Override
+        public long getEndPosition() {
+            return statement.getEndOffset();
+        }
+
+        @Override
+        public ImageIcon getCustomIcon() {
+            return ImageUtilities.loadImageIcon(ICON_BASE + "icons/at.png", false);
+        }
+
+        @Override
+        public int hashCode() {
+            int hashCode = 11;
+            if (getName() != null) {
+                hashCode = 31 * getName().hashCode() + hashCode;
+            }
+            hashCode = (int) (31 * getPosition() + hashCode);
+            return hashCode;
+        }
+
+    }
+
+    private class InlineBladeStructureItem extends BaseBladeStructureItem {
+
+        public InlineBladeStructureItem(Statement elementHandle, Snapshot snapshot) {
+            super(elementHandle, snapshot, "inl");
+        }
+
+        @Override
+        public ElementKind getKind() {
+            return ElementKind.TAG;
+        }
+    }
+
+    private class ExtendsBladeStructureItem extends BaseBladeStructureItem {
+
+        public ExtendsBladeStructureItem(Statement elementHandle, Snapshot snapshot) {
+            super(elementHandle, snapshot, "ext");
+        }
+
+        public ExtendsBladeStructureItem(Statement elementHandle, Snapshot snapshot, Block body) {
+            super(elementHandle, snapshot, body, "ext");
+        }
+
+        @Override
+        public ElementKind getKind() {
+            return ElementKind.PACKAGE;
+        }
+    }
+
+    class BladeElementHandle implements ElementHandle {
+
+        Statement statement;
+        Snapshot snapshot;
+
+        public BladeElementHandle(Statement item, Snapshot snapshot) {
+            this.statement = item;
+            this.snapshot = snapshot;
+        }
+
+        @Override
+        public FileObject getFileObject() {
+            return snapshot.getSource().getFileObject();
+        }
+
+        @Override
+        public String getMimeType() {
+            return BladeLanguage.BLADE_MIME_TYPE;
+        }
+
+        @Override
+        public String getName() {
+            return statement.toString();
+        }
+
+        @Override
+        public String getIn() {
+            return "Directive ";
+        }
+
+        @Override
+        public ElementKind getKind() {
+            return ElementKind.ATTRIBUTE;
+        }
+
+        @Override
+        public Set<Modifier> getModifiers() {
+            if (CharSequenceUtilities.startsWith(statement.toString(), "*")) {
+                return Collections.singleton(Modifier.STATIC);
+            }
+            return Collections.emptySet();
+        }
+
+        @Override
+        public boolean signatureEquals(ElementHandle eh) {
+            if (!(eh instanceof BladeElementHandle)) {
+                return false;
+            }
+            return eh.getName().equals(this.getName());
+        }
+
+        @Override
+        public OffsetRange getOffsetRange(ParserResult pr) {
+            return new OffsetRange(statement.getStartOffset(), statement.getEndOffset());
+        }
+
+    }
 }

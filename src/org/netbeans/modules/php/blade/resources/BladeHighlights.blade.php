@@ -1,10 +1,11 @@
 <?php
 $var = 1;
 ?>
+{{-- test --}}
 {{ $var }}
 @extends('file')
-@for ($i=1)
-@endfor
+@if ($i=1)
+@endif
 {!! $var !!}
 <div>Test</div>
 

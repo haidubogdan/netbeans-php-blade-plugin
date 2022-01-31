@@ -44,7 +44,7 @@ import java.util.prefs.PreferenceChangeEvent;
 import java.util.prefs.PreferenceChangeListener;
 import java.util.prefs.Preferences;
 import org.netbeans.api.editor.mimelookup.MimeLookup;
-import org.netbeans.modules.php.blade.editor.gsf.BladeLanguage;
+import org.netbeans.modules.php.blade.editor.BladeLanguage;
 import org.openide.util.WeakListeners;
 
 /**

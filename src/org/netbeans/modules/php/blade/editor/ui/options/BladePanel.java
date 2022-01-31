@@ -42,8 +42,6 @@
 package org.netbeans.modules.php.blade.editor.ui.options;
 
 import org.netbeans.modules.php.api.util.UiUtils;
-import org.netbeans.modules.php.blade.editor.actions.ToggleBlockCommentAction;
-//import org.netbeans.modules.php.blade.editor.actions.ToggleBlockCommentAction;
 import org.netbeans.spi.options.OptionsPanelController;
 import org.openide.util.NbBundle;
 
@@ -68,12 +66,7 @@ final class BladePanel extends javax.swing.JPanel {
     }
     
     private void setDefaultValues() {
-        ToggleBlockCommentAction.ToggleCommentType toggleCommentType = BladeOptions.getInstance().getToggleCommentType();
-        if (toggleCommentType == ToggleBlockCommentAction.ToggleCommentType.AS_BLADE_EVERYWHERE) {
-            asBladeEverywhereRadioButton.setSelected(true);
-        } else {
-            languageSensitiveRadioButton.setSelected(true);
-        }
+        
     }
 
     /**
@@ -86,24 +79,8 @@ final class BladePanel extends javax.swing.JPanel {
 
         toggleCommentButtonGroup = new javax.swing.ButtonGroup();
         jLabel1 = new javax.swing.JLabel();
-        asBladeEverywhereRadioButton = new javax.swing.JRadioButton();
-        languageSensitiveRadioButton = new javax.swing.JRadioButton();
 
         org.openide.awt.Mnemonics.setLocalizedText(jLabel1, org.openide.util.NbBundle.getMessage(BladePanel.class, "BladePanel.jLabel1.text")); // NOI18N
-
-        toggleCommentButtonGroup.add(asBladeEverywhereRadioButton);
-        asBladeEverywhereRadioButton.setMnemonic('t');
-        asBladeEverywhereRadioButton.setSelected(true);
-        org.openide.awt.Mnemonics.setLocalizedText(asBladeEverywhereRadioButton, org.openide.util.NbBundle.getMessage(BladePanel.class, "BladePanel.asBladeEverywhereRadioButton.text")); // NOI18N
-        asBladeEverywhereRadioButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                asBladeEverywhereRadioButtonActionPerformed(evt);
-            }
-        });
-
-        toggleCommentButtonGroup.add(languageSensitiveRadioButton);
-        languageSensitiveRadioButton.setMnemonic('l');
-        org.openide.awt.Mnemonics.setLocalizedText(languageSensitiveRadioButton, org.openide.util.NbBundle.getMessage(BladePanel.class, "BladePanel.languageSensitiveRadioButton.text")); // NOI18N
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
@@ -112,48 +89,25 @@ final class BladePanel extends javax.swing.JPanel {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(jLabel1)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(asBladeEverywhereRadioButton)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(languageSensitiveRadioButton)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(310, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel1)
-                    .addComponent(asBladeEverywhereRadioButton)
-                    .addComponent(languageSensitiveRadioButton))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addComponent(jLabel1)
+                .addContainerGap(12, Short.MAX_VALUE))
         );
     }// </editor-fold>//GEN-END:initComponents
-
-    private void asBladeEverywhereRadioButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_asBladeEverywhereRadioButtonActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_asBladeEverywhereRadioButtonActionPerformed
 
     void load() {
         if(firstOpening || !changed()) { // if panel is not modified by the user and he switches back to this panel, set to default
             firstOpening = false;
-            ToggleBlockCommentAction.ToggleCommentType toggleCommentType = BladeOptions.getInstance().getToggleCommentType();
-            if (toggleCommentType == ToggleBlockCommentAction.ToggleCommentType.AS_BLADE_EVERYWHERE) {
-                asBladeEverywhereRadioButton.setSelected(true);
-            } else {
-                languageSensitiveRadioButton.setSelected(true);
-            }
         }
     }
 
     void store() {
-        ToggleBlockCommentAction.ToggleCommentType toggleCommentType;
-        if (asBladeEverywhereRadioButton.isSelected()) {
-            toggleCommentType = ToggleBlockCommentAction.ToggleCommentType.AS_BLADE_EVERYWHERE;
-        } else {
-            toggleCommentType = ToggleBlockCommentAction.ToggleCommentType.LANGUAGE_SENSITIVE;
-        }
-        BladeOptions.getInstance().setToggleCommentType(toggleCommentType);
+        
     }
 
     boolean valid() {
@@ -163,26 +117,16 @@ final class BladePanel extends javax.swing.JPanel {
     
     void cancel() {
         if (changed()) { // if panel is modified by the user and options window closes, discard any changes
-            ToggleBlockCommentAction.ToggleCommentType toggleCommentType = BladeOptions.getInstance().getToggleCommentType();
-            if (toggleCommentType == ToggleBlockCommentAction.ToggleCommentType.AS_BLADE_EVERYWHERE) {
-                asBladeEverywhereRadioButton.setSelected(true);
-            } else {
-                languageSensitiveRadioButton.setSelected(true);
-            }
+            
         }
     }
 
     boolean changed() {
-        if (BladeOptions.getInstance().getToggleCommentType() == ToggleBlockCommentAction.ToggleCommentType.AS_BLADE_EVERYWHERE) {
-            return !asBladeEverywhereRadioButton.isSelected();
-        } 
-        return !languageSensitiveRadioButton.isSelected();
+        return true;
     }
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JRadioButton asBladeEverywhereRadioButton;
     private javax.swing.JLabel jLabel1;
-    private javax.swing.JRadioButton languageSensitiveRadioButton;
     private javax.swing.ButtonGroup toggleCommentButtonGroup;
     // End of variables declaration//GEN-END:variables
 }
