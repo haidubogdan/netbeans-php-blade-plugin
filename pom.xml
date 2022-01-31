@@ -3,11 +3,11 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.haidubogdan.netbeans.modules.php.blade</groupId>
     <artifactId>netbeans-php-blade-plugin</artifactId>
-    <version>1.0.0</version>
+    <version>2.0.2</version>
     <packaging>nbm</packaging>
     <name>BladePlugin for netbeans</name>
     <description>BladePlugin for netbeans</description>
-    <url>https://github.com/haidubogdan/netbeans-php-blade-plugin.git</url>
+    <url>https://github.com/haidubogdan/netbeans-php-blade-plugin</url>
     <developers>
         <developer>
             <id>haidubogdan</id>
@@ -19,8 +19,8 @@
     <scm>
         <connection>scm:git:https://github.com/haidubogdan/netbeans-php-blade-plugin.git</connection>
         <developerConnection>scm:https://github.com/haidubogdan/netbeans-php-blade-plugin.git</developerConnection>
-        <url>https://github.com/haidubogdan/netbeans-php-blade-plugin/tree/v2.0.2</url>
-        <tag>v2.0.2</tag>
+        <url>https://github.com/haidubogdan/netbeans-php-blade-plugin</url>
+        <tag>main</tag>
     </scm>
     <licenses>
         <license>
