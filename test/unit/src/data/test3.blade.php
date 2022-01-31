@@ -1,5 +1,2 @@
 @auth()
 @endauth
-
-
-
