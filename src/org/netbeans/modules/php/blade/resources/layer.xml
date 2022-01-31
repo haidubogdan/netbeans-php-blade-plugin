@@ -14,17 +14,12 @@
                         </folder>
                     </folder>
                 </folder>
-                <file name="EditorKit.instance">
-                    <attr name="instanceClass" stringvalue="org.netbeans.modules.php.blade.editor.BladeEditorKit"/>
-                    <attr name="instanceOf" stringvalue="javax.swing.text.EditorKit,org.netbeans.modules.php.blade.editor.BladeEditorKit"/>
-                    <attr name="beaninfo" boolvalue="false"/>
-                </file>
                 <file name="language.instance">
-                    <attr name="instanceCreate" methodvalue="org.netbeans.modules.php.blade.editor.lexer.BladeTopTokenId.language"/>
+                    <attr name="instanceCreate" methodvalue="org.netbeans.modules.php.blade.editor.lexer.BladeTokenId.language"/>
                     <attr name="instanceOf" stringvalue="org.netbeans.api.lexer.Language"/>
                 </file>
-                <file name="org-modules-php-blade-editor-embedding-BladeEmbeddingProvider.instance">
-                    <attr name="instanceOf" stringvalue="org.netbeans.modules.parsing.spi.TaskFactory" />
+                <file name="org-netbeans-modules-php-blade-editor-index-BladeIndexer$Factory.instance">
+                    <attr name="instanceOf" stringvalue="org.netbeans.modules.parsing.spi.indexing.EmbeddingIndexerFactory"/>
                 </file>
                 <folder name="FoldManager">
                     <file name="org-netbeans-modules-csl-editor-fold-GsfFoldManagerFactory.instance"/>
@@ -67,7 +62,6 @@
                     <attr name="instanceOf" stringvalue="org.netbeans.modules.parsing.spi.ParserFactory"/>
                     <attr name="instanceCreate" methodvalue="org.netbeans.modules.csl.core.GsfParserFactory.create"/>
                 </file>
-                
                 <file name="org-netbeans-modules-javascript-editing-embedding-JsEmbeddingProvider$Factory.instance">
                     <attr name="instanceOf" stringvalue="org.netbeans.modules.parsing.spi.TaskFactory"/>
                 </file>
@@ -82,14 +76,8 @@
                     <file name="org-netbeans-modules-csl-hints-GsfUpToDateStateProviderFactory.instance"/>
                 </folder>
                 <folder name="BracesMatchers">
-                    <file name="org-netbeans-modules-html-editor-HtmlBracesMatching.instance">
-                        <attr name="position" intvalue="50"/>
-                    </file>
-                    <file name="org-netbeans-modules-javascript-editing-JsBracesMatcherFactory.instance">
-                        <attr name="position" intvalue="10"/>
-                    </file>
-                    <file name="org-modules-php-blade-editor-BladeBracesMatcher$Factory.instance" >
-                        <attr name="position" intvalue="0"/>
+                    <file name="org-netbeans-modules-php-blade-editor-BladeBracesMatcher$Factory.instance">
+                        <attr name="position" intvalue="46"/>
                     </file>
                 </folder>
                 <folder name="HyperlinkProviders">
@@ -103,32 +91,20 @@
                     <attr name="instanceOf" stringvalue="org.netbeans.modules.editor.indent.spi.IndentTask$Factory"/>
                 </file>
                 <file name="org-netbeans-modules-csl-editor-semantic-HighlightsLayerFactoryImpl.instance"/>
+                
                 <folder name="CodeTemplateProcessorFactories">
                     <file name="org-netbeans-modules-csl-editor-codetemplates-GsfCodeTemplateProcessor$Factory.instance"/>
                 </folder>
-            </folder>
-            <folder name="blade-markup">
-                <file name="language.instance">
-                    <attr name="instanceCreate" methodvalue="org.netbeans.modules.php.blade.editor.lexer.BladeTokenId.language"/>
-                    <attr name="instanceOf" stringvalue="org.netbeans.api.lexer.Language"/>
-                </file>
-                <folder name="BracesMatchers">
-                    <file name="org-modules-php-blade-editor-BladeBracesMatcher$Factory.instance">
-                        <attr name="position" intvalue="0"/>
-                    </file>
-                </folder>
-            </folder>
-        </folder>
-    </folder>
-    <folder name="CslPlugins">
-        <folder name="text">
-            <folder name="x-blade">
-                <attr name="useCustomEditorKit" boolvalue="true"/>
-                <file name="language.instance">
-                    <attr name="instanceClass" stringvalue="org.netbeans.modules.php.blade.editor.gsf.BladeLanguage"/>
-                </file>
-                <file name="structure.instance">
-                    <attr name="instanceClass" stringvalue="org.netbeans.modules.php.blade.editor.gsf.BladeStructureScanner"/>
+                <!--from javascript-->
+                <file name="AutoIndenter.instance">
+                    <attr name="instanceOf" stringvalue="org.netbeans.spi.editor.typinghooks.TypedTextInterceptor$Factory"/>
+                    <attr name="instanceCreate" methodvalue="org.netbeans.modules.editor.indent.spi.support.AutomatedIndenting.createHotCharsIndenter"/>
+                    <attr name="regex1" stringvalue="\s*\{"/>
+                    <attr name="regex2" stringvalue="\s*\}"/>
+                    <attr name="regex3" stringvalue="\s*case\s"/>
+                    <attr name="regex4" stringvalue="\s*default[:\s]"/>
+                    <!-- <attr name="regex5" stringvalue="\s*else[\s\{]"/> -->
+                    <attr name="regex6" stringvalue="\s*\."/>
                 </file>
             </folder>
         </folder>
@@ -136,29 +112,9 @@
     <folder name="Loaders">
         <folder name="text">
             <folder name="x-blade">
+                <!-- keep for language annotation-->
                 <attr name="iconBase" stringvalue="org/netbeans/modules/php/blade/resources/icon.png"/>
-                <folder name="Actions">
-                    <file name="sep-1.instance">
-                        <attr name="instanceClass" stringvalue="javax.swing.JSeparator"/>
-                        <attr name="position" intvalue="200"/>
-                    </file>
-                    <file name="sep-2.instance">
-                        <attr name="instanceClass" stringvalue="javax.swing.JSeparator"/>
-                        <attr name="position" intvalue="500"/>
-                    </file>
-                    <file name="sep-3.instance">
-                        <attr name="instanceClass" stringvalue="javax.swing.JSeparator"/>
-                        <attr name="position" intvalue="800"/>
-                    </file>
-                    <file name="sep-4.instance">
-                        <attr name="instanceClass" stringvalue="javax.swing.JSeparator"/>
-                        <attr name="position" intvalue="1000"/>
-                    </file>
-                    <file name="sep-5.instance">
-                        <attr name="instanceClass" stringvalue="javax.swing.JSeparator"/>
-                        <attr name="position" intvalue="1200"/>
-                    </file>
-                </folder>
+               
             </folder>
         </folder>
     </folder>

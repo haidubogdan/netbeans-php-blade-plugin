@@ -42,12 +42,9 @@
 package org.netbeans.modules.php.blade.editor.lexer;
 
 import java.io.IOException;
-import java.util.Comparator;
-import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.netbeans.api.lexer.Token;
-import org.netbeans.lib.editor.util.CharSequenceUtilities;
 import org.netbeans.spi.lexer.Lexer;
 import org.netbeans.spi.lexer.LexerInput;
 import org.netbeans.spi.lexer.LexerRestartInfo;
@@ -58,17 +55,19 @@ import org.netbeans.spi.lexer.TokenFactory;
  */
 
 public class BladeLexer implements Lexer<BladeTokenId> {
-
-    protected BladeLexerState state;
+    //TODO move to syntex class
+    public static String OPEN_COMMENT = "{{--";
+    public static String CLOSE_COMMENT = "--}}";
     protected final TokenFactory<BladeTokenId> tokenFactory;
-    private final BladeDirectiveColoringLexer scanner;
+    private final BladeColoringLexer scanner;
     protected final LexerInput input;
     
     BladeLexer( LexerRestartInfo<BladeTokenId> info ) {
-        scanner = new BladeDirectiveColoringLexer(info);
+        //TODO issues
+        //@forelse lexer coloring
+        scanner = new BladeColoringLexer(info);
         tokenFactory = info.tokenFactory();
         input = info.input();
-        //state = info.state() == null ? new BladeLexerState() : new BladeLexerState( (BladeLexerState)info.state() );
     }
     
     public static synchronized BladeLexer create( LexerRestartInfo<BladeTokenId> info ) {
@@ -85,7 +84,7 @@ public class BladeLexer implements Lexer<BladeTokenId> {
             }
             return token;
         } catch (IOException ex) {
-            Logger.getLogger(BladeTopLexer.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(BladeLexer.class.getName()).log(Level.SEVERE, null, ex);
         }
         return null;
     }

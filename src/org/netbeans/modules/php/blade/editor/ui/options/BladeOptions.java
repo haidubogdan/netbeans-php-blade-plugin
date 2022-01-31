@@ -42,17 +42,16 @@
 package org.netbeans.modules.php.blade.editor.ui.options;
 
 import java.util.prefs.Preferences;
-import org.netbeans.modules.php.blade.editor.actions.ToggleBlockCommentAction;
 //import org.netbeans.modules.php.blade.editor.actions.ToggleBlockCommentAction;
 import org.openide.util.NbPreferences;
 
 /**
- *
+ * @todo ADD NEW OPTION VALUES
+ * 
  * @author Haidu Bogdan
  */
 public final class BladeOptions {
     private static final BladeOptions INSTANCE = new BladeOptions();
-    private static final String TOGGLE_COMMENT = "blade-toggle-comment"; //NOI18N
     private static final String BLADE_OPTIONS = "blade-options"; //NOI18N
 
     private Preferences getPreferences() {
@@ -64,15 +63,6 @@ public final class BladeOptions {
 
     public static BladeOptions getInstance() {
         return INSTANCE;
-    }
-
-    public void setToggleCommentType(ToggleBlockCommentAction.ToggleCommentType toggleComment) {
-        getPreferences().put(TOGGLE_COMMENT, toggleComment.name());
-    }
-
-    public ToggleBlockCommentAction.ToggleCommentType getToggleCommentType() {
-        String toggleCommentName = getPreferences().get(TOGGLE_COMMENT, ToggleBlockCommentAction.ToggleCommentType.AS_BLADE_EVERYWHERE.name());
-        return ToggleBlockCommentAction.ToggleCommentType.valueOf(toggleCommentName);
     }
 
 }

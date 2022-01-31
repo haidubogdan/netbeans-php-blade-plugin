@@ -45,11 +45,13 @@ import java.util.Collection;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
+import org.netbeans.api.html.lexer.HTMLTokenId;
 import org.netbeans.api.lexer.InputAttributes;
 import org.netbeans.api.lexer.Language;
 import org.netbeans.api.lexer.LanguagePath;
 import org.netbeans.api.lexer.Token;
 import org.netbeans.api.lexer.TokenId;
+import org.netbeans.modules.php.blade.editor.BladeLanguage;
 import org.netbeans.modules.php.editor.lexer.PHPTokenId;
 import org.netbeans.spi.lexer.LanguageEmbedding;
 import org.netbeans.spi.lexer.LanguageHierarchy;
@@ -61,17 +63,55 @@ import org.netbeans.spi.lexer.LexerRestartInfo;
  * @author Haidu Bogdan
  */
 public enum BladeTokenId implements TokenId {
-
-    T_BLADE_PHP_VAR(null, "blade_php_var"),
-    T_BLADE_ECHO(null, "blade_echo"),
+    //coloring values
+    T_BLADE_PHP_VAR(null, "blade_php_var"), //TODO rename with expression
+    T_BLADE_FOREACH_ARG(null, "blade_php_var"),
     T_BLADE_COMMENT( null, "blade_comment" ),
     T_BLADE_DIRECTIVE(null, "blade_directive"),
-    T_BLADE_OTHER( null, "blade_other" );
+    T_BLADE_OTHER( null, "blade_other" ),
+    T_BLADE_OPEN_ECHO( null, "blade_echo" ),
+    T_BLADE_OPEN_ECHO_ESCAPED( null, "blade_echo" ),
+    T_BLADE_CLOSE_ECHO( null, "blade_echo" ),
+    T_BLADE_CLOSE_ECHO_ESCAPED( null, "blade_echo" ),
+    T_BLADE_PHP_OPEN(null, "blade_directive"),
+    T_BLADE_YIELD(null, "blade_directive"),
+    T_BLADE_PARENT(null, "blade_directive"),
+    T_BLADE_EXTENDS(null, "blade_directive"),
+    T_BLADE_SECTION(null, "blade_directive"),
+    T_BLADE_INCLUDE(null, "blade_directive"),
+    T_BLADE_FOREACH(null, "blade_directive"),
+    T_BLADE_IF(null, "blade_directive"),
+    T_BLADE_ELSE(null, "blade_directive"),
+    T_BLADE_ELSEIF(null, "blade_directive"),
+    T_BLADE_ENDPHP(null, "blade_directive"),
+    T_BLADE_ENDFOREACH(null, "blade_directive"),
+    T_BLADE_ENDSECTION(null, "blade_directive"),
+    T_BLADE_STOP(null, "blade_directive"),
+    T_BLADE_FOR(null, "blade_directive"),
+    T_BLADE_COMMA(null, "html"),
+    T_DIRECTIVE_ARG(null, "blade_directive_arg"),
+    T_BLADE_ENDFOR(null, "blade_directive"),
+    T_BLADE_ENDIF(null, "blade_directive"),
+    BLADE_PHP_TOKEN(null, "token"),
+    BLADE_PHP_STRING(null, "string"),
+    T_PHP(null, "php"),
+    T_PHP_ECHO(null, "php"),
+    T_BLADE_PHP(null, "php"),
+    T_BLADE_PHP_ECHO(null, "blade_php_echo"),
+    T_BLADE_PHP_LOOP_PARAM(null, "php"),
+    T_BLADE_PHP_COND(null, "php"),
+    T_HTML( null, "html" ),
+    T_XML( null, "html" ),
+    T_OPEN_PHP(null, "html"),
+    T_CLOSE_PHP(null, "html"),
+    T_PHP_OPEN_ECHO(null, "html"),
+    T_BLADE_DIRECTIVE_PREFIX( null, "blade_directive" ),
+    NEWLINE(null, "whitespace"),
+    WHITESPACE(null, "whitespace")
+    ;
     
     private final String fixedText;
     private final String primaryCategory;
-    public static final String BLADE_MIME_TYPE = "text/blade-markup";
-    public static final String BLADE_MIME_SHORT = "blade-markup";
 
     BladeTokenId( String fixedText, String primaryCategory ) {
         this.fixedText = fixedText;
@@ -87,7 +127,7 @@ public enum BladeTokenId implements TokenId {
         return primaryCategory;
     }
     
-    private static final Language<BladeTokenId> language =
+   private static final Language<BladeTokenId> LANGUAGE =
             new LanguageHierarchy<BladeTokenId>() {
                 @Override
                 protected Collection<BladeTokenId> createTokenIds() {
@@ -102,27 +142,63 @@ public enum BladeTokenId implements TokenId {
 
                 @Override
                 protected Lexer<BladeTokenId> createLexer(LexerRestartInfo<BladeTokenId> info) {
-                    return BladeLexer.create(info);
+                   // return BladeLexer.create(info);
+                    return new BladeLexer(info);
                 }
 
                 @Override
                 protected String mimeType() {
-                    return BladeTokenId.BLADE_MIME_TYPE;
+                    return BladeLanguage.BLADE_MIME_TYPE;
                 }
 
                 @Override
                 protected LanguageEmbedding<?> embedding(Token<BladeTokenId> token,
                         LanguagePath languagePath, InputAttributes inputAttributes) {
+                    Language<?> lang = null;
+                    boolean join_sections = false;
                     BladeTokenId id = token.id();
-                    if (id == T_BLADE_PHP_VAR){
-                        return LanguageEmbedding.create( PHPTokenId.languageInPHP(), 0, 0, true );
+
+                    switch (id){
+                        case T_HTML:
+                           //html embedding not working well
+                           lang = HTMLTokenId.language();
+                           join_sections = true;
+                           break;
+                        case T_PHP:
+                            lang = PHPTokenId.languageInPHP();
+                            join_sections = true;
+                            break;
+                        case T_BLADE_PHP:  
+                            lang = PHPTokenId.languageInPHP();
+                            join_sections = true;
+                            break;
+                        case T_PHP_ECHO:
+                            //no break    
+                        case T_BLADE_PHP_VAR:
+                            //no break
+                        case T_BLADE_PHP_ECHO:
+                            //no break
+                        case T_DIRECTIVE_ARG:
+                            //no break
+                        case T_BLADE_PHP_COND:
+                            //no break
+                        case T_BLADE_PHP_LOOP_PARAM:    
+                            //affects inline tokens ? maybe use top lexer ?
+                            lang = PHPTokenId.languageInPHP();
+                            join_sections = true;
+                            break;
                     }
+                    
+                    if (lang != null){
+                        return LanguageEmbedding.create( lang, 0, 0, join_sections );
+                    }
+ 
                     return null;
 
                 }
             }.language();
 
     public static Language<BladeTokenId> language() {
-        return language;
+        return LANGUAGE;
     }
 }

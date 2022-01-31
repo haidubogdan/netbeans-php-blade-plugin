@@ -44,28 +44,15 @@ Version 2 license, then the option applies only if the new code is
 made subject to such option by the copyright holder.
 -->
 
+<!--custom code template list-->
+
 <!DOCTYPE codetemplates PUBLIC  "-//NetBeans//DTD Editor Code Templates settings 1.0//EN"
                                 "http://www.netbeans.org/dtds/EditorCodeTemplates-1_0.dtd">
 
 <codetemplates>
-    <codetemplate uuid="org.netbeans.modules.php.blade.editor.codetemplate.if" abbreviation="@if" contexts="blade-code">
+<!--    <codetemplate uuid="org.netbeans.modules.php.blade.editor.codetemplate.if" abbreviation="@c" contexts="blade-code">
         <code>
-<![CDATA[@if ${true}]]>
+<![CDATA[@customDirective]]>
         </code>
-    </codetemplate>
-    <codetemplate uuid="org.netbeans.modules.php.blade.editor.codetemplate.el" abbreviation="@el" contexts="blade-code">
-        <code>
-<![CDATA[@else]]>
-        </code>
-    </codetemplate>
-    <codetemplate uuid="org.netbeans.modules.php.blade.editor.codetemplate.eif" abbreviation="@en" contexts="blade-code">
-        <code>
-<![CDATA[@endif]]>
-        </code>
-    </codetemplate>
-    <codetemplate uuid="org.netbeans.modules.php.blade.editor.codetemplate.us" abbreviation="us" contexts="blade-code">
-        <code>
-<![CDATA[use "${page.html}"]]>
-        </code>
-    </codetemplate>
+    </codetemplate>-->
 </codetemplates>

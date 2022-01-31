@@ -42,11 +42,30 @@
 package org.netbeans.modules.php.blade.editor.parsing;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
-import org.netbeans.modules.csl.api.Severity;
+import java.util.Map;
 import org.netbeans.modules.csl.spi.ParserResult;
 import org.netbeans.modules.parsing.api.Snapshot;
+import org.netbeans.modules.php.blade.editor.parsing.astnodes.BladeProgram;
+import org.netbeans.modules.csl.api.Error;
+import org.netbeans.modules.php.blade.editor.model.Model;
+import org.netbeans.modules.php.blade.editor.model.ModelFactory;
+import org.netbeans.modules.php.editor.api.ElementQuery;
+import org.netbeans.modules.php.editor.api.ElementQueryFactory;
+import org.netbeans.modules.php.editor.api.QuerySupportFactory;
+import org.netbeans.modules.php.editor.model.ClassScope;
+import org.netbeans.modules.php.editor.model.FileScope;
+import org.netbeans.modules.php.editor.model.FunctionScope;
+import org.netbeans.modules.php.editor.parser.PHPParseResult;
+import org.netbeans.modules.php.editor.parser.astnodes.Comment;
+import org.netbeans.modules.php.editor.parser.astnodes.Program;
+import org.netbeans.modules.php.editor.parser.astnodes.Statement;
+
 import org.openide.filesystems.FileObject;
+
 /**
  *
  * @author Haidu Bogdan
@@ -54,138 +73,89 @@ import org.openide.filesystems.FileObject;
 public class BladeParserResult extends ParserResult {
 
     boolean valid = true;
+    private Model model;
+    private final BladeProgram root;
+    private List<Error> errors;
+    private ElementQuery.Index phpIndexQuery;
+    private org.netbeans.modules.php.editor.model.Model phpModel;
     
-    List<Error> errorList = new ArrayList<Error>();
-    List<Directive> directiveList = new ArrayList<Directive>();
-    
-    BladeParserResult( Snapshot snapshot ) {
-        super( snapshot );
+    BladeParserResult(Snapshot snapshot) {
+        super(snapshot);
+        this.root = null;
     }
-    
-    public List<Error> getErrors() { return errorList; }
-    
-    public void addError( String description, int offset, int length ) { 
-        errorList.add( new Error( description, offset, length, getSnapshot() ) ); 
+
+    public BladeParserResult(Snapshot snapshot, BladeProgram rootNode) {
+        super(snapshot);
+        this.root = rootNode;
+        this.errors = Collections.<Error>emptyList();
     }
-    
-    public List<Directive> getDirectives() { return directiveList; }
-    
-    public void addDirective( CharSequence function, int offset, int length, CharSequence extra ) { 
-        directiveList.add( new Directive( function, offset, length, extra ) ); 
+
+    public BladeProgram getProgram() {
+        return root;
     }
-    
+
+    public List<Error> getErrors() {
+        return errors;
+    }
+
+    public void setErrors(List<Error> errors) {
+        this.errors = errors;
+    }
+
     @Override
     protected void invalidate() {
         valid = false;
     }
-    
+
     public boolean isValid() {
         return valid;
     }
 
     @Override
     public List<? extends org.netbeans.modules.csl.api.Error> getDiagnostics() {
-        return errorList;
+        return errors;
+    }
+
+    public void setPhpIndexQuery(ElementQuery.Index indexQuery) {
+        phpIndexQuery = indexQuery;
+    }
+
+    public ElementQuery.Index getPhpIndexQuery() {
+        return phpIndexQuery;
     }
     
-    public class Error implements org.netbeans.modules.csl.api.Error {
-        
-        String description;
-        int offset;
-        int length;
-        Snapshot snapshot;
-        
-        public Error( String description, int offset, int length, Snapshot snapshot ) {
-            this.description = description;
-            this.offset = offset;
-            this.length = length;
-            this.snapshot = snapshot;
-        }
-        
-        @Override
-        public String getDescription() {
-            return description;
-        }
-        
-        public int getOffset() {
-            return offset;
-        }
-        
-        public int getLength() {
-            return length;
-        }
-
-        @Override
-        public String getDisplayName() {
-            return description;
-        }
-
-        @Override
-        public String getKey() {
-            return description;
-        }
-
-        @Override
-        public FileObject getFile() {
-            return snapshot.getSource().getFileObject();
-        }
-
-        @Override
-        public int getStartPosition() {
-            return offset;
-        }
-
-        @Override
-        public int getEndPosition() {
-            return offset + length;
-        }
-
-        @Override
-        public boolean isLineError() {
-            return false;
-        }
-
-        @Override
-        public Severity getSeverity() {
-            return Severity.ERROR;
-        }
-
-        @Override
-        public Object[] getParameters() {
-            return null;
-        }
-        
+    public org.netbeans.modules.php.editor.model.Model getPhpModel() {
+        return phpModel;
     }
-    
-    
-    public class Directive {
-        
-        CharSequence function;
-        int offset;
-        int length;
-        CharSequence extra;
-        
-        public Directive( CharSequence function, int offset, int length, CharSequence extra ) {
-            this.function = function;
-            this.offset = offset;
-            this.length = length;
-            this.extra = extra;
+
+    public void createPhpIndexQuery(Snapshot snapshot, FileObject fileObject) {
+        //TODO use this with extracted statments
+        int end = snapshot.getText().toString().length();
+//        ParsingUtils parsingUtils = new ParsingUtils();
+//    	parsingUtils.parsePhpText("<?php ");
+//        parsingUtils.getParserResult();
+        List<Statement> statements = new ArrayList<>();
+        Program emptyProgram = new Program(0, end, statements, Collections.<Comment>emptyList());
+        //TO DO extract embedding and create a fake snapshot
+        PHPParseResult result = new PHPParseResult(snapshot, emptyProgram);
+
+        phpIndexQuery = ElementQueryFactory.createIndexQuery(QuerySupportFactory.get(result));
+        phpModel = result.getModel(org.netbeans.modules.php.editor.model.Model.Type.COMMON);
+        /*
+        //could be an ideea to make use of the ModuleUtils filescope yet we need a existing php file
+        if (phpModel != null){
+            FileScope topScope = phpModel.getFileScope();
+            Collection<? extends ClassScope> list = ModelUtils.getDeclaredClasses(topScope);
+            int debug2 = 2;
         }
-        
-        public CharSequence getExtra() { return extra; }
-        
-        public CharSequence getDescription() {
-            return function;
-        }
-        
-        public int getOffset() {
-            return offset;
-        }
-        
-        public int getLength() {
-            return length;
-        }
-        
+        int debug = 1;
+        */
     }
-    
+
+    public synchronized Model getModel() {
+        if (model == null) {
+            model = ModelFactory.getModel(this);
+        }
+        return model;
+    }
 }

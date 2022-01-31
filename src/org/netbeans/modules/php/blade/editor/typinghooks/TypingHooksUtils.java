@@ -44,7 +44,7 @@ package org.netbeans.modules.php.blade.editor.typinghooks;
 import javax.swing.text.BadLocationException;
 import org.netbeans.editor.BaseDocument;
 import org.netbeans.modules.csl.api.EditorOptions;
-import org.netbeans.modules.php.blade.editor.gsf.BladeLanguage;
+import org.netbeans.modules.php.blade.editor.BladeLanguage;
 
 public final class TypingHooksUtils {
 
@@ -73,10 +73,6 @@ public final class TypingHooksUtils {
         }
         char[] previousChars = doc.getChars(dotPos - 1, 1);
         return previousChars.length > 0 && previousChars[0] == '\\';
-    }
-
-    public static boolean isOpeningDelimiterChar(char c) {
-        return c == '{' || c == '!';
     }
 
 }

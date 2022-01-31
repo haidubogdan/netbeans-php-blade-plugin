@@ -64,7 +64,8 @@ import org.openide.util.Exceptions;
 import org.openide.util.RequestProcessor;
 
 /**
- *
+ * seems to be used together with editor extender
+ * 
  * @author Haidu Bogdan
  */
 public class BladeCodeTemplateFilter extends UserTask implements CodeTemplateFilter {
@@ -109,14 +110,8 @@ public class BladeCodeTemplateFilter extends UserTask implements CodeTemplateFil
         assert resultIterator != null;
         Result parserResult = resultIterator.getParserResult();
         if (parserResult instanceof BladeParserResult) {
-//            CompletionContext completionContext = BladeCompletionContextFinder.find((BladeParserResult) parserResult, offset);
-//            if (CompletionContext.BLOCK.equals(completionContext)) {
-//                // current code templates are just for Blade Tags (which are used in blocks)
-//                accept = true;
-//            } else {
-//                accept = false;
-//            }
-            accept = true;
+            //TODO check for which context to show or not
+            accept = false;
         }
     }
 

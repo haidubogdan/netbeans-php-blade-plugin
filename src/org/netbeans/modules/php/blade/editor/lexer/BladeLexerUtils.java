@@ -41,18 +41,15 @@
  */
 package org.netbeans.modules.php.blade.editor.lexer;
 
-import java.util.ArrayList;
-import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.Objects;
-import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 import org.netbeans.api.html.lexer.HTMLTokenId;
 import org.netbeans.api.lexer.Language;
 import org.netbeans.api.lexer.Token;
 import org.netbeans.api.lexer.TokenHierarchy;
-import org.netbeans.api.lexer.TokenId;
 import org.netbeans.api.lexer.TokenSequence;
+import org.netbeans.api.lexer.TokenUtilities;
 import org.netbeans.editor.BaseDocument;
 import org.netbeans.modules.csl.api.OffsetRange;
 import org.netbeans.modules.parsing.api.Snapshot;
@@ -66,33 +63,138 @@ public final class BladeLexerUtils {
 
     private BladeLexerUtils() {
     }
-    
-    public static TokenSequence<? extends BladeTopTokenId> getBladeTokenSequence(final Snapshot snapshot, final int offset) {
-        return getTokenSequence(snapshot.getTokenHierarchy(), offset, BladeTopTokenId.language());
-    }
 
-    public static TokenSequence<? extends BladeTopTokenId> getBladeTokenSequence(final Document document, final int offset) {
-        TokenHierarchy<Document> th = TokenHierarchy.get(document);
-        return getTokenSequence(th, offset, BladeTopTokenId.language());
-    }
-    
     public static TokenSequence<? extends BladeTokenId> getBladeMarkupTokenSequence(final Document document, final int offset) {
         TokenHierarchy<Document> th = TokenHierarchy.get(document);
         return getTokenSequence(th, offset, BladeTokenId.language());
     }
-    
+
+    public static TokenSequence<BladeTokenId> getBladeTokenSequence(final Document document) {
+        TokenHierarchy<Document> th = TokenHierarchy.get(document);
+        return th.tokenSequence(BladeTokenId.language());
+    }
+
     public static TokenSequence<? extends BladeTokenId> getBladeMarkupTokenSequence(final Snapshot snapshot, final int offset) {
         TokenSequence<? extends BladeTokenId> bladeBlockTokenSequence = getTokenSequence(snapshot.getTokenHierarchy(), offset, BladeTokenId.language());
         return bladeBlockTokenSequence == null ? getTokenSequence(snapshot.getTokenHierarchy(), offset, BladeTokenId.language()) : bladeBlockTokenSequence;
     }
-    
+
     public static TokenSequence<? extends HTMLTokenId> getHtmlTokenSequence(final Document document, final int offset) {
         TokenHierarchy<Document> th = TokenHierarchy.get(document);
         return getTokenSequence(th, offset, HTMLTokenId.language());
     }
 
-    public static <L> TokenSequence<? extends L> getTokenSequence(final TokenHierarchy<?> th, final int offset, final Language<? extends L> language) {
-        TokenSequence<? extends L> ts = th.tokenSequence(language);
+    public static TokenSequence<? extends PHPTokenId> getPhpTokenSequence(final Document document, final int offset) {
+        TokenHierarchy<Document> th = TokenHierarchy.get(document);
+        return getTokenSequence(th, offset, PHPTokenId.language());
+    }
+
+    public static TokenSequence<? extends PHPTokenId> getPhpTokenSequence(TokenHierarchy<Document> th, final int offset) {
+        return getTokenSequence(th, offset, PHPTokenId.language());
+    }
+
+    public static OffsetRange findFwd(TokenSequence<? extends BladeTokenId> ts, BladeTokenId tokenDownId, String down) {
+        while (ts.moveNext()) {
+            Token<? extends BladeTokenId> token = ts.token();
+            BladeTokenId id = token.id();
+            String ttext = token.text().toString().trim();
+            if (id == tokenDownId && ttext.equals(down)) {
+                return new OffsetRange(ts.offset(), ts.offset() + down.length());
+            }
+        }
+
+        return OffsetRange.NONE;
+    }
+
+    public static OffsetRange findFwd(TokenSequence<? extends BladeTokenId> ts, String down) {
+        while (ts.moveNext()) {
+            Token<? extends BladeTokenId> token = ts.token();
+            String ttext = token.text().toString().trim();
+            if (ttext.equals(down)) {
+                return new OffsetRange(ts.offset(), ts.offset() + down.length());
+            }
+        }
+
+        return OffsetRange.NONE;
+    }
+
+    public static OffsetRange findFwd(TokenSequence<? extends BladeTokenId> ts, String down, String up) {
+        int blockBalance = 1;
+        while (ts.moveNext()) {
+            Token<? extends BladeTokenId> token = ts.token();
+            String ttext = token.text().toString().trim();
+
+            if (ttext.equals(down)) {
+                blockBalance--;
+                if (blockBalance == 0) {
+                    return new OffsetRange(ts.offset(), ts.offset() + down.length());
+                }
+            } else if (ttext.equals(up)) {
+                blockBalance++;
+            }
+        }
+        return OffsetRange.NONE;
+    }
+
+    public static OffsetRange findEndFwd(TokenSequence<? extends BladeTokenId> ts, BladeTokenId tokenDownId, String down) {
+        while (ts.moveNext()) {
+            Token<? extends BladeTokenId> token = ts.token();
+            BladeTokenId id = token.id();
+            String ttext = token.text().toString().trim();
+            if (id == tokenDownId && ttext.endsWith(down)) {
+                return new OffsetRange(ts.offset(), ts.offset() + down.length());
+            }
+        }
+
+        return OffsetRange.NONE;
+    }
+
+    public static List<? extends Token<BladeTokenId>> getPreceedingLineTokens(Token<BladeTokenId> token, int tokenOffset, TokenSequence<BladeTokenId> tokenSequence) {
+        int orgOffset = tokenSequence.offset();
+        LinkedList<Token<BladeTokenId>> tokens = new LinkedList<>();
+        if (token.id() != BladeTokenId.WHITESPACE
+                || TokenUtilities.indexOf(token.text().subSequence(0, Math.min(token.text().length(), tokenOffset)), '\n') == -1) { // NOI18N
+            while (true) {
+                if (!tokenSequence.movePrevious()) {
+                    break;
+                }
+                Token<BladeTokenId> cToken = tokenSequence.token();
+                if (cToken.id() == BladeTokenId.WHITESPACE
+                        && TokenUtilities.indexOf(cToken.text(), '\n') != -1) { // NOI18N
+                    break;
+                }
+                tokens.addLast(cToken);
+            }
+        }
+
+        tokenSequence.move(orgOffset);
+        tokenSequence.moveNext();
+
+        return tokens;
+    }
+
+    public static OffsetRange findFwd(BaseDocument doc, TokenSequence<? extends BladeTokenId> ts, BladeTokenId tokenUpId, String up, BladeTokenId tokenDownId, String down) {
+        int balance = 0;
+
+        while (ts.moveNext()) {
+            Token<? extends BladeTokenId> token = ts.token();
+
+            if ((token.id() == tokenUpId && token.text().equals(up))) {
+                balance++;
+            } else if (token.id() == tokenDownId && token.text().equals(down)) {
+                if (balance == 0) {
+                    return new OffsetRange(ts.offset(), ts.offset() + token.length());
+                }
+
+                balance--;
+            }
+        }
+
+        return OffsetRange.NONE;
+    }
+
+    public static <T> TokenSequence<? extends T> getTokenSequence(final TokenHierarchy<?> th, final int offset, final Language language) {
+        TokenSequence<? extends T> ts = th.tokenSequence(language);
         if (ts == null) {
             List<TokenSequence<?>> list = th.embeddedTokenSequences(offset, true);
             for (TokenSequence t : list) {
@@ -112,57 +214,6 @@ public final class BladeLexerUtils {
             }
         }
         return ts;
-    }
-
-    public static List<OffsetRange> findForwardMatching(TokenSequence<? extends BladeTopTokenId> topTs, BladeTokenText start, BladeTokenText end) {
-        return findForwardMatching(topTs, start, end, Collections.<BladeTokenText>emptyList());
-    }
-
-    public static List<OffsetRange> findForwardMatching(
-            TokenSequence<? extends BladeTopTokenId> topTs,
-            BladeTokenText start,
-            BladeTokenText end,
-            List<BladeTokenText> middle) {
-        List<OffsetRange> result = new ArrayList<>();
-        topTs.moveNext();
-        int originalOffset = topTs.offset();
-        int balance = 1;
-        while (topTs.moveNext()) {
-            Token<? extends BladeTopTokenId> token = topTs.token();
-        }
-        topTs.move(originalOffset);
-        return result;
-    }
-
-    private static boolean matchesToken(List<BladeTokenText> middle, Token<?  extends BladeTokenId> markupToken) {
-        boolean result = false;
-        for (BladeTokenText bladeTokenText : middle) {
-            if (bladeTokenText.matches(markupToken)) {
-                result = true;
-                break;
-            }
-        }
-        return result;
-    }
-
-    public static List<OffsetRange> findBackwardMatching(
-            TokenSequence<? extends BladeTopTokenId> topTs,
-            BladeTokenText start,
-            BladeTokenText end,
-            List<BladeTokenText> middle) {
-        List<OffsetRange> result = new ArrayList<>();
-        topTs.movePrevious();
-        int originalOffset = topTs.offset();
-        int balance = 1;
-        while (topTs.movePrevious()) {
-            Token<? extends BladeTopTokenId> token = topTs.token();
-        }
-        topTs.move(originalOffset);
-        return result;
-    }
-
-    public static List<OffsetRange> findBackwardMatching(TokenSequence<? extends BladeTopTokenId> topTs, BladeTokenText start, BladeTokenText end) {
-        return findBackwardMatching(topTs, start, end, Collections.<BladeTokenText>emptyList());
     }
 
     public static boolean textEquals(CharSequence text1, char... text2) {
@@ -186,103 +237,8 @@ public final class BladeLexerUtils {
         return false;
     }
 
-    public static int getTokenBalance(BaseDocument doc, char open, char close, int offset) throws BadLocationException {
-        TokenSequence<? extends TokenId> ts = BladeLexerUtils.getBladeMarkupTokenSequence(doc, offset);
-        if (ts == null) {
-            return 0;
-        }
-
-        int balance = 0;
-        ts.move(offset);
-        // check next tokens
-        while (ts.moveNext()) {
-            TokenId id = ts.token().id();
-//            if (id == BladeVariableTokenId.T_BLADE_PUNCTUATION || id == BladeTopTokenId.T_BLADE_PUNCTUATION) {
-//                if (BladeLexerUtils.textEquals(ts.token().text(), close)) {
-//                    balance--;
-//                } else if (BladeLexerUtils.textEquals(ts.token().text(), open)) {
-//                    break;
-//                }
-//            }
-        }
-
-        // check previous tokens
-        ts.move(offset);
-        while (ts.movePrevious()) {
-            TokenId id = ts.token().id();
-//            if (id == BladeVariableTokenId.T_BLADE_PUNCTUATION || id == BladeTopTokenId.T_BLADE_PUNCTUATION) {
-//                if (BladeLexerUtils.textEquals(ts.token().text(), close)) {
-//                    balance--;
-//                } else if (BladeLexerUtils.textEquals(ts.token().text(), open)) {
-//                    balance++;
-//                }
-//                if (balance > 0) {
-//                    break;
-//                }
-//            }
-        }
-        return balance;
+    public static boolean textIsStringWithQuotes(String text) {
+        return ((text.startsWith("\"") && text.endsWith("\""))
+                || text.startsWith("'") && text.endsWith("'"));
     }
-
-    public interface BladeTokenText {
-        BladeTokenText NONE = new BladeTokenText() {
-
-            @Override
-            public boolean matches(Token<? extends BladeTokenId> token) {
-                return false;
-            }
-        };
-
-        boolean matches(Token<? extends BladeTokenId> token);
-    }
-    
-
-    public static final class BladeTokenTextImpl implements BladeTokenText {
-        private final BladeTokenId tokenId;
-        private final String tokenText;
-
-        public static BladeTokenText create(BladeTokenId tokenId, String tokenText) {
-            return new BladeTokenTextImpl(tokenId, tokenText);
-        }
-
-        private BladeTokenTextImpl(BladeTokenId tokenId, String tokenText) {
-            this.tokenId = tokenId;
-            this.tokenText = tokenText;
-        }
-
-        @Override
-        public boolean matches(Token<? extends BladeTokenId> token) {
-            return token != null && token.id() == tokenId && tokenText.equals(token.text().toString());
-        }
-
-        @Override
-        public int hashCode() {
-            int hash = 7;
-            hash = 71 * hash + Objects.hashCode(this.tokenId);
-            hash = 71 * hash + Objects.hashCode(this.tokenText);
-            return hash;
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            if (obj == null) {
-                return false;
-            }
-            if (getClass() != obj.getClass()) {
-                return false;
-            }
-            final BladeTokenTextImpl other = (BladeTokenTextImpl) obj;
-            if (this.tokenId != other.tokenId) {
-                return false;
-            }
-            return Objects.equals(this.tokenText, other.tokenText);
-        }
-
-        @Override
-        public String toString() {
-            return "BladeTokenText{" + "tokenId=" + tokenId + ", tokenText=" + tokenText + '}';
-        }
-
-    }
-
 }
