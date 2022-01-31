@@ -405,7 +405,7 @@ COMMENT_END="--}}"
         return createFullSymbol(ASTBladeSymbols.T_BLADE_INLINE_PHP);
     }
 
-    "@"{DNUM} {
+    "@"{DNUM} | "@"{LNUM} {
     	String yytext = yytext();
     	popState();
     	return createFullSymbol(ASTBladeSymbols.T_INLINE_HTML);
