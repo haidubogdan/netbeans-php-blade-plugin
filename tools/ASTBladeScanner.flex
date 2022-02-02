@@ -4,7 +4,7 @@ package org.netbeans.modules.php.blade.editor.parsing;
 import java_cup.runtime.*;
 import org.netbeans.modules.php.blade.editor.BladeSyntax;
 import org.netbeans.modules.php.editor.parser.PHPParseResult;
-import org.netbeans.modules.web.common.api.ByteStack;
+import org.netbeans.modules.php.blade.editor.common.ByteStack;
 import org.openide.filesystems.FileObject;
 
 @org.netbeans.api.annotations.common.SuppressWarnings({"SF_SWITCH_FALLTHROUGH", "URF_UNREAD_FIELD", "DLS_DEAD_LOCAL_STORE", "DM_DEFAULT_ENCODING", "EI_EXPOSE_REP2", "UUF_UNUSED_FIELD"})
@@ -334,7 +334,8 @@ COMMENT_END="--}}"
         return createFullSymbol(ASTBladeSymbols.T_BLADE_STOP);
     }	
 
-    "@extends" { 
+    "@extends" {
+        pushState(ST_BLADE_INCLUDE_ARGS);
     	return createFullSymbol(ASTBladeSymbols.T_BLADE_EXTENDS); 
     }
 

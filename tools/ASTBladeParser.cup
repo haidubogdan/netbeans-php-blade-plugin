@@ -216,6 +216,12 @@ directive_statement:stm {:
     DirectiveName directive = new DirectiveName(extsleft, extsright, exts.toString());
     RESULT = new BladeExtendsStatement(extsleft, pathright, directive, path, block);
 :}
+| T_BLADE_EXTENDS:exts T_OPEN_PARENTHESE variable:path T_COMMA T_PHP_PARAMETER_EXPRESSION:p T_CLOSE_PARENTHESE:end {:
+    //for the moment until we find to make use of <<EOL>>
+    Block block = null;
+    DirectiveName directive = new DirectiveName(extsleft, extsright, exts.toString());
+    RESULT = new BladeExtendsStatement(extsleft, pathright, directive, path, block);
+:}
 | T_BLADE_YIELD:d T_OPEN_PARENTHESE yield_label:s T_CLOSE_PARENTHESE:end {:
     String strPath = "";
     if (s != null){
