@@ -41,28 +41,15 @@
  */
 package org.netbeans.modules.php.blade.editor.parsing;
 
-import java.io.IOException;
 import java.io.StringReader;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Enumeration;
 import java.util.List;
-import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeListener;
-import javax.swing.text.Document;
-import org.netbeans.api.editor.mimelookup.MimeLookup;
-import org.netbeans.api.java.classpath.ClassPath;
-import org.netbeans.api.lexer.InputAttributes;
-import org.netbeans.api.lexer.Language;
-import org.netbeans.api.project.ProjectManager;
 import org.netbeans.modules.csl.api.OffsetRange;
 import org.netbeans.modules.csl.spi.GsfUtilities;
-import org.netbeans.modules.editor.NbEditorDocument;
 import org.netbeans.modules.parsing.api.Snapshot;
 import org.netbeans.modules.parsing.api.Task;
 import org.netbeans.modules.parsing.impl.indexing.RepositoryUpdater;
@@ -101,9 +88,7 @@ public class BladeParser extends Parser {
                 final DataObject od;
                 try {
                     od = DataObject.find(currentFile);
-                    if (od instanceof BladeDataObject){
-                        
-                    } else {
+                    if (!(od instanceof BladeDataObject)){
                         boolean isValid = od.isValid();
                         DataLoader gdl = od.getLoader();
                         
@@ -118,7 +103,6 @@ public class BladeParser extends Parser {
                             //Exceptions.printStackTrace(ex);
                         }
                     }
-
                 } catch (DataObjectNotFoundException ex) {
                     Exceptions.printStackTrace(ex);
                 }
