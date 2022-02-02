@@ -14,10 +14,10 @@ import org.netbeans.modules.parsing.api.Source;
 import org.netbeans.modules.parsing.api.UserTask;
 import org.netbeans.modules.parsing.spi.ParseException;
 import org.netbeans.modules.php.blade.editor.BladeLanguage;
+import org.netbeans.modules.php.blade.editor.common.WebUtils;
 import org.netbeans.modules.php.blade.editor.index.api.IndexedElement;
 import org.netbeans.modules.php.blade.editor.model.api.BladeElement;
 import org.netbeans.modules.php.blade.editor.parsing.BladeParserResult;
-import org.netbeans.modules.web.common.api.WebUtils;
 import org.openide.filesystems.FileObject;
 
 /**

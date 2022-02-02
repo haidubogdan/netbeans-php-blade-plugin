@@ -41,7 +41,6 @@
  */
 package org.netbeans.modules.php.blade.editor.ui.options;
 
-import org.netbeans.modules.php.api.util.UiUtils;
 import org.netbeans.spi.options.OptionsPanelController;
 import org.openide.util.NbBundle;
 
@@ -50,7 +49,7 @@ import org.openide.util.NbBundle;
     keywords = {
         "php", "blade"
     },
-    location = UiUtils.OPTIONS_PATH,
+    location = "path",
     tabTitle = "#BladePanel.options.keywords.tabTitle"
 )
 final class BladePanel extends javax.swing.JPanel {

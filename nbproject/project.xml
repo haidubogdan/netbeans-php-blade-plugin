@@ -210,15 +210,6 @@
                     </run-dependency>
                 </dependency>
                 <dependency>
-                    <code-name-base>org.netbeans.modules.options.editor</code-name-base>
-                    <build-prerequisite/>
-                    <compile-dependency/>
-                    <run-dependency>
-                        <release-version>1</release-version>
-                        <implementation-version/>
-                    </run-dependency>
-                </dependency>
-                <dependency>
                     <code-name-base>org.netbeans.modules.parsing.api</code-name-base>
                     <build-prerequisite/>
                     <compile-dependency/>
@@ -236,36 +227,11 @@
                     </run-dependency>
                 </dependency>
                 <dependency>
-                    <code-name-base>org.netbeans.modules.php.api.editor</code-name-base>
-                    <build-prerequisite/>
-                    <compile-dependency/>
-                    <run-dependency>
-                        <release-version>0</release-version>
-                        <implementation-version/>
-                    </run-dependency>
-                </dependency>
-                <dependency>
-                    <code-name-base>org.netbeans.modules.php.api.phpmodule</code-name-base>
-                    <build-prerequisite/>
-                    <compile-dependency/>
-                    <run-dependency>
-                        <implementation-version/>
-                    </run-dependency>
-                </dependency>
-                <dependency>
                     <code-name-base>org.netbeans.modules.php.editor</code-name-base>
                     <build-prerequisite/>
                     <compile-dependency/>
                     <run-dependency>
                         <release-version>2</release-version>
-                        <implementation-version/>
-                    </run-dependency>
-                </dependency>
-                <dependency>
-                    <code-name-base>org.netbeans.modules.php.project</code-name-base>
-                    <build-prerequisite/>
-                    <compile-dependency/>
-                    <run-dependency>
                         <implementation-version/>
                     </run-dependency>
                 </dependency>
@@ -293,14 +259,6 @@
                     <compile-dependency/>
                     <run-dependency>
                         <specification-version>1.55.0.1</specification-version>
-                    </run-dependency>
-                </dependency>
-                <dependency>
-                    <code-name-base>org.netbeans.modules.web.common</code-name-base>
-                    <build-prerequisite/>
-                    <compile-dependency/>
-                    <run-dependency>
-                        <implementation-version/>
                     </run-dependency>
                 </dependency>
                 <dependency>
@@ -425,7 +383,29 @@
                     </test-dependency>
                 </test-type>
             </test-dependencies>
-            <public-packages/>
+            <public-packages>
+                <package>org.netbeans.modules.php.blade.editor</package>
+                <package>org.netbeans.modules.php.blade.editor.codetemplate</package>
+                <package>org.netbeans.modules.php.blade.editor.common</package>
+                <package>org.netbeans.modules.php.blade.editor.completion</package>
+                <package>org.netbeans.modules.php.blade.editor.embeddings</package>
+                <package>org.netbeans.modules.php.blade.editor.formatter</package>
+                <package>org.netbeans.modules.php.blade.editor.gsf</package>
+                <package>org.netbeans.modules.php.blade.editor.index</package>
+                <package>org.netbeans.modules.php.blade.editor.index.api</package>
+                <package>org.netbeans.modules.php.blade.editor.lexer</package>
+                <package>org.netbeans.modules.php.blade.editor.model</package>
+                <package>org.netbeans.modules.php.blade.editor.model.api</package>
+                <package>org.netbeans.modules.php.blade.editor.model.index</package>
+                <package>org.netbeans.modules.php.blade.editor.parsing</package>
+                <package>org.netbeans.modules.php.blade.editor.parsing.astnodes</package>
+                <package>org.netbeans.modules.php.blade.editor.parsing.astnodes.visitors</package>
+                <package>org.netbeans.modules.php.blade.editor.types.api</package>
+                <package>org.netbeans.modules.php.blade.editor.typinghooks</package>
+                <package>org.netbeans.modules.php.blade.editor.ui.options</package>
+                <package>org.netbeans.modules.php.blade.editor.verification</package>
+                <package>org.netbeans.modules.php.blade.refactoring</package>
+            </public-packages>
         </data>
     </configuration>
 </project>

@@ -12,7 +12,6 @@ import org.netbeans.modules.php.blade.editor.parsing.astnodes.ASTNode;
 import org.netbeans.modules.php.blade.editor.parsing.astnodes.BladeProgram;
 import org.netbeans.modules.php.editor.parser.ParserErrorHandler;
 import org.netbeans.modules.csl.api.Error;
-import org.netbeans.modules.php.api.util.StringUtils;
 import org.openide.util.NbBundle;
 
 /**
@@ -164,7 +163,7 @@ public class BladeErrorHandler implements ParserErrorHandler {
                 unexpectedText = getTokenTextForm(token.sym) + " '" + String.valueOf(token.value) + "'";
             } else {
                 String currentText = getTokenTextForm(token.sym);
-                if (StringUtils.hasText(currentText)) {
+                if (currentText != null && !currentText.trim().isEmpty()) {
                     unexpectedText = currentText.trim();
                 }
             }
@@ -185,7 +184,7 @@ public class BladeErrorHandler implements ParserErrorHandler {
             } else {
                 if (!isNodeToken()) {
                     String previousText = getTokenTextForm(token.sym);
-                    if (StringUtils.hasText(previousText)) {
+                    if (previousText != null && !previousText.trim().isEmpty()) {
                         afterText = previousText.trim();
                     }
                 }

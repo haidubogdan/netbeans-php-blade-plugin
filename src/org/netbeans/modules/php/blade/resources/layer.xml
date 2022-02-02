@@ -130,7 +130,6 @@
                     <folder name="x-blade">
                         <file name="BladeCodeCompletion.instance">
                             <attr name="instanceOf" stringvalue="org.netbeans.modules.options.editor.spi.PreferencesCustomizer$Factory"/>
-                            <attr name="instanceCreate" methodvalue="org.netbeans.modules.php.blade.editor.ui.options.CodeCompletionPanel.getCustomizerFactory"/>
                             <attr name="position" intvalue="100"/>
                         </file>
                         <file name="BladeSpecificCustomCustomizer.instance">

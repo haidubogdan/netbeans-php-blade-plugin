@@ -55,15 +55,15 @@ import org.netbeans.modules.parsing.api.Snapshot;
 import org.netbeans.modules.parsing.spi.EmbeddingProvider;
 import org.netbeans.modules.parsing.spi.SchedulerTask;
 import org.netbeans.modules.parsing.spi.TaskFactory;
-import static org.netbeans.modules.php.api.util.FileUtils.PHP_MIME_TYPE;
 import org.netbeans.modules.php.blade.editor.lexer.BladeTokenId;
 
 /**
  *
  * @author Haidu Bogdan
  */
-@EmbeddingProvider.Registration(mimeType = BladeLanguage.BLADE_MIME_TYPE, targetMimeType=PHP_MIME_TYPE)
+@EmbeddingProvider.Registration(mimeType = BladeLanguage.BLADE_MIME_TYPE, targetMimeType="text/x-php5")
 public class BladePhpEmbeddingProvider extends EmbeddingProvider {
+    public static String PHP_MIME_TYPE = "text/x-php5";
     @Override
     public List<Embedding> getEmbeddings(Snapshot snapshot) {
         TokenHierarchy<CharSequence> th = TokenHierarchy.create(snapshot.getText(), BladeTokenId.language());

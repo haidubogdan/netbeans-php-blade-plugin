@@ -44,20 +44,20 @@ package org.netbeans.modules.php.blade.editor.ui.options;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import javax.swing.JComponent;
-import org.netbeans.modules.php.api.util.UiUtils;
+import org.netbeans.modules.csl.api.UiUtils;
 import org.netbeans.spi.options.OptionsPanelController;
 import org.openide.util.HelpCtx;
 import org.openide.util.Lookup;
 
-@UiUtils.PhpOptionsPanelRegistration(
-    id = BladeOptionsPanelController.ID,
-    displayName = "#LBL_BladeOptionsName",
-    position = 1000
-)
+//@UiUtils.PhpOptionsPanelRegistration(
+//    id = BladeOptionsPanelController.ID,
+//    displayName = "#LBL_BladeOptionsName",
+//    position = 1000
+//)
 public final class BladeOptionsPanelController extends OptionsPanelController {
 
     static final String ID = "Blade"; // NOI18N
-    static final String OPTIONS_PATH = UiUtils.FRAMEWORKS_AND_TOOLS_SUB_PATH + "/" + ID; // NOI18N
+    static final String OPTIONS_PATH = "path" + "/" + ID; // NOI18N
 
     private BladePanel panel;
     private final PropertyChangeSupport pcs = new PropertyChangeSupport(this);

@@ -8,14 +8,18 @@ import java.util.logging.Logger;
 import javax.swing.text.Document;
 import org.netbeans.api.project.FileOwnerQuery;
 import org.netbeans.api.project.Project;
+import org.netbeans.api.project.ProjectUtils;
+import org.netbeans.api.project.SourceGroup;
+import org.netbeans.api.project.Sources;
 import org.netbeans.modules.csl.api.DataLoadersBridge;
-import org.netbeans.modules.php.project.PhpProject;
 
 import org.netbeans.modules.parsing.api.Source;
 import org.netbeans.modules.php.blade.editor.index.api.BladeIndex;
 import org.openide.filesystems.FileObject;
 import org.openide.filesystems.MIMEResolver;
+import org.openide.loaders.DataObject;
 import org.openide.util.Exceptions;
+import org.openide.util.Lookup;
 import org.openide.util.NbBundle;
 /**
  *
@@ -61,15 +65,17 @@ public class BladeProjectSupport {
     public static BladeProjectSupport findFor(FileObject fo) {
 	try {
 	    Project p = FileOwnerQuery.getOwner(fo);
-
+            String projectName = p.getClass().getSimpleName();
+            //Sources sources = ProjectUtils.getSources(p);
+            //SourceGroup[] sgs = sources.getSourceGroups(Sources.TYPE_GENERIC); // org.netbeans.api.java.project.JavaProjectConstants.SOURCES_TYPE_JAVA
             if (p == null) {
 		return null;
 	    }
             //might be an internal project from a composer file detection
-            if (!(p instanceof PhpProject)){
+            if (!(projectName.equals("PhpProject"))){
                 FileObject parent = p.getProjectDirectory().getParent();
                 p = FileOwnerQuery.getOwner(parent); //getting the parent project
-                if (p == null || !(p instanceof PhpProject)) {
+                if (p == null || !(p.getClass().getSimpleName().equals("PhpProject"))) {
                     LOGGER.log(Level.WARNING, "project for blade file not found {0}", fo.getPath());
                     return null;
                 }
