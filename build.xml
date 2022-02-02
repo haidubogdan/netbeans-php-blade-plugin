@@ -12,7 +12,7 @@
     <property name="build" value="build" />
     <property name="groupId" value="io.github.haidubogdan.netbeans.modules.php.blade" />
     <property name="artifactId" value="netbeans-php-blade-plugin" />
-    <property name="version" value="2.0.2" />
+    <property name="version" value="1.0.0" />
     <!-- defined maven snapshots and staging repository id and url -->
     <property name="ossrh-snapshots-repository-url"
               value="https://s01.oss.sonatype.org/content/repositories/snapshots/" />
