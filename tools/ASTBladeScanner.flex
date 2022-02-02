@@ -231,6 +231,7 @@ COMMENT_END="--}}"
 %state ST_BLADE_ECHO_ESCAPED
 %state ST_BLADE_PARAMETER_EXPRESSION
 %state ST_LOOK_FOR_DIRECTIVE_ARGUMENTS
+%state ST_HTML_COMMENT
 
 %%
 /* @ will activate ST_BLADE_DIRECTIVE pushback -> end la new line sau ")" */
@@ -332,7 +333,12 @@ COMMENT_END="--}}"
     "@stop" {
     	popState();
         return createFullSymbol(ASTBladeSymbols.T_BLADE_STOP);
-    }	
+    }
+
+    "@overwrite" {
+        popState();
+        return createFullSymbol(ASTBladeSymbols.T_BLADE_OVERWRITE);
+    }   
 
     "@extends" {
         pushState(ST_BLADE_INCLUDE_ARGS);
@@ -452,11 +458,18 @@ COMMENT_END="--}}"
    \"                      { yypushback(1);pushState(ST_STRING_DBQUOTE); }
    "'"                      { yypushback(1);pushState(ST_STRING_SQUOTE); }
    ","                     {
+        if (phpParameterExpressionText.length() > 0){
+            yypushback(1);
+            return createPhpParameterExpression(ASTBladeSymbols.T_PHP_PARAMETER_EXPRESSION);
+        }
         pushState(ST_BLADE_PARAMETER);
         return createSymbol(ASTBladeSymbols.T_COMMA);
    }
    "("  {
     	directiveParBalance++;
+        if (phpParameterExpressionText.trim().length() > 0){
+            phpParameterExpressionText += yytext();
+        }
     	return createSymbol(ASTBladeSymbols.T_OPEN_PARENTHESE);
 	}
     ")"                     {
@@ -464,10 +477,19 @@ COMMENT_END="--}}"
     	directiveParBalance--;
     	if (directiveParBalance <= 0){
             //exit out of ST_BLADE_INCLUDE_ARGS
+            if (phpParameterExpressionText.length() > 0){
+                directiveParBalance++;
+                yypushback(1);
+                return createPhpParameterExpression(ASTBladeSymbols.T_PHP_PARAMETER_EXPRESSION);
+            }
     		yybegin(YYINITIAL);
     		
     	}
     	return createSymbol(ASTBladeSymbols.T_CLOSE_PARENTHESE);
+    }
+
+    <ST_BLADE_INCLUDE_ARGS>{ANY_CHAR} {
+        phpParameterExpressionText += yytext();
     }
 }
 
@@ -479,7 +501,7 @@ COMMENT_END="--}}"
 <ST_PHP_CONDITION_EXPRESSION>")" {
     directiveParBalance--;
     phpConditionText += yytext();
-    if (directiveParBalance == 0){
+    if (directiveParBalance <= 0){
   		 yybegin(YYINITIAL);
    		 return createConditionSymbol(ASTBladeSymbols.T_PHP_CONDITION_EXPRESSION);
     }
@@ -607,8 +629,25 @@ COMMENT_END="--}}"
    return createFullSymbol(ASTBladeSymbols.T_STRING);
 }
 
-<YYINITIAL>(([^<@{}]|"<"[^?%<])+)|"<script"|"<" {
+
+
+<YYINITIAL>(([^<@{}]|"<"[^?%<!])+)|"<script"|"<" {
     return createFullSymbol(ASTBladeSymbols.T_INLINE_HTML);
+}
+
+<YYINITIAL> "<!--" {
+    yypushback(4);
+    pushState(ST_HTML_COMMENT);
+    //return createFullSymbol(ASTBladeSymbols.T_INLINE_HTML);
+}
+
+<ST_HTML_COMMENT>~"-->" {
+    popState();
+    return createFullSymbol(ASTBladeSymbols.T_INLINE_HTML);
+}
+
+<ST_HTML_COMMENT>{ANY_CHAR} {
+    
 }
 
 <YYINITIAL> "<?php" {

@@ -1,16 +1,9 @@
-@if($test)
-    @if (!empty($test['xx']))
-    <div class="radio-option">
-        
-    </div>
-    @else
-    <div class="radio-option">
-        <div ><img src="@2"></div>
-    </div>
+ <!--<img src="{{xxx}}/{{$xxx}}@2x.png" alt="brand" class="fff"/>-->
+<img src="@newImageUrl(card/xxx.png)" alt="{{xxx}}">
+@if($something)
+
+    @if($something2)
+
     @endif
-    <div class="fff">
-        <a href="javascript:void(0)" class="xxx">
-            
-        </a>
-    </div>
+
 @endif

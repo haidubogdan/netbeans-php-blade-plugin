@@ -102,7 +102,7 @@ terminal T_BLADE_COMMENT, T_BLADE_OPEN_ECHO, T_BLADE_CLOSE_ECHO;
 terminal T_BLADE_INLINE_PHP;
 terminal T_BLADE_INCLUDE;
 terminal T_BLADE_SECTION;
-terminal T_BLADE_ENDSECTION, T_BLADE_STOP;
+terminal T_BLADE_ENDSECTION, T_BLADE_STOP, T_BLADE_OVERWRITE;
 terminal T_BLADE_SHOW;
 terminal T_BLADE_EXTENDS;
 terminal T_BLADE_YIELD;
@@ -376,7 +376,8 @@ T_BLADE_ENDSECTION:token{:
 :}
 | T_BLADE_STOP:token {:
     RESULT = token;
-:} 
+:}
+| T_BLADE_OVERWRITE:token {: RESULT = token; :}
 ;
 
 yield_label_expression ::=
@@ -418,6 +419,7 @@ T_VARIABLE:var {:
     }
     RESULT = new Variable(varleft, varright, var.toString());    
 :}
+| T_PHP_PARAMETER_EXPRESSION:var {: RESULT = new Variable(varleft, varright, var.toString());  :}
 | variable:expr1 T_NEKUDA variable:expr2 {:
     //we will force just one string
     String expr1Str = "";
