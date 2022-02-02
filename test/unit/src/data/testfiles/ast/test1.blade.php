@@ -1,4 +1,3 @@
-
 @section('CSS')
 	<link href="@cssFile(tunnel_header.css)" rel="stylesheet" type="text/css"/>
 @endsection

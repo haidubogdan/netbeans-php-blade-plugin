@@ -283,15 +283,37 @@ public class FormatVisitor extends DefaultVisitor {
                 break;
             case T_HTML:
                 String tText = ts.token().text().toString();
+//                int lastWhitespaceIndex = findLastNonWhitespaceCharacter(tText);
+//                if (lastWhitespaceIndex < tText.length() && lastWhitespaceIndex > 0){
+//                    tokens.add(new FormatToken(FormatToken.Kind.WHITESPACE_BEFORE_HTML, ts.offset()));
+//                    String whitespaceString = tText.substring(lastWhitespaceIndex);
+//                    tokens.addAll(resolveWhitespaceTokens(whitespaceString, ts.offset() + lastWhitespaceIndex));
+//                    formatTokens.add(new FormatToken(FormatToken.Kind.HTML, ts.offset(), tText.substring(0, lastWhitespaceIndex - 1)));
+//                    
+//                } else 
                 if (!lastToken.getId().equals(FormatToken.Kind.HTML)){
-                    tokens.add(new FormatToken(FormatToken.Kind.WHITESPACE_BEFORE_HTML, ts.offset()));
-                    formatTokens.add(new FormatToken(FormatToken.Kind.HTML, ts.offset(), ts.token().text().toString()));
+                    //tokens.add(new FormatToken(FormatToken.Kind.WHITESPACE_BEFORE_HTML, ts.offset()));
+                    //formatTokens.add(new FormatToken(FormatToken.Kind.HTML, ts.offset(), ts.token().text().toString()));
                     //tokens.add(new FormatToken(FormatToken.Kind.WHITESPACE_AFTER_HTML, ts.offset()));
                 }
                 break;
             default:
                 //tokens.add(new FormatToken(FormatToken.Kind.TEXT, ts.offset(), ts.token().text().toString()));
         }
+    }
+    
+    protected static int findLastNonWhitespaceCharacter(String s){
+        int index = s.length() - 1;
+        while (index > 0) {
+            boolean isWhitespace = Character.isWhitespace(s.charAt(index));
+            if (!isWhitespace){
+                index++;
+                break;
+            }
+            index--;
+        }
+
+        return index;
     }
 
     private List<FormatToken> resolveWhitespaceTokens() {
@@ -315,6 +337,31 @@ public class FormatVisitor extends DefaultVisitor {
                 result.add(new FormatToken(FormatToken.Kind.WHITESPACE, tokenStartOffset + firstTextPart.length(), tokenText.substring(devideIndex)));
             } else {
                 result.add(new FormatToken(FormatToken.Kind.WHITESPACE, tokenStartOffset, adjustLastWhitespaceToken(ts.token())));
+            }
+        }
+        return result;
+    }
+    
+    private List<FormatToken> resolveWhitespaceTokens(String text, int offset) {
+
+        final List<FormatToken> result = new LinkedList<>();
+        int countNewLines = countOfNewLines(text);
+
+        if (countNewLines > 0) {
+            result.add(new FormatToken(FormatToken.Kind.WHITESPACE_INDENT, offset, adjustLastWhitespaceToken(ts.token())));
+        } else {
+            int tokenEndOffset = offset + text.length();
+            if (GsfUtilities.isCodeTemplateEditing(document)
+                    && caretOffset > offset
+                    && caretOffset < tokenEndOffset
+                    && offset > startOffset
+                    && tokenEndOffset < endOffset) {
+                int devideIndex = caretOffset - offset;
+                String firstTextPart = text.substring(0, devideIndex);
+                result.add(new FormatToken(FormatToken.Kind.WHITESPACE, offset, firstTextPart));
+                result.add(new FormatToken(FormatToken.Kind.WHITESPACE, offset + firstTextPart.length(), text.substring(devideIndex)));
+            } else {
+                result.add(new FormatToken(FormatToken.Kind.WHITESPACE, offset, adjustLastWhitespaceToken(ts.token())));
             }
         }
         return result;

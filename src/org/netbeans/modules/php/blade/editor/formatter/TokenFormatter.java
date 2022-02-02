@@ -10,8 +10,10 @@ import java.util.logging.Logger;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.JTextComponent;
 import org.netbeans.api.editor.EditorRegistry;
+import org.netbeans.api.editor.document.LineDocumentUtils;
 import org.netbeans.api.lexer.TokenSequence;
 import org.netbeans.editor.BaseDocument;
+import org.netbeans.editor.Utilities;
 import org.netbeans.modules.csl.spi.GsfUtilities;
 import org.netbeans.modules.csl.spi.ParserResult;
 import org.netbeans.modules.editor.indent.spi.Context;
@@ -19,6 +21,7 @@ import org.netbeans.modules.php.blade.editor.lexer.BladeLexerUtils;
 import org.netbeans.modules.php.blade.editor.lexer.BladeTokenId;
 import org.netbeans.modules.php.blade.editor.parsing.BladeParserResult;
 import org.netbeans.spi.lexer.MutableTextInput;
+import org.openide.util.Exceptions;
 
 /**
  * TODO INCOMPLETE
@@ -283,11 +286,14 @@ public class TokenFormatter {
                                     lastBladeIndent += ((FormatToken.IndentToken) formatToken).getDelta();
                                     break;
                                 case HTML:
-                                    changeOffset = formatToken.getOffset();
-                                    ws = countWhiteSpaceForPreserveExistingforDirectiveTagPlacement(oldText, 0);
-                                    newLines = ws.lines;
-                                    countSpaces = ws.spaces;
-                                    newText = createWhitespace(docOptions, newLines, countSpaces);
+//                                    changeOffset = formatToken.getOffset();
+//                                    ws = countWhiteSpaceForPreserveExistingforDirectiveTagPlacement(oldText, 0);
+//                                    newLines = ws.lines;
+//                                    countSpaces = ws.spaces;
+//                                    newText = createWhitespace(docOptions, newLines, countSpaces);
+                                    
+//                                    oldText = null;
+//                                    newText = null;
                                     int debug = 3;
                                     break;
                                 default:
