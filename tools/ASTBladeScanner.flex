@@ -458,7 +458,7 @@ COMMENT_END="--}}"
    \"                      { yypushback(1);pushState(ST_STRING_DBQUOTE); }
    "'"                      { yypushback(1);pushState(ST_STRING_SQUOTE); }
    ","                     {
-        if (phpParameterExpressionText.length() > 0){
+        if (phpParameterExpressionText.trim().length() > 0){
             yypushback(1);
             return createPhpParameterExpression(ASTBladeSymbols.T_PHP_PARAMETER_EXPRESSION);
         }
@@ -476,8 +476,9 @@ COMMENT_END="--}}"
     	String yytext = yytext();
     	directiveParBalance--;
     	if (directiveParBalance <= 0){
+            directiveParBalance = 0;
             //exit out of ST_BLADE_INCLUDE_ARGS
-            if (phpParameterExpressionText.length() > 0){
+            if (phpParameterExpressionText.trim().length() > 0){
                 directiveParBalance++;
                 yypushback(1);
                 return createPhpParameterExpression(ASTBladeSymbols.T_PHP_PARAMETER_EXPRESSION);
@@ -502,6 +503,7 @@ COMMENT_END="--}}"
     directiveParBalance--;
     phpConditionText += yytext();
     if (directiveParBalance <= 0){
+        directiveParBalance = 0;
   		 yybegin(YYINITIAL);
    		 return createConditionSymbol(ASTBladeSymbols.T_PHP_CONDITION_EXPRESSION);
     }
@@ -511,7 +513,8 @@ COMMENT_END="--}}"
 <ST_PHP_LOOP_EXPRESSION>")" {
     directiveParBalance--;
     phpConditionText += yytext();
-    if (directiveParBalance == 0){
+    if (directiveParBalance <= 0){
+        directiveParBalance = 0;
   		 yybegin(YYINITIAL);
    		 return createConditionSymbol(ASTBladeSymbols.T_PHP_LOOP_EXPRESSION);
     }
@@ -521,6 +524,7 @@ COMMENT_END="--}}"
     directiveParBalance--;
     phpConditionText += yytext();
     if (directiveParBalance <= 0){
+        directiveParBalance = 0;
   		 yypushback(1);
          popState();
    		 return createConditionSymbol(ASTBladeSymbols.T_PHP_PARAMETER_EXPRESSION);
@@ -549,6 +553,7 @@ COMMENT_END="--}}"
         String yytext = yytext();
     	directiveParBalance--;
     	if (directiveParBalance <= 0){
+            directiveParBalance =0;
     		if (phpParameterExpressionText.length() > 0){
     			directiveParBalance++;
     			yypushback(1);
@@ -597,6 +602,7 @@ COMMENT_END="--}}"
     ")"                     {
     	directiveParBalance--;
     	if (directiveParBalance <= 0){
+            directiveParBalance = 0;
     		yybegin(YYINITIAL);
     	}
     	return createSymbol(ASTBladeSymbols.T_CLOSE_PARENTHESE);

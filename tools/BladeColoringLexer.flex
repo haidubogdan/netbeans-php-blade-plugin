@@ -42,10 +42,9 @@
 
 package org.netbeans.modules.php.blade.editor.lexer;
 
-import java.util.Objects;
 import org.netbeans.spi.lexer.LexerInput;
 import org.netbeans.spi.lexer.LexerRestartInfo;
-import org.netbeans.modules.web.common.api.ByteStack;
+import org.netbeans.modules.php.blade.editor.common.ByteStack;
 
 @org.netbeans.api.annotations.common.SuppressWarnings({"SF_SWITCH_FALLTHROUGH", "URF_UNREAD_FIELD", "DLS_DEAD_LOCAL_STORE", "DM_DEFAULT_ENCODING", "EI_EXPOSE_REP"})
 %%
@@ -599,7 +598,7 @@ CLOSE_BLADE_PHP = "@endphp";
     
 }
 
-<ST_PHP_LOOKING_FOR_DIRECTIVE_ARG, ST_PHP_LOOKING_FOR_IF_EXPR>{ANY_CHAR} {
+<ST_PHP_LOOKING_FOR_DIRECTIVE_ARG, ST_PHP_LOOKING_FOR_IF_EXPR, ST_PHP_LOOKING_FOR_LOOP_EXPR>{ANY_CHAR} {
 	//any char directive arg
     String yytext = yytext();
     int debug = 1;

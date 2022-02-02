@@ -1,9 +1,14 @@
- <!--<img src="{{xxx}}/{{$xxx}}@2x.png" alt="brand" class="fff"/>-->
-<img src="@newImageUrl(card/xxx.png)" alt="{{xxx}}">
-@if($something)
 
-    @if($something2)
+@section('CSS')
+	<link href="@cssFile(tunnel_header.css)" rel="stylesheet" type="text/css"/>
+@endsection
 
-    @endif
+@section('menuHeaderButtons')
+    <a id="menuHeaderButtons-securePayment" class="btn visible-xs-block pull-right">
+        @trans(STR_PAYMENT_100)
+    </a>
+@endsection
+@for ($i = 1; $i <= count($steps); $i++)
 
-@endif
+@endfor
+
