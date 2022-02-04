@@ -6,8 +6,11 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.StringTokenizer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.swing.text.BadLocationException;
 import org.netbeans.api.annotations.common.CheckForNull;
 import org.netbeans.api.annotations.common.NullAllowed;
@@ -43,6 +46,8 @@ public class FormatVisitor extends DefaultVisitor {
     private int indent = 0; // TODO see if it can be changed with a loop in formatTokens
     boolean inlineState = false;
     boolean blockState = false;
+    private String prevHtmlText = "";
+    private BladeTokenId prevTokenId; 
 
     public FormatVisitor(BaseDocument document, DocumentOptions documentOptions, final int caretOffset, final int startOffset, final int endOffset) {
         this.document = document;
@@ -212,9 +217,37 @@ public class FormatVisitor extends DefaultVisitor {
         switch (id) {
             case WHITESPACE:
                 tokens.addAll(resolveWhitespaceTokens());
+                if (prevTokenId.equals(BladeTokenId.T_HTML)){
+                    String debug = prevHtmlText;
+                    Pattern pattern = Pattern.compile("<(\\/[\\w\\d\\s]+)>?[\\s]*$");
+       
+                    if (indent < 0){
+                        formatTokens.add(new FormatToken.IndentToken(ts.offset(), options.indentSize));
+                    } else {
+                        StringTokenizer st = new StringTokenizer(prevHtmlText, "", true);
+                        while (st.hasMoreTokens()) {
+                            String token = st.nextToken();
+                            Matcher matcher = pattern.matcher(token);
+                            int newLines = countOfNewLines(token);
+                            int closingTagCount = 0;
+                            while (matcher.find()) {
+                                closingTagCount++;
+                            }
+                            if (closingTagCount > 0){
+                                formatTokens.add(new FormatToken.IndentToken(ts.offset(), -closingTagCount * options.indentSize));
+                            } else {
+                                formatTokens.add(new FormatToken.IndentToken(ts.offset(), newLines * options.indentSize));
+                            }
+                            int debug2 = 1;
+                        }
+                    }
+                }
                 break;
             case NEWLINE:
                 tokens.addAll(resolveWhitespaceTokens());
+                if (prevTokenId.equals(BladeTokenId.T_HTML)){
+                    //formatTokens.add(new FormatToken.IndentToken(ts.offset(), options.indentSize));
+                }
                 break;
             case T_BLADE_SECTION:
             //no break
@@ -246,15 +279,10 @@ public class FormatVisitor extends DefaultVisitor {
             //no break
             case T_BLADE_ENDFOREACH:
                 indent -= options.indentSize;
-                if (lastToken.getId().equals(FormatToken.Kind.WHITESPACE_AFTER_HTML)){
-                    //tokens.add(new FormatToken(FormatToken.Kind.WHITESPACE_DIRECTIVE_AFTER_HTML, ts.offset()));
+                if (indent < 0) {
+                    tokens.add(new FormatToken(FormatToken.Kind.WHITESPACE_DECREMENT_INDENT, ts.offset()));
                 } else {
-                
-                    if (indent < 0) {
-                        tokens.add(new FormatToken(FormatToken.Kind.WHITESPACE_DECREMENT_INDENT, ts.offset()));
-                    } else {
-                        tokens.add(new FormatToken(FormatToken.Kind.WHITESPACE_BEFORE_DIRECTIVE_ENDTAG, ts.offset()));
-                    }
+                    tokens.add(new FormatToken(FormatToken.Kind.WHITESPACE_BEFORE_DIRECTIVE_ENDTAG, ts.offset()));
                 }
                 tokens.add(new FormatToken(FormatToken.Kind.TEXT, ts.offset(), ts.token().text().toString()));
                 break;
@@ -281,8 +309,16 @@ public class FormatVisitor extends DefaultVisitor {
                     }
                 }
                 break;
+            case T_BLADE_OPEN_ECHO:
+            case T_BLADE_OPEN_ECHO_ESCAPED:
+            case T_BLADE_CLOSE_ECHO:
+            case T_BLADE_CLOSE_ECHO_ESCAPED:
+            case T_BLADE_PHP_ECHO:
+                tokens.add(new FormatToken(FormatToken.Kind.TEXT, ts.offset(), ts.token().text().toString()));
+                break;
             case T_HTML:
-                String tText = ts.token().text().toString();
+//                String tText = ts.token().text().toString();
+                prevHtmlText = ts.token().text().toString();
 //                int lastWhitespaceIndex = findLastNonWhitespaceCharacter(tText);
 //                if (lastWhitespaceIndex < tText.length() && lastWhitespaceIndex > 0){
 //                    tokens.add(new FormatToken(FormatToken.Kind.WHITESPACE_BEFORE_HTML, ts.offset()));
@@ -300,6 +336,7 @@ public class FormatVisitor extends DefaultVisitor {
             default:
                 //tokens.add(new FormatToken(FormatToken.Kind.TEXT, ts.offset(), ts.token().text().toString()));
         }
+        prevTokenId = id;
     }
     
     protected static int findLastNonWhitespaceCharacter(String s){
