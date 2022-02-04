@@ -149,11 +149,19 @@ public class BladeTypedTextInterceptor implements TypedTextInterceptor {
                     s = doc.getText(caretOffset - 4, 4);
                     expectedBracket = "{{--";
                 }
+                token = ts.token();
+                
+                if (token.text().toString().startsWith("}")){
+                    return;
+                }
+                
+                String text = token.text().toString();
                 if (expectedBracket.equals(s)) { // NOI18N
                     StringBuilder sb = new StringBuilder();
                     sb.append("  ");
                     String completeBracket = matching(expectedBracket);
                     sb.append(completeBracket);
+                    
                     context.setText(sb.toString(), 1);
                 }
             } catch (BadLocationException ble) {
@@ -178,7 +186,7 @@ public class BladeTypedTextInterceptor implements TypedTextInterceptor {
     }
 
     /**
-     * Surround the selected text with chars("", '', (), {}, []).
+     * Surround the selected text with chars("", '', (), []).
      * <b>NOTE:</b> Replace the surrounding chars if the text is already
      * surrounded with chars.
      *
@@ -298,7 +306,6 @@ public class BladeTypedTextInterceptor implements TypedTextInterceptor {
     }
 
     @MimeRegistrations(value = {
-        @MimeRegistration(mimeType = "text/html", service = TypedTextInterceptor.Factory.class),
         @MimeRegistration(mimeType = BladeLanguage.BLADE_MIME_TYPE, service = TypedTextInterceptor.Factory.class)
     })
     public static class Factory implements TypedTextInterceptor.Factory {
