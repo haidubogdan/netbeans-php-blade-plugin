@@ -1403,15 +1403,18 @@ public class BladeColoringLexer {
         case 136: break;
         case 1: 
           { int firstReverseNW = yytext().length() - 1;
-
-    while (firstReverseNW > 0) {
+          String text = yytext();
+          int textLength = yylength();
+          boolean foundWhitespace = false;
+    while (firstReverseNW >= 0) {
         if (!Character.isWhitespace(yytext().charAt(firstReverseNW))){
             firstReverseNW++;
             break;
         }
+        foundWhitespace = true;
         firstReverseNW--;
     }
-    if (firstReverseNW < yytext().length() && firstReverseNW > 0) {
+    if (foundWhitespace && firstReverseNW > 0) {
         yypushback(yytext().length() - firstReverseNW);
     }
     return BladeTokenId.T_HTML;

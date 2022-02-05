@@ -81,6 +81,7 @@ public class BladePhpEmbeddingProvider extends EmbeddingProvider {
         String fake;
         int phpStart = -1;
         int phpLength = 0;
+        boolean prevTokenWasHtml = false;
         
         while (sequence.moveNext()) {
             Token<BladeTokenId> t = sequence.token();
@@ -91,7 +92,10 @@ public class BladePhpEmbeddingProvider extends EmbeddingProvider {
             if (len == 0){
                 continue;
             }
-             if (id == BladeTokenId.T_BLADE_PHP_OPEN) {
+
+            boolean tokenIsWhitespace = id.equals(BladeTokenId.NEWLINE) || id.equals(BladeTokenId.WHITESPACE);
+
+            if (id == BladeTokenId.T_BLADE_PHP_OPEN) {
                 //fake = new String(new char[tText.length()]).replace("\0", "@");
               //  fake = new String(new char[tText.length()]).replace("\0", " ");
               //  embeddings.add(snapshot.create(fake, PHP_MIME_TYPE));
@@ -113,13 +117,15 @@ public class BladePhpEmbeddingProvider extends EmbeddingProvider {
                 phpLength += t.length();
                 embeddings.add(snapshot.create(phpStart, phpLength, PHP_MIME_TYPE));
                 phpStart = phpLength = 0;
-            } else if (id != BladeTokenId.T_HTML) {
-                //in order to enable code completion
+            } else if (id.equals(BladeTokenId.T_HTML) || tokenIsWhitespace && prevTokenWasHtml) {
+                embeddings.add(snapshot.create(offset, t.length(), PHP_MIME_TYPE));
+            } else {
+                    //in order to enable code completion
                 fake = new String(new char[tText.length()]).replace("\0", " ");
                 embeddings.add(snapshot.create(fake, PHP_MIME_TYPE));
-            } else {
-                embeddings.add(snapshot.create(offset, t.length(), PHP_MIME_TYPE));
             }
+            
+            prevTokenWasHtml = id.equals(BladeTokenId.T_HTML) || tokenIsWhitespace;
         }
 
         if (embeddings.isEmpty()) {

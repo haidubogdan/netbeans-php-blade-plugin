@@ -131,7 +131,7 @@ public class FormatVisitor extends DefaultVisitor {
 
     @Override
     public void visit(DirectiveBladeBlock node) {
-        
+
         scan(node.getBody().getStatements());
     }
 
@@ -244,7 +244,7 @@ public class FormatVisitor extends DefaultVisitor {
                             }
                             if (closingTagCount > 0) {
                                 formatTokens.add(new FormatToken.IndentToken(ts.offset(), -closingTagCount * options.indentSize));
-                            } else {
+                            } else if (newLines > 0) {
                                 formatTokens.add(new FormatToken.IndentToken(ts.offset(), newLines * options.indentSize));
                             }
                             int debug2 = 1;
@@ -288,17 +288,17 @@ public class FormatVisitor extends DefaultVisitor {
             case T_BLADE_ENDFOR:
             //no break
             case T_BLADE_ENDFOREACH:
-                //if (!blockIsInline) {
+                if (!blockIsInline) {
                     indent -= options.indentSize;
                     if (indent < 0) {
                         tokens.add(new FormatToken(FormatToken.Kind.WHITESPACE_DECREMENT_INDENT, ts.offset()));
                     } else {
                         tokens.add(new FormatToken(FormatToken.Kind.WHITESPACE_BEFORE_DIRECTIVE_ENDTAG, ts.offset()));
                     }
-                //}
-                //} else {
-                //    tokens.add(new FormatToken(FormatToken.Kind.WHITESPACE_BEFORE_DIRECTIVE_ENDTAG_INLINE, ts.offset()));
-                //}
+
+                } else {
+                    tokens.add(new FormatToken(FormatToken.Kind.WHITESPACE_BEFORE_DIRECTIVE_ENDTAG_INLINE, ts.offset()));
+                }
                 tokens.add(new FormatToken(FormatToken.Kind.TEXT, ts.offset(), ts.token().text().toString()));
                 break;
             case BLADE_PHP_TOKEN:
@@ -335,7 +335,7 @@ public class FormatVisitor extends DefaultVisitor {
                 tokens.add(new FormatToken(FormatToken.Kind.WHITESPACE_BEFORE_ECHO_VAR, ts.offset()));
                 tokens.add(new FormatToken(FormatToken.Kind.TEXT, ts.offset(), ts.token().text().toString()));
                 //tokens.add(new FormatToken(FormatToken.Kind.WHITESPACE_AFTER_ECHO_VAR, ts.offset()));
-                break;    
+                break;
             case T_HTML:
                 prevHtmlText = ts.token().text().toString();
                 break;

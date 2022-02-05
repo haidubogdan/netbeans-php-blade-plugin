@@ -1,6 +1,17 @@
 <div>
-    <div></div>
-</div>
-     @if($test)
+{{-- cc --}}
+@if($x)
+    <div>
+        <div>
+            <div class="xx {{$x}}" @if($x) disabled @endif>
+                @include("xx")
+            </div>
 
-     @endif
+        </div>
+    {{-- cc --}}
+    @include("xx")
+    @includeIf("SDSDSDS")
+    {{$xx}}
+    </div>
+    @endif
+</div>

@@ -268,15 +268,18 @@ CLOSE_BLADE_PHP = "@endphp";
 
 <ST_HTML>(([^<@{}]|"<"[^?%(script)<])+)|"<script"|"<" {
     int firstReverseNW = yytext().length() - 1;
-
+          String text = yytext();
+          int textLength = yylength();
+          boolean foundWhitespace = false;
     while (firstReverseNW > 0) {
         if (!Character.isWhitespace(yytext().charAt(firstReverseNW))){
             firstReverseNW++;
             break;
         }
+        foundWhitespace = true;
         firstReverseNW--;
     }
-    if (firstReverseNW < yytext().length() && firstReverseNW > 0) {
+    if (foundWhitespace && firstReverseNW > 0) {
         yypushback(yytext().length() - firstReverseNW);
     }
     return BladeTokenId.T_HTML;

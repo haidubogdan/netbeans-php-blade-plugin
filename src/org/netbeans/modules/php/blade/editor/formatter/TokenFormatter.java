@@ -169,6 +169,8 @@ public class TokenFormatter {
                                 }
                                 FormatToken.Kind idToken = formatToken.getId();
                                 switch (idToken) {
+                                    case WHITESPACE:
+                                        break;
                                     case WHITESPACE_BEFORE_DIRECTIVE_START_TAG:
                                         String text = formatToken.getOldText();
                                         indentRule = true;
@@ -183,13 +185,26 @@ public class TokenFormatter {
                                         int debug5 = 3;
                                         break;
                                     case WHITESPACE_BEFORE_ECHO:
-                                        String text2 = formatToken.getOldText();
+                                        if (index > 1){
+                                            FormatToken prevToken = formatTokens.get(index - 1);
+                                            if (prevToken.isWhitespace()){
+                                                countSpaces = 1;
+                                            }
+                                        }
                                         //ws = countWhiteSpaceForPresevingInlineStatements();
                                         int debug6 = 3;
                                         break;
                                     case WHITESPACE_BEFORE_DIRECTIVE_TAG:
                                     case WHITESPACE_BEFORE_DIRECTIVE_ENDTAG:    
-                                        countSpaces = indent;
+                                        countSpaces = indent; 
+                                        if (index > 1){
+                                            FormatToken prevToken = formatTokens.get(index - 1);
+                                            if (prevToken.isWhitespace()){
+                                                //count the spaces
+                                                int currentSpaces = countOfSpaces(oldText.replace("\n", ""), 4);
+                                                countSpaces = currentSpaces >= indent ? 1 : indent;
+                                            }
+                                        }
                                         break;
                                     case WHITESPACE_DECREMENT_INDENT:
                                         indent -= docOptions.indentSize;
@@ -209,9 +224,24 @@ public class TokenFormatter {
                                         break;
                                     case WHITESPACE_AFTER_HTML:
                                         //no break
-                                    case WHITESPACE_BEFORE_HTML:
-                                        newLines = 0; ///??
+                                         newLines = 0; ///??
                                         countSpaces = 4;
+                                        break;
+                                    case WHITESPACE_BEFORE_DIRECTIVE_START_TAG_INLINE:
+                                        if (index > 1){
+                                            FormatToken prevToken = formatTokens.get(index - 1);
+                                            if (prevToken.isWhitespace()){
+                                                countSpaces = 1;
+                                            }
+                                        }
+                                        break;
+                                    case WHITESPACE_BEFORE_DIRECTIVE_ENDTAG_INLINE:
+                                        if (index > 1){
+                                            FormatToken prevToken = formatTokens.get(index - 1);
+                                            if (prevToken.isWhitespace()){
+                                                countSpaces = 1;
+                                            }
+                                        }
                                         break;
                                 }
                                 index++;
