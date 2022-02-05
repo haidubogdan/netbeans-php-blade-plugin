@@ -14,6 +14,7 @@ import java.util.regex.Pattern;
 import javax.swing.text.BadLocationException;
 import org.netbeans.api.annotations.common.CheckForNull;
 import org.netbeans.api.annotations.common.NullAllowed;
+import org.netbeans.api.editor.document.LineDocumentUtils;
 import org.netbeans.api.lexer.Token;
 import org.netbeans.api.lexer.TokenSequence;
 import org.netbeans.api.lexer.TokenUtilities;
@@ -46,8 +47,9 @@ public class FormatVisitor extends DefaultVisitor {
     private int indent = 0; // TODO see if it can be changed with a loop in formatTokens
     boolean inlineState = false;
     boolean blockState = false;
+    boolean blockIsInline = false;
     private String prevHtmlText = "";
-    private BladeTokenId prevTokenId; 
+    private BladeTokenId prevTokenId;
 
     public FormatVisitor(BaseDocument document, DocumentOptions documentOptions, final int caretOffset, final int startOffset, final int endOffset) {
         this.document = document;
@@ -129,6 +131,7 @@ public class FormatVisitor extends DefaultVisitor {
 
     @Override
     public void visit(DirectiveBladeBlock node) {
+        
         scan(node.getBody().getStatements());
     }
 
@@ -141,6 +144,7 @@ public class FormatVisitor extends DefaultVisitor {
 
     @Override
     public void visit(BladeForStatement node) {
+        setBlockLineInlineStatus(node);
         addAllUntilOffset(node.getStartOffset());
         if (node.getBody() != null) {
             scan(node.getBody().getStatements());
@@ -149,6 +153,7 @@ public class FormatVisitor extends DefaultVisitor {
 
     @Override
     public void visit(BladeSectionStatement node) {
+        setBlockLineInlineStatus(node);
         addAllUntilOffset(node.getStartOffset());
         int debug = 3;
         if (node.getBody() != null) {
@@ -158,6 +163,7 @@ public class FormatVisitor extends DefaultVisitor {
 
     @Override
     public void visit(BladeForeachStatement node) {
+        setBlockLineInlineStatus(node);
         addAllUntilOffset(node.getStartOffset());
         if (node.getBody() != null) {
             scan(node.getBody().getStatements());
@@ -166,7 +172,9 @@ public class FormatVisitor extends DefaultVisitor {
 
     @Override
     public void visit(BladeIfStatement node) {
+        setBlockLineInlineStatus(node);
         addAllUntilOffset(node.getStartOffset());
+
         if (node.getBody() != null) {
             scan(node.getBody().getStatements());
         }
@@ -216,12 +224,13 @@ public class FormatVisitor extends DefaultVisitor {
                 : null;
         switch (id) {
             case WHITESPACE:
+            case NEWLINE:
                 tokens.addAll(resolveWhitespaceTokens());
-                if (prevTokenId.equals(BladeTokenId.T_HTML)){
+                if (prevTokenId.equals(BladeTokenId.T_HTML)) {
                     String debug = prevHtmlText;
-                    Pattern pattern = Pattern.compile("<(\\/[\\w\\d\\s]+)>?[\\s]*$");
-       
-                    if (indent < 0){
+                    Pattern pattern = Pattern.compile("<(\\/[\\w\\d\\s]+)>");
+
+                    if (indent < 0) {
                         formatTokens.add(new FormatToken.IndentToken(ts.offset(), options.indentSize));
                     } else {
                         StringTokenizer st = new StringTokenizer(prevHtmlText, "", true);
@@ -233,7 +242,7 @@ public class FormatVisitor extends DefaultVisitor {
                             while (matcher.find()) {
                                 closingTagCount++;
                             }
-                            if (closingTagCount > 0){
+                            if (closingTagCount > 0) {
                                 formatTokens.add(new FormatToken.IndentToken(ts.offset(), -closingTagCount * options.indentSize));
                             } else {
                                 formatTokens.add(new FormatToken.IndentToken(ts.offset(), newLines * options.indentSize));
@@ -243,11 +252,9 @@ public class FormatVisitor extends DefaultVisitor {
                     }
                 }
                 break;
-            case NEWLINE:
-                tokens.addAll(resolveWhitespaceTokens());
-                if (prevTokenId.equals(BladeTokenId.T_HTML)){
-                    //formatTokens.add(new FormatToken.IndentToken(ts.offset(), options.indentSize));
-                }
+            case T_BLADE_COMMENT:
+                tokens.add(new FormatToken(FormatToken.Kind.WHITESPACE_BEFORE_BLADE_COMMENT, ts.offset()));
+                tokens.add(new FormatToken(FormatToken.Kind.TEXT, ts.offset(), ts.token().text().toString()));
                 break;
             case T_BLADE_SECTION:
             //no break
@@ -257,13 +264,16 @@ public class FormatVisitor extends DefaultVisitor {
             //no break;    
             case T_BLADE_FOREACH:
                 //
-                inlineState = false;
-                blockState = true;
-
-                tokens.add(new FormatToken(FormatToken.Kind.WHITESPACE_BEFORE_DIRECTIVE_START_TAG, ts.offset()));
+                inlineState = blockIsInline;
+                blockState = !blockIsInline;
+                if (!blockIsInline) {
+                    tokens.add(new FormatToken(FormatToken.Kind.WHITESPACE_BEFORE_DIRECTIVE_START_TAG, ts.offset()));
+                } else {
+                    tokens.add(new FormatToken(FormatToken.Kind.WHITESPACE_BEFORE_DIRECTIVE_START_TAG_INLINE, ts.offset()));
+                }
                 tokens.add(new FormatToken(FormatToken.Kind.TEXT, ts.offset(), ts.token().text().toString()));
                 break;
-            case T_BLADE_DIRECTIVE:    
+            case T_BLADE_DIRECTIVE:
             case T_BLADE_YIELD:
             case T_BLADE_INCLUDE:
                 inlineState = true;
@@ -278,12 +288,17 @@ public class FormatVisitor extends DefaultVisitor {
             case T_BLADE_ENDFOR:
             //no break
             case T_BLADE_ENDFOREACH:
-                indent -= options.indentSize;
-                if (indent < 0) {
-                    tokens.add(new FormatToken(FormatToken.Kind.WHITESPACE_DECREMENT_INDENT, ts.offset()));
-                } else {
-                    tokens.add(new FormatToken(FormatToken.Kind.WHITESPACE_BEFORE_DIRECTIVE_ENDTAG, ts.offset()));
-                }
+                //if (!blockIsInline) {
+                    indent -= options.indentSize;
+                    if (indent < 0) {
+                        tokens.add(new FormatToken(FormatToken.Kind.WHITESPACE_DECREMENT_INDENT, ts.offset()));
+                    } else {
+                        tokens.add(new FormatToken(FormatToken.Kind.WHITESPACE_BEFORE_DIRECTIVE_ENDTAG, ts.offset()));
+                    }
+                //}
+                //} else {
+                //    tokens.add(new FormatToken(FormatToken.Kind.WHITESPACE_BEFORE_DIRECTIVE_ENDTAG_INLINE, ts.offset()));
+                //}
                 tokens.add(new FormatToken(FormatToken.Kind.TEXT, ts.offset(), ts.token().text().toString()));
                 break;
             case BLADE_PHP_TOKEN:
@@ -313,37 +328,28 @@ public class FormatVisitor extends DefaultVisitor {
             case T_BLADE_OPEN_ECHO_ESCAPED:
             case T_BLADE_CLOSE_ECHO:
             case T_BLADE_CLOSE_ECHO_ESCAPED:
-            case T_BLADE_PHP_ECHO:
+                tokens.add(new FormatToken(FormatToken.Kind.WHITESPACE_BEFORE_ECHO, ts.offset()));
                 tokens.add(new FormatToken(FormatToken.Kind.TEXT, ts.offset(), ts.token().text().toString()));
                 break;
+            case T_BLADE_PHP_ECHO:
+                tokens.add(new FormatToken(FormatToken.Kind.WHITESPACE_BEFORE_ECHO_VAR, ts.offset()));
+                tokens.add(new FormatToken(FormatToken.Kind.TEXT, ts.offset(), ts.token().text().toString()));
+                //tokens.add(new FormatToken(FormatToken.Kind.WHITESPACE_AFTER_ECHO_VAR, ts.offset()));
+                break;    
             case T_HTML:
-//                String tText = ts.token().text().toString();
                 prevHtmlText = ts.token().text().toString();
-//                int lastWhitespaceIndex = findLastNonWhitespaceCharacter(tText);
-//                if (lastWhitespaceIndex < tText.length() && lastWhitespaceIndex > 0){
-//                    tokens.add(new FormatToken(FormatToken.Kind.WHITESPACE_BEFORE_HTML, ts.offset()));
-//                    String whitespaceString = tText.substring(lastWhitespaceIndex);
-//                    tokens.addAll(resolveWhitespaceTokens(whitespaceString, ts.offset() + lastWhitespaceIndex));
-//                    formatTokens.add(new FormatToken(FormatToken.Kind.HTML, ts.offset(), tText.substring(0, lastWhitespaceIndex - 1)));
-//                    
-//                } else 
-                if (!lastToken.getId().equals(FormatToken.Kind.HTML)){
-                    //tokens.add(new FormatToken(FormatToken.Kind.WHITESPACE_BEFORE_HTML, ts.offset()));
-                    //formatTokens.add(new FormatToken(FormatToken.Kind.HTML, ts.offset(), ts.token().text().toString()));
-                    //tokens.add(new FormatToken(FormatToken.Kind.WHITESPACE_AFTER_HTML, ts.offset()));
-                }
                 break;
             default:
-                //tokens.add(new FormatToken(FormatToken.Kind.TEXT, ts.offset(), ts.token().text().toString()));
+            //tokens.add(new FormatToken(FormatToken.Kind.TEXT, ts.offset(), ts.token().text().toString()));
         }
         prevTokenId = id;
     }
-    
-    protected static int findLastNonWhitespaceCharacter(String s){
+
+    protected static int findLastNonWhitespaceCharacter(String s) {
         int index = s.length() - 1;
         while (index > 0) {
             boolean isWhitespace = Character.isWhitespace(s.charAt(index));
-            if (!isWhitespace){
+            if (!isWhitespace) {
                 index++;
                 break;
             }
@@ -378,7 +384,7 @@ public class FormatVisitor extends DefaultVisitor {
         }
         return result;
     }
-    
+
     private List<FormatToken> resolveWhitespaceTokens(String text, int offset) {
 
         final List<FormatToken> result = new LinkedList<>();
@@ -442,6 +448,12 @@ public class FormatVisitor extends DefaultVisitor {
             }
         }
         return count;
+    }
+
+    private void setBlockLineInlineStatus(ASTNode node) {
+        int startLine = LineDocumentUtils.getLineStart(document, node.getStartOffset());
+        int endLine = LineDocumentUtils.getLineStart(document, node.getEndOffset());
+        blockIsInline = startLine == endLine;
     }
 
     protected static boolean isWhitespace(final CharSequence text) {

@@ -182,6 +182,11 @@ public class TokenFormatter {
                                         countSpaces = ws.spaces;
                                         int debug5 = 3;
                                         break;
+                                    case WHITESPACE_BEFORE_ECHO:
+                                        String text2 = formatToken.getOldText();
+                                        //ws = countWhiteSpaceForPresevingInlineStatements();
+                                        int debug6 = 3;
+                                        break;
                                     case WHITESPACE_BEFORE_DIRECTIVE_TAG:
                                     case WHITESPACE_BEFORE_DIRECTIVE_ENDTAG:    
                                         countSpaces = indent;
@@ -194,27 +199,6 @@ public class TokenFormatter {
                                         //adds a new line 
                                         indentLine = true;
                                         break;
-                                    case WHITESPACE_DIRECTIVE_AFTER_HTML:    
-                                        indentRule = true;
-                                        ws = countWSBeforeAStatement(
-                                                CodeStyle.WrapStyle.WRAP_ALWAYS,
-                                                true,
-                                                column,
-                                                countLengthOfNextSequence(formatTokens, index + 1),
-                                                indent,
-                                                isAfterLineComment(formatTokens, index));
-                                        //newLines = ws.lines;
-                                       countSpaces = ws.spaces;
-                                       break;
-                                    case WHITESPACE_AFTER_DIRECTIVE_ARGUMENT:
-                                        break;
-                                    case WHITESPACE_AFTER_DIRECTIVE_ENDTAG:
-                                        ws = countWhiteSpaceForPreserveExistingforDirectiveTagPlacement(oldText, 0);
-                                        newLines = ws.lines;
-                                        indentRule = oldText != null && countOfNewLines(oldText) > 0;
-                                        countSpaces = indentRule ? ws.spaces : 0;
-                                        int debug4 = 3;
-                                        break;    
                                     case INDENT:
                                         int indentDelta = ((FormatToken.IndentToken) formatToken).getDelta();
                                         indent += indentDelta;
@@ -332,21 +316,7 @@ public class TokenFormatter {
                     LOGGER.log(Level.FINE, "Applaying format stream took: {0} ms", (end - start.get())); // NOI18N
                 }
             }
-            
-            private Whitespace countWhiteSpaceForPreserveExistingforDirectiveTagPlacement(CharSequence oldText, int lastIndentOfBracedBlock) {
-                int lines = 0;
-                int spaces = 0;
-                if (oldText != null) {
-                    lines = countOfNewLines(oldText);
-                    spaces = countOfSpaces(oldText.toString(), docOptions.tabSize);
-                    int lastIndexOfNewLine = oldText.toString().lastIndexOf('\n');
-                    if (lastIndexOfNewLine != -1) {
-                        spaces = countOfSpaces(oldText.toString().substring(lastIndexOfNewLine + 1), docOptions.tabSize);
-                    }
-                }
-                return new Whitespace(lines, spaces + lastIndentOfBracedBlock);
-            }
-            
+              
             private Whitespace countWSBeforeAStatement(
                     CodeStyle.WrapStyle style,
                     boolean addSpaceIfNoLine,
