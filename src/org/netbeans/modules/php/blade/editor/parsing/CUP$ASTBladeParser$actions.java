@@ -54,7 +54,7 @@ class CUP$ASTBladeParser$actions {
       switch (CUP$ASTBladeParser$act_num)
         {
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 48: // elseif_list ::= elseif_list T_BLADE_ELSEIF T_PHP_CONDITION_EXPRESSION inner_statement_list 
+          case 50: // elseif_list ::= elseif_list T_BLADE_ELSEIF T_PHP_CONDITION_EXPRESSION inner_statement_list 
             {
               List[] RESULT =null;
 		int elseifListleft = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-3)).left;
@@ -73,12 +73,12 @@ class CUP$ASTBladeParser$actions {
 
     RESULT = elseifList;
 
-              CUP$ASTBladeParser$result = parser.getSymbolFactory().newSymbol("elseif_list",12, ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-3)), ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), RESULT);
+              CUP$ASTBladeParser$result = parser.getSymbolFactory().newSymbol("elseif_list",13, ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-3)), ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), RESULT);
             }
           return CUP$ASTBladeParser$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 47: // elseif_list ::= 
+          case 49: // elseif_list ::= 
             {
               List[] RESULT =null;
 		
@@ -90,12 +90,12 @@ class CUP$ASTBladeParser$actions {
 
     RESULT = returnList;
 
-              CUP$ASTBladeParser$result = parser.getSymbolFactory().newSymbol("elseif_list",12, ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), RESULT);
+              CUP$ASTBladeParser$result = parser.getSymbolFactory().newSymbol("elseif_list",13, ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), RESULT);
             }
           return CUP$ASTBladeParser$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 46: // path ::= error 
+          case 48: // path ::= error 
             {
               Expression RESULT =null;
 		int exprleft = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()).left;
@@ -104,12 +104,12 @@ class CUP$ASTBladeParser$actions {
 		
     RESULT = new ASTErrorExpression(exprleft, exprright);
 
-              CUP$ASTBladeParser$result = parser.getSymbolFactory().newSymbol("path",7, ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), RESULT);
+              CUP$ASTBladeParser$result = parser.getSymbolFactory().newSymbol("path",8, ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), RESULT);
             }
           return CUP$ASTBladeParser$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 45: // path ::= T_STRING 
+          case 47: // path ::= T_STRING 
             {
               Expression RESULT =null;
 		int pathleft = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()).left;
@@ -125,12 +125,12 @@ class CUP$ASTBladeParser$actions {
     }
 	RESULT = new PathExpression(pathleft, pathright, path);
 
-              CUP$ASTBladeParser$result = parser.getSymbolFactory().newSymbol("path",7, ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), RESULT);
+              CUP$ASTBladeParser$result = parser.getSymbolFactory().newSymbol("path",8, ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), RESULT);
             }
           return CUP$ASTBladeParser$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 44: // path_expression ::= error 
+          case 46: // path_expression ::= error 
             {
               Expression RESULT =null;
 		int exprleft = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()).left;
@@ -139,12 +139,12 @@ class CUP$ASTBladeParser$actions {
 		
     RESULT = new ASTErrorExpression(exprleft, exprright);
 
-              CUP$ASTBladeParser$result = parser.getSymbolFactory().newSymbol("path_expression",6, ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), RESULT);
+              CUP$ASTBladeParser$result = parser.getSymbolFactory().newSymbol("path_expression",7, ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), RESULT);
             }
           return CUP$ASTBladeParser$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 43: // path_expression ::= T_OPEN_PARENTHESE path T_CLOSE_PARENTHESE 
+          case 45: // path_expression ::= T_OPEN_PARENTHESE path T_CLOSE_PARENTHESE 
             {
               Expression RESULT =null;
 		int pathleft = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-1)).left;
@@ -153,7 +153,39 @@ class CUP$ASTBladeParser$actions {
 		
 	RESULT = path;
 
-              CUP$ASTBladeParser$result = parser.getSymbolFactory().newSymbol("path_expression",6, ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-2)), ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), RESULT);
+              CUP$ASTBladeParser$result = parser.getSymbolFactory().newSymbol("path_expression",7, ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-2)), ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), RESULT);
+            }
+          return CUP$ASTBladeParser$result;
+
+          /*. . . . . . . . . . . . . . . . . . . .*/
+          case 44: // variableList ::= 
+            {
+              List RESULT =null;
+		
+    RESULT = new LinkedList();
+
+              CUP$ASTBladeParser$result = parser.getSymbolFactory().newSymbol("variableList",3, ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), RESULT);
+            }
+          return CUP$ASTBladeParser$result;
+
+          /*. . . . . . . . . . . . . . . . . . . .*/
+          case 43: // variableList ::= variableList variable 
+            {
+              List RESULT =null;
+		int statementListleft = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-1)).left;
+		int statementListright = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-1)).right;
+		List statementList = (List)((java_cup.runtime.Symbol) CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-1)).value;
+		int varleft = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()).left;
+		int varright = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()).right;
+		Variable var = (Variable)((java_cup.runtime.Symbol) CUP$ASTBladeParser$stack.peek()).value;
+		
+    // Ignore null statements
+    if(var != null) {
+        statementList.add(var);
+    }
+    RESULT = statementList;
+
+              CUP$ASTBladeParser$result = parser.getSymbolFactory().newSymbol("variableList",3, ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-1)), ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), RESULT);
             }
           return CUP$ASTBladeParser$result;
 
@@ -175,7 +207,7 @@ class CUP$ASTBladeParser$actions {
                 }
     RESULT = new Variable(expr1left, expr1right, expr1Str);
 
-              CUP$ASTBladeParser$result = parser.getSymbolFactory().newSymbol("variable",10, ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-2)), ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), RESULT);
+              CUP$ASTBladeParser$result = parser.getSymbolFactory().newSymbol("variable",11, ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-2)), ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), RESULT);
             }
           return CUP$ASTBladeParser$result;
 
@@ -187,7 +219,7 @@ class CUP$ASTBladeParser$actions {
 		int varright = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()).right;
 		Object var = (Object)((java_cup.runtime.Symbol) CUP$ASTBladeParser$stack.peek()).value;
 		 RESULT = new Variable(varleft, varright, var.toString());  
-              CUP$ASTBladeParser$result = parser.getSymbolFactory().newSymbol("variable",10, ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), RESULT);
+              CUP$ASTBladeParser$result = parser.getSymbolFactory().newSymbol("variable",11, ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), RESULT);
             }
           return CUP$ASTBladeParser$result;
 
@@ -208,7 +240,7 @@ class CUP$ASTBladeParser$actions {
     }
     RESULT = new Variable(varleft, varright, var.toString());    
 
-              CUP$ASTBladeParser$result = parser.getSymbolFactory().newSymbol("variable",10, ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), RESULT);
+              CUP$ASTBladeParser$result = parser.getSymbolFactory().newSymbol("variable",11, ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), RESULT);
             }
           return CUP$ASTBladeParser$result;
 
@@ -225,7 +257,7 @@ class CUP$ASTBladeParser$actions {
     }
     RESULT = new Variable(varleft, varright, var.toString());
 
-              CUP$ASTBladeParser$result = parser.getSymbolFactory().newSymbol("variable",10, ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), RESULT);
+              CUP$ASTBladeParser$result = parser.getSymbolFactory().newSymbol("variable",11, ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), RESULT);
             }
           return CUP$ASTBladeParser$result;
 
@@ -239,7 +271,7 @@ class CUP$ASTBladeParser$actions {
 		
     RESULT = new ASTErrorExpression(exprleft, exprright);
 
-              CUP$ASTBladeParser$result = parser.getSymbolFactory().newSymbol("yield_label",9, ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), RESULT);
+              CUP$ASTBladeParser$result = parser.getSymbolFactory().newSymbol("yield_label",10, ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), RESULT);
             }
           return CUP$ASTBladeParser$result;
 
@@ -259,7 +291,7 @@ class CUP$ASTBladeParser$actions {
     }
 	RESULT = new SectionName(labelleft, labelright, label.toString());
 
-              CUP$ASTBladeParser$result = parser.getSymbolFactory().newSymbol("yield_label",9, ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), RESULT);
+              CUP$ASTBladeParser$result = parser.getSymbolFactory().newSymbol("yield_label",10, ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), RESULT);
             }
           return CUP$ASTBladeParser$result;
 
@@ -273,7 +305,7 @@ class CUP$ASTBladeParser$actions {
 		
     RESULT = label;
 
-              CUP$ASTBladeParser$result = parser.getSymbolFactory().newSymbol("yield_label_expression",8, ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-2)), ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), RESULT);
+              CUP$ASTBladeParser$result = parser.getSymbolFactory().newSymbol("yield_label_expression",9, ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-2)), ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), RESULT);
             }
           return CUP$ASTBladeParser$result;
 
@@ -352,7 +384,7 @@ class CUP$ASTBladeParser$actions {
     DirectiveName directive = new DirectiveName(dleft, dright, d.toString());
     RESULT = new BladeSectionStatement(dleft, endright, directive, label, block, BladeSectionStatement.Type.BLOCK);
 
-              CUP$ASTBladeParser$result = parser.getSymbolFactory().newSymbol("d_section_statement",15, ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-3)), ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), RESULT);
+              CUP$ASTBladeParser$result = parser.getSymbolFactory().newSymbol("d_section_statement",16, ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-3)), ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), RESULT);
             }
           return CUP$ASTBladeParser$result;
 
@@ -378,7 +410,7 @@ class CUP$ASTBladeParser$actions {
     DirectiveName directive = new DirectiveName(dleft, dright, d.toString());
     RESULT = new BladeSectionStatement(dleft, endright, directive, label, block, BladeSectionStatement.Type.INLINE);
 
-              CUP$ASTBladeParser$result = parser.getSymbolFactory().newSymbol("d_section_statement",15, ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-5)), ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), RESULT);
+              CUP$ASTBladeParser$result = parser.getSymbolFactory().newSymbol("d_section_statement",16, ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-5)), ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), RESULT);
             }
           return CUP$ASTBladeParser$result;
 
@@ -392,7 +424,7 @@ class CUP$ASTBladeParser$actions {
 		
 	RESULT = stm;
 
-              CUP$ASTBladeParser$result = parser.getSymbolFactory().newSymbol("directive_statement",13, ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), RESULT);
+              CUP$ASTBladeParser$result = parser.getSymbolFactory().newSymbol("directive_statement",14, ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), RESULT);
             }
           return CUP$ASTBladeParser$result;
 
@@ -407,7 +439,7 @@ class CUP$ASTBladeParser$actions {
     ASTError error = new ASTError(theErrorleft, theErrorright);
     RESULT = error;
 
-              CUP$ASTBladeParser$result = parser.getSymbolFactory().newSymbol("statement",4, ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), RESULT);
+              CUP$ASTBladeParser$result = parser.getSymbolFactory().newSymbol("statement",5, ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), RESULT);
             }
           return CUP$ASTBladeParser$result;
 
@@ -420,10 +452,10 @@ class CUP$ASTBladeParser$actions {
 		Object comment = (Object)((java_cup.runtime.Symbol) CUP$ASTBladeParser$stack.peek()).value;
 		
     /* comment */
-    BladeComment commentSy = new BladeComment(commentleft, commentright, comment.toString());
-    RESULT = commentSy;
+    BladeComment commentSt = new BladeComment(commentleft, commentright, comment.toString());
+    RESULT = commentSt;
 
-              CUP$ASTBladeParser$result = parser.getSymbolFactory().newSymbol("statement",4, ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), RESULT);
+              CUP$ASTBladeParser$result = parser.getSymbolFactory().newSymbol("statement",5, ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), RESULT);
             }
           return CUP$ASTBladeParser$result;
 
@@ -439,7 +471,7 @@ class CUP$ASTBladeParser$actions {
     InLineHtml inLineHtml = new InLineHtml(htmlleft, htmlright, ":");
     RESULT = inLineHtml;
 
-              CUP$ASTBladeParser$result = parser.getSymbolFactory().newSymbol("statement",4, ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), RESULT);
+              CUP$ASTBladeParser$result = parser.getSymbolFactory().newSymbol("statement",5, ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), RESULT);
             }
           return CUP$ASTBladeParser$result;
 
@@ -455,7 +487,7 @@ class CUP$ASTBladeParser$actions {
     InLineHtml inLineHtml = new InLineHtml(htmlleft, htmlright, html);
     RESULT = inLineHtml;
 
-              CUP$ASTBladeParser$result = parser.getSymbolFactory().newSymbol("statement",4, ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), RESULT);
+              CUP$ASTBladeParser$result = parser.getSymbolFactory().newSymbol("statement",5, ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), RESULT);
             }
           return CUP$ASTBladeParser$result;
 
@@ -470,7 +502,7 @@ class CUP$ASTBladeParser$actions {
     InLinePhp inLinePhp = new InLinePhp(phpleft, phpright, php.toString());
     RESULT = inLinePhp;
 
-              CUP$ASTBladeParser$result = parser.getSymbolFactory().newSymbol("statement",4, ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), RESULT);
+              CUP$ASTBladeParser$result = parser.getSymbolFactory().newSymbol("statement",5, ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), RESULT);
             }
           return CUP$ASTBladeParser$result;
 
@@ -485,7 +517,7 @@ class CUP$ASTBladeParser$actions {
     InLinePhp inLinePhp = new InLinePhp(phpleft, phpright, php.toString());
     RESULT = inLinePhp;
 
-              CUP$ASTBladeParser$result = parser.getSymbolFactory().newSymbol("statement",4, ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), RESULT);
+              CUP$ASTBladeParser$result = parser.getSymbolFactory().newSymbol("statement",5, ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), RESULT);
             }
           return CUP$ASTBladeParser$result;
 
@@ -500,7 +532,7 @@ class CUP$ASTBladeParser$actions {
     InLineHtml inLineHtml = new InLineHtml(htmlleft, htmlright, html.toString());
     RESULT = inLineHtml;
 
-              CUP$ASTBladeParser$result = parser.getSymbolFactory().newSymbol("statement",4, ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), RESULT);
+              CUP$ASTBladeParser$result = parser.getSymbolFactory().newSymbol("statement",5, ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), RESULT);
             }
           return CUP$ASTBladeParser$result;
 
@@ -521,7 +553,7 @@ class CUP$ASTBladeParser$actions {
     Expression expr = new PhpExpression(phpleft, phpright, php.toString());
     RESULT = new BladeEchoStatement(tokenleft, endright, token.toString(), expr);
 
-              CUP$ASTBladeParser$result = parser.getSymbolFactory().newSymbol("statement",4, ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-2)), ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), RESULT);
+              CUP$ASTBladeParser$result = parser.getSymbolFactory().newSymbol("statement",5, ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-2)), ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), RESULT);
             }
           return CUP$ASTBladeParser$result;
 
@@ -536,7 +568,7 @@ class CUP$ASTBladeParser$actions {
     DirectiveName directive = new DirectiveName(dleft, dright, d.toString());
     RESULT = new BladeConstDirectiveStatement(dleft, dright, directive);
 
-              CUP$ASTBladeParser$result = parser.getSymbolFactory().newSymbol("statement",4, ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), RESULT);
+              CUP$ASTBladeParser$result = parser.getSymbolFactory().newSymbol("statement",5, ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), RESULT);
             }
           return CUP$ASTBladeParser$result;
 
@@ -556,7 +588,7 @@ class CUP$ASTBladeParser$actions {
     DirectiveName directive = new DirectiveName(dleft, dright, d.toString());
     RESULT = new BladeConstDirectiveStatement(dleft, exprright, directive);
 
-              CUP$ASTBladeParser$result = parser.getSymbolFactory().newSymbol("statement",4, ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-3)), ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), RESULT);
+              CUP$ASTBladeParser$result = parser.getSymbolFactory().newSymbol("statement",5, ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-3)), ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), RESULT);
             }
           return CUP$ASTBladeParser$result;
 
@@ -582,7 +614,7 @@ class CUP$ASTBladeParser$actions {
     DirectiveName directive = new DirectiveName(dleft, dright, d.toString());
     RESULT = new BladeSwitchStatement(dleft, endright, directive, phpExpression, block);
 
-              CUP$ASTBladeParser$result = parser.getSymbolFactory().newSymbol("statement",4, ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-5)), ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), RESULT);
+              CUP$ASTBladeParser$result = parser.getSymbolFactory().newSymbol("statement",5, ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-5)), ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), RESULT);
             }
           return CUP$ASTBladeParser$result;
 
@@ -608,7 +640,7 @@ class CUP$ASTBladeParser$actions {
     DirectiveName directive = new DirectiveName(dleft, dright, d.toString());
     RESULT = new BladeConditionStatement(dleft, endright, directive, phpExpression, block);
 
-              CUP$ASTBladeParser$result = parser.getSymbolFactory().newSymbol("statement",4, ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-3)), ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), RESULT);
+              CUP$ASTBladeParser$result = parser.getSymbolFactory().newSymbol("statement",5, ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-3)), ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), RESULT);
             }
           return CUP$ASTBladeParser$result;
 
@@ -643,7 +675,7 @@ class CUP$ASTBladeParser$actions {
     DirectiveName directive = new DirectiveName(dleft, dright, d.toString());
     RESULT = new BladeIfStatement(dleft, endright, directive, loopExpr, block);
 
-              CUP$ASTBladeParser$result = parser.getSymbolFactory().newSymbol("statement",4, ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-4)), ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), RESULT);
+              CUP$ASTBladeParser$result = parser.getSymbolFactory().newSymbol("statement",5, ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-4)), ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), RESULT);
             }
           return CUP$ASTBladeParser$result;
 
@@ -669,7 +701,7 @@ class CUP$ASTBladeParser$actions {
     DirectiveName directive = new DirectiveName(dleft, dright, d.toString());
     RESULT = new BladeForStatement(dleft, endright, directive, loopExpr, block);
 
-              CUP$ASTBladeParser$result = parser.getSymbolFactory().newSymbol("statement",4, ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-3)), ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), RESULT);
+              CUP$ASTBladeParser$result = parser.getSymbolFactory().newSymbol("statement",5, ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-3)), ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), RESULT);
             }
           return CUP$ASTBladeParser$result;
 
@@ -695,20 +727,20 @@ class CUP$ASTBladeParser$actions {
     DirectiveName directive = new DirectiveName(dleft, dright, d.toString());
     RESULT = new BladeForeachStatement(dleft, endright, directive, loopExpr, block);
 
-              CUP$ASTBladeParser$result = parser.getSymbolFactory().newSymbol("statement",4, ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-3)), ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), RESULT);
+              CUP$ASTBladeParser$result = parser.getSymbolFactory().newSymbol("statement",5, ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-3)), ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), RESULT);
             }
           return CUP$ASTBladeParser$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 13: // statement ::= T_BLADE_INCLUDE T_OPEN_PARENTHESE variable T_COMMA T_PHP_PARAMETER_EXPRESSION T_CLOSE_PARENTHESE 
+          case 13: // statement ::= T_BLADE_INCLUDE T_OPEN_PARENTHESE variableList T_COMMA T_PHP_PARAMETER_EXPRESSION T_CLOSE_PARENTHESE 
             {
               Statement RESULT =null;
 		int dleft = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-5)).left;
 		int dright = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-5)).right;
 		Object d = (Object)((java_cup.runtime.Symbol) CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-5)).value;
-		int sleft = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-3)).left;
-		int sright = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-3)).right;
-		Variable s = (Variable)((java_cup.runtime.Symbol) CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-3)).value;
+		int varListleft = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-3)).left;
+		int varListright = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-3)).right;
+		List varList = (List)((java_cup.runtime.Symbol) CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-3)).value;
 		int pleft = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-1)).left;
 		int pright = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-1)).right;
 		Object p = (Object)((java_cup.runtime.Symbol) CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-1)).value;
@@ -718,20 +750,31 @@ class CUP$ASTBladeParser$actions {
 		
     String strPath = "";
     String strV = "";
-    if (s != null){
-        strPath = s.toString();
+    Object v;
+    for (int i=0 ; i < varList.size() ; i++) {
+        //TODO add a else logic
+        v = varList.get(i);
+        if (v instanceof String){
+            strPath = (String) v;
+            break;
+        }
+        int debug = 3;
     }
-    PathExpression label = new PathExpression(sleft, sright, strPath);
+    
+    //if (s != null){
+    //    strPath = s.toString();
+    //}
+    PathExpression label = new PathExpression(varListleft, varListright, strPath);
     DirectiveName directive = new DirectiveName(dleft, dright, d.toString());
     Variable variable = new Variable(0, 1, strV);
     RESULT = new BladeIncludeStatement(dleft, endright, directive, label, variable);
 
-              CUP$ASTBladeParser$result = parser.getSymbolFactory().newSymbol("statement",4, ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-5)), ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), RESULT);
+              CUP$ASTBladeParser$result = parser.getSymbolFactory().newSymbol("statement",5, ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-5)), ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), RESULT);
             }
           return CUP$ASTBladeParser$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 12: // statement ::= T_BLADE_INCLUDE T_OPEN_PARENTHESE variable T_CLOSE_PARENTHESE 
+          case 12: // statement ::= T_BLADE_INCLUDE T_OPEN_PARENTHESE variableList T_CLOSE_PARENTHESE 
             {
               Statement RESULT =null;
 		int dleft = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-3)).left;
@@ -740,24 +783,30 @@ class CUP$ASTBladeParser$actions {
 		int startleft = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-2)).left;
 		int startright = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-2)).right;
 		Object start = (Object)((java_cup.runtime.Symbol) CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-2)).value;
-		int sleft = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-1)).left;
-		int sright = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-1)).right;
-		Variable s = (Variable)((java_cup.runtime.Symbol) CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-1)).value;
+		int varListleft = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-1)).left;
+		int varListright = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-1)).right;
+		List varList = (List)((java_cup.runtime.Symbol) CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-1)).value;
 		int endleft = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()).left;
 		int endright = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()).right;
 		Object end = (Object)((java_cup.runtime.Symbol) CUP$ASTBladeParser$stack.peek()).value;
 		
 	String strPath = "";
     
-    if (s != null){
-        strPath = s.toString();
+    //if (s != null){
+    //    strPath = s.toString();
+    //}
+    Object v;
+    for (int i=0 ; i < varList.size() ; i++) {
+        //TODO add a else logic
+        v = varList.get(i);
+        int debug = 3;
     }
-
+    
     DirectiveName directive = new DirectiveName(dleft, dright, d.toString());
-    PathExpression label = new PathExpression(sleft, sright, strPath);
+    PathExpression label = new PathExpression(varListleft, varListright, strPath);
     RESULT = new BladeIncludeStatement(dleft, endright, directive, label);
 
-              CUP$ASTBladeParser$result = parser.getSymbolFactory().newSymbol("statement",4, ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-3)), ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), RESULT);
+              CUP$ASTBladeParser$result = parser.getSymbolFactory().newSymbol("statement",5, ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-3)), ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), RESULT);
             }
           return CUP$ASTBladeParser$result;
 
@@ -786,7 +835,7 @@ class CUP$ASTBladeParser$actions {
     SectionName label = new SectionName(sleft, sright, strPath);
     RESULT = new BladeYieldStatement(dleft, endright, directive, label);
 
-              CUP$ASTBladeParser$result = parser.getSymbolFactory().newSymbol("statement",4, ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-5)), ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), RESULT);
+              CUP$ASTBladeParser$result = parser.getSymbolFactory().newSymbol("statement",5, ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-5)), ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), RESULT);
             }
           return CUP$ASTBladeParser$result;
 
@@ -814,7 +863,7 @@ class CUP$ASTBladeParser$actions {
     SectionName label = new SectionName(sleft, sright, strPath);
     RESULT = new BladeYieldStatement(dleft, endright, directive, label);
 
-              CUP$ASTBladeParser$result = parser.getSymbolFactory().newSymbol("statement",4, ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-3)), ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), RESULT);
+              CUP$ASTBladeParser$result = parser.getSymbolFactory().newSymbol("statement",5, ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-3)), ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), RESULT);
             }
           return CUP$ASTBladeParser$result;
 
@@ -840,7 +889,7 @@ class CUP$ASTBladeParser$actions {
     DirectiveName directive = new DirectiveName(extsleft, extsright, exts.toString());
     RESULT = new BladeExtendsStatement(extsleft, pathright, directive, path, block);
 
-              CUP$ASTBladeParser$result = parser.getSymbolFactory().newSymbol("statement",4, ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-5)), ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), RESULT);
+              CUP$ASTBladeParser$result = parser.getSymbolFactory().newSymbol("statement",5, ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-5)), ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), RESULT);
             }
           return CUP$ASTBladeParser$result;
 
@@ -860,7 +909,7 @@ class CUP$ASTBladeParser$actions {
     DirectiveName directive = new DirectiveName(extsleft, extsright, exts.toString());
     RESULT = new BladeExtendsStatement(extsleft, pathright, directive, path, block);
 
-              CUP$ASTBladeParser$result = parser.getSymbolFactory().newSymbol("statement",4, ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-1)), ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), RESULT);
+              CUP$ASTBladeParser$result = parser.getSymbolFactory().newSymbol("statement",5, ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-1)), ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), RESULT);
             }
           return CUP$ASTBladeParser$result;
 
@@ -874,7 +923,7 @@ class CUP$ASTBladeParser$actions {
 		
 	RESULT = stm;
 
-              CUP$ASTBladeParser$result = parser.getSymbolFactory().newSymbol("statement",4, ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), RESULT);
+              CUP$ASTBladeParser$result = parser.getSymbolFactory().newSymbol("statement",5, ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), RESULT);
             }
           return CUP$ASTBladeParser$result;
 
@@ -888,7 +937,7 @@ class CUP$ASTBladeParser$actions {
 		
     RESULT = statement;
 
-              CUP$ASTBladeParser$result = parser.getSymbolFactory().newSymbol("top_statement",3, ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), RESULT);
+              CUP$ASTBladeParser$result = parser.getSymbolFactory().newSymbol("top_statement",4, ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), RESULT);
             }
           return CUP$ASTBladeParser$result;
 
@@ -899,7 +948,7 @@ class CUP$ASTBladeParser$actions {
 		
     RESULT = new LinkedList();
 
-              CUP$ASTBladeParser$result = parser.getSymbolFactory().newSymbol("inner_statement_list",5, ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), RESULT);
+              CUP$ASTBladeParser$result = parser.getSymbolFactory().newSymbol("inner_statement_list",6, ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), RESULT);
             }
           return CUP$ASTBladeParser$result;
 
@@ -920,7 +969,7 @@ class CUP$ASTBladeParser$actions {
     }
     RESULT = statementList;
 
-              CUP$ASTBladeParser$result = parser.getSymbolFactory().newSymbol("inner_statement_list",5, ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-1)), ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), RESULT);
+              CUP$ASTBladeParser$result = parser.getSymbolFactory().newSymbol("inner_statement_list",6, ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-1)), ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), RESULT);
             }
           return CUP$ASTBladeParser$result;
 
@@ -995,3 +1044,5 @@ class CUP$ASTBladeParser$actions {
         }
     }
 }
+
+

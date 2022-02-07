@@ -132,6 +132,7 @@ terminal T_OPEN_PARENTHESE,T_CLOSE_PARENTHESE;
 non terminal end_section;
 non terminal BladeProgram thestart;
 non terminal List top_statement_list;
+non terminal List variableList;
 non terminal Statement top_statement;
 non terminal Statement statement;
 non terminal List inner_statement_list;
@@ -242,24 +243,40 @@ directive_statement:stm {:
     SectionName label = new SectionName(sleft, sright, strPath);
     RESULT = new BladeYieldStatement(dleft, endright, directive, label);
 :}
-| T_BLADE_INCLUDE:d T_OPEN_PARENTHESE:start variable:s T_CLOSE_PARENTHESE:end {:
+| T_BLADE_INCLUDE:d T_OPEN_PARENTHESE:start variableList:varList T_CLOSE_PARENTHESE:end {:
 	String strPath = "";
     
-    if (s != null){
-        strPath = s.toString();
+    Object v;
+    for (int i=0 ; i < varList.size() ; i++) {
+        
+        v = varList.get(i);
+        if (v instanceof String){
+            //stop at first string
+            strPath = (String) v;
+            break;
+        }
+        int debug = 3;
     }
 
     DirectiveName directive = new DirectiveName(dleft, dright, d.toString());
-    PathExpression label = new PathExpression(sleft, sright, strPath);
+    PathExpression label = new PathExpression(varListleft, varListright, strPath);
     RESULT = new BladeIncludeStatement(dleft, endright, directive, label);
 :}
-| T_BLADE_INCLUDE:d T_OPEN_PARENTHESE variable:s T_COMMA T_PHP_PARAMETER_EXPRESSION:p T_CLOSE_PARENTHESE:end {:
+| T_BLADE_INCLUDE:d T_OPEN_PARENTHESE variableList:varList T_COMMA T_PHP_PARAMETER_EXPRESSION:p T_CLOSE_PARENTHESE:end {:
     String strPath = "";
     String strV = "";
-    if (s != null){
-        strPath = s.toString();
+    Object v;
+    for (int i=0 ; i < varList.size() ; i++) {
+        
+        v = varList.get(i);
+        if (v instanceof String){
+            //stop at first string
+            strPath = (String) v;
+            break;
+        }
+        int debug = 3;
     }
-    PathExpression label = new PathExpression(sleft, sright, strPath);
+    PathExpression label = new PathExpression(varListleft, varListright, strPath);
     DirectiveName directive = new DirectiveName(dleft, dright, d.toString());
     Variable variable = new Variable(0, 1, strV);
     RESULT = new BladeIncludeStatement(dleft, endright, directive, label, variable);
@@ -431,6 +448,20 @@ T_VARIABLE:var {:
     RESULT = new Variable(expr1left, expr1right, expr1Str);
 :}
 ;
+
+variableList ::=
+variableList:statementList variable:var 
+{:
+    // Ignore null statements
+    if(var != null) {
+        statementList.add(var);
+    }
+    RESULT = statementList;
+:}
+| /* empty */
+{:
+    RESULT = new LinkedList();
+:};
 
 path_expression ::=
 T_OPEN_PARENTHESE path:path T_CLOSE_PARENTHESE {:
