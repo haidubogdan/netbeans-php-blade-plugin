@@ -271,7 +271,7 @@ CLOSE_BLADE_PHP = "@endphp";
           String text = yytext();
           int textLength = yylength();
           boolean foundWhitespace = false;
-    while (firstReverseNW > 0) {
+    while (firstReverseNW >= 0) {
         if (!Character.isWhitespace(yytext().charAt(firstReverseNW))){
             firstReverseNW++;
             break;

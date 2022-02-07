@@ -73,4 +73,10 @@ public class DefaultVisitor implements Visitor {
     @Override
     public void visit(InLinePhp node) {
     }
+    
+    public void visit(BladeEchoStatement node) {
+    }
+    
+    public void visit(BladeComment node) {
+    }
 }

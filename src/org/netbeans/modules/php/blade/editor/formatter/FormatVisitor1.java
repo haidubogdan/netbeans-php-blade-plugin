@@ -3,7 +3,6 @@ package org.netbeans.modules.php.blade.editor.formatter;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -34,9 +33,9 @@ import org.openide.util.Exceptions;
  *
  * @author bhaidu
  */
-public class FormatVisitor implements Visitor {
+public class FormatVisitor1 extends DefaultVisitor {
 
-    private static final Logger LOGGER = Logger.getLogger(FormatVisitor.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(FormatVisitor1.class.getName());
     private final BaseDocument document;
     private final List<FormatToken> formatTokens;
     private final TokenSequence<? extends BladeTokenId> ts;
@@ -52,53 +51,8 @@ public class FormatVisitor implements Visitor {
     boolean blockIsInline = false;
     private String prevHtmlText = "";
     private BladeTokenId prevTokenId;
-    private Pattern htmlTagNamePattern = Pattern.compile("<([\\w\\d]+)\\s*(.*?)>");
-    private Pattern htmlCloseTagNamePattern = Pattern.compile("<\\/([\\w\\d]+)\\s*>");
-    
-    @Override
-    public void visit(ASTNode node) {
-       //
-    }
 
-    @Override
-    public void visit(BladeYieldStatement node) {
-    }
-
-    @Override
-    public void visit(BladeExtendsStatement node) {
-    }
-
-    @Override
-    public void visit(InLinePhp node) {
-    }
-
-    public void scan(Iterable<? extends ASTNode> nodes) {
-        if (nodes != null) {
-            for (ASTNode n : nodes) {
-                scan(n);
-            }
-        }
-    }
-    
-    public static Collection<String> HTML_VOID_ELEMENTS = Arrays.asList(
-            "input",
-            "area",
-            "br",
-            "col",
-            "command",
-            "embed",
-            "hr",
-            "img",
-            "keygen",
-            "link",
-            "meta",
-            "param",
-            "source",
-            "track",
-            "wbr"
-    );
-
-    public FormatVisitor(BaseDocument document, DocumentOptions documentOptions, final int caretOffset, final int startOffset, final int endOffset) {
+    public FormatVisitor1(BaseDocument document, DocumentOptions documentOptions, final int caretOffset, final int startOffset, final int endOffset) {
         this.document = document;
         ts = BladeLexerUtils.getBladeMarkupTokenSequence(document, 0);
         path = new LinkedList<>();
@@ -108,10 +62,9 @@ public class FormatVisitor implements Visitor {
         this.startOffset = startOffset;
         this.endOffset = endOffset;
         formatTokens.add(new FormatToken.InitToken());
-        //create just one TODO
     }
 
-    public FormatVisitor(BaseDocument document, TokenSequence<? extends BladeTokenId> tseq, DocumentOptions documentOptions, final int caretOffset, final int startOffset, final int endOffset) {
+    public FormatVisitor1(BaseDocument document, TokenSequence<? extends BladeTokenId> tseq, DocumentOptions documentOptions, final int caretOffset, final int startOffset, final int endOffset) {
         this.document = document;
         ts = tseq;
         path = new LinkedList<>();
@@ -131,15 +84,15 @@ public class FormatVisitor implements Visitor {
             ts.move(0);
             ts.moveNext();
             ts.movePrevious();
-            addFormatToken2(formatTokens);
-            scan(program.getStatements());
+            addFormatToken(formatTokens);
+            super.visit(program);
             FormatToken lastToken = formatTokens.size() > 0
                     ? formatTokens.get(formatTokens.size() - 1)
                     : null;
             while (ts.moveNext()) {
                 if (lastToken == null || lastToken.isWhitespace() || lastToken.getOffset() > ts.offset()) {
                     if (lastIndex < ts.index()) {
-                        addFormatToken2(formatTokens);
+                        addFormatToken(formatTokens);
                         lastToken = formatTokens.get(formatTokens.size() - 1);
                     }
                 }
@@ -148,188 +101,91 @@ public class FormatVisitor implements Visitor {
         }
     }
 
+    @Override
     public void scan(ASTNode node) {
         if (node == null) {
             return;
         }
-        if (node instanceof BladeEchoStatement){
-            int ddd = 1;
-        }
-        List<FormatToken> beforeTokens = new ArrayList<>(30);
-        int offsetLimit = node.getStartOffset();
-        boolean blockHandle = false;
-        if (node instanceof InLineHtml || node instanceof DirectiveBladeBlock) {
-            offsetLimit -= 1;
-            blockHandle = true;
-        }
-        
-        
-        ts.move(node.getStartOffset());
-        
-        if (ts.token() == null){
-            if (!moveNext()){
-                return;
-            }
-        }
-        
-        if (ts.token() == null){
-            return;
-        }
-        
-        BladeTokenId id = ts.token().id();
 
-        path.addFirst(node);
-        if (node instanceof DirectiveBladeBlock) {
-            DirectiveBladeBlock d = (DirectiveBladeBlock) node;
-            addDirectiveWSTokens(d);
+        List<FormatToken> beforeTokens = new ArrayList<>(30);
+        while (moveNext() && ts.offset() < node.getStartOffset()
+                && lastIndex < ts.index()
+                && ((ts.offset() + ts.token().length()) <= node.getStartOffset())) {
+
+            String text = ts.token().text().toString();
+            int tOffset = ts.offset();
+            int debug = 3;
+            addFormatToken(beforeTokens);
         }
-        node.accept(this);
+
+        formatTokens.addAll(beforeTokens);
+        ts.movePrevious();
+        path.addFirst(node);
+        super.scan(node);
         path.removeFirst();
     }
 
     @Override
+    public void scan(Iterable<? extends ASTNode> nodes) {
+        super.scan(nodes);
+    }
+
+    @Override
     public void visit(DirectiveBladeBlock node) {
+
         scan(node.getBody().getStatements());
     }
 
     @Override
     public void visit(InLineHtml node) {
-        BladeTokenId id = ts.token().id();
-        String text = ts.token().text().toString();
-        if (!isTreatedAsHtml(id)){
-            ts.movePrevious();
-            id = ts.token().id();
-            text = ts.token().text().toString();
-            if (!isTreatedAsHtml(id)){
-                return;
-            }
-            //return;
-        }
-        
-        switch (id) {
-            case T_HTML:
-                String htmlText = ts.token().text().toString();
-                StringTokenizer st = new StringTokenizer(htmlText, "\n", true);
-                formatTokens.add(new FormatToken(FormatToken.Kind.TEXT, ts.offset(), ts.token().text().toString()));
-                while (st.hasMoreTokens()) {
-                    String token = st.nextToken();
-                    if (token.trim().length() == 0) {
-                        int whitespace = 1111;
-                        //whitespace
-                        continue;
-                    }
-                    if (token.trim().length() < 3) {
-                        continue;
-                    }
-                    Matcher mOpen = htmlTagNamePattern.matcher(token);
-                    Matcher mClose = htmlCloseTagNamePattern.matcher(token);
-                    while (mOpen.find()) {
-                        //check if tag name is identable
-                        String tagName = mOpen.group(1);
-                        formatTokens.add(new FormatToken.IndentToken(ts.offset(), options.indentSize));
-                    }
-                    while (mClose.find()) {
-                        String closeTagName = mClose.group(1);
-                        formatTokens.add(new FormatToken(FormatToken.Kind.WHITESPACE_DECREMENT_INDENT, ts.offset()));
-                    }
-                }
-                break;
-            case WHITESPACE:
-            case NEWLINE:
-                formatTokens.addAll(resolveWhitespaceTokens());
-                break;
-        }
-        moveNext();
+        //addAllUntilOffset(node.getStartOffset());
+        //resets the indent can use in something
+        //formatTokens.add(new FormatToken.IndentToken(node.getEndOffset() -1, -1 * options.indentSize)); // -1: ]
     }
 
     @Override
     public void visit(BladeForStatement node) {
+        setBlockLineInlineStatus(node);
+        addAllUntilOffset(node.getStartOffset());
+        if (node.getBody() != null) {
+            scan(node.getBody().getStatements());
+        }
     }
 
     @Override
     public void visit(BladeSectionStatement node) {
+        setBlockLineInlineStatus(node);
+        addAllUntilOffset(node.getStartOffset());
+        int debug = 3;
+        if (node.getBody() != null) {
+            scan(node.getBody().getStatements());
+        }
     }
 
     @Override
     public void visit(BladeForeachStatement node) {
+        setBlockLineInlineStatus(node);
+        addAllUntilOffset(node.getStartOffset());
+        if (node.getBody() != null) {
+            scan(node.getBody().getStatements());
+        }
     }
 
     @Override
     public void visit(BladeIfStatement node) {
+        setBlockLineInlineStatus(node);
+        addAllUntilOffset(node.getStartOffset());
 
+        if (node.getBody() != null) {
+            scan(node.getBody().getStatements());
+        }
     }
 
     @Override
     public void visit(BladeIncludeStatement node) {
-
+        addAllUntilOffset(node.getStartOffset());
     }
 
-    @Override
-    public void visit(BladeEchoStatement node){
-        BladeTokenId id = ts.token().id();
-        if (!id.equals(BladeTokenId.T_BLADE_OPEN_ECHO) && !id.equals(BladeTokenId.T_BLADE_OPEN_ECHO_ESCAPED)){
-            ts.movePrevious();
-        }
-        switch (id) {
-            case T_BLADE_OPEN_ECHO:
-            case T_BLADE_OPEN_ECHO_ESCAPED:
-                formatTokens.add(new FormatToken(FormatToken.Kind.WHITESPACE_BEFORE_ECHO, ts.offset()));
-                formatTokens.add(new FormatToken(FormatToken.Kind.TEXT, ts.offset(), ts.token().text().toString()));
-                break;
-        }
-    }
-    
-    @Override
-    public void visit(BladeComment node){
-        BladeTokenId id = ts.token().id();
-        if (!id.equals(BladeTokenId.T_BLADE_COMMENT)){
-            ts.movePrevious();
-        }
-
-        if (id.equals(BladeTokenId.T_BLADE_COMMENT) && ts.token().text().toString().trim().equals("{{--")){
-            formatTokens.add(new FormatToken(FormatToken.Kind.WHITESPACE_BEFORE_BLADE_COMMENT, ts.offset()));
-            formatTokens.add(new FormatToken(FormatToken.Kind.TEXT, ts.offset(), ts.token().text().toString()));
-        }
-
-        int debug = 3;
-    }
-    
-    private void addDirectiveWSTokens(DirectiveBladeBlock node) {
-        BladeTokenId id = ts.token().id();
-        String tText = ts.token().text().toString();
-        
-        if (!tText.startsWith("@")){
-            ts.movePrevious();
-            if (ts.token() == null ){
-                return;
-            }
-            tText = ts.token().text().toString();
-            
-            if (!tText.startsWith("@")){
-                return;
-            }
-        }
-        
-        setBlockLineInlineStatus(node);
-        //addAllUntilOffset(node.getStartOffset());
-        formatTokens.add(new FormatToken(FormatToken.Kind.WHITESPACE_BEFORE_DIRECTIVE_START_TAG, ts.offset()));
-        formatTokens.add(new FormatToken(FormatToken.Kind.TEXT, ts.offset(), ts.token().text().toString()));
-        if (node.getBody() != null) {
-            scan(node.getBody().getStatements());
-        }
-        moveNext();
-    }
-
-    private boolean isTreatedAsHtml(BladeTokenId id){
-        switch (id){
-            case T_HTML:
-            case NEWLINE:
-            case WHITESPACE:
-                return true;
-        }
-        return false;
-    }
-    
     public List<FormatToken> getFormatTokens() {
         return formatTokens;
     }
@@ -342,7 +198,7 @@ public class FormatVisitor implements Visitor {
                 && offsetLengthIsSmaller) {
             String text = ts.token().text().toString();
             int tOffset = ts.offset();
-            addFormatToken2(formatTokens);
+            addFormatToken(formatTokens);
         }
         ts.movePrevious();
     }
@@ -351,16 +207,12 @@ public class FormatVisitor implements Visitor {
         while (moveNext() && ts.offset() < offset
                 && (ts.offset() + ts.token().length()) <= offset
                 && !TokenUtilities.textEquals(ts.token().text(), terminator)) {
-            addFormatToken2(formatTokens);
+            addFormatToken(formatTokens);
         }
         ts.movePrevious();
     }
 
     private void addFormatToken(List<FormatToken> tokens) {
-
-    }
-
-    private void addFormatToken2(List<FormatToken> tokens) {
         if (lastIndex == ts.index()) {
             ts.moveNext();
             return;
@@ -371,9 +223,6 @@ public class FormatVisitor implements Visitor {
         FormatToken lastToken = formatTokens.size() > 0
                 ? formatTokens.get(formatTokens.size() - 1)
                 : null;
-        if (1 == 1) {
-            return;
-        }
         switch (id) {
             case WHITESPACE:
             case NEWLINE:
@@ -651,6 +500,5 @@ public class FormatVisitor implements Visitor {
         }
         return hasNewline;
     }
-
 
 }

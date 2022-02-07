@@ -24,10 +24,8 @@ import org.netbeans.spi.lexer.MutableTextInput;
 import org.openide.util.Exceptions;
 
 /**
- * TODO INCOMPLETE
- * CURRENT ISSUES
- * html indent
- * 
+ * TODO INCOMPLETE CURRENT ISSUES html indent
+ *
  * @author bhaidu
  */
 public class TokenFormatter {
@@ -185,9 +183,9 @@ public class TokenFormatter {
                                         int debug5 = 3;
                                         break;
                                     case WHITESPACE_BEFORE_ECHO:
-                                        if (index > 1){
+                                        if (index > 1) {
                                             FormatToken prevToken = formatTokens.get(index - 1);
-                                            if (prevToken.isWhitespace()){
+                                            if (prevToken.isWhitespace()) {
                                                 countSpaces = 1;
                                             }
                                         }
@@ -195,14 +193,25 @@ public class TokenFormatter {
                                         int debug6 = 3;
                                         break;
                                     case WHITESPACE_BEFORE_DIRECTIVE_TAG:
-                                    case WHITESPACE_BEFORE_DIRECTIVE_ENDTAG:    
-                                        countSpaces = indent; 
-                                        if (index > 1){
+                                    case WHITESPACE_BEFORE_DIRECTIVE_ENDTAG:
+                                        countSpaces = indent;
+                                        if (index > 1) {
                                             FormatToken prevToken = formatTokens.get(index - 1);
-                                            if (prevToken.isWhitespace()){
+                                            if (prevToken.isWhitespace()) {
                                                 //count the spaces
                                                 int currentSpaces = countOfSpaces(oldText.replace("\n", ""), 4);
                                                 countSpaces = currentSpaces >= indent ? 1 : indent;
+                                            }
+                                        }
+                                        break;
+                                    case WHITESPACE_BEFORE_DIRECTIVE_ELSE:
+                                        countSpaces = indent;
+                                        if (index > 1) {
+                                            FormatToken prevToken = formatTokens.get(index - 1);
+                                            if (prevToken.isWhitespace()) {
+                                                //count the spaces
+                                                int currentSpaces = countOfSpaces(oldText.replace("\n", ""), 4);
+                                                countSpaces = currentSpaces >= indent ? 0 : indent;
                                             }
                                         }
                                         break;
@@ -224,21 +233,21 @@ public class TokenFormatter {
                                         break;
                                     case WHITESPACE_AFTER_HTML:
                                         //no break
-                                         newLines = 0; ///??
+                                        newLines = 0; ///??
                                         countSpaces = 4;
                                         break;
                                     case WHITESPACE_BEFORE_DIRECTIVE_START_TAG_INLINE:
-                                        if (index > 1){
+                                        if (index > 1) {
                                             FormatToken prevToken = formatTokens.get(index - 1);
-                                            if (prevToken.isWhitespace()){
+                                            if (prevToken.isWhitespace()) {
                                                 countSpaces = 1;
                                             }
                                         }
                                         break;
                                     case WHITESPACE_BEFORE_DIRECTIVE_ENDTAG_INLINE:
-                                        if (index > 1){
+                                        if (index > 1) {
                                             FormatToken prevToken = formatTokens.get(index - 1);
-                                            if (prevToken.isWhitespace()){
+                                            if (prevToken.isWhitespace()) {
                                                 countSpaces = 1;
                                             }
                                         }
@@ -274,9 +283,7 @@ public class TokenFormatter {
                                 }
                             }
 
-                            
                             newText = createWhitespace(docOptions, newLines, countSpaces);
-                           
 
                             int realOffset = changeOffset + delta;
                             if (templateEdit && !caretInTemplateSolved && oldText != null
@@ -290,7 +297,7 @@ public class TokenFormatter {
                                     caretInTemplateSolved = true;
                                 }
                             }
-                            
+
                             //decrement
                             index--;
                         } else {
@@ -305,7 +312,7 @@ public class TokenFormatter {
 //                                    newLines = ws.lines;
 //                                    countSpaces = ws.spaces;
 //                                    newText = createWhitespace(docOptions, newLines, countSpaces);
-                                    
+
 //                                    oldText = null;
 //                                    newText = null;
                                     int debug = 3;
@@ -346,7 +353,7 @@ public class TokenFormatter {
                     LOGGER.log(Level.FINE, "Applaying format stream took: {0} ms", (end - start.get())); // NOI18N
                 }
             }
-              
+
             private Whitespace countWSBeforeAStatement(
                     CodeStyle.WrapStyle style,
                     boolean addSpaceIfNoLine,
@@ -625,7 +632,7 @@ public class TokenFormatter {
         return spaces;
     }
 
-     private boolean isAfterLineComment(List<FormatToken> tokens, int index) {
+    private boolean isAfterLineComment(List<FormatToken> tokens, int index) {
         //TODO complete
         return false;
     }

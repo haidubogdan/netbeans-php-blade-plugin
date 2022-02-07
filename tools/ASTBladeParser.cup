@@ -336,8 +336,10 @@ directive_statement:stm {:
     InLineHtml inLineHtml = new InLineHtml(htmlleft, htmlright, ":");
     RESULT = inLineHtml;
 :}
-| T_BLADE_COMMENT {:
+| T_BLADE_COMMENT:comment {:
     /* comment */
+    BladeComment commentSt = new BladeComment(commentleft, commentright, comment.toString());
+    RESULT = commentSt;
 :}
 
 | error:theError /* error statement */

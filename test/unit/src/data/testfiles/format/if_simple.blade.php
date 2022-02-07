@@ -1,4 +1,4 @@
-    <div class="container">
+     <div class="container">
         @if ($xx)
             <div class="container-fluid">
                 <div id="clientMenuCollapse">

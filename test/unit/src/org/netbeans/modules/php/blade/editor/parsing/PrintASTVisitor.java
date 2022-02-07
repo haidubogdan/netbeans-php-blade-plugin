@@ -85,6 +85,16 @@ public class PrintASTVisitor implements Visitor {
     public void visit(InLineHtml node) {
     }
 
+    @Override
+    public void visit(BladeComment node) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void visit(BladeEchoStatement node) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
     private class XMLPrintNode {
 
         private class GroupItem {

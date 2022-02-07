@@ -4,6 +4,7 @@ import java.util.LinkedList;
 import java.util.List;
 import org.netbeans.modules.php.blade.editor.parsing.astnodes.ASTError;
 import org.netbeans.modules.php.blade.editor.parsing.astnodes.ASTErrorExpression;
+import org.netbeans.modules.php.blade.editor.parsing.astnodes.BladeComment;
 import org.netbeans.modules.php.blade.editor.parsing.astnodes.BladeConditionStatement;
 import org.netbeans.modules.php.blade.editor.parsing.astnodes.BladeConstDirectiveStatement;
 import org.netbeans.modules.php.blade.editor.parsing.astnodes.BladeEchoStatement;
@@ -414,8 +415,13 @@ class CUP$ASTBladeParser$actions {
           case 27: // statement ::= T_BLADE_COMMENT 
             {
               Statement RESULT =null;
+		int commentleft = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()).left;
+		int commentright = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()).right;
+		Object comment = (Object)((java_cup.runtime.Symbol) CUP$ASTBladeParser$stack.peek()).value;
 		
     /* comment */
+    BladeComment commentSy = new BladeComment(commentleft, commentright, comment.toString());
+    RESULT = commentSy;
 
               CUP$ASTBladeParser$result = parser.getSymbolFactory().newSymbol("statement",4, ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), RESULT);
             }

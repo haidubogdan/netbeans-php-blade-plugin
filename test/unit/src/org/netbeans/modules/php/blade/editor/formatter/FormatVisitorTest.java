@@ -48,37 +48,65 @@ public class FormatVisitorTest extends BladeTestBase {
     protected String createResult(TokenSequence<?> ts, List<FormatToken> formatTokens) throws Exception {
         StringBuilder result = new StringBuilder();
         int index = 0;
-        ts.move(0);
-        while (ts.moveNext()) {
-            TokenId tokenId = ts.token().id();
-            CharSequence text = ts.token().text();
-            result.append(ts.index());
-            result.append(" ");
-            result.append(tokenId.name());
-            result.append(" ");
-            result.append(BladeLexerUtils.replaceLinesAndTabs(text.toString()));
-            result.append("\n");
-            FormatToken tokenF = formatTokens.size() > index ?  formatTokens.get(index) : null;
-            if (tokenF != null && tokenF.getOldText() == null) {
-                while(index < formatTokens.size() && tokenF.getOldText() == null) {
-                    tokenF = formatTokens.get(index);
-                    result.append("\t");
-                    result.append(tokenF.getId());
-                    result.append(" ");
-                    result.append(tokenF.getOffset());
-                    result.append(" ");
-                    result.append(tokenF.getOldText());
-                    result.append("\n");
-                    index++;
-                }
-            } else {
-                index++;
+        while (index < formatTokens.size()) {
+            FormatToken tokenF = formatTokens.get(index);
+            ts.move(tokenF.getOffset());
+            ts.moveNext();
+            if (ts.token() != null) {
+                TokenId tokenId = ts.token().id();
+                CharSequence text = ts.token().text();
+                result.append(ts.index());
+                result.append(" ");
+                result.append(tokenId.name());
+                result.append(" ");
+                result.append(BladeLexerUtils.replaceLinesAndTabs(text.toString()));
+                result.append("\n");
             }
-
-//            assertEquals(tokenTS.text().toString(), tokenF.getOldText());
-//            assertEquals(ts.offset(), tokenF.getOffset());
+            result.append("\t");
+            result.append(tokenF.getId());
+            result.append(" - ");
+            result.append(tokenF.getOffset());
+            result.append(" ");
+            result.append(tokenF.getOldText());
+            result.append("\n");
+            index++;
         }
 
+//        ts.move(0);
+//        while (ts.moveNext()) {
+//            TokenId tokenId = ts.token().id();
+//            CharSequence text = ts.token().text();
+//            result.append(ts.index());
+//            result.append(" ");
+//            result.append(tokenId.name());
+//            result.append(" ");
+//            result.append(BladeLexerUtils.replaceLinesAndTabs(text.toString()));
+//            result.append("\n");
+//            FormatToken tokenF = formatTokens.size() > index ?  formatTokens.get(index) : null;
+//            //index not 1 on 1 with formatIndex
+//            if (tokenF != null && tokenF.getOldText() == null) {
+//                result.append("i - ");
+//                result.append(index);
+//                 result.append(" ");
+//                result.append("FtList:\n");
+//                while(index < formatTokens.size() && tokenF.getOldText() == null) {
+//                    tokenF = formatTokens.get(index);
+//                    result.append("\t");
+//                    result.append(tokenF.getId());
+//                    result.append(" - ");
+//                    result.append(tokenF.getOffset());
+//                    result.append(" ");
+//                    result.append(tokenF.getOldText());
+//                    result.append("\n");
+//                    index++;
+//                }
+//            } else {
+//                index++;
+//            }
+//
+////            assertEquals(tokenTS.text().toString(), tokenF.getOldText());
+////            assertEquals(ts.offset(), tokenF.getOffset());
+//        }
         return result.toString();
     }
 
@@ -89,31 +117,30 @@ public class FormatVisitorTest extends BladeTestBase {
         System.out.print("\n---Format scan for <<" + filename + ">>\n\n");
         ParsingUtils parsingUtils = new ParsingUtils();
         FileObject fo = FileUtil.toFileObject(filePath);
-        
+
 //        FakeFileObject file = parsingUtils.createFileObject(content);
 //        BaseDocument doc = (BaseDocument) parsingUtils.openDocument(fo);
-
         BaseDocument doc = getDocument("text", BladeLanguage.BLADE_MIME_TYPE, BladeTokenId.language());
         TokenFormatter.DocumentOptions docOptions = new TokenFormatter.DocumentOptions(doc);
-         FormatVisitor formatVisitor = new FormatVisitor(doc, ts, docOptions, 0, 0, doc.getLength());
+        FormatVisitor formatVisitor = new FormatVisitor(doc, ts, docOptions, 0, 0, doc.getLength());
         ASTBladeScanner scanner = new ASTBladeScanner(new StringReader(content));
         ASTBladeParser parser = new ASTBladeParser(scanner);
         Symbol root = parser.parse();
-        if (root == null){
+        if (root == null) {
             return null;
         }
-        BladeProgram program = (BladeProgram)root.value;
+        BladeProgram program = (BladeProgram) root.value;
         formatVisitor.scan(program);
         List<FormatToken> formatTokens = formatVisitor.getFormatTokens();
-        
+
         return createResult(ts, formatTokens);
     }
 
     protected void performTest(String filename) throws Exception {
         performTest(filename, null);
     }
-    
-     protected String getTestResult(String filename, String caretLine) throws Exception {
+
+    protected String getTestResult(String filename, String caretLine) throws Exception {
         return getTestResult(filename);
     }
 
@@ -122,17 +149,17 @@ public class FormatVisitorTest extends BladeTestBase {
         String result = getTestResult(filename, caretLine);
         System.out.print(result);
     }
-        
+
     @Test
     public void testIf() throws Exception {
         performTest("format/if.blade");
     }
-    
+
     @Test
     public void testIfSimple() throws Exception {
         performTest("format/if_simple.blade");
     }
-    
+
     public BaseDocument getDocument(String s, final String mimeType, final Language language) {
         try {
             BaseDocument doc = new BaseDocument(true, mimeType) {
@@ -158,8 +185,7 @@ public class FormatVisitorTest extends BladeTestBase {
             doc.insertString(0, s, null);
 
             return doc;
-        }
-        catch (Exception ex){
+        } catch (Exception ex) {
             fail(ex.toString());
             return null;
         }

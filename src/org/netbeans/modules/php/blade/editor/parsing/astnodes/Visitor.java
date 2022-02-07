@@ -17,4 +17,6 @@ public interface Visitor {
     public void visit(BladeForeachStatement node);
     public void visit(InLineHtml node);
     public void visit(InLinePhp node);
+    public void visit(BladeComment node);
+    public void visit(BladeEchoStatement node);
 }
