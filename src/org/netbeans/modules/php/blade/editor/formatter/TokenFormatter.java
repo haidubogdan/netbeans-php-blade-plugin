@@ -13,6 +13,7 @@ import org.netbeans.api.editor.EditorRegistry;
 import org.netbeans.api.editor.document.LineDocumentUtils;
 import org.netbeans.api.lexer.TokenSequence;
 import org.netbeans.editor.BaseDocument;
+import org.netbeans.editor.CharSeq;
 import org.netbeans.editor.Utilities;
 import org.netbeans.modules.csl.spi.GsfUtilities;
 import org.netbeans.modules.csl.spi.ParserResult;
@@ -54,8 +55,6 @@ public class TokenFormatter {
         public int beforeDirectiveTagPlacement;
         public boolean expandTabsToSpaces;
 
-        boolean wrapNeverKeepLines = Boolean.getBoolean("nb.php.editor.formatting.never.keep.lines"); // NOI18N
-
         public DocumentOptions(BaseDocument doc) {
             CodeStyle codeStyle = CodeStyle.get(doc);
             continualIndentSize = codeStyle.getContinuationIndentSize();
@@ -67,24 +66,6 @@ public class TokenFormatter {
             expandTabsToSpaces = codeStyle.expandTabToSpaces();
         }
 
-    }
-
-    /**
-     *
-     * @param chs
-     * @return number of new lines in the inputunitTestPane != null ?
-     * unitTestPane.getCaretPosition()
-     */
-    private int countOfNewLines(CharSequence chs) {
-        int count = 0;
-        if (chs != null) {
-            for (int i = 0; i < chs.length(); i++) {
-                if (chs.charAt(i) == '\n') { // NOI18N
-                    count++;
-                }
-            }
-        }
-        return count;
     }
 
     public void reformat(final Context formatContext, ParserResult info) {
@@ -125,223 +106,201 @@ public class TokenFormatter {
                 int deltaForLastMoveBeforeLineComment = 0;
                 int index = 0;
                 int newLines;
-                int delta = 0;
+                //int delta = 0;
                 int column = 0;
                 int countSpaces;
                 String newText = null;
                 String oldText;
                 //ass all directives are standalone we will need it
-                int htmlIndent = -1;
+                int htmlIndent = 0;
+                boolean lastH = false;
                 int changeOffset = -1;
+                boolean stopReplace = false;
                 Whitespace ws;
                 FormatToken formatToken;
-
+                FormatToken lastIndentToken = null;
+                FormatToken lastFormatToken = null;
+                FormatToken lastWhitespaceToken = null;
                 try {
                     mti.tokenHierarchyControl().setActive(false);
                     start.set(System.currentTimeMillis());
                     while (index < formatTokens.size()) {
                         formatToken = formatTokens.get(index);
                         FormatToken.Kind id = formatToken.getId();
-                        oldText = null; //NOI18N
-                        if (formatToken.isWhitespace()) {
-                            newLines = -1;
-                            countSpaces = 0;
-                            boolean wasARule = false;
-                            boolean indentRule = false;
-                            boolean indentLine = false;
-                            boolean afterDirectiveArgument = false;
-                            CodeStyle.beforeDirectiveTagPlacement lastBracePlacement = CodeStyle.beforeDirectiveTagPlacement.SAME_LINE;
+                        changeOffset = formatToken.getOffset();
+                        int spaceCount = 0;
+                        switch (id) {
+                            case WHITESPACE:
+                                lastWhitespaceToken = formatToken;
+                                break;
+                            case WHITESPACE_INDENT:
+                                lastIndentToken = formatToken;
+                                break;
+                            case INDENT:
+                                if (formatToken instanceof FormatToken.IndentToken) {
+                                    FormatToken.IndentToken indentToken = (FormatToken.IndentToken) formatToken;
+                                    indent += indentToken.getDelta();
+                                } else if (formatToken instanceof FormatToken.HtmlIndentToken) {
+                                    FormatToken.HtmlIndentToken indentToken = (FormatToken.HtmlIndentToken) formatToken;
+                                    htmlIndent = indentToken.getDelta();
+                                }
+                                break;
+                            case WHITESPACE_BEFORE_DIRECTIVE_START_TAG:
+                            case WHITESPACE_BEFORE_DIRECTIVE_TAG:
+                            case WHITESPACE_BEFORE_DIRECTIVE_ENDTAG:
+                                int decrementOffset = 0;
+                                if (id == FormatToken.Kind.WHITESPACE_BEFORE_DIRECTIVE_ENDTAG) {
+                                    decrementOffset = 4;
+                                }
 
-                            changeOffset = formatToken.getOffset();
+                                if (lastFormatToken != null && lastFormatToken.isWhitespace()) {
 
-                            while (index < formatTokens.size() && (formatToken.isWhitespace()
-                                    || formatToken.getId() == FormatToken.Kind.INDENT)) {
-                                id = formatToken.getId();
-                                if (oldText == null && formatToken.getOldText() != null) {
-                                    oldText = formatToken.getOldText();
                                 }
-                                if (formatToken.getId() != FormatToken.Kind.INDENT
-                                        && formatToken.getId() != FormatToken.Kind.WHITESPACE_INDENT
-                                        && formatToken.getId() != FormatToken.Kind.WHITESPACE) {
-                                    wasARule = true;
-                                }
-                                FormatToken.Kind idToken = formatToken.getId();
-                                switch (idToken) {
-                                    case WHITESPACE:
-                                        break;
-                                    case WHITESPACE_BEFORE_DIRECTIVE_START_TAG:
-                                        String text = formatToken.getOldText();
-                                        indentRule = true;
-                                        ws = countWSBeforeAStatement(
-                                                CodeStyle.WrapStyle.WRAP_ALWAYS,
-                                                true,
-                                                column,
-                                                countLengthOfNextSequence(formatTokens, index + 1),
-                                                indent,
-                                                isAfterLineComment(formatTokens, index));
-                                        countSpaces = ws.spaces;
-                                        int debug5 = 3;
-                                        break;
-                                    case WHITESPACE_BEFORE_ECHO:
-                                        if (index > 1) {
-                                            FormatToken prevToken = formatTokens.get(index - 1);
-                                            if (prevToken.isWhitespace()) {
-                                                countSpaces = 1;
+                                int currentLine = LineDocumentUtils.getLineStart(doc, changeOffset + delta);
+                                if (lastIndentToken != null && lastIndentToken.isWhitespace()) {
+                                    int indentOffset = 0;
+                                    int newLineIndex = 0;
+                                    while (newLineIndex < lastIndentToken.getOldText().length()
+                                            && lastIndentToken.getOldText().charAt(newLineIndex) == '\n') {
+                                        newLineIndex++;
+                                        indentOffset++;
+                                    }
+                                    if (isOnSameLine(changeOffset + delta, lastIndentToken.getOffset() + indentOffset)) {
+                                        String whitespace = lastIndentToken.getOldText();
+                                        if (whitespace != null && whitespace.length() > 1) {
+                                            for (char c : whitespace.toCharArray()) {
+                                                if (c == ' ') {
+                                                    spaceCount++;
+                                                }
                                             }
                                         }
-                                        //ws = countWhiteSpaceForPresevingInlineStatements();
-                                        int debug6 = 3;
-                                        break;
-                                    case WHITESPACE_BEFORE_DIRECTIVE_TAG:
-                                    case WHITESPACE_BEFORE_DIRECTIVE_ENDTAG:
-                                        countSpaces = indent;
-                                        if (index > 1) {
-                                            FormatToken prevToken = formatTokens.get(index - 1);
-                                            if (prevToken.isWhitespace()) {
-                                                //count the spaces
-                                                int currentSpaces = countOfSpaces(oldText.replace("\n", ""), 4);
-                                                countSpaces = currentSpaces >= indent ? 1 : indent;
+                                        int totalIndent = indent + htmlIndent - decrementOffset;
+                                        if (totalIndent > 0) {
+                                            if (spaceCount < totalIndent) {
+                                                insert(changeOffset, delta, new String(new char[totalIndent]).replace("\0", " "));
+                                            } else {
+                                                //might have to replace
+                                                int diffWhitespace = totalIndent - spaceCount;
+                                                if (diffWhitespace > 0) {
+                                                    replace(lastIndentToken.getOffset() + indentOffset, delta, diffWhitespace, new String(new char[diffWhitespace]).replace("\0", " "));
+                                                } else {
+                                                    diffWhitespace = Math.abs(diffWhitespace);
+                                                    replace(lastIndentToken.getOffset() + indentOffset, delta, diffWhitespace, "");
+                                                }
+                                            }
+                                        } else if (totalIndent == 0) {
+                                            if (spaceCount > 0) {
+                                                replace(lastIndentToken.getOffset() + indentOffset, delta, spaceCount, "");
                                             }
                                         }
-                                        break;
-                                    case WHITESPACE_BEFORE_DIRECTIVE_ELSE:
-                                        countSpaces = indent;
-                                        if (index > 1) {
-                                            FormatToken prevToken = formatTokens.get(index - 1);
-                                            if (prevToken.isWhitespace()) {
-                                                //count the spaces
-                                                int currentSpaces = countOfSpaces(oldText.replace("\n", ""), 4);
-                                                countSpaces = currentSpaces >= indent ? 0 : indent;
-                                            }
+                                    }
+                                } else if (currentLine == 0) {
+                                    //first row
+                                    if (lastWhitespaceToken != null) {
+                                        int diffWhitespace = changeOffset - lastWhitespaceToken.getOffset();
+                                        if (diffWhitespace > 0) {
+                                            replace(lastWhitespaceToken.getOffset(), delta, diffWhitespace, "");
                                         }
-                                        break;
-                                    case WHITESPACE_DECREMENT_INDENT:
-                                        indent -= docOptions.indentSize;
-                                        countSpaces = indent;
-                                        break;
-                                    case WHITESPACE_INDENT:
-                                        //adds a new line 
-                                        indentLine = true;
-                                        break;
-                                    case INDENT:
-                                        int indentDelta = ((FormatToken.IndentToken) formatToken).getDelta();
-                                        indent += indentDelta;
-                                        lastBladeIndent += indentDelta;
-                                        break;
-                                    case WHITESPACE_BEFORE_DIRECTIVE_PAREN:
-                                        countSpaces = 0;
-                                        break;
-                                    case WHITESPACE_AFTER_HTML:
-                                        //no break
-                                        newLines = 0; ///??
-                                        countSpaces = 4;
-                                        break;
-                                    case WHITESPACE_BEFORE_DIRECTIVE_START_TAG_INLINE:
-                                        if (index > 1) {
-                                            FormatToken prevToken = formatTokens.get(index - 1);
-                                            if (prevToken.isWhitespace()) {
-                                                countSpaces = 1;
-                                            }
-                                        }
-                                        break;
-                                    case WHITESPACE_BEFORE_DIRECTIVE_ENDTAG_INLINE:
-                                        if (index > 1) {
-                                            FormatToken prevToken = formatTokens.get(index - 1);
-                                            if (prevToken.isWhitespace()) {
-                                                countSpaces = 1;
-                                            }
-                                        }
-                                        break;
-                                }
-                                index++;
-                                if (index < formatTokens.size()) {
-                                    formatToken = formatTokens.get(index);
-                                }
-                            }
-
-                            if (changeOffset > -1) {
-                                if (wasARule) {
-                                    if ((!indentRule || newLines == -1) && indentLine) {
-                                        countSpaces = Math.max(countSpaces, indent);
-                                        newLines = Math.max(1, newLines);
                                     }
                                 }
-                            } else if (indentLine) {
-                                countSpaces = indent;
-                                newLines = oldText == null ? 1 : countOfNewLines(oldText);
-                                if (index > 1 && index < formatTokens.size()
-                                        && formatTokens.get(index - 2).getId() == FormatToken.Kind.TEXT
-                                        && formatTokens.get(index).getId() == FormatToken.Kind.TEXT
-                                        && "(".equals(formatTokens.get(index - 2).getOldText())
-                                        && ")".equals(formatTokens.get(index).getOldText())) {
-                                    newLines = 0;
+                                break;
+                            case WHITESPACE_BEFORE_HTML:
+                                //can't override the html formatting
+                                break;
+                            case WHITESPACE_DECREMENT_INDENT:
+                                indent -= 4;
+                                break;
+                            case WHITESPACE_BEFORE_DIRECTIVE_PAREN:
+                                if (lastFormatToken != null
+                                        && lastFormatToken.isWhitespace()
+                                        && lastFormatToken.getOldText().length() > 0) {
+                                    int whitespaceOffset = lastFormatToken.getOffset();
+                                    int xxx = 1;
+                                    replace(whitespaceOffset, delta, changeOffset - whitespaceOffset, "");
                                 }
-                            } else {
-                                boolean isBeginLine = isBeginLine(formatTokens, index - 1);
-                                if (oldText != null) {
-                                    countSpaces = isBeginLine ? indent : oldText.length();
+                                break;
+                            case WHITESPACE_BEFORE_BLADE_PHP:
+                            case WHITESPACE_BEFORE_BLADE_PHP_BODY:
+                                int xxx = 1;
+                                if (lastIndentToken != null && lastIndentToken.isWhitespace()) {
+                                    String whitespace = lastIndentToken.getOldText();
+                                    if (whitespace != null && whitespace.length() > 1) {
+                                        for (char c : whitespace.toCharArray()) {
+                                            if (c == ' ') {
+                                                spaceCount++;
+                                            }
+                                        }
+                                    }
+                                    int totalIndent = indent + htmlIndent;
+                                    if (totalIndent > 0) {
+                                        if (spaceCount < totalIndent) {
+                                            insert(changeOffset, delta, new String(new char[totalIndent]).replace("\0", " "));
+                                        } else {
+                                            if (lastFormatToken != null
+                                                    && lastFormatToken instanceof FormatToken.PhpBladeToken) {
+                                                FormatToken.PhpBladeToken phpFormatToken = (FormatToken.PhpBladeToken) lastFormatToken;
+                                                if (id.equals(FormatToken.Kind.WHITESPACE_BEFORE_BLADE_PHP_BODY)) {
+                                                    String phpCode = phpFormatToken.getText();
+//                                                    int startLine = LineDocumentUtils.getLineStart(doc, changeOffset);
+                                                    int nrLines = LineDocumentUtils.getLineCount(doc, changeOffset, changeOffset + phpCode.length());
+                                                    
+                                                    try {
+                                                        
+                                                        int lineOffset = changeOffset;
+                                                        int lineIndex = LineDocumentUtils.getLineIndex(doc, changeOffset);
+//                                                        int nextNonNewLine = LineDocumentUtils.getNextNonNewline(doc, changeOffset);
+//                                                        String word = LineDocumentUtils.getWord(doc, nextNonNewLine);
+                                                        int bodyEnd = LineDocumentUtils.getLineEnd(doc, changeOffset + phpCode.length());
+                                                        for (int i = 0; i< nrLines; i++){
+                                                            int startLine = LineDocumentUtils.getLineStartFromIndex(doc, lineIndex);
+                                                            String word = LineDocumentUtils.getWord(doc, startLine);
+                                                            if (word.equals("\n")){
+                                                                word = LineDocumentUtils.getWord(doc, startLine + 1);
+                                                            }
+                                                            lineIndex++;
+//                                                            int nextNonNewLine = LineDocumentUtils.getNextNonNewline(doc, lineOffset);
+//                                                            int startLine = LineDocumentUtils.getLineStart(doc, lineOffset);
+//                                                            int lEnd = LineDocumentUtils.getLineEnd(doc, lineOffset);
+//                                                            String word = LineDocumentUtils.getWord(doc, nextNonNewLine);
+//                                                            String wordEnd = LineDocumentUtils.getWord(doc, lEnd);
+//                                                            lineOffset = lEnd;
+//                                                            if (word.length() < totalIndent || word.trim().length() == 0) {
+//                                                                insert(startLine, delta, new String(new char[totalIndent]).replace("\0", " "));
+//                                                            }
+                                                        }
+                                                        int sddsds = 1;
+                                                    } catch (BadLocationException ex){
+                                                        
+                                                    }
+                                                    
+                                                    int indentOffset = 0;
+//                                                    int newLineIndex = 0;
+//                                                    spaceCount = 0;
+//                                                    while (newLineIndex < phpFormatToken.getText().length()
+//                                                            && phpFormatToken.getText().charAt(newLineIndex) == '\n') {
+//                                                        newLineIndex++;
+//                                                        indentOffset++;
+//                                                    }
+//                                                    if (indentOffset < phpFormatToken.getText().length()) {
+//                                                        while (indentOffset < phpFormatToken.getText().length()
+//                                                            && phpFormatToken.getText().charAt(indentOffset) == ' ') {
+//                                                            spaceCount++;
+//                                                        }
+//                                                        if (spaceCount < totalIndent) {
+//                                                            insert(changeOffset, delta, new String(new char[totalIndent]).replace("\0", " "));
+//                                                        }
+//                                                    }
+                                                    
+                                                }
+                                            }
+                                        }
+                                    }
                                 }
-                            }
-
-                            newText = createWhitespace(docOptions, newLines, countSpaces);
-
-                            int realOffset = changeOffset + delta;
-                            if (templateEdit && !caretInTemplateSolved && oldText != null
-                                    && formatContext.startOffset() - 1 <= realOffset
-                                    && realOffset <= formatContext.endOffset() + 1) {
-
-                                int caretPosition = caretOffset + delta;
-                                if (caretPosition == formatContext.endOffset() && oldText.length() > 0 && newText.length() > 0
-                                        && oldText.charAt(0) == ' ' && newText.charAt(0) != ' ' && 0 != countOfNewLines(oldText)) {
-                                    newText = ' ' + newText;   // templates like public, return ...
-                                    caretInTemplateSolved = true;
-                                }
-                            }
-
-                            //decrement
-                            index--;
-                        } else {
-                            switch (formatToken.getId()) {
-                                case INDENT:
-                                    indent += ((FormatToken.IndentToken) formatToken).getDelta();
-                                    lastBladeIndent += ((FormatToken.IndentToken) formatToken).getDelta();
-                                    break;
-                                case HTML:
-//                                    changeOffset = formatToken.getOffset();
-//                                    ws = countWhiteSpaceForPreserveExistingforDirectiveTagPlacement(oldText, 0);
-//                                    newLines = ws.lines;
-//                                    countSpaces = ws.spaces;
-//                                    newText = createWhitespace(docOptions, newLines, countSpaces);
-
-//                                    oldText = null;
-//                                    newText = null;
-                                    int debug = 3;
-                                    break;
-                                default:
-                            }
+                                break;
                         }
-
-                        String debugText = formatToken.getOldText();
-                        delta = replaceString(doc, changeOffset, oldText, newText, delta, templateEdit);
-                        if (newText == null) {
-                            String formatTokenOldText = formatToken.getOldText() == null ? "" : formatToken.getOldText();
-                            int formatTokenOldTextLength = formatTokenOldText.length();
-                            int lines = countOfNewLines(formatTokenOldText);
-                            if (lines > 0) {
-                                int lastNewLine = formatTokenOldText.lastIndexOf('\n'); //NOI18N
-                                column = formatTokenOldText.substring(lastNewLine).length();
-                            } else {
-                                column += formatTokenOldTextLength;
-                            }
-                        } else {
-                            int lines = countOfNewLines(newText);
-                            if (lines > 0) {
-                                column = newText.length() - lines;
-                            } else {
-                                column += newText.length();
-                            }
-                        }
-                        newText = null;
+                        //countSpaces = 3;
+                        //replace(formatToken.getOffset(), countSpaces, "  ");
+                        lastFormatToken = formatToken;
                         index++;
                     }
 
@@ -354,256 +313,42 @@ public class TokenFormatter {
                 }
             }
 
-            private Whitespace countWSBeforeAStatement(
-                    CodeStyle.WrapStyle style,
-                    boolean addSpaceIfNoLine,
-                    int column,
-                    int lengthOfNexSequence,
-                    int currentIndent,
-                    boolean isAfterLineComment) {
-                int lines = 0;
-                int spaces = 0;
-                switch (style) {
-                    case WRAP_ALWAYS:
-                        lines = 1;
-                        spaces = currentIndent;
-                        break;
-                    case WRAP_NEVER:
-                        if (isAfterLineComment) {
-                            lines = 1;
-                            spaces = currentIndent;
-                        } else {
-                            lines = 0;
-                            spaces = addSpaceIfNoLine ? 1 : 0;
-                        }
-                        break;
-                    case WRAP_IF_LONG:
-                        if (column + 1 + lengthOfNexSequence > docOptions.margin) {
-                            lines = 1;
-                            spaces = currentIndent + docOptions.indentSize;
-                        } else {
-                            if (isAfterLineComment) {
-                                lines = 1;
-                                spaces = currentIndent;
-                            } else {
-                                lines = 0;
-                                spaces = addSpaceIfNoLine ? 1 : 0;
-                            }
-                        }
-                        break;
-                    default:
-                        assert false : style;
-                }
-                return new Whitespace(lines, spaces);
-            }
+            private int delta = 0;
+            private int indent = 0;
 
-            private int startOffset = -1;
-            private int endOffset = -1;
-            // prviousIndentDelta keeps information, when a template is inserted and
-            // the code is not formatted according setted rules. Like initial indentation, etc.
-            // Basically it contain difference between number of spaces in document and
-            // the position if the document will be formatted according our rules.
-            private int previousIndentDelta = 0;
-            private String previousOldIndentText = "";
-            private String previousNewIndentText = "";
-
-            private int replaceString(BaseDocument document, int offset, String oldText, String newText, int delta, boolean templateEdit) {
-                if (oldText == null) {
-                    oldText = "";
-                }
-
-                if (startOffset == -1) {
-                    // set the range, where the formatting should be done
-                    startOffset = formatContext.startOffset();
-                    endOffset = formatContext.endOffset();
-                }
-                if (startOffset > 0 && (startOffset - oldText.length()) > offset
-                        && newText != null && newText.indexOf('\n') > -1) {
-                    // will be formatted new line that the first one has to be special
-                    previousNewIndentText = newText;
-                    previousOldIndentText = oldText;
-                }
-                if (newText != null && (!oldText.equals(newText)
-                        || (startOffset > 0 && (startOffset - oldText.length()) == offset))) {
-                    int realOffset = offset + delta;
-                    if (startOffset > 0 && (startOffset - oldText.length()) == offset) {
-                        // this should be a line with a place, where the template is inserted.
-                        if (previousOldIndentText.length() == 0 && previousNewIndentText.length() == 0) {
-                            // probably we are at the begining of file, so keep the current possition
-                            previousOldIndentText = oldText;
-                            previousNewIndentText = newText;
-                        }
-                        // find difference between the new text and old text of the previous formatting rule
-                        int indexOldTextLine = previousOldIndentText.lastIndexOf('\n');
-                        int indexNewTextLine = previousNewIndentText.lastIndexOf('\n');
-
-                        previousNewIndentText = indexNewTextLine == -1 ? previousNewIndentText : previousNewIndentText.substring(indexNewTextLine + 1);
-                        previousOldIndentText = indexOldTextLine == -1 ? previousOldIndentText : previousOldIndentText.substring(indexOldTextLine + 1);
-
-                        previousIndentDelta = countOfSpaces(previousOldIndentText, docOptions.tabSize)
-                                - countOfSpaces(previousNewIndentText, docOptions.tabSize);
-
-                        // find the indent of the new text
-                        indexNewTextLine = newText.lastIndexOf('\n');
-                        String replaceNew = indexNewTextLine == -1 ? newText : newText.substring(indexNewTextLine + 1);
-                        int replaceNewLength = countOfSpaces(replaceNew, docOptions.tabSize);
-
-                        // if there was a difference on the previous line, apply the difference for the current line as well.
-                        if (previousIndentDelta != 0 && indexNewTextLine > -1 && (replaceNewLength >= 0)) {
-                            replaceNewLength += previousIndentDelta;
-                            replaceNew = createWhitespace(docOptions, 0, Math.max(0, replaceNewLength));
-                        }
-                        indexOldTextLine = oldText.lastIndexOf('\n');
-                        String replaceOld = indexOldTextLine == -1 ? oldText : oldText.substring(indexOldTextLine + 1);
-                        int replaceOldLength = countOfSpaces(replaceOld, docOptions.tabSize);
-
-                        if (replaceOldLength != replaceNewLength) {
-                            delta = replaceSimpleString(document, realOffset + indexOldTextLine + 1, replaceOld, replaceNew, delta);
-                            return delta;
-                        }
-                    }
-                    if (startOffset <= realOffset
-                            && ((realOffset < endOffset + delta) || (realOffset == endOffset + delta && !templateEdit))) {
-
-                        if (!templateEdit || startOffset == 0) { // if is not in template, then replace simply or is not format selection
-                            delta = replaceSimpleString(document, realOffset, oldText, newText, delta);
-                        } else {
-                            // the replacing has to be done line by line.
-                            int indexOldTextLine = oldText.indexOf('\n');
-                            int indexNewTextLine = newText.indexOf('\n');
-                            int indexOldText = 0;
-                            int indexNewText = 0;
-                            String replaceOld;
-                            String replaceNew;
-
-                            if (indexOldTextLine == -1 && indexNewTextLine == -1) { // no new line in both)
-                                delta = replaceSimpleString(document, realOffset, oldText, newText, delta);
-                            } else {
-
-                                do {
-                                    indexOldTextLine = oldText.indexOf('\n', indexOldText); // NOI18N
-                                    indexNewTextLine = newText.indexOf('\n', indexNewText); // NOI18N
-
-                                    if (indexOldTextLine == -1) {
-                                        indexOldTextLine = oldText.length();
-                                    }
-                                    if (indexNewTextLine == -1) {
-                                        indexNewTextLine = newText.length();
-                                    }
-                                    replaceOld = indexOldText == indexOldTextLine && oldText.length() > 0 ? "\n" : oldText.substring(indexOldText, indexOldTextLine); // NOI18N
-                                    replaceNew = indexNewText == indexNewTextLine ? "\n" : newText.substring(indexNewText, indexNewTextLine); // NOI18N
-                                    if (previousIndentDelta != 0 && indexNewText != indexNewTextLine
-                                            && indexNewText > 0
-                                            && indexNewTextLine > -1 && (replaceNew.length()) > 0) {
-                                        int newSpaces = countOfSpaces(replaceNew, docOptions.tabSize) + previousIndentDelta;
-                                        replaceNew = createWhitespace(docOptions, 0, Math.max(0, newSpaces));
-                                    }
-                                    if (!replaceOld.equals(replaceNew)
-                                            && ((indexOldText + replaceOld.length()) <= oldText.length()
-                                            || indexNewText == indexNewTextLine)) {
-
-                                        if (newText.trim().length() == 0) {
-                                            delta = replaceSimpleString(document, realOffset + indexOldText,
-                                                    replaceOld, replaceNew, delta);
-                                        } else {
-                                            // in template we can move only with whitespaces
-                                            // if we will touch a parameter of the template
-                                            // then the processing of the template is stopped.
-                                            // see issue #197906
-                                            int indexOldChar = 0;
-                                            int indexNewChar = 0;
-                                            while (indexNewChar < replaceNew.length() && indexOldChar < replaceOld.length()) {
-                                                char newChar = replaceNew.charAt(indexNewChar);
-                                                char oldChar = replaceOld.charAt(indexOldChar);
-                                                if (newChar != oldChar) {
-                                                    if (Character.isWhitespace(newChar)) {
-                                                        delta = replaceSimpleString(document, realOffset + indexOldText + indexNewChar,
-                                                                "", "" + newChar, delta);
-                                                        indexNewChar++;
-                                                    } else {
-                                                        if (Character.isWhitespace(oldChar)) {
-                                                            delta = replaceSimpleString(document, realOffset + indexOldText + indexNewChar,
-                                                                    "" + oldChar, "", delta);
-                                                            indexOldChar++;
-                                                        }
-                                                    }
-
-                                                } else {
-                                                    indexNewChar++;
-                                                    indexOldChar++;
-                                                }
-                                            }
-
-                                        }
-                                    }
-                                    indexOldText = indexOldTextLine + 1; //(indexOldText == indexOldTextLine ? 2 : 1);
-                                    indexNewText = indexNewTextLine + 1; //(indexNewText == indexNewTextLine ? 2 : 1);
-                                    realOffset = offset + delta;
-
-                                } while (indexOldText < oldText.length()
-                                        && indexNewText < newText.length());
-
-                                if (indexOldText >= oldText.length()
-                                        && indexNewText < newText.length()) {
-                                    StringBuilder sb = new StringBuilder();
-                                    boolean addNewLine;
-                                    do {
-                                        indexNewTextLine = newText.indexOf('\n', indexNewText); // NOI18N
-                                        addNewLine = (indexNewTextLine != -1);
-                                        if (!addNewLine) {
-                                            indexNewTextLine = newText.length();
-                                        }
-                                        replaceNew = newText.substring(indexNewText, indexNewTextLine == -1 ? newText.length() : indexNewTextLine); // NOI18N
-                                        int newSpaces = countOfSpaces(replaceNew, docOptions.tabSize);
-                                        if (previousIndentDelta != 0 && indexNewText != indexNewTextLine
-                                                && indexNewText > 0
-                                                && indexNewTextLine > -1 && (newSpaces > 0)) {
-                                            newSpaces = newSpaces + previousIndentDelta;
-                                            replaceNew = createWhitespace(docOptions, 0, Math.max(0, newSpaces));
-                                        }
-                                        sb.append(replaceNew);
-                                        if (addNewLine) {
-                                            sb.append('\n');   //NOI18N
-                                        }
-                                        indexNewText = indexNewTextLine + 1;
-                                    } while (indexNewText < newText.length());
-
-                                    if (sb.length() > 0) {
-                                        delta = replaceSimpleString(document, realOffset + oldText.length(),
-                                                "", sb.toString(), delta);
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-                return delta;
-            }
-
-            private int replaceSimpleString(BaseDocument document, int realOffset, String oldText, String newText, int delta) {
+            private void replace(int offset, int deltaOffset, int vlength, String newString) {
                 try {
-                    int removeLength = 0;
-                    if (oldText.length() > 0) {
-                        removeLength = realOffset + oldText.length() < document.getLength()
-                                ? oldText.length()
-                                : document.getLength() - realOffset;
+                    String oldText = doc.getText(offset + deltaOffset, vlength);
+                    if (newString.equals(oldText)) {
+                        return;
                     }
-                    document.replace(realOffset, removeLength, newText, null);
-                    delta = delta - oldText.length() + newText.length();
+                    doc.remove(offset + deltaOffset, vlength);
+                    delta -= vlength;
                 } catch (BadLocationException ex) {
-                    LOGGER.throwing(TokenFormatter.this.getClass().getName(), "replaceSimpleSring", ex); //NOI18N
+                    LOGGER.log(Level.INFO, null, ex);
                 }
-                return delta;
             }
 
-            private int countLengthOfNextSequence(List<FormatToken> formatTokens, int index) {
-                FormatToken token = formatTokens.get(index);
-                int length = 0;
-                //TODO complete
-                return length;
+            private void insert(int offset, int deltaOffset, String newString) {
+                try {
+                    String oldText = doc.getText(offset + deltaOffset, newString.length());
+                    if (oldText.charAt(0) == '\n') {
+                        offset += 1;
+                    }
+                    delta += newString.length();
+                    doc.insertString(offset + deltaOffset, newString, null);
+                } catch (BadLocationException ex) {
+                    LOGGER.log(Level.INFO, null, ex);
+                }
             }
 
+            private boolean isOnSameLine(int offset1, int offset2) {
+                int startLine = LineDocumentUtils.getLineStart(doc, offset1);
+                int endLine = LineDocumentUtils.getLineStart(doc, offset2);
+                return startLine == endLine;
+            }
         });
+        int dddd = 3;
     }
 
     private static class Whitespace {
@@ -616,52 +361,6 @@ public class TokenFormatter {
             this.spaces = spaces;
         }
 
-    }
-
-    private int countOfSpaces(String text, int tabSize) {
-        int spaces = 0;
-        int index = 0;
-        while (index < text.length()) {
-            if (text.charAt(index) == '\t') {
-                spaces += tabSize;
-            } else {
-                spaces++;
-            }
-            index++;
-        }
-        return spaces;
-    }
-
-    private boolean isAfterLineComment(List<FormatToken> tokens, int index) {
-        //TODO complete
-        return false;
-    }
-
-    private boolean isBeginLine(List<FormatToken> tokens, int index) {
-        FormatToken token = tokens.get(index);
-        while (index > 0 && (token.isWhitespace() || token.getId() == FormatToken.Kind.INDENT)
-                && token.getId() != FormatToken.Kind.WHITESPACE_INDENT) {
-            token = tokens.get(--index);
-        }
-
-        return token.getId() == FormatToken.Kind.WHITESPACE_INDENT || token.getId() == FormatToken.Kind.LINE_COMMENT;
-    }
-
-    private String createWhitespace(DocumentOptions docOptions, int lines, int spaces) {
-        if (lines == 0 && spaces == 0) {
-            return EMPTY_STRING;
-        }
-        StringBuilder sb = new StringBuilder();
-
-        for (int i = 0; i < lines; i++) {
-            sb.append('\n');
-        }
-        if (spaces > 0) {
-            // should be called IndentUtils from editor api, when issue #192289 will be fixed
-            sb.append(IndentUtils.cachedOrCreatedIndentString(spaces, docOptions.expandTabsToSpaces, docOptions.tabSize));
-        }
-
-        return sb.toString();
     }
 
 }

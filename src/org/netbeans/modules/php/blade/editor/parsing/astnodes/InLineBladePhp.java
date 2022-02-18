@@ -5,8 +5,8 @@ package org.netbeans.modules.php.blade.editor.parsing.astnodes;
  * @author bhaidu
  */
 public class InLineBladePhp extends Statement implements StructureModelItem{
-
-    public InLineBladePhp(int start, int end) {
+    private String phpCode = "";
+    public InLineBladePhp(int start, int end, String phpCode) {
         super(start, end);
     }
 
@@ -18,5 +18,9 @@ public class InLineBladePhp extends Statement implements StructureModelItem{
     @Override
     public String toString() {
         return "@php"; //NOI18N
+    }
+        
+    public String getPhpCode(){
+        return phpCode;
     }
 }

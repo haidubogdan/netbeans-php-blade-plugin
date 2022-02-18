@@ -27,13 +27,15 @@ public class FormatToken {
         WHITESPACE_DIRECTIVE_AFTER_HTML,
         WHITESPACE_DECREMENT_INDENT,
         WHITESPACE_BEFORE_DIRECTIVE_ENDTAG,
+        WHITESPACE_BEFORE_DIRECTIVE_ENDTAG_INLINE,
         WHITESPACE_BEFORE_DIRECTIVE_TAG,
+        WHITESPACE_BEFORE_DIRECTIVE_TAG_INSIDE_HTML_TAG,
         WHITESPACE_BEFORE_DIRECTIVE_ELSE,
         WHITESPACE_AFTER_DIRECTIVE_ENDTAG,
-        WHITESPACE_BEFORE_DIRECTIVE_ENDTAG_INLINE,
         WHITESPACE_BEFORE_ECHO_VAR,
         WHITESPACE_AFTER_ECHO_VAR,
         WHITESPACE_BEFORE_DIRECTIVE_PAREN,
+        WHITESPACE_AFTER_DIRECTIVE_PAREN,
         WHITESPACE_AFTER_HTML,
         WHITESPACE_BEFORE_HTML,
         WHITESPACE_HTML,
@@ -41,7 +43,10 @@ public class FormatToken {
         WHITESPACE_BEFORE_DIRECTIVE_START_TAG,
         WHITESPACE_BEFORE_DIRECTIVE_START_TAG_INLINE,
         WHITESPACE_BEFORE_ECHO,
+        WHITESPACE_BEFORE_BLADE_PHP,
+        WHITESPACE_BEFORE_BLADE_PHP_BODY,
         WHITESPACE_BEFORE_BLADE_COMMENT,
+        WHITESPACE_AFTER_BLADE_COMMENT,
         LINE_COMMENT,
         COMMENT,
         COMMENT_START,
@@ -121,6 +126,62 @@ public class FormatToken {
         private int delta;
 
         public IndentToken(int offset, int delta) {
+            super(Kind.INDENT, offset, null);
+            this.delta = delta;
+        }
+
+        public int getDelta() {
+            return delta;
+        }
+    }
+    
+    public static class WsDirectiveToken extends FormatToken {
+
+        private String directive;
+
+        public WsDirectiveToken(Kind ws, int offset, String directive) {
+            super(ws, offset, null);
+            this.directive = directive;
+        }
+
+        public String getDirective() {
+            return directive;
+        }
+    }
+    
+    public static class PhpBladeToken extends FormatToken {
+
+        private String text;
+
+        public PhpBladeToken(Kind ws, int offset, String text) {
+            super(ws, offset, null);
+            this.text = text;
+        }
+
+        public String getText() {
+            return text;
+        }
+    }
+    
+    public static class WsPhpToken extends FormatToken {
+
+        private String directive;
+
+        public WsPhpToken(Kind ws, int offset, String directive) {
+            super(ws, offset, null);
+            this.directive = directive;
+        }
+
+        public String getDirective() {
+            return directive;
+        }
+    }
+    
+    public static class HtmlIndentToken extends FormatToken {
+
+        private int delta;
+
+        public HtmlIndentToken(int offset, int delta) {
             super(Kind.INDENT, offset, null);
             this.delta = delta;
         }

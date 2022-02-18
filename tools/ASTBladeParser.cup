@@ -136,9 +136,9 @@ non terminal List variableList;
 non terminal Statement top_statement;
 non terminal Statement statement;
 non terminal List inner_statement_list;
-non terminal Expression path_expression;
+non terminal ArgumentExpression path_expression;
 non terminal Expression path;
-non terminal Expression yield_label_expression;
+non terminal ArgumentExpression yield_label_expression;
 non terminal Expression yield_label;
 non terminal Variable variable;
 non terminal section_param;
@@ -147,7 +147,7 @@ non terminal List[] elseif_list;
 non terminal Statement directive_statement;
 non terminal directive_identifier;
 
-non terminal BladeSectionStatement d_section_statement;
+non terminal Statement d_section_statement;
 non terminal d_if_statement;
 
 precedence left T_BLADE_INCLUDE, T_BLADE_SECTION, T_BLADE_EXTENDS, T_BLADE_FOREACH, T_BLADE_FOR, T_BLADE_IF, T_BLADE_ELSEIF, T_BLADE_CONDITION_OPEN_TAG;
@@ -217,13 +217,15 @@ directive_statement:stm {:
     DirectiveName directive = new DirectiveName(extsleft, extsright, exts.toString());
     RESULT = new BladeExtendsStatement(extsleft, pathright, directive, path, block);
 :}
-| T_BLADE_EXTENDS:exts T_OPEN_PARENTHESE variable:path T_COMMA T_PHP_PARAMETER_EXPRESSION:p T_CLOSE_PARENTHESE:end {:
+| T_BLADE_EXTENDS:exts T_OPEN_PARENTHESE:po variable:path T_COMMA T_PHP_PARAMETER_EXPRESSION:p T_CLOSE_PARENTHESE:end {:
     //for the moment until we find to make use of <<EOL>>
     Block block = null;
+    PhpExpression parameter = new PhpExpression(pleft, pright, p.toString());
     DirectiveName directive = new DirectiveName(extsleft, extsright, exts.toString());
-    RESULT = new BladeExtendsStatement(extsleft, pathright, directive, path, block);
+    ArgumentExpression expr = new ArgumentExpression(path, poleft, endright, parameter);
+    RESULT = new BladeExtendsStatement(extsleft, endright, directive, expr, block);
 :}
-| T_BLADE_YIELD:d T_OPEN_PARENTHESE yield_label:s T_CLOSE_PARENTHESE:end {:
+| T_BLADE_YIELD:d T_OPEN_PARENTHESE:po yield_label:s T_CLOSE_PARENTHESE:end {:
     String strPath = "";
     if (s != null){
         strPath = s.toString();
@@ -232,18 +234,20 @@ directive_statement:stm {:
 
     DirectiveName directive = new DirectiveName(dleft, dright, d.toString());
     SectionName label = new SectionName(sleft, sright, strPath);
-    RESULT = new BladeYieldStatement(dleft, endright, directive, label);
+    ArgumentExpression expr = new ArgumentExpression(label, poleft, endright);
+    RESULT = new BladeYieldStatement(dleft, endright, directive, expr);
 :}
-| T_BLADE_YIELD:d T_OPEN_PARENTHESE yield_label:s T_COMMA T_PHP_PARAMETER_EXPRESSION:p T_CLOSE_PARENTHESE:end {:
+| T_BLADE_YIELD:d T_OPEN_PARENTHESE:po yield_label:s T_COMMA T_PHP_PARAMETER_EXPRESSION:p T_CLOSE_PARENTHESE:end {:
     String strPath = "";
     if (s != null){
         strPath = s.toString();
     }
     DirectiveName directive = new DirectiveName(dleft, dright, d.toString());
     SectionName label = new SectionName(sleft, sright, strPath);
-    RESULT = new BladeYieldStatement(dleft, endright, directive, label);
+    ArgumentExpression expr = new ArgumentExpression(label, poleft, endright);
+    RESULT = new BladeYieldStatement(dleft, endright, directive, expr);
 :}
-| T_BLADE_INCLUDE:d T_OPEN_PARENTHESE:start variableList:varList T_CLOSE_PARENTHESE:end {:
+| T_BLADE_INCLUDE:d T_OPEN_PARENTHESE:po variableList:varList T_CLOSE_PARENTHESE:end {:
 	String strPath = "";
     
     Object v;
@@ -255,14 +259,14 @@ directive_statement:stm {:
             strPath = (String) v;
             break;
         }
-        int debug = 3;
     }
 
     DirectiveName directive = new DirectiveName(dleft, dright, d.toString());
     PathExpression label = new PathExpression(varListleft, varListright, strPath);
-    RESULT = new BladeIncludeStatement(dleft, endright, directive, label);
+    ArgumentExpression expr = new ArgumentExpression(label, poleft, endright);
+    RESULT = new BladeIncludeStatement(dleft, endright, directive, expr);
 :}
-| T_BLADE_INCLUDE:d T_OPEN_PARENTHESE variableList:varList T_COMMA T_PHP_PARAMETER_EXPRESSION:p T_CLOSE_PARENTHESE:end {:
+| T_BLADE_INCLUDE:d T_OPEN_PARENTHESE:po variableList:varList T_COMMA T_PHP_PARAMETER_EXPRESSION:p T_CLOSE_PARENTHESE:end {:
     String strPath = "";
     String strV = "";
     Object v;
@@ -274,24 +278,26 @@ directive_statement:stm {:
             strPath = (String) v;
             break;
         }
-        int debug = 3;
     }
     PathExpression label = new PathExpression(varListleft, varListright, strPath);
     DirectiveName directive = new DirectiveName(dleft, dright, d.toString());
-    Variable variable = new Variable(0, 1, strV);
-    RESULT = new BladeIncludeStatement(dleft, endright, directive, label, variable);
+    Variable parameter = new Variable(0, 1, strV);
+    ArgumentExpression expr = new ArgumentExpression(label, poleft, endright, parameter);
+    RESULT = new BladeIncludeStatement(dleft, endright, directive, expr);
 :}
 | T_BLADE_FOREACH:d T_PHP_LOOP_EXPRESSION:s inner_statement_list:statementList T_BLADE_ENDFOREACH:end {:
     Block block = new Block(statementListleft, statementListright, statementList);
     PhpExpression loopExpr = new PhpExpression(sleft, sright, s.toString());
     DirectiveName directive = new DirectiveName(dleft, dright, d.toString());
-    RESULT = new BladeForeachStatement(dleft, endright, directive, loopExpr, block);
+    ArgumentExpression expr = new ArgumentExpression(loopExpr, sleft, sright);
+    RESULT = new BladeForeachStatement(dleft, endright, directive, expr, block);
 :}
 | T_BLADE_FOR:d T_PHP_LOOP_EXPRESSION:s inner_statement_list:statementList T_BLADE_ENDFOR:end {:
     Block block = new Block(statementListleft, statementListright, statementList);
     PhpExpression loopExpr = new PhpExpression(sleft, sright, s.toString());
     DirectiveName directive = new DirectiveName(dleft, dright, d.toString());
-    RESULT = new BladeForStatement(dleft, endright, directive, loopExpr, block);
+    ArgumentExpression expr = new ArgumentExpression(loopExpr, sleft, sright);
+    RESULT = new BladeForStatement(dleft, endright, directive, expr, block);
 :}
 | T_BLADE_IF:d T_PHP_CONDITION_EXPRESSION:s inner_statement_list:statementList elseif_list:elseif T_BLADE_ENDIF:end {:
 
@@ -301,27 +307,32 @@ directive_statement:stm {:
     }
 
     Block block = new Block(statementListleft, statementListright, statementList);
-    PhpExpression loopExpr = new PhpExpression(sleft, sright, s.toString());
+    PhpExpression ifExpr = new PhpExpression(sleft, sright, s.toString());
     DirectiveName directive = new DirectiveName(dleft, dright, d.toString());
-    RESULT = new BladeIfStatement(dleft, endright, directive, loopExpr, block);
+    ArgumentExpression expr = new ArgumentExpression(ifExpr, sleft, sright);
+    RESULT = new BladeIfStatement(dleft, endright, directive, expr, block);
 :}
 | T_BLADE_CONDITION_OPEN_TAG:d T_PHP_CONDITION_EXPRESSION:expr inner_statement_list:statementList T_BLADE_ENDIF:end {:
     Block block = new Block(statementListleft, statementListright, statementList);
     PhpExpression phpExpression = new PhpExpression(exprleft, exprright, expr.toString());
     DirectiveName directive = new DirectiveName(dleft, dright, d.toString());
-    RESULT = new BladeConditionStatement(dleft, endright, directive, phpExpression, block);
+    ArgumentExpression argexpr = new ArgumentExpression(phpExpression, exprleft, exprright);
+    RESULT = new BladeConditionStatement(dleft, endright, directive, argexpr, block);
 :}
-| T_BLADE_SWITCH:d T_OPEN_PARENTHESE T_PHP_PARAMETER_EXPRESSION:expr T_CLOSE_PARENTHESE inner_statement_list:statementList T_BLADE_ENDSWITCH:end {:
+| T_BLADE_SWITCH:d T_OPEN_PARENTHESE:po T_PHP_PARAMETER_EXPRESSION:expr T_CLOSE_PARENTHESE:pc inner_statement_list:statementList T_BLADE_ENDSWITCH:end {:
     Block block = new Block(statementListleft, statementListright, statementList);
     PhpExpression phpExpression = new PhpExpression(exprleft, exprright, expr.toString());
     DirectiveName directive = new DirectiveName(dleft, dright, d.toString());
-    RESULT = new BladeSwitchStatement(dleft, endright, directive, phpExpression, block);
+    ArgumentExpression argexpr = new ArgumentExpression(phpExpression, poleft, pcright);
+    RESULT = new BladeSwitchStatement(dleft, endright, directive, argexpr, block);
 :}
 |  T_BLADE_DIRECTIVE:d T_OPEN_PARENTHESE T_PHP_PARAMETER_EXPRESSION:expr T_CLOSE_PARENTHESE {:
 	//TODO store expression expression
     //directive statement with arguments
     DirectiveName directive = new DirectiveName(dleft, dright, d.toString());
-    RESULT = new BladeConstDirectiveStatement(dleft, exprright, directive);
+    PhpExpression phpExpression = new PhpExpression(exprleft, exprright, expr.toString());
+    ArgumentExpression argexpr = new ArgumentExpression(phpExpression, exprleft, exprright);
+    RESULT = new DirectiveWithArgument(dleft, exprright, directive, argexpr);
 :}
 | T_BLADE_DIRECTIVE:d {:
     DirectiveName directive = new DirectiveName(dleft, dright, d.toString());
@@ -340,7 +351,7 @@ directive_statement:stm {:
     RESULT = inLinePhp;
 :}
 | T_BLADE_INLINE_PHP:php {:
-    InLinePhp inLinePhp = new InLinePhp(phpleft, phpright, php.toString());
+    InLineBladePhp inLinePhp = new InLineBladePhp(phpleft, phpright, php.toString());
     RESULT = inLinePhp;
 :}
 | T_STRING:html {:
@@ -373,16 +384,16 @@ d_section_statement:stm{:
 :};
 
 d_section_statement ::= 
-T_BLADE_SECTION:d T_OPEN_PARENTHESE yield_label:label T_COMMA T_PHP_PARAMETER_EXPRESSION:p T_CLOSE_PARENTHESE:end {:
-    Variable value = new Variable(0, 0, "");
-    Block block = new Block(0, 0, value);
+T_BLADE_SECTION:d T_OPEN_PARENTHESE:po yield_label:label T_COMMA T_PHP_PARAMETER_EXPRESSION:p T_CLOSE_PARENTHESE:end {:
     DirectiveName directive = new DirectiveName(dleft, dright, d.toString());
-    RESULT = new BladeSectionStatement(dleft, endright, directive, label, block, BladeSectionStatement.Type.INLINE);
+    PhpExpression phpExpression = new PhpExpression(pleft, pright,  p.toString());
+    ArgumentExpression argexpr = new ArgumentExpression(phpExpression, poleft, endright, phpExpression);
+    RESULT = new BladeInlineSectionStatement(dleft, endright, directive, argexpr);
 :}
 | T_BLADE_SECTION:d yield_label_expression:label inner_statement_list:statementList end_section:end{:
     Block block = new Block(statementListleft, statementListright, statementList);
     DirectiveName directive = new DirectiveName(dleft, dright, d.toString());
-    RESULT = new BladeSectionStatement(dleft, endright, directive, label, block, BladeSectionStatement.Type.BLOCK);
+    RESULT = new BladeSectionStatement(dleft, endright, directive, label, block);
 :};
 
 
@@ -400,8 +411,8 @@ T_BLADE_ENDSECTION:token{:
 ;
 
 yield_label_expression ::=
-T_OPEN_PARENTHESE yield_label:label T_CLOSE_PARENTHESE {:
-    RESULT = label;
+T_OPEN_PARENTHESE:po yield_label:label T_CLOSE_PARENTHESE:pc {:
+    RESULT =  new ArgumentExpression(label, poleft, pcright);;
 :}
 ;
 
@@ -414,10 +425,6 @@ T_STRING:label {:
     	label = label.substring(1, label.length() -1);
     }
 	RESULT = new SectionName(labelleft, labelright, label.toString());
-:}
-| error:expr
-{:
-    RESULT = new ASTErrorExpression(exprleft, exprright);
 :}
 ;
 
@@ -464,12 +471,8 @@ variableList:statementList variable:var
 :};
 
 path_expression ::=
-T_OPEN_PARENTHESE path:path T_CLOSE_PARENTHESE {:
-	RESULT = path;
-:}
-| error:expr
-{:
-    RESULT = new ASTErrorExpression(exprleft, exprright);
+T_OPEN_PARENTHESE:o path:path T_CLOSE_PARENTHESE:e {:
+	RESULT = new ArgumentExpression(path, oleft, eright );
 :}
 ;
 

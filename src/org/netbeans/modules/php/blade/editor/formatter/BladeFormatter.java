@@ -103,12 +103,12 @@ public class BladeFormatter implements Formatter {
 
     @Override
     public int indentSize() {
-        return CodeStyle.get((Document) null).getIndentSize();
+        return 4;
     }
 
     @Override
     public int hangingIndentSize() {
-        return CodeStyle.get((Document) null).getContinuationIndentSize();
+        return 8;
     }
 
     private static String getMimeTypeAtOffset(Document doc, int offset) {

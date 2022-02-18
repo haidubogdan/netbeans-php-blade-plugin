@@ -8,26 +8,9 @@ package org.netbeans.modules.php.blade.editor.parsing.astnodes;
  * @endif
  * @author bhaidu
  */
-public class BladeSwitchStatement extends DirectiveBladeBlock implements StructureModelItem {
-
-    private Expression expression;
-
-    public BladeSwitchStatement(int start, int end, DirectiveName directive, Expression expression, Block body) {
-        super(start, end, directive, body);
-
-        if (expression == null) {
-            throw new IllegalArgumentException();
-        }
-        this.expression = expression;
-    }
-
-    /**
-     * Returns the expression of this for each statement.
-     *
-     * @return the expression node
-     */
-    public Expression getExpression() {
-        return this.expression;
+public class BladeSwitchStatement extends DirectiveExpressionBlock implements StructureModelItem {
+    public BladeSwitchStatement(int start, int end, DirectiveName directive, ArgumentExpression expression, Block body) {
+        super(start, end, directive, expression, body);
     }
 
     @Override

@@ -4,6 +4,7 @@ import java.util.LinkedList;
 import java.util.List;
 import org.netbeans.modules.php.blade.editor.parsing.astnodes.ASTError;
 import org.netbeans.modules.php.blade.editor.parsing.astnodes.ASTErrorExpression;
+import org.netbeans.modules.php.blade.editor.parsing.astnodes.ArgumentExpression;
 import org.netbeans.modules.php.blade.editor.parsing.astnodes.BladeComment;
 import org.netbeans.modules.php.blade.editor.parsing.astnodes.BladeConditionStatement;
 import org.netbeans.modules.php.blade.editor.parsing.astnodes.BladeConstDirectiveStatement;
@@ -13,12 +14,14 @@ import org.netbeans.modules.php.blade.editor.parsing.astnodes.BladeForStatement;
 import org.netbeans.modules.php.blade.editor.parsing.astnodes.BladeForeachStatement;
 import org.netbeans.modules.php.blade.editor.parsing.astnodes.BladeIfStatement;
 import org.netbeans.modules.php.blade.editor.parsing.astnodes.BladeIncludeStatement;
+import org.netbeans.modules.php.blade.editor.parsing.astnodes.BladeInlineSectionStatement;
 import org.netbeans.modules.php.blade.editor.parsing.astnodes.BladeProgram;
 import org.netbeans.modules.php.blade.editor.parsing.astnodes.BladeSectionStatement;
 import org.netbeans.modules.php.blade.editor.parsing.astnodes.BladeSwitchStatement;
 import org.netbeans.modules.php.blade.editor.parsing.astnodes.BladeYieldStatement;
 import org.netbeans.modules.php.blade.editor.parsing.astnodes.Block;
 import org.netbeans.modules.php.blade.editor.parsing.astnodes.DirectiveName;
+import org.netbeans.modules.php.blade.editor.parsing.astnodes.DirectiveWithArgument;
 import org.netbeans.modules.php.blade.editor.parsing.astnodes.Expression;
 import org.netbeans.modules.php.blade.editor.parsing.astnodes.InLineBladePhp;
 import org.netbeans.modules.php.blade.editor.parsing.astnodes.InLineHtml;
@@ -28,7 +31,6 @@ import org.netbeans.modules.php.blade.editor.parsing.astnodes.PhpExpression;
 import org.netbeans.modules.php.blade.editor.parsing.astnodes.SectionName;
 import org.netbeans.modules.php.blade.editor.parsing.astnodes.Statement;
 import org.netbeans.modules.php.blade.editor.parsing.astnodes.Variable;
-
 
 /** Cup generated class to encapsulate user supplied action code.*/
 class CUP$ASTBladeParser$actions {
@@ -54,7 +56,7 @@ class CUP$ASTBladeParser$actions {
       switch (CUP$ASTBladeParser$act_num)
         {
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 50: // elseif_list ::= elseif_list T_BLADE_ELSEIF T_PHP_CONDITION_EXPRESSION inner_statement_list 
+          case 48: // elseif_list ::= elseif_list T_BLADE_ELSEIF T_PHP_CONDITION_EXPRESSION inner_statement_list 
             {
               List[] RESULT =null;
 		int elseifListleft = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-3)).left;
@@ -78,7 +80,7 @@ class CUP$ASTBladeParser$actions {
           return CUP$ASTBladeParser$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 49: // elseif_list ::= 
+          case 47: // elseif_list ::= 
             {
               List[] RESULT =null;
 		
@@ -95,7 +97,7 @@ class CUP$ASTBladeParser$actions {
           return CUP$ASTBladeParser$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 48: // path ::= error 
+          case 46: // path ::= error 
             {
               Expression RESULT =null;
 		int exprleft = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()).left;
@@ -109,7 +111,7 @@ class CUP$ASTBladeParser$actions {
           return CUP$ASTBladeParser$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 47: // path ::= T_STRING 
+          case 45: // path ::= T_STRING 
             {
               Expression RESULT =null;
 		int pathleft = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()).left;
@@ -130,35 +132,27 @@ class CUP$ASTBladeParser$actions {
           return CUP$ASTBladeParser$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 46: // path_expression ::= error 
+          case 44: // path_expression ::= T_OPEN_PARENTHESE path T_CLOSE_PARENTHESE 
             {
-              Expression RESULT =null;
-		int exprleft = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()).left;
-		int exprright = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()).right;
-		Object expr = (Object)((java_cup.runtime.Symbol) CUP$ASTBladeParser$stack.peek()).value;
-		
-    RESULT = new ASTErrorExpression(exprleft, exprright);
-
-              CUP$ASTBladeParser$result = parser.getSymbolFactory().newSymbol("path_expression",7, ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), RESULT);
-            }
-          return CUP$ASTBladeParser$result;
-
-          /*. . . . . . . . . . . . . . . . . . . .*/
-          case 45: // path_expression ::= T_OPEN_PARENTHESE path T_CLOSE_PARENTHESE 
-            {
-              Expression RESULT =null;
+              ArgumentExpression RESULT =null;
+		int oleft = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-2)).left;
+		int oright = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-2)).right;
+		Object o = (Object)((java_cup.runtime.Symbol) CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-2)).value;
 		int pathleft = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-1)).left;
 		int pathright = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-1)).right;
 		Expression path = (Expression)((java_cup.runtime.Symbol) CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-1)).value;
+		int eleft = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()).left;
+		int eright = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()).right;
+		Object e = (Object)((java_cup.runtime.Symbol) CUP$ASTBladeParser$stack.peek()).value;
 		
-	RESULT = path;
+	RESULT = new ArgumentExpression(path, oleft, eright );
 
               CUP$ASTBladeParser$result = parser.getSymbolFactory().newSymbol("path_expression",7, ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-2)), ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), RESULT);
             }
           return CUP$ASTBladeParser$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 44: // variableList ::= 
+          case 43: // variableList ::= 
             {
               List RESULT =null;
 		
@@ -169,7 +163,7 @@ class CUP$ASTBladeParser$actions {
           return CUP$ASTBladeParser$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 43: // variableList ::= variableList variable 
+          case 42: // variableList ::= variableList variable 
             {
               List RESULT =null;
 		int statementListleft = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-1)).left;
@@ -190,7 +184,7 @@ class CUP$ASTBladeParser$actions {
           return CUP$ASTBladeParser$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 42: // variable ::= variable T_NEKUDA variable 
+          case 41: // variable ::= variable T_NEKUDA variable 
             {
               Variable RESULT =null;
 		int expr1left = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-2)).left;
@@ -212,7 +206,7 @@ class CUP$ASTBladeParser$actions {
           return CUP$ASTBladeParser$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 41: // variable ::= T_PHP_PARAMETER_EXPRESSION 
+          case 40: // variable ::= T_PHP_PARAMETER_EXPRESSION 
             {
               Variable RESULT =null;
 		int varleft = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()).left;
@@ -224,7 +218,7 @@ class CUP$ASTBladeParser$actions {
           return CUP$ASTBladeParser$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 40: // variable ::= T_STRING 
+          case 39: // variable ::= T_STRING 
             {
               Variable RESULT =null;
 		int varleft = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()).left;
@@ -245,7 +239,7 @@ class CUP$ASTBladeParser$actions {
           return CUP$ASTBladeParser$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 39: // variable ::= T_VARIABLE 
+          case 38: // variable ::= T_VARIABLE 
             {
               Variable RESULT =null;
 		int varleft = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()).left;
@@ -258,20 +252,6 @@ class CUP$ASTBladeParser$actions {
     RESULT = new Variable(varleft, varright, var.toString());
 
               CUP$ASTBladeParser$result = parser.getSymbolFactory().newSymbol("variable",11, ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), RESULT);
-            }
-          return CUP$ASTBladeParser$result;
-
-          /*. . . . . . . . . . . . . . . . . . . .*/
-          case 38: // yield_label ::= error 
-            {
-              Expression RESULT =null;
-		int exprleft = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()).left;
-		int exprright = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()).right;
-		Object expr = (Object)((java_cup.runtime.Symbol) CUP$ASTBladeParser$stack.peek()).value;
-		
-    RESULT = new ASTErrorExpression(exprleft, exprright);
-
-              CUP$ASTBladeParser$result = parser.getSymbolFactory().newSymbol("yield_label",10, ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), RESULT);
             }
           return CUP$ASTBladeParser$result;
 
@@ -298,12 +278,18 @@ class CUP$ASTBladeParser$actions {
           /*. . . . . . . . . . . . . . . . . . . .*/
           case 36: // yield_label_expression ::= T_OPEN_PARENTHESE yield_label T_CLOSE_PARENTHESE 
             {
-              Expression RESULT =null;
+              ArgumentExpression RESULT =null;
+		int poleft = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-2)).left;
+		int poright = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-2)).right;
+		Object po = (Object)((java_cup.runtime.Symbol) CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-2)).value;
 		int labelleft = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-1)).left;
 		int labelright = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-1)).right;
 		Expression label = (Expression)((java_cup.runtime.Symbol) CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-1)).value;
+		int pcleft = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()).left;
+		int pcright = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()).right;
+		Object pc = (Object)((java_cup.runtime.Symbol) CUP$ASTBladeParser$stack.peek()).value;
 		
-    RESULT = label;
+    RESULT =  new ArgumentExpression(label, poleft, pcright);;
 
               CUP$ASTBladeParser$result = parser.getSymbolFactory().newSymbol("yield_label_expression",9, ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-2)), ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), RESULT);
             }
@@ -366,13 +352,13 @@ class CUP$ASTBladeParser$actions {
           /*. . . . . . . . . . . . . . . . . . . .*/
           case 31: // d_section_statement ::= T_BLADE_SECTION yield_label_expression inner_statement_list end_section 
             {
-              BladeSectionStatement RESULT =null;
+              Statement RESULT =null;
 		int dleft = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-3)).left;
 		int dright = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-3)).right;
 		Object d = (Object)((java_cup.runtime.Symbol) CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-3)).value;
 		int labelleft = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-2)).left;
 		int labelright = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-2)).right;
-		Expression label = (Expression)((java_cup.runtime.Symbol) CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-2)).value;
+		ArgumentExpression label = (ArgumentExpression)((java_cup.runtime.Symbol) CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-2)).value;
 		int statementListleft = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-1)).left;
 		int statementListright = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-1)).right;
 		List statementList = (List)((java_cup.runtime.Symbol) CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-1)).value;
@@ -382,7 +368,7 @@ class CUP$ASTBladeParser$actions {
 		
     Block block = new Block(statementListleft, statementListright, statementList);
     DirectiveName directive = new DirectiveName(dleft, dright, d.toString());
-    RESULT = new BladeSectionStatement(dleft, endright, directive, label, block, BladeSectionStatement.Type.BLOCK);
+    RESULT = new BladeSectionStatement(dleft, endright, directive, label, block);
 
               CUP$ASTBladeParser$result = parser.getSymbolFactory().newSymbol("d_section_statement",16, ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-3)), ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), RESULT);
             }
@@ -391,10 +377,13 @@ class CUP$ASTBladeParser$actions {
           /*. . . . . . . . . . . . . . . . . . . .*/
           case 30: // d_section_statement ::= T_BLADE_SECTION T_OPEN_PARENTHESE yield_label T_COMMA T_PHP_PARAMETER_EXPRESSION T_CLOSE_PARENTHESE 
             {
-              BladeSectionStatement RESULT =null;
+              Statement RESULT =null;
 		int dleft = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-5)).left;
 		int dright = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-5)).right;
 		Object d = (Object)((java_cup.runtime.Symbol) CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-5)).value;
+		int poleft = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-4)).left;
+		int poright = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-4)).right;
+		Object po = (Object)((java_cup.runtime.Symbol) CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-4)).value;
 		int labelleft = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-3)).left;
 		int labelright = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-3)).right;
 		Expression label = (Expression)((java_cup.runtime.Symbol) CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-3)).value;
@@ -405,10 +394,10 @@ class CUP$ASTBladeParser$actions {
 		int endright = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()).right;
 		Object end = (Object)((java_cup.runtime.Symbol) CUP$ASTBladeParser$stack.peek()).value;
 		
-    Variable value = new Variable(0, 0, "");
-    Block block = new Block(0, 0, value);
     DirectiveName directive = new DirectiveName(dleft, dright, d.toString());
-    RESULT = new BladeSectionStatement(dleft, endright, directive, label, block, BladeSectionStatement.Type.INLINE);
+    PhpExpression phpExpression = new PhpExpression(pleft, pright,  p.toString());
+    ArgumentExpression argexpr = new ArgumentExpression(phpExpression, poleft, endright, phpExpression);
+    RESULT = new BladeInlineSectionStatement(dleft, endright, directive, argexpr);
 
               CUP$ASTBladeParser$result = parser.getSymbolFactory().newSymbol("d_section_statement",16, ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-5)), ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), RESULT);
             }
@@ -420,7 +409,7 @@ class CUP$ASTBladeParser$actions {
               Statement RESULT =null;
 		int stmleft = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()).left;
 		int stmright = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()).right;
-		BladeSectionStatement stm = (BladeSectionStatement)((java_cup.runtime.Symbol) CUP$ASTBladeParser$stack.peek()).value;
+		Statement stm = (Statement)((java_cup.runtime.Symbol) CUP$ASTBladeParser$stack.peek()).value;
 		
 	RESULT = stm;
 
@@ -499,7 +488,7 @@ class CUP$ASTBladeParser$actions {
 		int phpright = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()).right;
 		Object php = (Object)((java_cup.runtime.Symbol) CUP$ASTBladeParser$stack.peek()).value;
 		
-    InLinePhp inLinePhp = new InLinePhp(phpleft, phpright, php.toString());
+    InLineBladePhp inLinePhp = new InLineBladePhp(phpleft, phpright, php.toString());
     RESULT = inLinePhp;
 
               CUP$ASTBladeParser$result = parser.getSymbolFactory().newSymbol("statement",5, ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), RESULT);
@@ -586,7 +575,9 @@ class CUP$ASTBladeParser$actions {
 	//TODO store expression expression
     //directive statement with arguments
     DirectiveName directive = new DirectiveName(dleft, dright, d.toString());
-    RESULT = new BladeConstDirectiveStatement(dleft, exprright, directive);
+    PhpExpression phpExpression = new PhpExpression(exprleft, exprright, expr.toString());
+    ArgumentExpression argexpr = new ArgumentExpression(phpExpression, exprleft, exprright);
+    RESULT = new DirectiveWithArgument(dleft, exprright, directive, argexpr);
 
               CUP$ASTBladeParser$result = parser.getSymbolFactory().newSymbol("statement",5, ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-3)), ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), RESULT);
             }
@@ -599,9 +590,15 @@ class CUP$ASTBladeParser$actions {
 		int dleft = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-5)).left;
 		int dright = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-5)).right;
 		Object d = (Object)((java_cup.runtime.Symbol) CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-5)).value;
+		int poleft = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-4)).left;
+		int poright = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-4)).right;
+		Object po = (Object)((java_cup.runtime.Symbol) CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-4)).value;
 		int exprleft = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-3)).left;
 		int exprright = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-3)).right;
 		Object expr = (Object)((java_cup.runtime.Symbol) CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-3)).value;
+		int pcleft = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-2)).left;
+		int pcright = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-2)).right;
+		Object pc = (Object)((java_cup.runtime.Symbol) CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-2)).value;
 		int statementListleft = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-1)).left;
 		int statementListright = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-1)).right;
 		List statementList = (List)((java_cup.runtime.Symbol) CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-1)).value;
@@ -612,7 +609,8 @@ class CUP$ASTBladeParser$actions {
     Block block = new Block(statementListleft, statementListright, statementList);
     PhpExpression phpExpression = new PhpExpression(exprleft, exprright, expr.toString());
     DirectiveName directive = new DirectiveName(dleft, dright, d.toString());
-    RESULT = new BladeSwitchStatement(dleft, endright, directive, phpExpression, block);
+    ArgumentExpression argexpr = new ArgumentExpression(phpExpression, poleft, pcright);
+    RESULT = new BladeSwitchStatement(dleft, endright, directive, argexpr, block);
 
               CUP$ASTBladeParser$result = parser.getSymbolFactory().newSymbol("statement",5, ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-5)), ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), RESULT);
             }
@@ -638,7 +636,8 @@ class CUP$ASTBladeParser$actions {
     Block block = new Block(statementListleft, statementListright, statementList);
     PhpExpression phpExpression = new PhpExpression(exprleft, exprright, expr.toString());
     DirectiveName directive = new DirectiveName(dleft, dright, d.toString());
-    RESULT = new BladeConditionStatement(dleft, endright, directive, phpExpression, block);
+    ArgumentExpression argexpr = new ArgumentExpression(phpExpression, exprleft, exprright);
+    RESULT = new BladeConditionStatement(dleft, endright, directive, argexpr, block);
 
               CUP$ASTBladeParser$result = parser.getSymbolFactory().newSymbol("statement",5, ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-3)), ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), RESULT);
             }
@@ -671,9 +670,10 @@ class CUP$ASTBladeParser$actions {
     }
 
     Block block = new Block(statementListleft, statementListright, statementList);
-    PhpExpression loopExpr = new PhpExpression(sleft, sright, s.toString());
+    PhpExpression ifExpr = new PhpExpression(sleft, sright, s.toString());
     DirectiveName directive = new DirectiveName(dleft, dright, d.toString());
-    RESULT = new BladeIfStatement(dleft, endright, directive, loopExpr, block);
+    ArgumentExpression expr = new ArgumentExpression(ifExpr, sleft, sright);
+    RESULT = new BladeIfStatement(dleft, endright, directive, expr, block);
 
               CUP$ASTBladeParser$result = parser.getSymbolFactory().newSymbol("statement",5, ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-4)), ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), RESULT);
             }
@@ -699,7 +699,8 @@ class CUP$ASTBladeParser$actions {
     Block block = new Block(statementListleft, statementListright, statementList);
     PhpExpression loopExpr = new PhpExpression(sleft, sright, s.toString());
     DirectiveName directive = new DirectiveName(dleft, dright, d.toString());
-    RESULT = new BladeForStatement(dleft, endright, directive, loopExpr, block);
+    ArgumentExpression expr = new ArgumentExpression(loopExpr, sleft, sright);
+    RESULT = new BladeForStatement(dleft, endright, directive, expr, block);
 
               CUP$ASTBladeParser$result = parser.getSymbolFactory().newSymbol("statement",5, ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-3)), ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), RESULT);
             }
@@ -725,7 +726,8 @@ class CUP$ASTBladeParser$actions {
     Block block = new Block(statementListleft, statementListright, statementList);
     PhpExpression loopExpr = new PhpExpression(sleft, sright, s.toString());
     DirectiveName directive = new DirectiveName(dleft, dright, d.toString());
-    RESULT = new BladeForeachStatement(dleft, endright, directive, loopExpr, block);
+    ArgumentExpression expr = new ArgumentExpression(loopExpr, sleft, sright);
+    RESULT = new BladeForeachStatement(dleft, endright, directive, expr, block);
 
               CUP$ASTBladeParser$result = parser.getSymbolFactory().newSymbol("statement",5, ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-3)), ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), RESULT);
             }
@@ -738,6 +740,9 @@ class CUP$ASTBladeParser$actions {
 		int dleft = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-5)).left;
 		int dright = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-5)).right;
 		Object d = (Object)((java_cup.runtime.Symbol) CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-5)).value;
+		int poleft = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-4)).left;
+		int poright = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-4)).right;
+		Object po = (Object)((java_cup.runtime.Symbol) CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-4)).value;
 		int varListleft = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-3)).left;
 		int varListright = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-3)).right;
 		List varList = (List)((java_cup.runtime.Symbol) CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-3)).value;
@@ -752,22 +757,19 @@ class CUP$ASTBladeParser$actions {
     String strV = "";
     Object v;
     for (int i=0 ; i < varList.size() ; i++) {
-        //TODO add a else logic
+        
         v = varList.get(i);
         if (v instanceof String){
+            //stop at first string
             strPath = (String) v;
             break;
         }
-        int debug = 3;
     }
-    
-    //if (s != null){
-    //    strPath = s.toString();
-    //}
     PathExpression label = new PathExpression(varListleft, varListright, strPath);
     DirectiveName directive = new DirectiveName(dleft, dright, d.toString());
-    Variable variable = new Variable(0, 1, strV);
-    RESULT = new BladeIncludeStatement(dleft, endright, directive, label, variable);
+    Variable parameter = new Variable(0, 1, strV);
+    ArgumentExpression expr = new ArgumentExpression(label, poleft, endright, parameter);
+    RESULT = new BladeIncludeStatement(dleft, endright, directive, expr);
 
               CUP$ASTBladeParser$result = parser.getSymbolFactory().newSymbol("statement",5, ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-5)), ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), RESULT);
             }
@@ -780,9 +782,9 @@ class CUP$ASTBladeParser$actions {
 		int dleft = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-3)).left;
 		int dright = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-3)).right;
 		Object d = (Object)((java_cup.runtime.Symbol) CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-3)).value;
-		int startleft = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-2)).left;
-		int startright = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-2)).right;
-		Object start = (Object)((java_cup.runtime.Symbol) CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-2)).value;
+		int poleft = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-2)).left;
+		int poright = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-2)).right;
+		Object po = (Object)((java_cup.runtime.Symbol) CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-2)).value;
 		int varListleft = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-1)).left;
 		int varListright = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-1)).right;
 		List varList = (List)((java_cup.runtime.Symbol) CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-1)).value;
@@ -792,19 +794,21 @@ class CUP$ASTBladeParser$actions {
 		
 	String strPath = "";
     
-    //if (s != null){
-    //    strPath = s.toString();
-    //}
     Object v;
     for (int i=0 ; i < varList.size() ; i++) {
-        //TODO add a else logic
+        
         v = varList.get(i);
-        int debug = 3;
+        if (v instanceof String){
+            //stop at first string
+            strPath = (String) v;
+            break;
+        }
     }
-    
+
     DirectiveName directive = new DirectiveName(dleft, dright, d.toString());
     PathExpression label = new PathExpression(varListleft, varListright, strPath);
-    RESULT = new BladeIncludeStatement(dleft, endright, directive, label);
+    ArgumentExpression expr = new ArgumentExpression(label, poleft, endright);
+    RESULT = new BladeIncludeStatement(dleft, endright, directive, expr);
 
               CUP$ASTBladeParser$result = parser.getSymbolFactory().newSymbol("statement",5, ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-3)), ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), RESULT);
             }
@@ -817,6 +821,9 @@ class CUP$ASTBladeParser$actions {
 		int dleft = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-5)).left;
 		int dright = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-5)).right;
 		Object d = (Object)((java_cup.runtime.Symbol) CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-5)).value;
+		int poleft = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-4)).left;
+		int poright = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-4)).right;
+		Object po = (Object)((java_cup.runtime.Symbol) CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-4)).value;
 		int sleft = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-3)).left;
 		int sright = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-3)).right;
 		Expression s = (Expression)((java_cup.runtime.Symbol) CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-3)).value;
@@ -833,7 +840,8 @@ class CUP$ASTBladeParser$actions {
     }
     DirectiveName directive = new DirectiveName(dleft, dright, d.toString());
     SectionName label = new SectionName(sleft, sright, strPath);
-    RESULT = new BladeYieldStatement(dleft, endright, directive, label);
+    ArgumentExpression expr = new ArgumentExpression(label, poleft, endright);
+    RESULT = new BladeYieldStatement(dleft, endright, directive, expr);
 
               CUP$ASTBladeParser$result = parser.getSymbolFactory().newSymbol("statement",5, ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-5)), ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), RESULT);
             }
@@ -846,6 +854,9 @@ class CUP$ASTBladeParser$actions {
 		int dleft = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-3)).left;
 		int dright = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-3)).right;
 		Object d = (Object)((java_cup.runtime.Symbol) CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-3)).value;
+		int poleft = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-2)).left;
+		int poright = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-2)).right;
+		Object po = (Object)((java_cup.runtime.Symbol) CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-2)).value;
 		int sleft = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-1)).left;
 		int sright = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-1)).right;
 		Expression s = (Expression)((java_cup.runtime.Symbol) CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-1)).value;
@@ -861,7 +872,8 @@ class CUP$ASTBladeParser$actions {
 
     DirectiveName directive = new DirectiveName(dleft, dright, d.toString());
     SectionName label = new SectionName(sleft, sright, strPath);
-    RESULT = new BladeYieldStatement(dleft, endright, directive, label);
+    ArgumentExpression expr = new ArgumentExpression(label, poleft, endright);
+    RESULT = new BladeYieldStatement(dleft, endright, directive, expr);
 
               CUP$ASTBladeParser$result = parser.getSymbolFactory().newSymbol("statement",5, ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-3)), ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), RESULT);
             }
@@ -874,6 +886,9 @@ class CUP$ASTBladeParser$actions {
 		int extsleft = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-5)).left;
 		int extsright = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-5)).right;
 		Object exts = (Object)((java_cup.runtime.Symbol) CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-5)).value;
+		int poleft = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-4)).left;
+		int poright = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-4)).right;
+		Object po = (Object)((java_cup.runtime.Symbol) CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-4)).value;
 		int pathleft = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-3)).left;
 		int pathright = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-3)).right;
 		Variable path = (Variable)((java_cup.runtime.Symbol) CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-3)).value;
@@ -886,8 +901,10 @@ class CUP$ASTBladeParser$actions {
 		
     //for the moment until we find to make use of <<EOL>>
     Block block = null;
+    PhpExpression parameter = new PhpExpression(pleft, pright, p.toString());
     DirectiveName directive = new DirectiveName(extsleft, extsright, exts.toString());
-    RESULT = new BladeExtendsStatement(extsleft, pathright, directive, path, block);
+    ArgumentExpression expr = new ArgumentExpression(path, poleft, endright, parameter);
+    RESULT = new BladeExtendsStatement(extsleft, endright, directive, expr, block);
 
               CUP$ASTBladeParser$result = parser.getSymbolFactory().newSymbol("statement",5, ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-5)), ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), RESULT);
             }
@@ -902,7 +919,7 @@ class CUP$ASTBladeParser$actions {
 		Object exts = (Object)((java_cup.runtime.Symbol) CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-1)).value;
 		int pathleft = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()).left;
 		int pathright = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()).right;
-		Expression path = (Expression)((java_cup.runtime.Symbol) CUP$ASTBladeParser$stack.peek()).value;
+		ArgumentExpression path = (ArgumentExpression)((java_cup.runtime.Symbol) CUP$ASTBladeParser$stack.peek()).value;
 		
     //for the moment until we find to make use of <<EOL>>
     Block block = null;
@@ -1044,5 +1061,3 @@ class CUP$ASTBladeParser$actions {
         }
     }
 }
-
-

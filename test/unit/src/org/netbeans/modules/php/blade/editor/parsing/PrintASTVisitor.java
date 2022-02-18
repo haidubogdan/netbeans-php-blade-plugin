@@ -50,7 +50,7 @@ public class PrintASTVisitor implements Visitor {
     }
 
     @Override
-    public void visit(DirectiveBladeBlock node) {
+    public void visit(DirectiveExpressionBlock node) {
     }
 
     @Override
@@ -92,6 +92,31 @@ public class PrintASTVisitor implements Visitor {
 
     @Override
     public void visit(BladeEchoStatement node) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void visit(BladeInlineSectionStatement node) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void visit(DirectiveWithArgument node) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void visit(BladeConditionStatement node) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void visit(BladeElseIfStatement node) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void visit(InLineBladePhp node) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
@@ -243,7 +268,7 @@ public class PrintASTVisitor implements Visitor {
 
     //blade
     public void visit(BladeSectionStatement node) {
-        XMLPrintNode printNode = new XMLPrintNode(node, "BladeSection", new String[]{"type", node.getSectionType().name()});
+        XMLPrintNode printNode = new XMLPrintNode(node, "BladeSection", new String[]{"block"});
         printNode.addChild(node.getLabel());
         printNode.print(this);
     }

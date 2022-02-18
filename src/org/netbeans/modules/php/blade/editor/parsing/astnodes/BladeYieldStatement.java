@@ -6,12 +6,8 @@ package org.netbeans.modules.php.blade.editor.parsing.astnodes;
  */
 public class BladeYieldStatement extends InlineDirectiveStatement { //should make it inline
 
-    public BladeYieldStatement(int start, int end, DirectiveName directive, Expression label) {
+    public BladeYieldStatement(int start, int end, DirectiveName directive, ArgumentExpression label) {
         super(start, end, directive, label);
-    }
-
-    public BladeYieldStatement(int start, int end, DirectiveName directive, Expression label, Variable argument) {
-        super(start, end, directive, label, argument);
     }
 
     @Override
@@ -23,5 +19,4 @@ public class BladeYieldStatement extends InlineDirectiveStatement { //should mak
     public String toString() {
         return "@yield " + getLabel().toString(); //NOI18N
     }
-
 }

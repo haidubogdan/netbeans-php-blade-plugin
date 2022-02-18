@@ -6,44 +6,38 @@ package org.netbeans.modules.php.blade.editor.parsing.astnodes;
  */
 public class InlineDirectiveStatement extends DirectiveStatement implements StructureModelItem, DirectiveWithPath {
 
-    Expression label;
-    private Variable argument;
+    protected ArgumentExpression expression;
 
-    public InlineDirectiveStatement(int start, int end, DirectiveName directive, Expression label) {
+    public InlineDirectiveStatement(int start, int end, DirectiveName directive, ArgumentExpression expression) {
         super(start, end, directive);
 
-        if (label == null) {
+        if (expression == null) {
             throw new IllegalArgumentException();
         }
-        this.label = label;
-        this.argument = null;
+        this.expression = expression;
     }
 
-    public InlineDirectiveStatement(int start, int end, DirectiveName directive, Expression label, Variable argument) {
-        super(start, end, directive);
-
-        if (label == null) {
-            throw new IllegalArgumentException();
-        }
-        this.label = label;
-        this.argument = argument;
+    public ArgumentExpression getArgumentExpression() {
+        return this.expression;
     }
-
+    
     /**
      *
      * @return the label label
      */
     @Override
     public Expression getLabel() {
-        return label;
+        assert expression != null;
+        return expression.getMainArgument();
     }
 
     /**
      *
      * @return the label label
      */
-    public Variable getArgument() {
-        return argument;
+    public Expression getArgument() {
+        assert expression != null;
+        return expression.getParameter();
     }
 
     @Override
@@ -53,7 +47,7 @@ public class InlineDirectiveStatement extends DirectiveStatement implements Stru
 
     @Override
     public String toString() {
-        return "inlineStatement " + label.toString(); //NOI18N
+        return "inlineStatement " + getLabel().toString(); //NOI18N
     }
 
 }

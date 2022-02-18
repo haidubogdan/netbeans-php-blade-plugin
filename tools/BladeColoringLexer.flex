@@ -62,6 +62,7 @@ import org.netbeans.modules.php.blade.editor.common.ByteStack;
     private LexerInput input;
     private int parenBalanceInDirective = 0; //for directive arguments
     private boolean argHasVariable = false;
+    private int pushBackCount = 0;
 
     public BladeColoringLexer(LexerRestartInfo info) {
         this.input = info.input();
@@ -266,12 +267,21 @@ CLOSE_BLADE_PHP = "@endphp";
     return BladeTokenId.WHITESPACE;
 }
 
-<ST_HTML>(([^<@{}]|"<"[^?%(script)<])+)|"<script"|"<" {
+<ST_HTML>(([^\n<@{}]|"<"[^?%(script)<])+)|"<script"|"<" {
+	int wstart = 0;
     int firstReverseNW = yytext().length() - 1;
-          String text = yytext();
-          int textLength = yylength();
-          boolean foundWhitespace = false;
+	  String text = yytext();
+	  int textLength = yylength();
+	  boolean foundWhitespace = false;
+      
+  	if (text.trim().length() == textLength){
+      	return BladeTokenId.T_HTML;
+    }
+    
+    pushBackCount = 0;
+
     while (firstReverseNW >= 0) {
+        Character c = yytext().charAt(firstReverseNW);
         if (!Character.isWhitespace(yytext().charAt(firstReverseNW))){
             firstReverseNW++;
             break;
@@ -280,7 +290,10 @@ CLOSE_BLADE_PHP = "@endphp";
         firstReverseNW--;
     }
     if (foundWhitespace && firstReverseNW > 0) {
-        yypushback(yytext().length() - firstReverseNW);
+        int diff = yylength() - firstReverseNW;
+        yypushback(diff);
+        String ddText = text.substring(0, firstReverseNW);
+        int dd = 1;
     }
     return BladeTokenId.T_HTML;
 }
@@ -821,7 +834,7 @@ CLOSE_BLADE_PHP = "@endphp";
 <ST_HIGHLIGHTING_ERROR> {
     {WHITESPACE} {
         popState();
-        return BladeTokenId.T_HTML;
+        return BladeTokenId.WHITESPACE;
     }
     . {
         return BladeTokenId.T_HTML;

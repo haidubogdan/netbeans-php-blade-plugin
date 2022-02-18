@@ -33,7 +33,7 @@ public class DefaultVisitor implements Visitor {
     }
 
     @Override
-    public void visit(DirectiveBladeBlock node) {
+    public void visit(DirectiveExpressionBlock node) {
         scan(node.getBody().getStatements());
     }
 
@@ -53,30 +53,57 @@ public class DefaultVisitor implements Visitor {
     @Override
     public void visit(BladeIncludeStatement node) {
     }
-    
+
     @Override
     public void visit(BladeForeachStatement node) {
+        scan(node.getBody().getStatements());
     }
-    
+
     @Override
     public void visit(BladeIfStatement node) {
+        scan(node.getBody().getStatements());
     }
-    
+
     @Override
     public void visit(BladeForStatement node) {
+        scan(node.getBody().getStatements());
     }
-    
+
     @Override
     public void visit(InLineHtml node) {
     }
-    
+
     @Override
     public void visit(InLinePhp node) {
     }
-    
+
     public void visit(BladeEchoStatement node) {
     }
-    
+
     public void visit(BladeComment node) {
+    }
+
+    @Override
+    public void visit(BladeInlineSectionStatement node) {
+
+    }
+
+    @Override
+    public void visit(DirectiveWithArgument node) {
+
+    }
+
+    @Override
+    public void visit(BladeConditionStatement node) {
+        scan(node.getBody().getStatements());
+    }
+
+    @Override
+    public void visit(BladeElseIfStatement node) {
+
+    }
+
+    @Override
+    public void visit(InLineBladePhp node) {
     }
 }

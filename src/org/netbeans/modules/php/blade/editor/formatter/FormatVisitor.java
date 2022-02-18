@@ -54,10 +54,12 @@ public class FormatVisitor implements Visitor {
     private BladeTokenId prevTokenId;
     private Pattern htmlTagNamePattern = Pattern.compile("<([\\w\\d]+)\\s*(.*?)>");
     private Pattern htmlCloseTagNamePattern = Pattern.compile("<\\/([\\w\\d]+)\\s*>");
-    
+    boolean insideHtmlElementTag = false;
+    int lastWhitespaceOffset = -1;
+
     @Override
     public void visit(ASTNode node) {
-       //
+        //
     }
 
     @Override
@@ -79,7 +81,7 @@ public class FormatVisitor implements Visitor {
             }
         }
     }
-    
+
     public static Collection<String> HTML_VOID_ELEMENTS = Arrays.asList(
             "input",
             "area",
@@ -152,50 +154,164 @@ public class FormatVisitor implements Visitor {
         if (node == null) {
             return;
         }
-        if (node instanceof BladeEchoStatement){
-            int ddd = 1;
+
+        if (ts.token() != null && ts.offset() < node.getStartOffset()) {
+            while (moveNext() && ts.offset() < node.getStartOffset()) {
+                //check for whitespaces
+                BladeTokenId idBefore = ts.token().id();
+                switch (idBefore) {
+                    case WHITESPACE:
+                    case NEWLINE:
+                        int offsetD = ts.offset();
+                        if (lastWhitespaceOffset != offsetD) {
+                            lastWhitespaceOffset = offsetD;
+                            formatTokens.addAll(resolveWhitespaceTokens());
+                        }
+                        break;
+                }
+            }
         }
-        List<FormatToken> beforeTokens = new ArrayList<>(30);
-        int offsetLimit = node.getStartOffset();
-        boolean blockHandle = false;
-        if (node instanceof InLineHtml || node instanceof DirectiveBladeBlock) {
-            offsetLimit -= 1;
-            blockHandle = true;
-        }
-        
-        
+
         ts.move(node.getStartOffset());
-        
-        if (ts.token() == null){
-            if (!moveNext()){
+
+        if (ts.token() == null) {
+            if (!moveNext()) {
                 return;
             }
         }
-        
-        if (ts.token() == null){
+
+        if (ts.token() == null) {
             return;
         }
-        
+
         BladeTokenId id = ts.token().id();
+        
+        //add the first whitespaces
+        switch (id) {
+            case WHITESPACE:
+            case NEWLINE:
+                int offsetD = ts.offset();
+                if (lastWhitespaceOffset != offsetD) {
+                    lastWhitespaceOffset = offsetD;
+                    formatTokens.addAll(resolveWhitespaceTokens());
+                }
+                moveNext();
+                break;
+        }
 
         path.addFirst(node);
-        if (node instanceof DirectiveBladeBlock) {
-            DirectiveBladeBlock d = (DirectiveBladeBlock) node;
-            addDirectiveWSTokens(d);
+        if (node instanceof DirectiveExpressionBlock) {
+            DirectiveExpressionBlock d = (DirectiveExpressionBlock) node;
+            addDirectiveBlockWSTokens(d);
+        } else if (node instanceof InlineDirectiveStatement) {
+            InlineDirectiveStatement d = (InlineDirectiveStatement) node;
+            addDirectiveInlineWSTokens(d);
         }
         node.accept(this);
         path.removeFirst();
     }
 
     @Override
-    public void visit(DirectiveBladeBlock node) {
+    public void visit(DirectiveExpressionBlock node) {
         scan(node.getBody().getStatements());
     }
 
     @Override
     public void visit(InLineHtml node) {
+        
+        setBlockLineInlineStatus(node);
+        if (blockIsInline) {
+            //insideHtmlElementTag = false;
+            //return;
+        }
         BladeTokenId id = ts.token().id();
         String text = ts.token().text().toString();
+        String content = node.getContent();
+
+        if (content == null || content.length() == 0 || content.trim().length() == 0) {
+            if (id.equals(BladeTokenId.T_HTML)){
+                //insideHtmlElementTag = false;
+            }
+            return;
+        }
+
+        if (Character.isWhitespace(content.charAt(0))) {
+            int offsetD = ts.offset();
+            if (lastWhitespaceOffset != offsetD && Character.isWhitespace(text.charAt(0))) {
+                lastWhitespaceOffset = offsetD;
+                formatTokens.addAll(resolveWhitespaceTokens());
+            } else if (lastWhitespaceOffset != node.getStartOffset() && Character.isWhitespace(content.charAt(0))){
+                lastWhitespaceOffset = node.getStartOffset();
+                formatTokens.addAll(resolveWhitespaceTokens());
+            }
+            while (moveNext() && ts.offset() < node.getStartOffset() && ts.token().id() == BladeTokenId.T_HTML) {
+                if (lastWhitespaceOffset != ts.offset()) {
+                    lastWhitespaceOffset = ts.offset();
+                    formatTokens.addAll(resolveWhitespaceTokens());
+                }
+            }
+            if (ts.token().id() != BladeTokenId.T_HTML){
+                ts.movePrevious();
+            }
+        }
+
+        id = ts.token().id();
+        text = ts.token().text().toString();
+        
+        switch (id) {
+            case WHITESPACE:
+            case NEWLINE:
+                if (moveNext()) {
+                    id = ts.token().id();
+                }
+                break;
+        }
+        
+        if (id.equals(BladeTokenId.T_HTML)) {
+            formatTokens.add(new FormatToken(FormatToken.Kind.WHITESPACE_BEFORE_HTML, ts.offset()));
+            //formatTokens.add(new FormatToken(FormatToken.Kind.HTML, ts.offset(), ts.token().text().toString()));
+            String htmlText = ts.token().text().toString();
+            StringTokenizer st = new StringTokenizer(htmlText, "<", true);
+            int openTagBalance = 0;
+            boolean tagDetected = false;
+            while (st.hasMoreTokens()) {
+                String token = st.nextToken();
+                if (token.indexOf("<") > -1) {
+                    openTagBalance++;
+                    tagDetected= true;
+                }
+                if (token.indexOf(">") > -1) {
+                    openTagBalance--;
+                }
+            }
+            
+            String trimmedContent = content.replaceAll("\\s+$", "");
+            String trimmedWhitespaceContent = content.replaceAll("[ ]+$", "");
+            if (htmlText.trim().endsWith(">")){
+                if (trimmedWhitespaceContent.endsWith("\n")){
+                    int lastNewLine = trimmedContent.lastIndexOf("\n");
+                    int lastOpeningTag = trimmedContent.lastIndexOf("<");
+                    int lastClosingOpeningTag = trimmedContent.lastIndexOf("</");
+                    int countSpaces = 0;
+                    if (lastNewLine > 0 && lastNewLine < lastOpeningTag &&
+                        lastClosingOpeningTag < lastOpeningTag){
+                        for (int i = lastNewLine + 1; i < lastOpeningTag; i++) {
+                            if (!Character.isWhitespace(trimmedContent.charAt(i))) {
+                                break;
+                            }
+                            countSpaces++;
+                        }
+                    }
+                    countSpaces = Math.max(countSpaces, 4);
+                    formatTokens.add(new FormatToken.HtmlIndentToken(ts.offset(), countSpaces));
+                }
+            }
+            insideHtmlElementTag = openTagBalance > 0 && tagDetected;
+  
+            formatTokens.add(new FormatToken(FormatToken.Kind.WHITESPACE_AFTER_HTML, ts.offset()));
+        }
+
+        /*
         if (!isTreatedAsHtml(id)){
             ts.movePrevious();
             id = ts.token().id();
@@ -210,6 +326,7 @@ public class FormatVisitor implements Visitor {
             case T_HTML:
                 String htmlText = ts.token().text().toString();
                 StringTokenizer st = new StringTokenizer(htmlText, "\n", true);
+                //formatTokens.add(new FormatToken(FormatToken.Kind.WHITESPACE_BEFORE_HTML, ts.offset()));
                 formatTokens.add(new FormatToken(FormatToken.Kind.TEXT, ts.offset(), ts.token().text().toString()));
                 while (st.hasMoreTokens()) {
                     String token = st.nextToken();
@@ -236,10 +353,14 @@ public class FormatVisitor implements Visitor {
                 break;
             case WHITESPACE:
             case NEWLINE:
-                formatTokens.addAll(resolveWhitespaceTokens());
+                int offsetD = ts.offset();
+                if (lastWhitespaceOffset != offsetD){
+                    lastWhitespaceOffset = offsetD;
+                    formatTokens.addAll(resolveWhitespaceTokens());
+                }
                 break;
         }
-        moveNext();
+         */
     }
 
     @Override
@@ -265,9 +386,9 @@ public class FormatVisitor implements Visitor {
     }
 
     @Override
-    public void visit(BladeEchoStatement node){
+    public void visit(BladeEchoStatement node) {
         BladeTokenId id = ts.token().id();
-        if (!id.equals(BladeTokenId.T_BLADE_OPEN_ECHO) && !id.equals(BladeTokenId.T_BLADE_OPEN_ECHO_ESCAPED)){
+        if (!id.equals(BladeTokenId.T_BLADE_OPEN_ECHO) && !id.equals(BladeTokenId.T_BLADE_OPEN_ECHO_ESCAPED)) {
             ts.movePrevious();
         }
         switch (id) {
@@ -277,51 +398,260 @@ public class FormatVisitor implements Visitor {
                 formatTokens.add(new FormatToken(FormatToken.Kind.TEXT, ts.offset(), ts.token().text().toString()));
                 break;
         }
+
+        ts.move(node.getEndOffset());
+        ts.movePrevious();
+        Token token = ts.token();
+        String text = ts.token().text().toString();
+        if (ts.token().id().equals(BladeTokenId.T_BLADE_CLOSE_ECHO)) {
+            formatTokens.add(new FormatToken(FormatToken.Kind.TEXT, ts.offset(), ts.token().text().toString()));
+        }
     }
-    
+
     @Override
-    public void visit(BladeComment node){
+    public void visit(BladeComment node) {
         BladeTokenId id = ts.token().id();
-        if (!id.equals(BladeTokenId.T_BLADE_COMMENT)){
+        if (!id.equals(BladeTokenId.T_BLADE_COMMENT)) {
             ts.movePrevious();
         }
 
-        if (id.equals(BladeTokenId.T_BLADE_COMMENT) && ts.token().text().toString().trim().equals("{{--")){
+        if (id.equals(BladeTokenId.T_BLADE_COMMENT) && ts.token().text().toString().trim().equals("{{--")) {
             formatTokens.add(new FormatToken(FormatToken.Kind.WHITESPACE_BEFORE_BLADE_COMMENT, ts.offset()));
             formatTokens.add(new FormatToken(FormatToken.Kind.TEXT, ts.offset(), ts.token().text().toString()));
         }
-
+        moveNext();
+        while (ts.token().id() == BladeTokenId.T_BLADE_COMMENT && ts.offset() < node.getEndOffset() && ts.token().text().toString().trim() != "--}}") {
+            formatTokens.add(new FormatToken(FormatToken.Kind.TEXT, ts.offset(), ts.token().text().toString()));
+            moveNext();
+        }
+        id = ts.token().id();
+        if (id.equals(BladeTokenId.T_BLADE_COMMENT) && ts.token().text().toString().trim().equals("--}}")) {
+            //formatTokens.add(new FormatToken(FormatToken.Kind.TEXT, ts.offset(), ts.token().text().toString()));
+            formatTokens.add(new FormatToken(FormatToken.Kind.WHITESPACE_AFTER_BLADE_COMMENT, ts.offset()));
+        }
         int debug = 3;
     }
-    
-    private void addDirectiveWSTokens(DirectiveBladeBlock node) {
+
+    @Override
+    public void visit(BladeInlineSectionStatement node) {
+    }
+
+    @Override
+    public void visit(DirectiveWithArgument node) {
+    }
+
+    @Override
+    public void visit(BladeConditionStatement node) {
+    }
+
+    @Override
+    public void visit(BladeElseIfStatement node) {
+    }
+
+    @Override
+    public void visit(InLineBladePhp node) {
+        //TODO move into a function
         BladeTokenId id = ts.token().id();
         String tText = ts.token().text().toString();
-        
-        if (!tText.startsWith("@")){
+
+        if (!tText.startsWith("@")) {
             ts.movePrevious();
-            if (ts.token() == null ){
+            if (ts.token() == null) {
                 return;
             }
             tText = ts.token().text().toString();
-            
-            if (!tText.startsWith("@")){
+
+            if (!tText.startsWith("@")) {
                 return;
             }
         }
+        id = ts.token().id();
+        if (insideHtmlElementTag) {
+            formatTokens.add(new FormatToken(FormatToken.Kind.WHITESPACE_BEFORE_DIRECTIVE_TAG_INSIDE_HTML_TAG, ts.offset()));
+        } else {
+            formatTokens.add(new FormatToken.PhpBladeToken(FormatToken.Kind.WHITESPACE_BEFORE_BLADE_PHP, ts.offset(), ts.token().text().toString()));
+        }
+        //formatTokens.add(new FormatToken(FormatToken.Kind.TEXT, ts.offset(), ts.token().text().toString()));
         
+        if (insideHtmlElementTag) {
+            return;
+        }
+        
+        moveNext();
+        id = ts.token().id();
+        
+        
+        if (id.equals(BladeTokenId.T_BLADE_PHP)){
+            formatTokens.add(new FormatToken.PhpBladeToken(FormatToken.Kind.WHITESPACE_BEFORE_BLADE_PHP_BODY, ts.offset(),
+                    ts.token().text().toString()));
+            //formatTokens.add(new FormatToken(FormatToken.Kind.TEXT, ts.offset(), ts.token().text().toString()));
+        }
+        
+        moveNext();
+        id = ts.token().id();
+        tText = ts.token().text().toString();
+        
+        if (tText.equals("@endphp")) {
+            formatTokens.add(new FormatToken.PhpBladeToken(FormatToken.Kind.WHITESPACE_BEFORE_BLADE_PHP, ts.offset(),
+                    ts.token().text().toString()));
+            //formatTokens.add(new FormatToken(FormatToken.Kind.TEXT, ts.offset(), ts.token().text().toString()));
+         }
+    }
+
+    private void addDirectiveBlockWSTokens(DirectiveExpressionBlock node) {
+        BladeTokenId id = ts.token().id();
+        String tText = ts.token().text().toString();
+
+        if (!tText.startsWith("@")) {
+            ts.movePrevious();
+            if (ts.token() == null) {
+                return;
+            }
+            tText = ts.token().text().toString();
+
+            if (!tText.startsWith("@")) {
+                return;
+            }
+        }
+
         setBlockLineInlineStatus(node);
-        //addAllUntilOffset(node.getStartOffset());
-        formatTokens.add(new FormatToken(FormatToken.Kind.WHITESPACE_BEFORE_DIRECTIVE_START_TAG, ts.offset()));
+        formatTokens.add(new FormatToken.WsDirectiveToken(FormatToken.Kind.WHITESPACE_BEFORE_DIRECTIVE_START_TAG,
+                ts.offset(), ts.token().text().toString()));
         formatTokens.add(new FormatToken(FormatToken.Kind.TEXT, ts.offset(), ts.token().text().toString()));
+
+        while (moveNext() && ts.offset() < node.getArgumentExpression().getStartOffset() - 1) {
+            BladeTokenId btid = ts.token().id();
+            String tt = ts.token().text().toString();
+            if (isWhitespaceToken(btid) && lastWhitespaceOffset != ts.offset()) {
+                lastWhitespaceOffset = ts.offset();
+                formatTokens.addAll(resolveWhitespaceTokens());
+            }
+        }
+
+        //left paren
+        ts.move(node.getArgumentExpression().getStartOffset() - 1);
+        if (!ts.movePrevious()){
+            moveNext();
+        }
+
+        if (ts.token() == null) {
+            return;
+        }
+        String text = ts.token().text().toString();
+        int offset = ts.offset();
+
+        if (ts.token().id().equals(BladeTokenId.BLADE_PHP_TOKEN)) {
+            formatTokens.add(new FormatToken(FormatToken.Kind.WHITESPACE_BEFORE_DIRECTIVE_PAREN, ts.offset()));
+            formatTokens.add(new FormatToken(FormatToken.Kind.TEXT, ts.offset(), ts.token().text().toString()));
+        }
+
+        //right paren
+        ts.move(node.getArgumentExpression().getEndOffset());
+        ts.movePrevious();
+        Token token = ts.token();
+        text = ts.token().text().toString();
+        if (ts.token().id().equals(BladeTokenId.BLADE_PHP_TOKEN)) {
+            formatTokens.add(new FormatToken(FormatToken.Kind.TEXT, ts.offset(), ts.token().text().toString()));
+            //formatTokens.add(new FormatToken(FormatToken.Kind.WHITESPACE_AFTER_DIRECTIVE_PAREN, ts.offset()));
+            if (!blockIsInline) {
+                formatTokens.add(new FormatToken.IndentToken(ts.offset(), options.indentSize));
+            }
+        }
+
         if (node.getBody() != null) {
             scan(node.getBody().getStatements());
         }
+
+        //TODO check for whitespace 
+        if (formatTokens.size() > 1) {
+            FormatToken lastFormatToken = formatTokens.get(formatTokens.size() - 1);
+            int lastoffset = lastFormatToken.getOffset();
+            ts.move(lastoffset);
+            while (moveNext() && ts.offset() < node.getEndOffset()) {
+                BladeTokenId btid = ts.token().id();
+                String tt = ts.token().text().toString();
+                if (isWhitespaceToken(btid) && lastWhitespaceOffset != ts.offset()) {
+                    lastWhitespaceOffset = ts.offset();
+                    formatTokens.addAll(resolveWhitespaceTokens());
+                }
+            }
+        }
+
+        ts.move(node.getEndOffset());
+
+        if (ts.movePrevious()) {
+            String endTag = ts.token().text().toString();
+            if (!blockIsInline) {
+                formatTokens.add(new FormatToken(FormatToken.Kind.WHITESPACE_DECREMENT_INDENT, ts.offset()));
+            }
+            formatTokens.add(new FormatToken.WsDirectiveToken(FormatToken.Kind.WHITESPACE_BEFORE_DIRECTIVE_ENDTAG, ts.offset(),
+                    ts.token().text().toString()));
+            formatTokens.add(new FormatToken(FormatToken.Kind.TEXT, ts.offset(), ts.token().text().toString()));
+            formatTokens.add(new FormatToken(FormatToken.Kind.WHITESPACE_AFTER_DIRECTIVE_ENDTAG, ts.offset()));
+        }
+
         moveNext();
     }
 
-    private boolean isTreatedAsHtml(BladeTokenId id){
-        switch (id){
+    private void addDirectiveInlineWSTokens(InlineDirectiveStatement node) {
+        BladeTokenId id = ts.token().id();
+        String tText = ts.token().text().toString();
+
+        if (!tText.startsWith("@")) {
+            ts.movePrevious();
+            if (ts.token() == null) {
+                return;
+            }
+            tText = ts.token().text().toString();
+
+            if (!tText.startsWith("@")) {
+                return;
+            }
+        }
+
+        id = ts.token().id();
+        if (insideHtmlElementTag){
+            formatTokens.add(new FormatToken(FormatToken.Kind.WHITESPACE_BEFORE_DIRECTIVE_TAG_INSIDE_HTML_TAG, ts.offset()));
+        } else {
+            formatTokens.add(new FormatToken.WsDirectiveToken(FormatToken.Kind.WHITESPACE_BEFORE_DIRECTIVE_TAG, ts.offset(), ts.token().text().toString()));
+        }
+        formatTokens.add(new FormatToken(FormatToken.Kind.TEXT, ts.offset(), ts.token().text().toString()));
+
+        //left paren
+        ts.move(node.getArgumentExpression().getStartOffset() - 1);
+        ts.movePrevious();
+
+        while (ts.token().id() != BladeTokenId.BLADE_PHP_TOKEN
+                && ts.offset() < node.getArgumentExpression().getStartOffset()) {
+            moveNext();
+        }
+
+        String text = ts.token().text().toString();
+        int offset = ts.offset();
+
+        if (ts.token().id().equals(BladeTokenId.BLADE_PHP_TOKEN)) {
+            formatTokens.add(new FormatToken(FormatToken.Kind.WHITESPACE_BEFORE_DIRECTIVE_PAREN, ts.offset()));
+            formatTokens.add(new FormatToken(FormatToken.Kind.TEXT, ts.offset(), ts.token().text().toString()));
+        }
+
+        //right paren
+        ts.move(node.getArgumentExpression().getEndOffset());
+        ts.movePrevious();
+        Token token = ts.token();
+        text = ts.token().text().toString();
+        if (ts.token().id().equals(BladeTokenId.T_BLADE_PHP_VAR)) {
+            moveNext();
+        }
+        if (ts.token() == null) {
+            return;
+        }
+        if (ts.token().id().equals(BladeTokenId.BLADE_PHP_TOKEN)) {
+            formatTokens.add(new FormatToken(FormatToken.Kind.TEXT, ts.offset(), ts.token().text().toString()));
+        }
+    }
+
+    private boolean isTreatedAsHtml(BladeTokenId id) {
+        switch (id) {
             case T_HTML:
             case NEWLINE:
             case WHITESPACE:
@@ -329,7 +659,16 @@ public class FormatVisitor implements Visitor {
         }
         return false;
     }
-    
+
+    private boolean isWhitespaceToken(BladeTokenId id) {
+        switch (id) {
+            case NEWLINE:
+            case WHITESPACE:
+                return true;
+        }
+        return false;
+    }
+
     public List<FormatToken> getFormatTokens() {
         return formatTokens;
     }
@@ -473,13 +812,13 @@ public class FormatVisitor implements Visitor {
 
                 //statement whitespace before left paren
                 if (TokenUtilities.textEquals("(", txt)) { // NOI18N
-                    if (parent instanceof DirectiveBladeBlock || parent instanceof BladeProgram) {
+                    if (parent instanceof DirectiveExpressionBlock || parent instanceof BladeProgram) {
                         tokens.add(new FormatToken(FormatToken.Kind.WHITESPACE_BEFORE_DIRECTIVE_PAREN, ts.offset()));
                         tokens.add(new FormatToken(FormatToken.Kind.TEXT, ts.offset(), ts.token().text().toString()));
                     }
                 } else if (TokenUtilities.textEquals(")", txt)) {
                     //to do check if the directive is a block tag
-                    if (parent instanceof DirectiveBladeBlock) {
+                    if (parent instanceof DirectiveExpressionBlock) {
                         if (indent > 0) {
                             if (inlineState) {
                                 indent = 0;//reset
@@ -651,6 +990,5 @@ public class FormatVisitor implements Visitor {
         }
         return hasNewline;
     }
-
 
 }

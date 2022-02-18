@@ -131,7 +131,7 @@ public class FormatVisitor1 extends DefaultVisitor {
     }
 
     @Override
-    public void visit(DirectiveBladeBlock node) {
+    public void visit(DirectiveExpressionBlock node) {
 
         scan(node.getBody().getStatements());
     }
@@ -322,13 +322,13 @@ public class FormatVisitor1 extends DefaultVisitor {
 
                 //statement whitespace before left paren
                 if (TokenUtilities.textEquals("(", txt)) { // NOI18N
-                    if (parent instanceof DirectiveBladeBlock || parent instanceof BladeProgram) {
+                    if (parent instanceof DirectiveExpressionBlock || parent instanceof BladeProgram) {
                         tokens.add(new FormatToken(FormatToken.Kind.WHITESPACE_BEFORE_DIRECTIVE_PAREN, ts.offset()));
                         tokens.add(new FormatToken(FormatToken.Kind.TEXT, ts.offset(), ts.token().text().toString()));
                     }
                 } else if (TokenUtilities.textEquals(")", txt)) {
                     //to do check if the directive is a block tag
-                    if (parent instanceof DirectiveBladeBlock) {
+                    if (parent instanceof DirectiveExpressionBlock) {
                         if (indent > 0) {
                             if (inlineState) {
                                 indent = 0;//reset

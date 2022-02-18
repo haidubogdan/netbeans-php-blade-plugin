@@ -6,6 +6,7 @@ import java.io.StringReader;
 import java.util.List;
 import java_cup.runtime.Symbol;
 import org.junit.Test;
+import org.netbeans.api.editor.document.LineDocumentUtils;
 import org.netbeans.api.lexer.Language;
 import org.netbeans.api.lexer.Token;
 import org.netbeans.api.lexer.TokenId;
@@ -45,7 +46,7 @@ public class FormatVisitorTest extends BladeTestBase {
         super.tearDown();
     }
 
-    protected String createResult(TokenSequence<?> ts, List<FormatToken> formatTokens) throws Exception {
+    protected String createResult(BaseDocument doc, TokenSequence<?> ts, List<FormatToken> formatTokens) throws Exception {
         StringBuilder result = new StringBuilder();
         int index = 0;
         while (index < formatTokens.size()) {
@@ -62,51 +63,41 @@ public class FormatVisitorTest extends BladeTestBase {
                 result.append(BladeLexerUtils.replaceLinesAndTabs(text.toString()));
                 result.append("\n");
             }
+//            int newLineIndex = 0;
+//            int indentOffset = 0;
+//            
+//            while (tokenF.getOldText()!= null && newLineIndex < tokenF.getOldText().length() && 
+//                    tokenF.getOldText().charAt(newLineIndex) == '\n'){
+//                newLineIndex++;
+//                indentOffset++;
+//            }
+            int textLength = 0;
+            if (tokenF.getOldText()!= null){
+                textLength = tokenF.getOldText().length();
+            }
             result.append("\t");
+            int lineNr = LineDocumentUtils.getLineStart(doc, tokenF.getOffset());
+            result.append(" - offset line - ");
+            result.append(lineNr);
+            if (textLength > 0){
+                int lineNrEnd = LineDocumentUtils.getLineStart(doc, tokenF.getOffset() + textLength);
+                if (lineNrEnd != lineNr){
+                    result.append("(");
+                    result.append(lineNrEnd);
+                    result.append(")");
+                }
+            }
+            result.append(" - ");
             result.append(tokenF.getId());
             result.append(" - ");
             result.append(tokenF.getOffset());
-            result.append(" ");
+            result.append(" <<");
             result.append(tokenF.getOldText());
+            result.append(">>");
             result.append("\n");
             index++;
         }
 
-//        ts.move(0);
-//        while (ts.moveNext()) {
-//            TokenId tokenId = ts.token().id();
-//            CharSequence text = ts.token().text();
-//            result.append(ts.index());
-//            result.append(" ");
-//            result.append(tokenId.name());
-//            result.append(" ");
-//            result.append(BladeLexerUtils.replaceLinesAndTabs(text.toString()));
-//            result.append("\n");
-//            FormatToken tokenF = formatTokens.size() > index ?  formatTokens.get(index) : null;
-//            //index not 1 on 1 with formatIndex
-//            if (tokenF != null && tokenF.getOldText() == null) {
-//                result.append("i - ");
-//                result.append(index);
-//                 result.append(" ");
-//                result.append("FtList:\n");
-//                while(index < formatTokens.size() && tokenF.getOldText() == null) {
-//                    tokenF = formatTokens.get(index);
-//                    result.append("\t");
-//                    result.append(tokenF.getId());
-//                    result.append(" - ");
-//                    result.append(tokenF.getOffset());
-//                    result.append(" ");
-//                    result.append(tokenF.getOldText());
-//                    result.append("\n");
-//                    index++;
-//                }
-//            } else {
-//                index++;
-//            }
-//
-////            assertEquals(tokenTS.text().toString(), tokenF.getOldText());
-////            assertEquals(ts.offset(), tokenF.getOffset());
-//        }
         return result.toString();
     }
 
@@ -120,7 +111,7 @@ public class FormatVisitorTest extends BladeTestBase {
 
 //        FakeFileObject file = parsingUtils.createFileObject(content);
 //        BaseDocument doc = (BaseDocument) parsingUtils.openDocument(fo);
-        BaseDocument doc = getDocument("text", BladeLanguage.BLADE_MIME_TYPE, BladeTokenId.language());
+        BaseDocument doc = getDocument(content, BladeLanguage.BLADE_MIME_TYPE, BladeTokenId.language());
         TokenFormatter.DocumentOptions docOptions = new TokenFormatter.DocumentOptions(doc);
         FormatVisitor formatVisitor = new FormatVisitor(doc, ts, docOptions, 0, 0, doc.getLength());
         ASTBladeScanner scanner = new ASTBladeScanner(new StringReader(content));
@@ -133,7 +124,7 @@ public class FormatVisitorTest extends BladeTestBase {
         formatVisitor.scan(program);
         List<FormatToken> formatTokens = formatVisitor.getFormatTokens();
 
-        return createResult(ts, formatTokens);
+        return createResult(doc, ts, formatTokens);
     }
 
     protected void performTest(String filename) throws Exception {
