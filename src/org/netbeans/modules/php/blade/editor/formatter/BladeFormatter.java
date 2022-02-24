@@ -44,6 +44,7 @@ package org.netbeans.modules.php.blade.editor.formatter;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.SwingUtilities;
 import javax.swing.text.Document;
 import org.netbeans.api.lexer.TokenHierarchy;
 import org.netbeans.api.lexer.TokenSequence;
@@ -69,9 +70,14 @@ public class BladeFormatter implements Formatter {
     @Override
     public void reformat(Context context, ParserResult info) {
         long start = System.currentTimeMillis();
-
-        (new TokenFormatter()).reformat(context, info);
-
+        Runnable rn = new Runnable() {
+            @Override
+            public void run() {
+                (new TokenFormatter()).reformat(context, info);
+            }
+        };
+        //wait until html indent is finished
+        SwingUtilities.invokeLater(rn);
         if (LOGGER.isLoggable(Level.FINE)) {
             long end = System.currentTimeMillis();
             LOGGER.log(Level.FINE, "Reformat took: {0} ms", (end - start)); //NOI18N
@@ -86,14 +92,6 @@ public class BladeFormatter implements Formatter {
             Indentation indent = new IndentationCounter((BaseDocument) context.document()).count(context.caretOffset());
             indent.modify(context);
         }
-    }
-
-    private static void removeTrailingSpaces() {
-
-    }
-
-    private void indentLine() {
-
     }
 
     @Override

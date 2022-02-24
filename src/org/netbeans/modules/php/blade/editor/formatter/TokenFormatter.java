@@ -3,6 +3,7 @@ package org.netbeans.modules.php.blade.editor.formatter;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.List;
+import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Level;
@@ -13,8 +14,6 @@ import org.netbeans.api.editor.EditorRegistry;
 import org.netbeans.api.editor.document.LineDocumentUtils;
 import org.netbeans.api.lexer.TokenSequence;
 import org.netbeans.editor.BaseDocument;
-import org.netbeans.editor.CharSeq;
-import org.netbeans.editor.Utilities;
 import org.netbeans.modules.csl.spi.GsfUtilities;
 import org.netbeans.modules.csl.spi.ParserResult;
 import org.netbeans.modules.editor.indent.spi.Context;
@@ -22,7 +21,7 @@ import org.netbeans.modules.php.blade.editor.lexer.BladeLexerUtils;
 import org.netbeans.modules.php.blade.editor.lexer.BladeTokenId;
 import org.netbeans.modules.php.blade.editor.parsing.BladeParserResult;
 import org.netbeans.spi.lexer.MutableTextInput;
-import org.openide.util.Exceptions;
+
 
 /**
  * TODO INCOMPLETE CURRENT ISSUES html indent
@@ -72,7 +71,7 @@ public class TokenFormatter {
         final BaseDocument doc = (BaseDocument) formatContext.document();
         final BladeParserResult bladeParseResult = ((BladeParserResult) info);
         final DocumentOptions docOptions = new DocumentOptions(doc);
-
+        
         doc.runAtomic(new Runnable() {
             @Override
             public void run() {
@@ -116,6 +115,7 @@ public class TokenFormatter {
                 boolean lastH = false;
                 int changeOffset = -1;
                 boolean stopReplace = false;
+
                 Whitespace ws;
                 FormatToken formatToken;
                 FormatToken lastIndentToken = null;
@@ -129,6 +129,7 @@ public class TokenFormatter {
                         FormatToken.Kind id = formatToken.getId();
                         changeOffset = formatToken.getOffset();
                         int spaceCount = 0;
+                        int totalIndent = 0;
                         switch (id) {
                             case WHITESPACE:
                                 lastWhitespaceToken = formatToken;
@@ -174,7 +175,7 @@ public class TokenFormatter {
                                                 }
                                             }
                                         }
-                                        int totalIndent = indent + htmlIndent - decrementOffset;
+                                        totalIndent = indent + htmlIndent - decrementOffset;
                                         if (totalIndent > 0) {
                                             if (spaceCount < totalIndent) {
                                                 insert(changeOffset, delta, new String(new char[totalIndent]).replace("\0", " "));
@@ -205,7 +206,25 @@ public class TokenFormatter {
                                 }
                                 break;
                             case WHITESPACE_BEFORE_HTML:
-                                //can't override the html formatting
+                                Map<Integer, Integer> suggestedLineIndents = (Map<Integer, Integer>) doc.getProperty("AbstractIndenter.lineIndents"); // NOI18N
+                                try {
+                                    int lineNumber = LineDocumentUtils.getLineIndex(doc, changeOffset);
+                                    Integer suggestedIndent = suggestedLineIndents != null
+                                            ? suggestedLineIndents.get(lineNumber)
+                                            : Integer.valueOf(0);
+                                    if (suggestedIndent == null) {
+                                        suggestedIndent = suggestedLineIndents.get(lineNumber + 1) != null
+                                                ? suggestedLineIndents.get(lineNumber + 1)
+                                                : Integer.valueOf(0);
+                                    }
+                                    if (suggestedIndent < indent){
+                                        insert(changeOffset - 1, delta, new String(new char[indent]).replace("\0", " "));
+                                    }
+                                    int ddd = 3;
+                                } catch (BadLocationException ex) {
+                                    
+                                }
+                               
                                 break;
                             case WHITESPACE_DECREMENT_INDENT:
                                 indent -= 4;
@@ -220,84 +239,51 @@ public class TokenFormatter {
                                 }
                                 break;
                             case WHITESPACE_BEFORE_BLADE_PHP:
+                                break;
                             case WHITESPACE_BEFORE_BLADE_PHP_BODY:
-                                int xxx = 1;
-                                if (lastIndentToken != null && lastIndentToken.isWhitespace()) {
-                                    String whitespace = lastIndentToken.getOldText();
-                                    if (whitespace != null && whitespace.length() > 1) {
-                                        for (char c : whitespace.toCharArray()) {
-                                            if (c == ' ') {
-                                                spaceCount++;
-                                            }
+                                totalIndent = indent + htmlIndent;
+                                FormatToken.PhpBladeToken phpFormatToken = (FormatToken.PhpBladeToken) formatToken;
+                                String phpCode = phpFormatToken.getText();
+                                int endOffset = changeOffset + phpCode.length();
+                                int nrLines = LineDocumentUtils.getLineCount(doc, changeOffset, endOffset);
+                                try {
+                                    int lineIndex = LineDocumentUtils.getLineIndex(doc, changeOffset);
+                                    int startLine = LineDocumentUtils.getLineStartFromIndex(doc, lineIndex);
+                                    int wordStart = LineDocumentUtils.getWordStart(doc, startLine);
+                                    String word = LineDocumentUtils.getWord(doc, wordStart);
+
+                                    for (int i = 0; i < nrLines; i++) {
+                                        startLine = LineDocumentUtils.getLineStartFromIndex(doc, lineIndex);
+
+                                        if (LineDocumentUtils.isLineWhitespace(doc, startLine)) {
+                                            lineIndex++;
+                                            continue;
                                         }
-                                    }
-                                    int totalIndent = indent + htmlIndent;
-                                    if (totalIndent > 0) {
-                                        if (spaceCount < totalIndent) {
-                                            insert(changeOffset, delta, new String(new char[totalIndent]).replace("\0", " "));
-                                        } else {
-                                            if (lastFormatToken != null
-                                                    && lastFormatToken instanceof FormatToken.PhpBladeToken) {
-                                                FormatToken.PhpBladeToken phpFormatToken = (FormatToken.PhpBladeToken) lastFormatToken;
-                                                if (id.equals(FormatToken.Kind.WHITESPACE_BEFORE_BLADE_PHP_BODY)) {
-                                                    String phpCode = phpFormatToken.getText();
-//                                                    int startLine = LineDocumentUtils.getLineStart(doc, changeOffset);
-                                                    int nrLines = LineDocumentUtils.getLineCount(doc, changeOffset, changeOffset + phpCode.length());
-                                                    
-                                                    try {
-                                                        
-                                                        int lineOffset = changeOffset;
-                                                        int lineIndex = LineDocumentUtils.getLineIndex(doc, changeOffset);
-//                                                        int nextNonNewLine = LineDocumentUtils.getNextNonNewline(doc, changeOffset);
-//                                                        String word = LineDocumentUtils.getWord(doc, nextNonNewLine);
-                                                        int bodyEnd = LineDocumentUtils.getLineEnd(doc, changeOffset + phpCode.length());
-                                                        for (int i = 0; i< nrLines; i++){
-                                                            int startLine = LineDocumentUtils.getLineStartFromIndex(doc, lineIndex);
-                                                            String word = LineDocumentUtils.getWord(doc, startLine);
-                                                            if (word.equals("\n")){
-                                                                word = LineDocumentUtils.getWord(doc, startLine + 1);
-                                                            }
-                                                            lineIndex++;
-//                                                            int nextNonNewLine = LineDocumentUtils.getNextNonNewline(doc, lineOffset);
-//                                                            int startLine = LineDocumentUtils.getLineStart(doc, lineOffset);
-//                                                            int lEnd = LineDocumentUtils.getLineEnd(doc, lineOffset);
-//                                                            String word = LineDocumentUtils.getWord(doc, nextNonNewLine);
-//                                                            String wordEnd = LineDocumentUtils.getWord(doc, lEnd);
-//                                                            lineOffset = lEnd;
-//                                                            if (word.length() < totalIndent || word.trim().length() == 0) {
-//                                                                insert(startLine, delta, new String(new char[totalIndent]).replace("\0", " "));
-//                                                            }
-                                                        }
-                                                        int sddsds = 1;
-                                                    } catch (BadLocationException ex){
-                                                        
-                                                    }
-                                                    
-                                                    int indentOffset = 0;
-//                                                    int newLineIndex = 0;
-//                                                    spaceCount = 0;
-//                                                    while (newLineIndex < phpFormatToken.getText().length()
-//                                                            && phpFormatToken.getText().charAt(newLineIndex) == '\n') {
-//                                                        newLineIndex++;
-//                                                        indentOffset++;
-//                                                    }
-//                                                    if (indentOffset < phpFormatToken.getText().length()) {
-//                                                        while (indentOffset < phpFormatToken.getText().length()
-//                                                            && phpFormatToken.getText().charAt(indentOffset) == ' ') {
-//                                                            spaceCount++;
-//                                                        }
-//                                                        if (spaceCount < totalIndent) {
-//                                                            insert(changeOffset, delta, new String(new char[totalIndent]).replace("\0", " "));
-//                                                        }
-//                                                    }
-                                                    
-                                                }
-                                            }
+
+                                        wordStart = LineDocumentUtils.getWordStart(doc, startLine);
+                                        word = LineDocumentUtils.getWord(doc, wordStart);
+                                        if (word.equals("\n")) {
+                                            wordStart = LineDocumentUtils.getNextWordStart(doc, wordStart);
+                                            word = LineDocumentUtils.getWord(doc, wordStart);
+                                            startLine = wordStart;
                                         }
+
+                                        int diffOffset = totalIndent - word.length();
+
+                                        if (diffOffset > 0 || word.trim().length() > 0) {
+                                            String whitespace = new String(new char[diffOffset]).replace("\0", " ");
+                                            doc.insertString(wordStart, whitespace, null);
+                                            delta += whitespace.length();
+                                        }
+                                        lineIndex++;
                                     }
+                                } catch (BadLocationException ex) {
+
                                 }
+                                int xxx = 1;
                                 break;
                         }
+
                         //countSpaces = 3;
                         //replace(formatToken.getOffset(), countSpaces, "  ");
                         lastFormatToken = formatToken;
@@ -348,7 +334,6 @@ public class TokenFormatter {
                 return startLine == endLine;
             }
         });
-        int dddd = 3;
     }
 
     private static class Whitespace {

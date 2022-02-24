@@ -230,10 +230,7 @@ import org.netbeans.modules.php.blade.editor.common.ByteStack;
 %state ST_PHP_IF_EXPR
 %state ST_PHP_LOOKING_FOR_IF_EXPR
 %state ST_PHP_LOOKING_FOR_LOOP_EXPR
-%state ST_DIRECTIVE_ARG
-%state ST_CLOSE_PARANTHEIS
-%state ST_STRING_DQUOTE
-%state ST_STRING_SQUOTE
+%state ST_AFTER_DIRECTIVE_ARG
 
 WHITESPACE=[ \t\r\n]+
 NEWLINE=("\r"|"\n"|"\r\n")
@@ -415,6 +412,7 @@ CLOSE_BLADE_PHP = "@endphp";
     return BladeTokenId.T_BLADE_ENDPHP;
 }
 
+/* layout tokens */
 
 <ST_HTML> "@yield" {
 	pushState(ST_PHP_LOOKING_FOR_DIRECTIVE_ARG);
@@ -444,6 +442,8 @@ CLOSE_BLADE_PHP = "@endphp";
     return BladeTokenId.T_BLADE_EXTENDS;
 }
 
+
+/* loop statements */
 
 <ST_HTML> "@foreach" {
     pushState(ST_PHP_LOOKING_FOR_LOOP_EXPR);
@@ -485,9 +485,19 @@ CLOSE_BLADE_PHP = "@endphp";
     parenBalanceInDirective--;
     String yytext = yytext();
     if (parenBalanceInDirective == 0){
-        yybegin(ST_HTML);
+        yybegin(ST_AFTER_DIRECTIVE_ARG);
     }
     return BladeTokenId.BLADE_PHP_TOKEN;
+}
+
+<ST_AFTER_DIRECTIVE_ARG>{WHITESPACE} {
+	yybegin(ST_HTML);
+	return BladeTokenId.WHITESPACE;
+}
+
+<ST_AFTER_DIRECTIVE_ARG>{ANY_CHAR} {
+	yypushback(yylength());
+	yybegin(ST_HTML);
 }
 
 <ST_PHP_LOOKING_FOR_DIRECTIVE_ARG>\" | ">" {
@@ -497,6 +507,7 @@ CLOSE_BLADE_PHP = "@endphp";
 }
 
 <ST_PHP_LOOKING_FOR_DIRECTIVE_ARG>{NEWLINE}+ {
+	//unfinished directive arg
 	yybegin(ST_HTML);
     return BladeTokenId.WHITESPACE;
 }
@@ -506,7 +517,7 @@ CLOSE_BLADE_PHP = "@endphp";
     parenBalanceInDirective--;
     String yytext = yytext();
     if (yylength() == 1 && parenBalanceInDirective == 0){
-        yybegin(ST_HTML);
+        yybegin(ST_AFTER_DIRECTIVE_ARG);
         return BladeTokenId.BLADE_PHP_TOKEN;
     }
     if (parenBalanceInDirective <= 0){
@@ -549,7 +560,7 @@ CLOSE_BLADE_PHP = "@endphp";
 }
 
 <ST_BLADE_ARGUMENT>{ANY_CHAR} {
-	
+	//search for next tokens
 }
 
 <ST_LOOKING_FOR_SECOND_PARAMETER>"(" {
@@ -567,7 +578,7 @@ CLOSE_BLADE_PHP = "@endphp";
     parenBalanceInDirective--;
     if (yylength() == 1){
     	parenBalanceInDirective=0;
-        yybegin(ST_HTML);
+        yybegin(ST_AFTER_DIRECTIVE_ARG);
         return BladeTokenId.BLADE_PHP_TOKEN;
     }
     if (parenBalanceInDirective <= 0){
@@ -580,20 +591,8 @@ CLOSE_BLADE_PHP = "@endphp";
 	//second param state
 }
 
-
 <ST_PHP_LOOKING_FOR_IF_EXPR, ST_PHP_LOOKING_FOR_LOOP_EXPR>{WHITESPACE}+"(" {
 	String yytext = yytext();
-	switch (zzLexicalState) {
-            case ST_PHP_LOOKING_FOR_IF_EXPR:
-                    popState();
-                    pushState(ST_PHP_IF_EXPR);
-                    break;
-            case ST_PHP_LOOKING_FOR_LOOP_EXPR:
-                    popState();
-                    pushState(ST_PHP_LOOP_EXPR);
-                    break;
-	}
-	
 	yypushback(1);
 	return BladeTokenId.WHITESPACE;
 }
@@ -618,7 +617,7 @@ CLOSE_BLADE_PHP = "@endphp";
     String yytext = yytext();
     if (yytext.contains("\n")){
         //finish searching for arguments
-        popState();
+        yybegin(ST_HTML);
     }
     if (isWhitespace()){
     	return BladeTokenId.WHITESPACE;
@@ -630,13 +629,11 @@ CLOSE_BLADE_PHP = "@endphp";
 	//any char directive arg
     String yytext = yytext();
     int debug = 1;
+    //wait until something relevant is found
 }
 
 <ST_PHP_IF_EXPR, ST_PHP_LOOP_EXPR>{WHITESPACE}+ {
-    if (parenBalanceInDirective != 0 && yytext().replaceAll("\\s+","").length() == 1){
-    ///??
-            return BladeTokenId.WHITESPACE;
-    }
+
 }
 
 <ST_PHP_IF_EXPR, ST_PHP_LOOP_EXPR>"(" {
@@ -652,7 +649,7 @@ CLOSE_BLADE_PHP = "@endphp";
     parenBalanceInDirective--;
     if (yylength() == 1){
     	parenBalanceInDirective=0;
-        popState();
+        yybegin(ST_AFTER_DIRECTIVE_ARG);
         return BladeTokenId.BLADE_PHP_TOKEN;
     }
     if (parenBalanceInDirective == 0){
@@ -669,6 +666,7 @@ CLOSE_BLADE_PHP = "@endphp";
 <ST_PHP_IF_EXPR, ST_PHP_LOOP_EXPR>{ANY_CHAR} {
     String yytext = yytext();
     int debug = 1;
+    //wait until something relevant is found
 }
 
 <ST_HTML> "@endforeach" {
@@ -691,77 +689,6 @@ CLOSE_BLADE_PHP = "@endphp";
 
 <ST_HTML>{DIRECTIVE_PREFIX}{WHITESPACE} {
    return BladeTokenId.T_BLADE_DIRECTIVE_PREFIX; 
-}
-
-/*
-<ST_HTML>{DIRECTIVE_PREFIX}{LABEL} {WHITESPACE}* "(" {
-   //this is to fix a possible fatal in php embedding after (:) char
-   pushState(ST_DIRECTIVE_ARG);
-   yypushback(1);
-   return BladeTokenId.T_BLADE_DIRECTIVE; 
-}*/
-
-<ST_DIRECTIVE_ARG>"(" {
-    String yytext = yytext();
-    parenBalanceInDirective++;
-    if (parenBalanceInDirective == 1){
-        //first paranthesis
-    	return BladeTokenId.BLADE_PHP_TOKEN;
-    }
-}
-
-<ST_DIRECTIVE_ARG>")" {
-	String yytext = yytext();
-    if (yylength() == 1){
-       parenBalanceInDirective = 0;
-       popState();
-       return BladeTokenId.BLADE_PHP_TOKEN;
-    }
-    parenBalanceInDirective--;
-    if (parenBalanceInDirective <= 0){
-        if (yylength() == 1){
-           popState();
-           return BladeTokenId.BLADE_PHP_TOKEN;
-        }
-        yypushback(1);
-        popState();
-        pushState(ST_CLOSE_PARANTHEIS);
-        argHasVariable = false;
-		return BladeTokenId.T_DIRECTIVE_ARG;
-    }
-}
-
-<ST_DIRECTIVE_ARG>\" {
-    //can try to remove this state
-    //should add a condition to not include it as a argument
-    String yytext = yytext();
-    int test = 1;
-    if (yylength() == 1){
-        pushState(ST_STRING_DQUOTE);
-    }
-}
-
-<ST_DIRECTIVE_ARG>\' {
-    String yytext = yytext();
-    int test = 1;
-    if (yylength() == 1){
-        pushState(ST_STRING_SQUOTE);
-    }
-}
-
-<ST_DIRECTIVE_ARG>"$"{LABEL} {
-    argHasVariable = true;
-}
-
-<ST_DIRECTIVE_ARG>{ANY_CHAR} {
-	String yytext = yytext();
-	int test = 1;
-}
-
-<ST_CLOSE_PARANTHEIS>")" {
-        String yytext = yytext();
-       popState();
-       return BladeTokenId.BLADE_PHP_TOKEN;
 }
 
 <ST_HTML> {OPEN_ECHO} {
@@ -825,7 +752,9 @@ CLOSE_BLADE_PHP = "@endphp";
     //no break;
 }
 
-<ST_HTML>{ANY_CHAR} {}
+<ST_HTML>{ANY_CHAR} {
+	//wait until something relevent is found
+}
 
 /* ============================================
    Stay in this state until we find a whitespace.
@@ -840,26 +769,6 @@ CLOSE_BLADE_PHP = "@endphp";
         return BladeTokenId.T_HTML;
     }
 }
-
-<ST_STRING_DQUOTE> {
-  \"                             { popState();
-                                   return BladeTokenId.BLADE_PHP_STRING; }
-  [^\"\\]+                       {  }
-  \\\"                           {  }
-  \\                             {  }
-}
-
-<ST_STRING_SQUOTE> {
-  \'                             { popState();
-                                   return BladeTokenId.BLADE_PHP_STRING; }
-  [^\'\\]+                       {  }
-  \\\'                           {  }
-  \\                             {  }
-}
-
-<ST_STRING_SQUOTE, ST_STRING_DQUOTE>{ANY_CHAR} {
-    
-} 
 
 /* ============================================
    This rule must be the last in the section!!

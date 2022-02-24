@@ -133,19 +133,7 @@ public class FormatVisitor implements Visitor {
             ts.move(0);
             ts.moveNext();
             ts.movePrevious();
-            addFormatToken2(formatTokens);
             scan(program.getStatements());
-            FormatToken lastToken = formatTokens.size() > 0
-                    ? formatTokens.get(formatTokens.size() - 1)
-                    : null;
-            while (ts.moveNext()) {
-                if (lastToken == null || lastToken.isWhitespace() || lastToken.getOffset() > ts.offset()) {
-                    if (lastIndex < ts.index()) {
-                        addFormatToken2(formatTokens);
-                        lastToken = formatTokens.get(formatTokens.size() - 1);
-                    }
-                }
-            }
             path.removeFirst();
         }
     }
@@ -284,83 +272,11 @@ public class FormatVisitor implements Visitor {
                     openTagBalance--;
                 }
             }
-            
-            String trimmedContent = content.replaceAll("\\s+$", "");
-            String trimmedWhitespaceContent = content.replaceAll("[ ]+$", "");
-            if (htmlText.trim().endsWith(">")){
-                if (trimmedWhitespaceContent.endsWith("\n")){
-                    int lastNewLine = trimmedContent.lastIndexOf("\n");
-                    int lastOpeningTag = trimmedContent.lastIndexOf("<");
-                    int lastClosingOpeningTag = trimmedContent.lastIndexOf("</");
-                    int countSpaces = 0;
-                    if (lastNewLine > 0 && lastNewLine < lastOpeningTag &&
-                        lastClosingOpeningTag < lastOpeningTag){
-                        for (int i = lastNewLine + 1; i < lastOpeningTag; i++) {
-                            if (!Character.isWhitespace(trimmedContent.charAt(i))) {
-                                break;
-                            }
-                            countSpaces++;
-                        }
-                    }
-                    countSpaces = Math.max(countSpaces, 4);
-                    formatTokens.add(new FormatToken.HtmlIndentToken(ts.offset(), countSpaces));
-                }
-            }
+           
             insideHtmlElementTag = openTagBalance > 0 && tagDetected;
   
             formatTokens.add(new FormatToken(FormatToken.Kind.WHITESPACE_AFTER_HTML, ts.offset()));
         }
-
-        /*
-        if (!isTreatedAsHtml(id)){
-            ts.movePrevious();
-            id = ts.token().id();
-            text = ts.token().text().toString();
-            if (!isTreatedAsHtml(id)){
-                return;
-            }
-            //return;
-        }
-        
-        switch (id) {
-            case T_HTML:
-                String htmlText = ts.token().text().toString();
-                StringTokenizer st = new StringTokenizer(htmlText, "\n", true);
-                //formatTokens.add(new FormatToken(FormatToken.Kind.WHITESPACE_BEFORE_HTML, ts.offset()));
-                formatTokens.add(new FormatToken(FormatToken.Kind.TEXT, ts.offset(), ts.token().text().toString()));
-                while (st.hasMoreTokens()) {
-                    String token = st.nextToken();
-                    if (token.trim().length() == 0) {
-                        int whitespace = 1111;
-                        //whitespace
-                        continue;
-                    }
-                    if (token.trim().length() < 3) {
-                        continue;
-                    }
-                    Matcher mOpen = htmlTagNamePattern.matcher(token);
-                    Matcher mClose = htmlCloseTagNamePattern.matcher(token);
-                    while (mOpen.find()) {
-                        //check if tag name is identable
-                        String tagName = mOpen.group(1);
-                        formatTokens.add(new FormatToken.IndentToken(ts.offset(), options.indentSize));
-                    }
-                    while (mClose.find()) {
-                        String closeTagName = mClose.group(1);
-                        formatTokens.add(new FormatToken(FormatToken.Kind.WHITESPACE_DECREMENT_INDENT, ts.offset()));
-                    }
-                }
-                break;
-            case WHITESPACE:
-            case NEWLINE:
-                int offsetD = ts.offset();
-                if (lastWhitespaceOffset != offsetD){
-                    lastWhitespaceOffset = offsetD;
-                    formatTokens.addAll(resolveWhitespaceTokens());
-                }
-                break;
-        }
-         */
     }
 
     @Override
@@ -650,16 +566,6 @@ public class FormatVisitor implements Visitor {
         }
     }
 
-    private boolean isTreatedAsHtml(BladeTokenId id) {
-        switch (id) {
-            case T_HTML:
-            case NEWLINE:
-            case WHITESPACE:
-                return true;
-        }
-        return false;
-    }
-
     private boolean isWhitespaceToken(BladeTokenId id) {
         switch (id) {
             case NEWLINE:
@@ -673,183 +579,6 @@ public class FormatVisitor implements Visitor {
         return formatTokens;
     }
 
-    private void addAllUntilOffset(int offset) {
-        boolean canMoveNext = moveNext();
-        boolean offsetIsSmaller = ts.offset() < offset;
-        boolean offsetLengthIsSmaller = (ts.offset() + ts.token().length()) <= offset;
-        while (canMoveNext && offsetIsSmaller
-                && offsetLengthIsSmaller) {
-            String text = ts.token().text().toString();
-            int tOffset = ts.offset();
-            addFormatToken2(formatTokens);
-        }
-        ts.movePrevious();
-    }
-
-    private void addAllUntilOffset(int offset, String terminator) {
-        while (moveNext() && ts.offset() < offset
-                && (ts.offset() + ts.token().length()) <= offset
-                && !TokenUtilities.textEquals(ts.token().text(), terminator)) {
-            addFormatToken2(formatTokens);
-        }
-        ts.movePrevious();
-    }
-
-    private void addFormatToken(List<FormatToken> tokens) {
-
-    }
-
-    private void addFormatToken2(List<FormatToken> tokens) {
-        if (lastIndex == ts.index()) {
-            ts.moveNext();
-            return;
-        }
-        lastIndex = ts.index();
-        BladeTokenId id = (BladeTokenId) ts.token().id();
-        ASTNode parent = path.get(0);
-        FormatToken lastToken = formatTokens.size() > 0
-                ? formatTokens.get(formatTokens.size() - 1)
-                : null;
-        if (1 == 1) {
-            return;
-        }
-        switch (id) {
-            case WHITESPACE:
-            case NEWLINE:
-                tokens.addAll(resolveWhitespaceTokens());
-                if (prevTokenId.equals(BladeTokenId.T_HTML)) {
-                    String debug = prevHtmlText;
-                    Pattern pattern = Pattern.compile("<(\\/[\\w\\d\\s]+)>");
-
-                    if (indent < 0) {
-                        formatTokens.add(new FormatToken.IndentToken(ts.offset(), options.indentSize));
-                    } else {
-                        StringTokenizer st = new StringTokenizer(prevHtmlText, "", true);
-                        while (st.hasMoreTokens()) {
-                            String token = st.nextToken();
-                            Matcher matcher = pattern.matcher(token);
-                            int newLines = countOfNewLines(token);
-                            int closingTagCount = 0;
-                            while (matcher.find()) {
-                                closingTagCount++;
-                            }
-                            if (closingTagCount > 0) {
-                                formatTokens.add(new FormatToken.IndentToken(ts.offset(), -closingTagCount * options.indentSize));
-                            } else if (newLines > 0) {
-                                formatTokens.add(new FormatToken.IndentToken(ts.offset(), newLines * options.indentSize));
-                            }
-                            int debug2 = 1;
-                        }
-                    }
-                }
-                break;
-            case T_BLADE_COMMENT:
-                tokens.add(new FormatToken(FormatToken.Kind.WHITESPACE_BEFORE_BLADE_COMMENT, ts.offset()));
-                tokens.add(new FormatToken(FormatToken.Kind.TEXT, ts.offset(), ts.token().text().toString()));
-                break;
-            case T_BLADE_SECTION:
-            //no break
-            case T_BLADE_FOR:
-            //no break
-            case T_BLADE_IF:
-            //no break;    
-            case T_BLADE_FOREACH:
-                //
-                inlineState = blockIsInline;
-                blockState = !blockIsInline;
-                if (!blockIsInline) {
-                    tokens.add(new FormatToken(FormatToken.Kind.WHITESPACE_BEFORE_DIRECTIVE_START_TAG, ts.offset()));
-                } else {
-                    tokens.add(new FormatToken(FormatToken.Kind.WHITESPACE_BEFORE_DIRECTIVE_START_TAG_INLINE, ts.offset()));
-                }
-                tokens.add(new FormatToken(FormatToken.Kind.TEXT, ts.offset(), ts.token().text().toString()));
-                break;
-            case T_BLADE_DIRECTIVE:
-            case T_BLADE_YIELD:
-            case T_BLADE_INCLUDE:
-                inlineState = true;
-                blockState = false;
-                tokens.add(new FormatToken(FormatToken.Kind.WHITESPACE_BEFORE_DIRECTIVE_TAG, ts.offset()));
-                tokens.add(new FormatToken(FormatToken.Kind.TEXT, ts.offset(), ts.token().text().toString()));
-                break;
-            case T_BLADE_ELSEIF:
-            //no break
-            case T_BLADE_ELSE:
-                if (!blockIsInline) {
-                    indent -= options.indentSize;
-                    if (indent < 0) {
-                        tokens.add(new FormatToken(FormatToken.Kind.WHITESPACE_DECREMENT_INDENT, ts.offset()));
-                    } else {
-                        tokens.add(new FormatToken(FormatToken.Kind.WHITESPACE_BEFORE_DIRECTIVE_ELSE, ts.offset()));
-                    }
-                } else {
-                    tokens.add(new FormatToken(FormatToken.Kind.WHITESPACE_BEFORE_DIRECTIVE_ENDTAG_INLINE, ts.offset()));
-                }
-                tokens.add(new FormatToken(FormatToken.Kind.TEXT, ts.offset(), ts.token().text().toString()));
-                break;
-            case T_BLADE_ENDSECTION:
-            //no break
-            case T_BLADE_ENDIF:
-            //no break
-            case T_BLADE_ENDFOR:
-            //no break
-            case T_BLADE_ENDFOREACH:
-                if (!blockIsInline) {
-                    indent -= options.indentSize;
-                    if (indent < 0) {
-                        tokens.add(new FormatToken(FormatToken.Kind.WHITESPACE_DECREMENT_INDENT, ts.offset()));
-                    } else {
-                        tokens.add(new FormatToken(FormatToken.Kind.WHITESPACE_BEFORE_DIRECTIVE_ENDTAG, ts.offset()));
-                    }
-
-                } else {
-                    tokens.add(new FormatToken(FormatToken.Kind.WHITESPACE_BEFORE_DIRECTIVE_ENDTAG_INLINE, ts.offset()));
-                }
-                tokens.add(new FormatToken(FormatToken.Kind.TEXT, ts.offset(), ts.token().text().toString()));
-                break;
-            case BLADE_PHP_TOKEN:
-                CharSequence txt = ts.token().text();
-
-                //statement whitespace before left paren
-                if (TokenUtilities.textEquals("(", txt)) { // NOI18N
-                    if (parent instanceof DirectiveExpressionBlock || parent instanceof BladeProgram) {
-                        tokens.add(new FormatToken(FormatToken.Kind.WHITESPACE_BEFORE_DIRECTIVE_PAREN, ts.offset()));
-                        tokens.add(new FormatToken(FormatToken.Kind.TEXT, ts.offset(), ts.token().text().toString()));
-                    }
-                } else if (TokenUtilities.textEquals(")", txt)) {
-                    //to do check if the directive is a block tag
-                    if (parent instanceof DirectiveExpressionBlock) {
-                        if (indent > 0) {
-                            if (inlineState) {
-                                indent = 0;//reset
-                            }
-                            formatTokens.add(new FormatToken.IndentToken(ts.offset(), options.indentSize));
-                        } else if (blockState) {
-                            indent += options.indentSize;
-                        }
-                    }
-                }
-                break;
-            case T_BLADE_OPEN_ECHO:
-            case T_BLADE_OPEN_ECHO_ESCAPED:
-            case T_BLADE_CLOSE_ECHO:
-            case T_BLADE_CLOSE_ECHO_ESCAPED:
-                tokens.add(new FormatToken(FormatToken.Kind.WHITESPACE_BEFORE_ECHO, ts.offset()));
-                tokens.add(new FormatToken(FormatToken.Kind.TEXT, ts.offset(), ts.token().text().toString()));
-                break;
-            case T_BLADE_PHP_ECHO:
-                tokens.add(new FormatToken(FormatToken.Kind.WHITESPACE_BEFORE_ECHO_VAR, ts.offset()));
-                tokens.add(new FormatToken(FormatToken.Kind.TEXT, ts.offset(), ts.token().text().toString()));
-                //tokens.add(new FormatToken(FormatToken.Kind.WHITESPACE_AFTER_ECHO_VAR, ts.offset()));
-                break;
-            case T_HTML:
-                prevHtmlText = ts.token().text().toString();
-                break;
-            default:
-            //tokens.add(new FormatToken(FormatToken.Kind.TEXT, ts.offset(), ts.token().text().toString()));
-        }
-        prevTokenId = id;
-    }
 
     protected static int findLastNonWhitespaceCharacter(String s) {
         int index = s.length() - 1;

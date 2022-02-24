@@ -107,8 +107,7 @@ public enum BladeTokenId implements TokenId {
     T_PHP_OPEN_ECHO(null, "html"),
     T_BLADE_DIRECTIVE_PREFIX( null, "blade_directive" ),
     NEWLINE(null, "whitespace"),
-    WHITESPACE(null, "whitespace")
-    ;
+    WHITESPACE(null, "whitespace");
     
     private final String fixedText;
     private final String primaryCategory;
