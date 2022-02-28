@@ -207,6 +207,9 @@ public class TokenFormatter {
                                 }
                                 break;
                             case WHITESPACE_BEFORE_HTML:
+                                 if (lastFormatToken != null && lastFormatToken.getId() == FormatToken.Kind.WHITESPACE_AFTER_ECHO) {
+                                     break;
+                                }
                                 int suggestedIndent = suggestedIndent(changeOffset);
                                 if (suggestedIndent < indent){
                                     insert(changeOffset - 1, delta, new String(new char[indent]).replace("\0", " "));

@@ -256,7 +256,7 @@ public class FormatVisitor implements Visitor {
             }
            
             insideHtmlElementTag = openTagBalance > 0 && tagDetected;
-  
+           
             formatTokens.add(new FormatToken(FormatToken.Kind.WHITESPACE_AFTER_HTML, ts.offset()));
         }
     }
@@ -303,6 +303,7 @@ public class FormatVisitor implements Visitor {
         String text = ts.token().text().toString();
         if (ts.token().id().equals(BladeTokenId.T_BLADE_CLOSE_ECHO)) {
             formatTokens.add(new FormatToken(FormatToken.Kind.TEXT, ts.offset(), ts.token().text().toString()));
+            formatTokens.add(new FormatToken(FormatToken.Kind.WHITESPACE_AFTER_ECHO, ts.offset(), ts.token().text().toString()));
         }
     }
 
