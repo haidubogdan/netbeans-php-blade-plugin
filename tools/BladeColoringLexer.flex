@@ -743,11 +743,6 @@ CLOSE_BLADE_PHP = "@endphp";
     return BladeTokenId.T_HTML;
 }
 
-<ST_HTML> {CLOSE_ECHO} | {CLOSE_ECHO_ESCAPED} {
-    String yytext = yytext();
-    return BladeTokenId.T_BLADE_CLOSE_ECHO;
-}
-
 <ST_BLADE_ECHO, ST_BLADE_ECHO_ESCAPED> {WHITESPACE}+ {
     //no break;
 }

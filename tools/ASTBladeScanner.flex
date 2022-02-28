@@ -290,11 +290,6 @@ COMMENT_END="--}}"
     return createFullSymbol(ASTBladeSymbols.T_INLINE_HTML);
 }
 
-<YYINITIAL> {CLOSE_ECHO} | {CLOSE_ECHO_ESCAPED} {
-    String yytext = yytext();
-    return createFullSymbol(ASTBladeSymbols.T_BLADE_CLOSE_ECHO);
-}
-
 <ST_BLADE_ECHO, ST_BLADE_ECHO_ESCAPED> {WHITESPACE}+ {
     //no break;
 }
