@@ -42,7 +42,7 @@ import org.openide.windows.TopComponent;
  *
  * @author bhaidu
  */
-@ServiceProvider(service = ActionsImplementationProvider.class, position = 1060)
+//@ServiceProvider(service = ActionsImplementationProvider.class, position = 1060)
 public class BladeActionsImplementationProvider extends ActionsImplementationProvider {
 //TODO can implement doFindUsages
     private static final RequestProcessor RP = new RequestProcessor(BladeActionsImplementationProvider.class);
