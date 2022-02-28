@@ -35,4 +35,10 @@ public class BladeLexerIssuesTest extends BladeLexerTestBase {
         performTest("issues/javascript_with_directives.blade");
     }
     
+      
+    @Test
+    public void testCurlyIssue3() throws Exception {
+        performTest("issues/curly_issue_3.blade");
+    }
+    
 }
