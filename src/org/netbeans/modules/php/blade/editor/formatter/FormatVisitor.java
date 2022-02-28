@@ -82,24 +82,6 @@ public class FormatVisitor implements Visitor {
         }
     }
 
-    public static Collection<String> HTML_VOID_ELEMENTS = Arrays.asList(
-            "input",
-            "area",
-            "br",
-            "col",
-            "command",
-            "embed",
-            "hr",
-            "img",
-            "keygen",
-            "link",
-            "meta",
-            "param",
-            "source",
-            "track",
-            "wbr"
-    );
-
     public FormatVisitor(BaseDocument document, DocumentOptions documentOptions, final int caretOffset, final int startOffset, final int endOffset) {
         this.document = document;
         ts = BladeLexerUtils.getBladeMarkupTokenSequence(document, 0);

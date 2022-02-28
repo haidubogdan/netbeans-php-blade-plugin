@@ -142,13 +142,14 @@ public class TokenFormatter {
                                     FormatToken.IndentToken indentToken = (FormatToken.IndentToken) formatToken;
                                     indent += indentToken.getDelta();
                                 } else if (formatToken instanceof FormatToken.HtmlIndentToken) {
-                                    FormatToken.HtmlIndentToken indentToken = (FormatToken.HtmlIndentToken) formatToken;
-                                    htmlIndent = indentToken.getDelta();
+                                    //FormatToken.HtmlIndentToken indentToken = (FormatToken.HtmlIndentToken) formatToken;
+                                    //htmlIndent = indentToken.getDelta();
                                 }
                                 break;
                             case WHITESPACE_BEFORE_DIRECTIVE_START_TAG:
                             case WHITESPACE_BEFORE_DIRECTIVE_TAG:
                             case WHITESPACE_BEFORE_DIRECTIVE_ENDTAG:
+                                htmlIndent = suggestedIndent(changeOffset);
                                 int decrementOffset = 0;
                                 if (id == FormatToken.Kind.WHITESPACE_BEFORE_DIRECTIVE_ENDTAG) {
                                     decrementOffset = 4;
@@ -206,25 +207,10 @@ public class TokenFormatter {
                                 }
                                 break;
                             case WHITESPACE_BEFORE_HTML:
-                                Map<Integer, Integer> suggestedLineIndents = (Map<Integer, Integer>) doc.getProperty("AbstractIndenter.lineIndents"); // NOI18N
-                                try {
-                                    int lineNumber = LineDocumentUtils.getLineIndex(doc, changeOffset);
-                                    Integer suggestedIndent = suggestedLineIndents != null
-                                            ? suggestedLineIndents.get(lineNumber)
-                                            : Integer.valueOf(0);
-                                    if (suggestedIndent == null) {
-                                        suggestedIndent = suggestedLineIndents.get(lineNumber + 1) != null
-                                                ? suggestedLineIndents.get(lineNumber + 1)
-                                                : Integer.valueOf(0);
-                                    }
-                                    if (suggestedIndent < indent){
-                                        insert(changeOffset - 1, delta, new String(new char[indent]).replace("\0", " "));
-                                    }
-                                    int ddd = 3;
-                                } catch (BadLocationException ex) {
-                                    
+                                int suggestedIndent = suggestedIndent(changeOffset);
+                                if (suggestedIndent < indent){
+                                    insert(changeOffset - 1, delta, new String(new char[indent]).replace("\0", " "));
                                 }
-                               
                                 break;
                             case WHITESPACE_DECREMENT_INDENT:
                                 indent -= 4;
@@ -241,6 +227,7 @@ public class TokenFormatter {
                             case WHITESPACE_BEFORE_BLADE_PHP:
                                 break;
                             case WHITESPACE_BEFORE_BLADE_PHP_BODY:
+                                htmlIndent = suggestedIndent(changeOffset);
                                 totalIndent = indent + htmlIndent;
                                 FormatToken.PhpBladeToken phpFormatToken = (FormatToken.PhpBladeToken) formatToken;
                                 String phpCode = phpFormatToken.getText();
@@ -301,6 +288,25 @@ public class TokenFormatter {
 
             private int delta = 0;
             private int indent = 0;
+            
+            private int suggestedIndent(int changeOffset) {
+                Map<Integer, Integer> suggestedLineIndents = (Map<Integer, Integer>) doc.getProperty("AbstractIndenter.lineIndents"); // NOI18N
+                try {
+                    int lineNumber = LineDocumentUtils.getLineIndex(doc, changeOffset);
+                    Integer suggestedIndent = suggestedLineIndents != null
+                            ? suggestedLineIndents.get(lineNumber)
+                            : Integer.valueOf(0);
+                    if (suggestedIndent == null) {
+                        suggestedIndent = suggestedLineIndents.get(lineNumber + 1) != null
+                                ? suggestedLineIndents.get(lineNumber + 1)
+                                : Integer.valueOf(0);
+                    }
+                    return suggestedIndent;
+                } catch (BadLocationException ex) {
+
+                }
+                return 0;
+            }
 
             private void replace(int offset, int deltaOffset, int vlength, String newString) {
                 try {
