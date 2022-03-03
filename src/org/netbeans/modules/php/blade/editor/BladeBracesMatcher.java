@@ -109,7 +109,7 @@ public class BladeBracesMatcher implements BracesMatcher {
                     return new int[]{toffs, toffs + tText.length()};
                 } else if (id == BladeTokenId.T_BLADE_OPEN_ECHO_ESCAPED) {
                     return new int[]{toffs, toffs + tText.length()};
-                } else if (id == BladeTokenId.T_BLADE_COMMENT && tText.equals(BladeLexer.OPEN_COMMENT)) {
+                } else if (id == BladeTokenId.T_BLADE_COMMENT && tText.equals(BladeSyntax.OPEN_COMMENT)) {
                     return new int[]{toffs, toffs + tText.length()};
                 } else if (TOKENS_WITH_ENDTAGS.contains(id)) {
                     return new int[]{toffs, toffs + tText.trim().length()};
