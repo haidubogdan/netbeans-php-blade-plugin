@@ -23,6 +23,9 @@ public class BladeSyntax {
         }
     }
 
+    public static String OPEN_COMMENT = "{{--";
+    public static String CLOSE_COMMENT = "--}}";
+    
     public final static Collection<String> INLINE_DIRECTIVES = Arrays.asList(
         "@include", "@includeIf", "@extends", 
         "@section" //can be inline

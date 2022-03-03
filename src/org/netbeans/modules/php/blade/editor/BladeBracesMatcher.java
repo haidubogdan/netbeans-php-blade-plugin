@@ -164,9 +164,9 @@ public class BladeBracesMatcher implements BracesMatcher {
                 } else if (t.id() == BladeTokenId.T_BLADE_OPEN_ECHO_ESCAPED) {
                     r = BladeLexerUtils.findFwd(ts, BladeTokenId.T_BLADE_CLOSE_ECHO_ESCAPED, "!!}");
                     return new int[]{r.getStart(), r.getEnd()};
-                } else if (t.id() == BladeTokenId.T_BLADE_COMMENT && tText.equals(BladeLexer.OPEN_COMMENT)) {
+                } else if (t.id() == BladeTokenId.T_BLADE_COMMENT && tText.equals(BladeSyntax.OPEN_COMMENT)) {
                     //we just need the end token occurence
-                    r = BladeLexerUtils.findEndFwd(ts, BladeTokenId.T_BLADE_COMMENT, BladeLexer.CLOSE_COMMENT);
+                    r = BladeLexerUtils.findEndFwd(ts, BladeTokenId.T_BLADE_COMMENT, BladeSyntax.CLOSE_COMMENT);
                     return new int[]{r.getStart(), r.getEnd()};
                 } else if (TOKENS_WITH_ENDTAGS.contains(t.id()) || BladeSyntax.DIRECTIVES_WITH_ENDTAGS.contains(tText.trim())) {
                     String name = tText.trim().substring(1);

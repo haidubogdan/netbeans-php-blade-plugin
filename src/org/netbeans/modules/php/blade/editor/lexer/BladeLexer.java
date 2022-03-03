@@ -55,9 +55,6 @@ import org.netbeans.spi.lexer.TokenFactory;
  */
 
 public class BladeLexer implements Lexer<BladeTokenId> {
-    //TODO move to syntex class
-    public static String OPEN_COMMENT = "{{--";
-    public static String CLOSE_COMMENT = "--}}";
     protected final TokenFactory<BladeTokenId> tokenFactory;
     private final BladeColoringLexer scanner;
     protected final LexerInput input;
