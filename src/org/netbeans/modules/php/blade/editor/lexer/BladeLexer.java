@@ -60,8 +60,6 @@ public class BladeLexer implements Lexer<BladeTokenId> {
     protected final LexerInput input;
     
     BladeLexer( LexerRestartInfo<BladeTokenId> info ) {
-        //TODO issues
-        //@forelse lexer coloring
         scanner = new BladeColoringLexer(info);
         tokenFactory = info.tokenFactory();
         input = info.input();
