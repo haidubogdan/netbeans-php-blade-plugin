@@ -1,9 +1,5 @@
 package org.netbeans.modules.php.blade.editor.formatter;
 
-import org.netbeans.api.annotations.common.CheckForNull;
-import org.netbeans.api.annotations.common.NonNull;
-import org.netbeans.modules.php.blade.editor.lexer.BladeTokenId;
-
 /**
  *
  * @author bhaidu
