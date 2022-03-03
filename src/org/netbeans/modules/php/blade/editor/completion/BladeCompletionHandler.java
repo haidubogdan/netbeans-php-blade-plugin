@@ -85,18 +85,15 @@ import org.openide.util.NbBundle;
 public class BladeCompletionHandler implements CodeCompletionHandler2 {
 
     private static final Logger LOGGER = Logger.getLogger(BladeCompletionHandler.class.getSimpleName());
-    static final Map<String, KeywordCompletionType> BLADE_KEYWORDS = new HashMap<>();
-
-    static {
-        //TODO type is redundent
-        BLADE_KEYWORDS.put("@continue", KeywordCompletionType.SIMPLE); //NOI18N
-        BLADE_KEYWORDS.put("@csrf", KeywordCompletionType.SIMPLE); //NOI18N
-        BLADE_KEYWORDS.put("@break", KeywordCompletionType.SIMPLE); //NOI18N
-        BLADE_KEYWORDS.put("@endfor", KeywordCompletionType.SIMPLE); //NOI18N
-        BLADE_KEYWORDS.put("@endif", KeywordCompletionType.SIMPLE); //NOI18N
-        BLADE_KEYWORDS.put("@endforeach", KeywordCompletionType.SIMPLE); //NOI18N
-        BLADE_KEYWORDS.put("@endsection", KeywordCompletionType.SIMPLE); //NOI18N
-    }
+    static final Collection<String> BLADE_KEYWORDS = Arrays.asList(
+        "@continue",
+        "@csrf",
+        "@break",
+        "@endfor",
+        "@endif",
+        "@endforeach",
+        "@endsection"
+    );
 
     static final Map<String, KeywordCompletionType> BLADE_DIRECTIVES = new HashMap<>();
 
@@ -212,8 +209,7 @@ public class BladeCompletionHandler implements CodeCompletionHandler2 {
     }
 
     private void completeKeywords(final List<CompletionProposal> completionProposals, final CompletionRequest request) {
-        List<String> defaultKeywords = new ArrayList<>(BLADE_KEYWORDS.keySet());
-        for (String keyword : defaultKeywords) {
+        for (String keyword : BLADE_KEYWORDS) {
             if (startsWith(keyword, request.prefix)) {
                 completionProposals.add(new BladeCompletionItem.KeywordItem(keyword, request));
             }
