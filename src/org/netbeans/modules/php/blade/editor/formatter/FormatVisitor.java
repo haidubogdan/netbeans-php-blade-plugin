@@ -188,14 +188,19 @@ public class FormatVisitor implements Visitor {
 
     @Override
     public void visit(InLineHtml node) {
-        
-        setBlockLineInlineStatus(node);
+        BladeTokenId id = ts.token().id();
+        String text = ts.token().text().toString();
+        if (text.equals("\n")){
+            //result.add(new FormatToken(FormatToken.Kind.WHITESPACE_INDENT, tokenStartOffset, adjustLastWhitespaceToken(ts.token())));
+            return;
+        }
+        if (id.equals(BladeTokenId.T_HTML)){
+            setBlockLineInlineStatus(node);
+        }
         if (blockIsInline) {
             //insideHtmlElementTag = false;
             //return;
         }
-        BladeTokenId id = ts.token().id();
-        String text = ts.token().text().toString();
         String content = node.getContent();
 
         if (content == null || content.length() == 0 || content.trim().length() == 0) {
@@ -480,6 +485,11 @@ public class FormatVisitor implements Visitor {
 
         if (ts.movePrevious()) {
             String endTag = ts.token().text().toString();
+            if (!endTag.startsWith("@")){
+                //it's not a valid endtag 
+                //TODO treat extends
+                return;
+            }
             if (!blockIsInline) {
                 formatTokens.add(new FormatToken(FormatToken.Kind.WHITESPACE_DECREMENT_INDENT, ts.offset()));
             }

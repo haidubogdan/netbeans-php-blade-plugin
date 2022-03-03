@@ -212,7 +212,8 @@ public class TokenFormatter {
                                 }
                                 int suggestedIndent = suggestedIndent(changeOffset);
                                 if (suggestedIndent < indent){
-                                    insert(changeOffset - 1, delta, new String(new char[indent]).replace("\0", " "));
+                                    //blocking html indent until fixes to inline attributes are fixed
+                                    //insert(changeOffset - 1, delta, new String(new char[indent]).replace("\0", " "));
                                 }
                                 break;
                             case WHITESPACE_DECREMENT_INDENT:
