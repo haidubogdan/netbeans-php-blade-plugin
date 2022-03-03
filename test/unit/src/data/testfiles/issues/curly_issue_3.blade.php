@@ -1,5 +1,5 @@
 {{$xx}}
-<script>
+<script>//test
 var a={a:{}};
-<script>
+</script>
 {{$xx}}
