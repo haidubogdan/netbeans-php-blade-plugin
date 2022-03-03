@@ -140,6 +140,7 @@ public class BladeParser extends Parser {
                     List<Statement> statements = new ArrayList<>();
                     BladeProgram emptyProgram = new BladeProgram(0, end, statements, null);
                     result = new BladeParserResult(context.getSnapshot(), emptyProgram);
+                    //TODO extract the php error syntax
                     result.setErrors(errorHandler.displaySyntaxErrors(emptyProgram));
                 }
             } else {
