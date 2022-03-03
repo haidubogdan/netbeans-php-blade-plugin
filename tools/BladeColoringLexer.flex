@@ -264,7 +264,7 @@ CLOSE_BLADE_PHP = "@endphp";
     return BladeTokenId.WHITESPACE;
 }
 
-<ST_HTML>(([^<@{}]|"<"[^?%(script)<])+)|"<script"|"<" {
+<ST_HTML>(([^<@{}]|"<"[^?%<])+)|"<" {
 	int wstart = 0;
     int firstReverseNW = yytext().length() - 1;
 	  String text = yytext();
@@ -292,10 +292,6 @@ CLOSE_BLADE_PHP = "@endphp";
         String ddText = text.substring(0, firstReverseNW);
         int dd = 1;
     }
-    return BladeTokenId.T_HTML;
-}
-
-<ST_HTML>"<script"{WHITESPACE}+"language"{WHITESPACE}*"="{WHITESPACE}*( "php"|"\"php\""|"\'php\'"){WHITESPACE}*">" {
     return BladeTokenId.T_HTML;
 }
 

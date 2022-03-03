@@ -631,8 +631,7 @@ COMMENT_END="--}}"
 }
 
 
-
-<YYINITIAL>(([^<@{}]|"<"[^?%<!])+)|"<script"|"<" {
+<YYINITIAL>(([^<@{}]|"<"[^?%<!])+)|"<" {
     return createFullSymbol(ASTBladeSymbols.T_INLINE_HTML);
 }
 
