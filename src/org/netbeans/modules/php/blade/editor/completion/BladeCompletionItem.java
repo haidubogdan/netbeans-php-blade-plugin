@@ -62,7 +62,7 @@ public class BladeCompletionItem implements CompletionProposal {
     @Override
     public String getLhsHtml(HtmlFormatter formatter) {
         formatter.name(getKind(), true);
-        formatter.appendHtml("<font color=\"#404040\">");
+        formatter.appendHtml("<font>");
         formatter.appendHtml("<b>");
         formatter.appendText(previewValue);
         formatter.appendHtml("</b>");

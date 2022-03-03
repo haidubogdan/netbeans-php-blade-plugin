@@ -98,7 +98,7 @@ public class CCDocHtmlFormatter extends HtmlFormatter {
 
         if (isType) {
             sb.append("<i>");
-            sb.append("<font color=\"#404040\">");
+            sb.append("<font>");
         } else {
             sb.append("</font>");
             sb.append("</i>");
