@@ -101,7 +101,6 @@ public class BladePhpEmbeddingProvider extends EmbeddingProvider {
               //  embeddings.add(snapshot.create(fake, PHP_MIME_TYPE));
             } else if (id == BladeTokenId.T_BLADE_PHP) {
                 //SEEMS TO WORK VERY STRANGE
-                //TODO avoid embedding ?
                 fake = "<?php " +  tText + "?>" + new String(new char[3]).replace("\0", " ");
                 embeddings.add(snapshot.create(fake, PHP_MIME_TYPE));
             } else if (id == BladeTokenId.T_BLADE_ENDPHP) {
