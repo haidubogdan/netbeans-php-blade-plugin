@@ -279,7 +279,6 @@ public class BladeDeclarationFinder implements DeclarationFinder {
     private DeclarationLocation findBladeViewsLocation(BladeParserResult info, String pathValue, int carretOffset) {
         Model model = info.getModel();
         PathElement elem = new PathElement(pathValue);
-        String bladePath = pathValue + ".blade";
         DeclarationLocation alternatives = DeclarationLocation.NONE;
         if (model != null) {
             org.netbeans.modules.php.blade.editor.model.OccurencesSupport occurencesSupport = model.getOccurencesSupport(info, carretOffset);
@@ -303,9 +302,9 @@ public class BladeDeclarationFinder implements DeclarationFinder {
                     Collection<IndexedElement> bladeViews;
                     bladeViews = index.findBladePathsByPrefix(pathValue, BladeIndex.MatchType.PREFIX);
                     for (IndexedElement bladeView : bladeViews) {
+                        String bladeName = bladeView.getName();
                         FileObject file = bladeView.getFileObject();
-                        String filename = file.getName();
-                        if (!filename.equals(bladePath)){
+                        if (!bladeName.equals(pathValue)){
                             continue;
                         }
                         DeclarationLocation declLocation = new DeclarationLocation(
