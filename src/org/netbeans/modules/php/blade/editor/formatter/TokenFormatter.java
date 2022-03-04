@@ -97,6 +97,7 @@ public class TokenFormatter {
                     LOGGER.log(Level.FINE, "Tokens in TS: {0}", ts.tokenCount());
                     LOGGER.log(Level.FINE, "Format tokens: {0}", formatTokens.size());
                 }
+                
                 MutableTextInput mti = (MutableTextInput) doc.getProperty(MutableTextInput.class);
                 int indent = docOptions.initialIndent;
                 int lastBladeIndent = 0;
@@ -150,6 +151,7 @@ public class TokenFormatter {
                             case WHITESPACE_BEFORE_DIRECTIVE_TAG:
                             case WHITESPACE_BEFORE_DIRECTIVE_ENDTAG:
                                 htmlIndent = suggestedIndent(changeOffset);
+                                htmlIndent = 0;
                                 int decrementOffset = 0;
                                 if (id == FormatToken.Kind.WHITESPACE_BEFORE_DIRECTIVE_ENDTAG) {
                                     decrementOffset = 4;

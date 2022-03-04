@@ -548,7 +548,7 @@ public class FormatVisitor implements Visitor {
         ts.movePrevious();
         Token token = ts.token();
         text = ts.token().text().toString();
-        if (ts.token().id().equals(BladeTokenId.T_BLADE_PHP_VAR)) {
+        if (ts.token() != null && ts.token().id().equals(BladeTokenId.T_BLADE_PHP_VAR)) {
             moveNext();
         }
         if (ts.token() == null) {
