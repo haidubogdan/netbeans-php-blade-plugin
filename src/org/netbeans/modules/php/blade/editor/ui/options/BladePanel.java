@@ -52,7 +52,7 @@ import org.openide.util.NbBundle;
     location = "path",
     tabTitle = "#BladePanel.options.keywords.tabTitle"
 )
-final class BladePanel extends javax.swing.JPanel {
+public final class BladePanel extends javax.swing.JPanel {
 
     private final BladeOptionsPanelController controller;
     private boolean firstOpening = true;

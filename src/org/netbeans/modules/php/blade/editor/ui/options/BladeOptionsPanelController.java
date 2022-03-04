@@ -48,12 +48,15 @@ import org.netbeans.modules.csl.api.UiUtils;
 import org.netbeans.spi.options.OptionsPanelController;
 import org.openide.util.HelpCtx;
 import org.openide.util.Lookup;
+import org.openide.util.NbBundle;
 
-//@UiUtils.PhpOptionsPanelRegistration(
-//    id = BladeOptionsPanelController.ID,
-//    displayName = "#LBL_BladeOptionsName",
-//    position = 1000
-//)
+@NbBundle.Messages("BladeOptionsPanelController.name=Blade")
+@OptionsPanelController.SubRegistration(
+    location = "Html5",
+    id = BladeOptionsPanelController.ID,
+    displayName = "#BladeOptionsPanelController.name",
+    position = 100
+)
 public final class BladeOptionsPanelController extends OptionsPanelController {
 
     static final String ID = "Blade"; // NOI18N

@@ -245,6 +245,15 @@
                     </run-dependency>
                 </dependency>
                 <dependency>
+                    <code-name-base>org.netbeans.modules.projectuiapi</code-name-base>
+                    <build-prerequisite/>
+                    <compile-dependency/>
+                    <run-dependency>
+                        <release-version>1</release-version>
+                        <specification-version>1.101.0.8</specification-version>
+                    </run-dependency>
+                </dependency>
+                <dependency>
                     <code-name-base>org.netbeans.modules.projectuiapi.base</code-name-base>
                     <build-prerequisite/>
                     <compile-dependency/>
@@ -292,6 +301,14 @@
                     <compile-dependency/>
                     <run-dependency>
                         <specification-version>9.18</specification-version>
+                    </run-dependency>
+                </dependency>
+                <dependency>
+                    <code-name-base>org.openide.filesystems.nb</code-name-base>
+                    <build-prerequisite/>
+                    <compile-dependency/>
+                    <run-dependency>
+                        <specification-version>9.23</specification-version>
                     </run-dependency>
                 </dependency>
                 <dependency>
