@@ -340,6 +340,11 @@ COMMENT_END="--}}"
     	return createFullSymbol(ASTBladeSymbols.T_BLADE_EXTENDS); 
     }
 
+    "@append" {
+        popState();
+        return createFullSymbol(ASTBladeSymbols.T_BLADE_APPEND);
+    }
+
     /* include */
     "@include" | "@includeIf" {
        pushState(ST_BLADE_INCLUDE_ARGS);
