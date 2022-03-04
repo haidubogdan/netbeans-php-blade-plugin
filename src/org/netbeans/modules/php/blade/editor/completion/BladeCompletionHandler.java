@@ -92,7 +92,9 @@ public class BladeCompletionHandler implements CodeCompletionHandler2 {
         "@endfor",
         "@endif",
         "@endforeach",
-        "@endsection"
+        "@endsection",
+        "@stop",
+        "@append"
     );
 
     static final Map<String, KeywordCompletionType> BLADE_DIRECTIVES = new HashMap<>();
@@ -100,6 +102,8 @@ public class BladeCompletionHandler implements CodeCompletionHandler2 {
     static {
         BLADE_DIRECTIVES.put("@yield", KeywordCompletionType.WITH_ARG); //NOI18N
         BLADE_DIRECTIVES.put("@push", KeywordCompletionType.WITH_ARG); //NOI18N
+        BLADE_DIRECTIVES.put("@once", KeywordCompletionType.WITH_ARG); //NOI18N
+        BLADE_DIRECTIVES.put("@pushOnce", KeywordCompletionType.WITH_ARG); //NOI18N
         BLADE_DIRECTIVES.put("@env", KeywordCompletionType.WITH_ARG); //NOI18N
         BLADE_DIRECTIVES.put("@extends", KeywordCompletionType.WITH_ARG); //NOI18N
         BLADE_DIRECTIVES.put("@include", KeywordCompletionType.WITH_ARG); //NOI18N
