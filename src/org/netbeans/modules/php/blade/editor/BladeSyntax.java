@@ -27,12 +27,12 @@ public class BladeSyntax {
     public static String CLOSE_COMMENT = "--}}";
     
     public final static Collection<String> INLINE_DIRECTIVES = Arrays.asList(
-        "@include", "@includeIf", "@extends", 
+        "@include", "@includeIf", "@extends", "@includeWhen", "@includeUnless",
         "@section" //can be inline
     );
     
     public final static Collection<String> DIRECTIVES_WITH_VIEW_PATH = Arrays.asList(
-            "@include", "@includeIf", "@extends"
+            "@include", "@includeIf", "@extends", "@includeWhen", "@includeUnless"
     );
 
     public static Collection<String> DIRECTIVES_WITH_ENDTAGS = Arrays.asList(
@@ -55,7 +55,10 @@ public class BladeSyntax {
             "@disk",
             "@push",
             "@prepend",
-            "@error"
+            "@error",
+            "@can",
+            "@canany",
+            "@cannot"
     );
     
     public final static Collection<String> CONDITIONAL_DIRECTIVES = Arrays.asList(

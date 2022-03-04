@@ -94,7 +94,8 @@ public class BladeCompletionHandler implements CodeCompletionHandler2 {
         "@endforeach",
         "@endsection",
         "@stop",
-        "@append"
+        "@append",
+        "@empty"
     );
 
     static final Map<String, KeywordCompletionType> BLADE_DIRECTIVES = new HashMap<>();
@@ -117,6 +118,9 @@ public class BladeCompletionHandler implements CodeCompletionHandler2 {
         BLADE_DIRECTIVES.put("@guest", KeywordCompletionType.WITH_ARG_AND_ENDTAG); //NOI18N
         BLADE_DIRECTIVES.put("@switch", KeywordCompletionType.WITH_ARG_AND_ENDTAG); //NOI18N
         BLADE_DIRECTIVES.put("@section", KeywordCompletionType.WITH_ARG_AND_ENDTAG); //NOI18N
+        BLADE_DIRECTIVES.put("@can", KeywordCompletionType.WITH_ARG_AND_ENDTAG); //NOI18N
+        BLADE_DIRECTIVES.put("@canany", KeywordCompletionType.WITH_ARG_AND_ENDTAG); //NOI18N
+        BLADE_DIRECTIVES.put("@cannot", KeywordCompletionType.WITH_ARG_AND_ENDTAG); //NOI18N
         BLADE_DIRECTIVES.put("@php", KeywordCompletionType.WITH_ENDTAG);
     }
 
