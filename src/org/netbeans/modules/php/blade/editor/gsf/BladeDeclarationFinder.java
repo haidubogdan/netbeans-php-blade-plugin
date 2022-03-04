@@ -1,5 +1,6 @@
 package org.netbeans.modules.php.blade.editor.gsf;
 
+import java.util.Collection;
 import org.netbeans.modules.php.blade.editor.BladeLanguage;
 import java.util.Collections;
 import java.util.Set;
@@ -16,10 +17,15 @@ import org.netbeans.modules.csl.api.HtmlFormatter;
 import org.netbeans.modules.csl.api.Modifier;
 import org.netbeans.modules.csl.api.OffsetRange;
 import org.netbeans.modules.csl.spi.ParserResult;
+import org.netbeans.modules.php.blade.editor.BladeProjectSupport;
+import org.netbeans.modules.php.blade.editor.completion.BladeCompletionItem;
+import org.netbeans.modules.php.blade.editor.index.api.BladeIndex;
+import org.netbeans.modules.php.blade.editor.index.api.IndexedElement;
 import org.netbeans.modules.php.blade.editor.lexer.BladeLexerUtils;
 import org.netbeans.modules.php.blade.editor.lexer.BladeTokenId;
 import org.netbeans.modules.php.blade.editor.model.Model;
 import org.netbeans.modules.php.blade.editor.model.api.BladeElement;
+import org.netbeans.modules.php.blade.editor.model.api.BladePathElement;
 import org.netbeans.modules.php.blade.editor.parsing.BladeParserResult;
 import org.netbeans.modules.php.editor.CodeUtils;
 import org.netbeans.modules.php.editor.api.ElementQuery;
@@ -95,8 +101,7 @@ public class BladeDeclarationFinder implements DeclarationFinder {
             Token<?> tokenPhp = tsPhp.token();
             if (tokenPhp != null) {
                 /**
-                 * TODO 
-                 * simulate occurence builder from php
+                 * TODO simulate occurence builder from php
                  */
                 TokenId phpId = tokenPhp.id();
                 String textPhp = tokenPhp.text().toString().trim();
@@ -273,16 +278,16 @@ public class BladeDeclarationFinder implements DeclarationFinder {
 
     private DeclarationLocation findBladeViewsLocation(BladeParserResult info, String pathValue, int carretOffset) {
         Model model = info.getModel();
-
+        PathElement elem = new PathElement(pathValue);
+        String bladePath = pathValue + ".blade";
+        DeclarationLocation alternatives = DeclarationLocation.NONE;
         if (model != null) {
             org.netbeans.modules.php.blade.editor.model.OccurencesSupport occurencesSupport = model.getOccurencesSupport(info, carretOffset);
             org.netbeans.modules.php.blade.editor.model.api.Occurence underCaret = occurencesSupport.getOccurence();
             if (underCaret != null) {
-                DeclarationLocation alternatives = DeclarationLocation.NONE;
                 for (BladeElement element : underCaret.getAllDeclarations()) {
                     DeclarationLocation declLocation = new DeclarationLocation(
                             element.getFileObject(), 0);
-                    PathElement elem = new PathElement(pathValue);
                     AlternativeLocation al = new BladeAlternativeLocation(elem, declLocation);
                     if (alternatives == DeclarationLocation.NONE) {
                         alternatives = al.getLocation();
@@ -290,9 +295,32 @@ public class BladeDeclarationFinder implements DeclarationFinder {
                     alternatives.addAlternative(al);
                 }
                 return alternatives;
+            } else {
+                //TODO check if there is an alternative using occurence here also ?
+                BladeProjectSupport sup = BladeProjectSupport.findFor(info.getSnapshot().getSource().getFileObject());
+                if (sup != null) {
+                    BladeIndex index = sup.getIndex();
+                    Collection<IndexedElement> bladeViews;
+                    bladeViews = index.findBladePathsByPrefix(pathValue, BladeIndex.MatchType.PREFIX);
+                    for (IndexedElement bladeView : bladeViews) {
+                        FileObject file = bladeView.getFileObject();
+                        String filename = file.getName();
+                        if (!filename.equals(bladePath)){
+                            continue;
+                        }
+                        DeclarationLocation declLocation = new DeclarationLocation(
+                                file, 0);
+                        AlternativeLocation al = new BladeAlternativeLocation(elem, declLocation);
+                        if (alternatives == DeclarationLocation.NONE) {
+                            alternatives = al.getLocation();
+                        }
+                        alternatives.addAlternative(al);
+                    }
+                    return alternatives;
+                }
             }
         }
-       
+
         return DeclarationLocation.NONE;
     }
 
