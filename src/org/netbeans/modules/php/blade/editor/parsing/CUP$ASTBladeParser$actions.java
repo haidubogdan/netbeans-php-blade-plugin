@@ -56,7 +56,7 @@ class CUP$ASTBladeParser$actions {
       switch (CUP$ASTBladeParser$act_num)
         {
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 49: // elseif_list ::= elseif_list T_BLADE_ELSEIF T_PHP_CONDITION_EXPRESSION inner_statement_list 
+          case 50: // elseif_list ::= elseif_list T_BLADE_ELSEIF T_PHP_CONDITION_EXPRESSION inner_statement_list 
             {
               List[] RESULT =null;
 		int elseifListleft = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-3)).left;
@@ -80,7 +80,7 @@ class CUP$ASTBladeParser$actions {
           return CUP$ASTBladeParser$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 48: // elseif_list ::= 
+          case 49: // elseif_list ::= 
             {
               List[] RESULT =null;
 		
@@ -97,7 +97,7 @@ class CUP$ASTBladeParser$actions {
           return CUP$ASTBladeParser$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 47: // path ::= error 
+          case 48: // path ::= error 
             {
               Expression RESULT =null;
 		int exprleft = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()).left;
@@ -105,6 +105,20 @@ class CUP$ASTBladeParser$actions {
 		Object expr = (Object)((java_cup.runtime.Symbol) CUP$ASTBladeParser$stack.peek()).value;
 		
     RESULT = new ASTErrorExpression(exprleft, exprright);
+
+              CUP$ASTBladeParser$result = parser.getSymbolFactory().newSymbol("path",8, ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), RESULT);
+            }
+          return CUP$ASTBladeParser$result;
+
+          /*. . . . . . . . . . . . . . . . . . . .*/
+          case 47: // path ::= T_PHP_PARAMETER_EXPRESSION 
+            {
+              Expression RESULT =null;
+		int pathleft = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()).left;
+		int pathright = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()).right;
+		Object path = (Object)((java_cup.runtime.Symbol) CUP$ASTBladeParser$stack.peek()).value;
+		
+	RESULT = new PathExpression(pathleft, pathright, path.toString());
 
               CUP$ASTBladeParser$result = parser.getSymbolFactory().newSymbol("path",8, ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), RESULT);
             }

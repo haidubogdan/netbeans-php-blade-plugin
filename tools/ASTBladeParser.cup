@@ -490,6 +490,12 @@ T_STRING:path {:
     }
 	RESULT = new PathExpression(pathleft, pathright, path);
 :}
+| T_PHP_PARAMETER_EXPRESSION:path {:
+    if (path == null) {
+        path = "";
+    }
+	RESULT = new PathExpression(pathleft, pathright, path.toString());
+:}
 | error:expr
 {:
     RESULT = new ASTErrorExpression(exprleft, exprright);

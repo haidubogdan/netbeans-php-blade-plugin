@@ -455,8 +455,8 @@ COMMENT_END="--}}"
 }
 
 <ST_BLADE_INCLUDE_ARGS> {
-   \"                      { yypushback(1);pushState(ST_STRING_DBQUOTE); }
-   "'"                      { yypushback(1);pushState(ST_STRING_SQUOTE); }
+   \"    { yypushback(1);pushState(ST_STRING_DBQUOTE); }
+   "'"   { yypushback(1);pushState(ST_STRING_SQUOTE); }
    ","                     {
         if (phpParameterExpressionText.trim().length() > 0){
             yypushback(1);
@@ -470,7 +470,11 @@ COMMENT_END="--}}"
         if (phpParameterExpressionText.trim().length() > 0){
             phpParameterExpressionText += yytext();
         }
-    	return createSymbol(ASTBladeSymbols.T_OPEN_PARENTHESE);
+        if (directiveParBalance > 1) {
+            pushState(ST_BLADE_PARAMETER);
+        } else {
+    	   return createSymbol(ASTBladeSymbols.T_OPEN_PARENTHESE);
+        }
 	}
     ")"                     {
     	String yytext = yytext();
