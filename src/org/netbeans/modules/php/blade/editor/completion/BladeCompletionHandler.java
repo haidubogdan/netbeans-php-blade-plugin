@@ -254,6 +254,7 @@ public class BladeCompletionHandler implements CodeCompletionHandler2 {
             String textToComplete;
 
             if (startInput > 0) {
+                //TODO add more permisive layout completion?
                 if (queryText.length() > 0 && !path.startsWith(queryText)) {
                     continue;
                 }

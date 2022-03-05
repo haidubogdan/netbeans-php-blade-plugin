@@ -262,9 +262,11 @@ public class BladeIndex {
                 String[] split = item.split(BladeIndexer.ITEMS_SEPARATOR);
                 String name = split[0];
 
-                if ((matchType.equals(MatchType.EXACT) && !name.equals(prefix))
-                        || matchType.equals(MatchType.PREFIX) && !name.startsWith(prefix)) {
-                    //add prefix lowercase
+                if ((matchType.equals(MatchType.EXACT) && name.equals(prefix))){
+                    //ok
+                } else if(matchType.equals(MatchType.PREFIX) && (name.startsWith(prefix) || name.endsWith(prefix)) || name.contains("." + prefix)) {
+                    //ok
+                } else {
                     continue;
                 }
 

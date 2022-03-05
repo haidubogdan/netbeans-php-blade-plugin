@@ -304,7 +304,9 @@ public class BladeDeclarationFinder implements DeclarationFinder {
                     for (IndexedElement bladeView : bladeViews) {
                         String bladeName = bladeView.getName();
                         FileObject file = bladeView.getFileObject();
-                        if (!bladeName.equals(pathValue)){
+                        if (bladeName.endsWith(pathValue) || bladeName.startsWith(pathValue)){
+                            //all good;
+                        } else {
                             continue;
                         }
                         DeclarationLocation declLocation = new DeclarationLocation(
