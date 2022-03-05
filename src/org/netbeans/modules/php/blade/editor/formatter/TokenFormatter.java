@@ -189,12 +189,12 @@ public class TokenFormatter {
                                                     replace(lastIndentToken.getOffset() + indentOffset, delta, diffWhitespace, new String(new char[diffWhitespace]).replace("\0", " "));
                                                 } else {
                                                     diffWhitespace = Math.abs(diffWhitespace);
-                                                    replace(lastIndentToken.getOffset() + indentOffset, delta, diffWhitespace, "");
+                                                    //replace(lastIndentToken.getOffset() + indentOffset, delta, diffWhitespace, "");
                                                 }
                                             }
                                         } else if (totalIndent == 0) {
                                             if (spaceCount > 0) {
-                                                replace(lastIndentToken.getOffset() + indentOffset, delta, spaceCount, "");
+                                                //replace(lastIndentToken.getOffset() + indentOffset, delta, spaceCount, "");
                                             }
                                         }
                                     }
@@ -203,7 +203,7 @@ public class TokenFormatter {
                                     if (lastWhitespaceToken != null) {
                                         int diffWhitespace = changeOffset - lastWhitespaceToken.getOffset();
                                         if (diffWhitespace > 0) {
-                                            replace(lastWhitespaceToken.getOffset(), delta, diffWhitespace, "");
+                                            //replace(lastWhitespaceToken.getOffset(), delta, diffWhitespace, "");
                                         }
                                     }
                                 }
@@ -227,7 +227,7 @@ public class TokenFormatter {
                                         && lastFormatToken.getOldText().length() > 0) {
                                     int whitespaceOffset = lastFormatToken.getOffset();
                                     int xxx = 1;
-                                    replace(whitespaceOffset, delta, changeOffset - whitespaceOffset, "");
+                                    //replace(whitespaceOffset, delta, changeOffset - whitespaceOffset, "");
                                 }
                                 break;
                             case WHITESPACE_BEFORE_BLADE_PHP:

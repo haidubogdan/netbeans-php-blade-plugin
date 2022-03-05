@@ -429,6 +429,12 @@ T_STRING:label {:
     }
 	RESULT = new SectionName(labelleft, labelright, label.toString());
 :}
+| T_PHP_PARAMETER_EXPRESSION:label {:
+	if (label == null) {
+        label = "";
+    }
+	RESULT = new SectionName(labelleft, labelright, label.toString());
+:}
 ;
 
 variable ::=
