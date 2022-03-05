@@ -530,9 +530,13 @@ public class FormatVisitor implements Visitor {
         ts.move(node.getArgumentExpression().getStartOffset() - 1);
         ts.movePrevious();
 
-        while (ts.token().id() != BladeTokenId.BLADE_PHP_TOKEN
+        while (ts.token()!=null && ts.token().id() != BladeTokenId.BLADE_PHP_TOKEN
                 && ts.offset() < node.getArgumentExpression().getStartOffset()) {
             moveNext();
+        }
+        
+        if (ts.token() == null){
+            return;
         }
 
         String text = ts.token().text().toString();
