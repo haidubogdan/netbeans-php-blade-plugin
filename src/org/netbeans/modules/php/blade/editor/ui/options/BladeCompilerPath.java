@@ -1,4 +1,4 @@
-package org.netbeans.modules.php.blade.editor.ui.customizer;
+package org.netbeans.modules.php.blade.editor.ui.options;
 
 import java.io.File;
 import org.openide.filesystems.FileChooserBuilder;
@@ -7,12 +7,13 @@ import org.openide.filesystems.FileChooserBuilder;
  *
  * @author bhaidu
  */
-public class CustomizerIncludePath extends javax.swing.JPanel {
-
+public class BladeCompilerPath extends javax.swing.JPanel {
+    private final BladeCompilerPathPanelController controller;
     /**
      * Creates new form CustomizerIncludePath
      */
-    public CustomizerIncludePath() {
+    public BladeCompilerPath(BladeCompilerPathPanelController controller) {
+        this.controller = controller;
         initComponents();
     }
 
@@ -29,10 +30,10 @@ public class CustomizerIncludePath extends javax.swing.JPanel {
         jTabbedPane1 = new javax.swing.JTabbedPane();
         AddFolder = new javax.swing.JButton();
 
-        org.openide.awt.Mnemonics.setLocalizedText(includePathLabel, org.openide.util.NbBundle.getMessage(CustomizerIncludePath.class, "CustomizerIncludePath.includePathLabel.text")); // NOI18N
+        org.openide.awt.Mnemonics.setLocalizedText(includePathLabel, org.openide.util.NbBundle.getMessage(BladeCompilerPath.class, "BladeCompilerPath.includePathLabel.text")); // NOI18N
 
-        org.openide.awt.Mnemonics.setLocalizedText(AddFolder, org.openide.util.NbBundle.getMessage(CustomizerIncludePath.class, "CustomizerIncludePath.AddFolder.text")); // NOI18N
-        AddFolder.setActionCommand(org.openide.util.NbBundle.getMessage(CustomizerIncludePath.class, "CustomizerIncludePath.AddFolder.actionCommand")); // NOI18N
+        org.openide.awt.Mnemonics.setLocalizedText(AddFolder, org.openide.util.NbBundle.getMessage(BladeCompilerPath.class, "BladeCompilerPath.AddFolder.text")); // NOI18N
+        AddFolder.setActionCommand(org.openide.util.NbBundle.getMessage(BladeCompilerPath.class, "BladeCompilerPath.AddFolder.actionCommand")); // NOI18N
         AddFolder.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 AddFolderActionPerformed(evt);
@@ -66,7 +67,7 @@ public class CustomizerIncludePath extends javax.swing.JPanel {
     }// </editor-fold>//GEN-END:initComponents
 
     private void AddFolderActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_AddFolderActionPerformed
-        File file = new FileChooserBuilder(CustomizerIncludePath.class)
+        File file = new FileChooserBuilder(BladeCompilerPath.class)
                 .setFilesOnly(true)
                 .setTitle("select folder")
                 .showOpenDialog();
@@ -81,4 +82,26 @@ public class CustomizerIncludePath extends javax.swing.JPanel {
     private javax.swing.JLabel includePathLabel;
     private javax.swing.JTabbedPane jTabbedPane1;
     // End of variables declaration//GEN-END:variables
+
+    void load() {
+        //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    void store() {
+        //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    void cancel() {
+        //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    boolean valid() {
+        return true;
+        //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    boolean changed() {
+        return false;
+        //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
 }

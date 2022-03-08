@@ -50,19 +50,19 @@ import org.openide.util.HelpCtx;
 import org.openide.util.Lookup;
 import org.openide.util.NbBundle;
 
-@NbBundle.Messages("BladeOptionsPanelController.name=Blade")
+@NbBundle.Messages("BladeCompilerPathPanelController.name=Blade Compiler Path")
 @OptionsPanelController.SubRegistration(
     location = "Html5",
-    id = BladeOptionsPanelController.ID,
-    displayName = "#BladeOptionsPanelController.name",
+    id = BladeCompilerPathPanelController.ID,
+    displayName = "#BladeCompilerPathPanelController.name",
     position = 100
 )
-public final class BladeOptionsPanelController extends OptionsPanelController {
+public final class BladeCompilerPathPanelController extends OptionsPanelController {
 
-    static final String ID = "Blade Path"; // NOI18N
+    static final String ID = "Blade Compiler Path"; // NOI18N
     static final String OPTIONS_PATH = "path" + "/" + ID; // NOI18N
 
-    private BladeOptionsPanel panel;
+    private BladeCompilerPath panel;
     private final PropertyChangeSupport pcs = new PropertyChangeSupport(this);
     private volatile boolean changed;
 
@@ -113,9 +113,9 @@ public final class BladeOptionsPanelController extends OptionsPanelController {
         pcs.removePropertyChangeListener(l);
     }
 
-    private BladeOptionsPanel getPanel() {
+    private BladeCompilerPath getPanel() {
         if (panel == null) {
-            panel = new BladeOptionsPanel(this);
+            panel = new BladeCompilerPath(this);
         }
         return panel;
     }

@@ -52,12 +52,12 @@ import org.openide.util.NbBundle;
     location = "path",
     tabTitle = "#BladePanel.options.keywords.tabTitle"
 )
-public final class BladePanel extends javax.swing.JPanel {
+public final class BladeOptionsPanel extends javax.swing.JPanel {
 
     private final BladeOptionsPanelController controller;
     private boolean firstOpening = true;
 
-    BladePanel(BladeOptionsPanelController controller) {
+    BladeOptionsPanel(BladeOptionsPanelController controller) {
         this.controller = controller;
         initComponents();
         setDefaultValues();
@@ -79,7 +79,7 @@ public final class BladePanel extends javax.swing.JPanel {
         toggleCommentButtonGroup = new javax.swing.ButtonGroup();
         jLabel1 = new javax.swing.JLabel();
 
-        org.openide.awt.Mnemonics.setLocalizedText(jLabel1, org.openide.util.NbBundle.getMessage(BladePanel.class, "BladePanel.jLabel1.text")); // NOI18N
+        org.openide.awt.Mnemonics.setLocalizedText(jLabel1, org.openide.util.NbBundle.getMessage(BladeOptionsPanel.class, "BladeOptionsPanel.jLabel1.text")); // NOI18N
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
@@ -95,7 +95,7 @@ public final class BladePanel extends javax.swing.JPanel {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(jLabel1)
-                .addContainerGap(12, Short.MAX_VALUE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
     }// </editor-fold>//GEN-END:initComponents
 
