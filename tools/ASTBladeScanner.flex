@@ -418,6 +418,12 @@ COMMENT_END="--}}"
     	return createFullSymbol(ASTBladeSymbols.T_INLINE_HTML);
     }
 
+    "@"[ ]*[\(\#\.\{\'\"]+ {
+       String yytext = yytext();
+       popState();
+       return createFullSymbol(ASTBladeSymbols.T_INLINE_HTML);
+    }
+
     "@"{LABEL} {
        String yytext = yytext();
        if (BladeSyntax.CONDITIONAL_DIRECTIVES.contains(yytext)) {
@@ -427,6 +433,7 @@ COMMENT_END="--}}"
        pushState(ST_LOOK_FOR_DIRECTIVE_ARGUMENTS);
        return createFullSymbol(ASTBladeSymbols.T_BLADE_DIRECTIVE);
     }
+
 
     {NEWLINE} {
        String yytext = yytext();

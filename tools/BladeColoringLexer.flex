@@ -677,6 +677,11 @@ CLOSE_BLADE_PHP = "@endphp";
     return BladeTokenId.T_BLADE_ENDIF;
 }
 
+<ST_HTML>"@"[ ]*[\d\(\#\.\{\'\"]+ {
+    String yytext = yytext();
+    return BladeTokenId.T_HTML; 
+}
+
 <ST_HTML>{DIRECTIVE_PREFIX}{LABEL} {
    String yytext = yytext();
    pushState(ST_PHP_LOOKING_FOR_DIRECTIVE_ARG);
@@ -684,7 +689,7 @@ CLOSE_BLADE_PHP = "@endphp";
 }
 
 <ST_HTML>{DIRECTIVE_PREFIX}{WHITESPACE} {
-   return BladeTokenId.T_BLADE_DIRECTIVE_PREFIX; 
+   return BladeTokenId.T_HTML; 
 }
 
 <ST_HTML> {OPEN_ECHO} {
