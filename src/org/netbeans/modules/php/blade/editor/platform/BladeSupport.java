@@ -3,6 +3,8 @@ package org.netbeans.modules.php.blade.editor.platform;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
+import java.net.URL;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.prefs.PreferenceChangeEvent;
@@ -33,14 +35,14 @@ public final class BladeSupport {
    // private final FileChangeListener nodeSourcesListener = new NodeSourcesListener();
     //final BladePreferences preferences;
    // private final ActionProvider actionProvider;
-   // final NodeJsSourceRoots sourceRoots;
+    final BladeSourceRoots sourceRoots;
   //  final PackageJson packageJson;
     
     private BladeSupport(Project project) {
         assert project != null;
         this.project = project;
         //actionProvider = new NodeJsActionProvider(project);
-        //sourceRoots = new NodeJsSourceRoots(project);
+        sourceRoots = new BladeSourceRoots(project);
         //preferences = new NodeJsPreferences(project);
         //packageJson = new PackageJson(project.getProjectDirectory());
     }
@@ -58,6 +60,10 @@ public final class BladeSupport {
         assert support != null : "BladeSupport should be found in project " + project.getClass().getName() + " (lookup: " + project.getLookup() + ")";
         return support;
     }
+    
+    public List<URL> getSourceRoots() {
+        return sourceRoots.getSourceRoots();
+    }
 /*
     public NodeJsPreferences getPreferences() {
         return preferences;
@@ -67,9 +73,7 @@ public final class BladeSupport {
         return actionProvider;
     }
 
-    public List<URL> getSourceRoots() {
-        return sourceRoots.getSourceRoots();
-    }
+ 
 
     public PackageJson getPackageJson() {
         return packageJson;
@@ -88,8 +92,8 @@ public final class BladeSupport {
     }
 
     public void fireSourceRootsChanged() {
-        //sourceRoots.resetSourceRoots();
-        //firePropertyChanged(NodeJsPlatformProvider.PROP_SOURCE_ROOTS, null, null);
+        sourceRoots.resetSourceRoots();
+        firePropertyChanged(BladePlatformProvider.PROP_SOURCE_ROOTS, null, null);
     }
 
     void projectOpened() {
