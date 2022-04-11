@@ -45,7 +45,7 @@ public class BladeIndexer extends EmbeddingIndexer {
     public static final String BLADE_CONTENT_KEY = "bladeContent"; //NOI18N
 
     public static final String VALUE_SEPARATOR = ",";
-    public static final String ITEMS_SEPARATOR = "|";
+    public static final String ITEMS_SEPARATOR = "/";
     //use for bladeDataIndex model
     public static final Collection<String> INDEX_KEYS = Arrays.asList(new String[]{BladeIndexer.YIELD_INDEX_KEY});
 

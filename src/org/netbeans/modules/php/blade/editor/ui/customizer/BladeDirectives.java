@@ -35,7 +35,7 @@ public class BladeDirectives extends javax.swing.JPanel {
          
     public void storeData(){
         DefaultListModel pathModel = (DefaultListModel) customDirectivePathList.getModel();
-        BladeProjectProperties.getInstance().setCompilerPathList(pathModel);
+        BladeProjectProperties.getInstance(project).setCompilerPathList(pathModel);
     }
     
     public void addChangeListener(ChangeListener listener) {
@@ -67,7 +67,7 @@ public class BladeDirectives extends javax.swing.JPanel {
             }
         });
 
-        customDirectivePathList.setModel(org.netbeans.modules.php.blade.project.BladeProjectProperties.getInstance().getModelCompilerPathList());
+        customDirectivePathList.setModel(org.netbeans.modules.php.blade.project.BladeProjectProperties.getInstance(project).getModelCompilerPathList());
         jScrollPane1.setViewportView(customDirectivePathList);
 
         org.openide.awt.Mnemonics.setLocalizedText(removePathButton, org.openide.util.NbBundle.getMessage(BladeDirectives.class, "BladeDirectives.removePathButton.text")); // NOI18N
@@ -106,8 +106,8 @@ public class BladeDirectives extends javax.swing.JPanel {
                         .addComponent(compilerPathFileButton)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(removePathButton))
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(0, 123, Short.MAX_VALUE))
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 143, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(0, 110, Short.MAX_VALUE))
         );
     }// </editor-fold>//GEN-END:initComponents
 

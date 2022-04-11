@@ -48,9 +48,9 @@
                       <EmptySpace max="-2" attributes="0"/>
                       <Component id="removePathButton" min="-2" max="-2" attributes="0"/>
                   </Group>
-                  <Component id="jScrollPane1" min="-2" max="-2" attributes="0"/>
+                  <Component id="jScrollPane1" min="-2" pref="143" max="-2" attributes="0"/>
               </Group>
-              <EmptySpace min="0" pref="123" max="32767" attributes="0"/>
+              <EmptySpace min="0" pref="110" max="32767" attributes="0"/>
           </Group>
       </Group>
     </DimensionLayout>
@@ -89,7 +89,7 @@
         <Component class="javax.swing.JList" name="customDirectivePathList">
           <Properties>
             <Property name="model" type="javax.swing.ListModel" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-              <Connection code="org.netbeans.modules.php.blade.project.BladeProjectProperties.getInstance().getModelCompilerPathList()" type="code"/>
+              <Connection code="org.netbeans.modules.php.blade.project.BladeProjectProperties.getInstance(project).getModelCompilerPathList()" type="code"/>
             </Property>
           </Properties>
           <AuxValues>

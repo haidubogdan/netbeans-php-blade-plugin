@@ -44,7 +44,10 @@ package org.netbeans.modules.php.blade.project;
 import java.util.prefs.PreferenceChangeListener;
 import java.util.prefs.Preferences;
 import javax.swing.DefaultListModel;
+import org.netbeans.api.project.Project;
+import org.netbeans.api.project.ProjectUtils;
 import org.netbeans.modules.php.blade.api.BladeVersion;
+import org.netbeans.modules.php.blade.editor.BladePreferences;
 import org.netbeans.modules.php.blade.ui.UiOptionsUtils;
 //import org.netbeans.modules.php.blade.editor.actions.ToggleBlockCommentAction;
 import org.openide.util.NbPreferences;
@@ -60,15 +63,26 @@ public final class BladeProjectProperties {
     private static final String BLADE_VERSION = "blade.version"; // NOI18N
     private static final String COMPILER_PATH_LIST = "compiler.path.list";
     private static final String VIEW_PATH_LIST = "views.path.list";
+    private Project project;
 
     private BladeProjectProperties() {
     }
 
+    public static BladeProjectProperties getInstance(Project project) {
+        if (INSTANCE.project == null || INSTANCE.project != project){
+            INSTANCE.project = project;
+        }
+        return INSTANCE;
+    }
+    
     public static BladeProjectProperties getInstance() {
         return INSTANCE;
     }
 
     private Preferences getPreferences() {
+        if (project != null){
+            return ProjectUtils.getPreferences(project, this.getClass(), false);
+        }
         return NbPreferences.forModule(this.getClass());
     }
 

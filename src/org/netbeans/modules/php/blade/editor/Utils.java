@@ -43,6 +43,7 @@ package org.netbeans.modules.php.blade.editor;
 
 import java.io.File;
 import java.lang.reflect.Field;
+import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.netbeans.api.project.FileOwnerQuery;
@@ -92,12 +93,21 @@ public class Utils {
         String sp = "/";
         String relativeFilePath = fileObject.getPath().replace(projectRoot.getPath() + sp, "");
         
-        String[] views = BladeProjectProperties.getInstance().getViewsPathList();
-        
+        String[] views = BladeProjectProperties.getInstance(project).getViewsPathList();
+        Arrays.sort(views, new java.util.Comparator<String>() {
+            @Override
+            public int compare(String s1, String s2) {
+                // TODO: Argument validation (nullity, length)
+                return s2.length() - s1.length();// comparision
+            }
+        });
         if (views.length > 0){
             String filePath = fileObject.getPath();
             //should sort by length
             for (String view : views){
+                if (view.length() == 0){
+                    continue;
+                }
                 File viewPath = new File(view);
                 if (!viewPath.exists()){
                     continue;

@@ -81,30 +81,10 @@ import org.netbeans.modules.php.blade.editor.completion.BladeCompletionItem.Sect
 import org.netbeans.modules.php.blade.editor.index.api.BladeIndex;
 import org.netbeans.modules.php.blade.editor.index.api.IndexedElement;
 import org.netbeans.modules.php.blade.editor.parsing.ParsingUtils;
-import org.netbeans.modules.php.blade.editor.parsing.astnodes.ASTNode;
-import org.netbeans.modules.php.blade.editor.parsing.astnodes.visitors.DefaultVisitor;
-import org.netbeans.modules.php.blade.project.BladeProjectProperties;
 import org.netbeans.modules.php.blade.project.CustomDirectives;
 import org.netbeans.modules.php.blade.project.CustomDirectives.DirectiveNames;
-import org.netbeans.modules.php.editor.api.ElementQuery;
-import org.netbeans.modules.php.editor.api.NameKind;
-import org.netbeans.modules.php.editor.api.PhpElementKind;
-import org.netbeans.modules.php.editor.api.QualifiedName;
-import org.netbeans.modules.php.editor.api.elements.ClassElement;
-import org.netbeans.modules.php.editor.api.elements.MethodElement;
 import org.netbeans.modules.php.editor.csl.PHPLanguage;
-import org.netbeans.modules.php.editor.model.FileScope;
-import org.netbeans.modules.php.editor.model.IndexScope;
-import org.netbeans.modules.php.editor.model.ModelUtils;
-import org.netbeans.modules.php.editor.model.NamespaceScope;
-import org.netbeans.modules.php.editor.model.Occurence;
-import org.netbeans.modules.php.editor.model.Scope;
-import org.netbeans.modules.php.editor.parser.astnodes.Expression;
-import org.netbeans.modules.php.editor.parser.astnodes.FunctionInvocation;
-import org.netbeans.modules.php.editor.parser.astnodes.Identifier;
-import org.netbeans.modules.php.editor.parser.astnodes.Scalar;
 import org.openide.filesystems.FileObject;
-import org.openide.filesystems.FileUtil;
 import org.openide.util.NbBundle;
 
 public class BladeCompletionHandler implements CodeCompletionHandler2 {
@@ -127,6 +107,9 @@ public class BladeCompletionHandler implements CodeCompletionHandler2 {
 
     static {
         BLADE_DIRECTIVES.put("@yield", KeywordCompletionType.WITH_ARG); //NOI18N
+        BLADE_DIRECTIVES.put("@checked", KeywordCompletionType.WITH_ARG); //NOI18N
+        BLADE_DIRECTIVES.put("@selected", KeywordCompletionType.WITH_ARG); //NOI18N
+        BLADE_DIRECTIVES.put("@disabled", KeywordCompletionType.WITH_ARG); //NOI18N
         BLADE_DIRECTIVES.put("@push", KeywordCompletionType.WITH_ARG); //NOI18N
         BLADE_DIRECTIVES.put("@once", KeywordCompletionType.WITH_ARG); //NOI18N
         BLADE_DIRECTIVES.put("@pushOnce", KeywordCompletionType.WITH_ARG); //NOI18N

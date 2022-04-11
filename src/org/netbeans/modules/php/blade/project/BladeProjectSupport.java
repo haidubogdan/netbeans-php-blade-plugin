@@ -46,6 +46,7 @@ public class BladeProjectSupport extends ProjectOpenedHook implements Preference
 
     @Override
     protected void projectOpened() {
+        BladeProjectProperties.getInstance(project);
         CustomDirectives.getInstance();
     }
 

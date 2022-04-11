@@ -267,15 +267,7 @@ public class BladeIndex {
                         int start = Integer.parseInt(split[2]);
                         range = new OffsetRange(start, start + name.length());
                     }
-                } else if (keyName!= BladeIndexer.BLADE_VIEW_PATH && item.indexOf("/") > -1){
-                    //fallback TODO fix the caching refresh
-                    String[] split = item.split("/");
-                    name = split[0];
-                    if (split.length > 2) {
-                        int start = Integer.parseInt(split[2]);
-                        range = new OffsetRange(start, start + name.length());
-                    }
-                }          
+                }        
 
                 if ((matchType.equals(MatchType.EXACT) && name.equals(prefix))){
                     //ok
