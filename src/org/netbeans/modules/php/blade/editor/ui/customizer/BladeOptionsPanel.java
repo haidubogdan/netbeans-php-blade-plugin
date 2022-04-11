@@ -134,12 +134,18 @@ public final class BladeOptionsPanel extends javax.swing.JPanel {
         addViewFolderButton = new javax.swing.JButton();
         removeViewFolderButton = new javax.swing.JButton();
         reindexViewsButton = new javax.swing.JButton();
+        jLabel2 = new javax.swing.JLabel();
+        jLabel3 = new javax.swing.JLabel();
+        jLabel4 = new javax.swing.JLabel();
 
         org.openide.awt.Mnemonics.setLocalizedText(bladeOptionsLabel, org.openide.util.NbBundle.getMessage(BladeOptionsPanel.class, "BladeOptionsPanel.bladeOptionsLabel.text")); // NOI18N
 
         org.openide.awt.Mnemonics.setLocalizedText(bladeVersionLabel, org.openide.util.NbBundle.getMessage(BladeOptionsPanel.class, "BladeOptionsPanel.bladeVersionLabel.text")); // NOI18N
 
+        bladeVersionComboBox.setToolTipText(org.openide.util.NbBundle.getMessage(BladeOptionsPanel.class, "BladeOptionsPanel.bladeVersionComboBox.toolTipText")); // NOI18N
+
         org.openide.awt.Mnemonics.setLocalizedText(jLabel1, org.openide.util.NbBundle.getMessage(BladeOptionsPanel.class, "BladeOptionsPanel.jLabel1.text")); // NOI18N
+        jLabel1.setToolTipText(org.openide.util.NbBundle.getMessage(BladeOptionsPanel.class, "BladeOptionsPanel.jLabel1.toolTipText")); // NOI18N
 
         viewsPathList.setModel(org.netbeans.modules.php.blade.project.BladeProjectProperties.getInstance().getModelViewsPathList());
         jScrollPane1.setViewportView(viewsPathList);
@@ -159,11 +165,18 @@ public final class BladeOptionsPanel extends javax.swing.JPanel {
         });
 
         org.openide.awt.Mnemonics.setLocalizedText(reindexViewsButton, org.openide.util.NbBundle.getMessage(BladeOptionsPanel.class, "BladeOptionsPanel.reindexViewsButton.text")); // NOI18N
+        reindexViewsButton.setToolTipText(org.openide.util.NbBundle.getMessage(BladeOptionsPanel.class, "BladeOptionsPanel.reindexViewsButton.toolTipText")); // NOI18N
         reindexViewsButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 reindexViewsButtonActionPerformed(evt);
             }
         });
+
+        org.openide.awt.Mnemonics.setLocalizedText(jLabel2, org.openide.util.NbBundle.getMessage(BladeOptionsPanel.class, "BladeOptionsPanel.jLabel2.text")); // NOI18N
+
+        org.openide.awt.Mnemonics.setLocalizedText(jLabel3, org.openide.util.NbBundle.getMessage(BladeOptionsPanel.class, "BladeOptionsPanel.jLabel3.text")); // NOI18N
+
+        org.openide.awt.Mnemonics.setLocalizedText(jLabel4, org.openide.util.NbBundle.getMessage(BladeOptionsPanel.class, "BladeOptionsPanel.jLabel4.text")); // NOI18N
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
@@ -172,8 +185,9 @@ public final class BladeOptionsPanel extends javax.swing.JPanel {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jLabel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 370, Short.MAX_VALUE)
+                        .addComponent(jScrollPane1)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                             .addComponent(removeViewFolderButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -181,13 +195,16 @@ public final class BladeOptionsPanel extends javax.swing.JPanel {
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(bladeOptionsLabel)
+                            .addComponent(jLabel1)
+                            .addComponent(reindexViewsButton)
                             .addGroup(layout.createSequentialGroup()
                                 .addComponent(bladeVersionLabel)
                                 .addGap(18, 18, 18)
-                                .addComponent(bladeVersionComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addComponent(jLabel1)
-                            .addComponent(reindexViewsButton))
-                        .addGap(0, 0, Short.MAX_VALUE)))
+                                .addComponent(bladeVersionComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(18, 18, 18)
+                                .addComponent(jLabel2))
+                            .addComponent(jLabel4))
+                        .addGap(0, 53, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -198,19 +215,24 @@ public final class BladeOptionsPanel extends javax.swing.JPanel {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(bladeVersionLabel)
-                    .addComponent(bladeVersionComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(bladeVersionComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel2))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabel1)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(8, 8, 8)
+                .addComponent(jLabel4)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(addViewFolderButton)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(removeViewFolderButton)))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(removeViewFolderButton))
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(reindexViewsButton)
-                .addContainerGap(63, Short.MAX_VALUE))
+                .addContainerGap(13, Short.MAX_VALUE))
         );
     }// </editor-fold>//GEN-END:initComponents
 
@@ -269,6 +291,9 @@ public final class BladeOptionsPanel extends javax.swing.JPanel {
     private javax.swing.JComboBox<BladeVersion> bladeVersionComboBox;
     private javax.swing.JLabel bladeVersionLabel;
     private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel4;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JButton reindexViewsButton;
     private javax.swing.JButton removeViewFolderButton;
