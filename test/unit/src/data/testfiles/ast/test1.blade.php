@@ -1,5 +1,3 @@
-@if(xxx)
-    @includeIf('xxx.'.$xx . "sss", [
-    'sss' => $sss[$ccc],
-])
-@endif
+@section('content')
+  <td style="mso-number-format:&#39;@&#39;;"></td>
+@endsection

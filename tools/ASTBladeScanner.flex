@@ -294,6 +294,14 @@ COMMENT_END="--}}"
     //no break;
 }
 
+<YYINITIAL>"@"[ ]*[\d\(\#\.\{\'\"]+ {
+    return createFullSymbol(ASTBladeSymbols.T_INLINE_HTML);
+}
+
+<YYINITIAL>"@"[\#|\&] {
+    return createFullSymbol(ASTBladeSymbols.T_INLINE_HTML);
+}
+
 <YYINITIAL>"@" {
     pushState(ST_BLADE_DIRECTIVE);
     if (yylength() > 0){
