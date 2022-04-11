@@ -18,14 +18,20 @@ import org.openide.filesystems.FileObject;
 public class GeneratedDirectiveElement implements ElementHandle {
 
     private final String name;
+    private FileObject fileObj;
 
     public GeneratedDirectiveElement(String name) {
         this.name = name;
     }
+    
+    public GeneratedDirectiveElement(String name, FileObject file) {
+        this.name = name;
+        this.fileObj = file;
+    }
 
     @Override
     public FileObject getFileObject() {
-        return null;
+        return fileObj;
     }
 
     @Override

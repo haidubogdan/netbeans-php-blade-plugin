@@ -9,9 +9,9 @@ import org.openide.util.NbBundle;
  * @author bhaidu
  */
 @NbBundle.Messages({
-    "BladeVersion.IVIEW_4=IV 4.1/4.2",
-    "BladeVersion.IVIEW_5=IV 5.1/5.8",
-    "BladeVersion.IVIEW_9=IV 9.",})
+    "BladeVersion.IVIEW_4=4.1/4.2",
+    "BladeVersion.IVIEW_5=5.1/5.8",
+    "BladeVersion.IVIEW_9=9.*",})
 public enum BladeVersion {
     /**
      * ILLUMINATE / VIEW 4.1/4.2

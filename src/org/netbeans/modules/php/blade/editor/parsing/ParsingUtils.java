@@ -97,6 +97,10 @@ public class ParsingUtils {
         if (currentFile != null) {
             file.setParent(currentFile.getParent());
         }
+        parseFileObject(file);
+    }
+    
+    public void parseFileObject(FileObject file){
         Document doc = openDocument(file);
 
         try {

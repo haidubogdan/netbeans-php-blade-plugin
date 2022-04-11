@@ -27,7 +27,7 @@ import org.openide.util.lookup.ServiceProvider;
 public class BladeDataIndexModel extends BladeIndexModel {
     
     private static final String VALUE_SEPARATOR = ",";
-    private static final String ITEMS_SEPARATOR = "/";
+    private static final String ITEMS_SEPARATOR = "|";
     private Collection<IndexedElement> yields;
     
     public BladeDataIndexModel(Collection<IndexedElement> yields) {

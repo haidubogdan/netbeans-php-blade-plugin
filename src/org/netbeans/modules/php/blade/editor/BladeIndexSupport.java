@@ -8,18 +8,13 @@ import java.util.logging.Logger;
 import javax.swing.text.Document;
 import org.netbeans.api.project.FileOwnerQuery;
 import org.netbeans.api.project.Project;
-import org.netbeans.api.project.ProjectUtils;
-import org.netbeans.api.project.SourceGroup;
-import org.netbeans.api.project.Sources;
 import org.netbeans.modules.csl.api.DataLoadersBridge;
 
 import org.netbeans.modules.parsing.api.Source;
 import org.netbeans.modules.php.blade.editor.index.api.BladeIndex;
 import org.openide.filesystems.FileObject;
 import org.openide.filesystems.MIMEResolver;
-import org.openide.loaders.DataObject;
 import org.openide.util.Exceptions;
-import org.openide.util.Lookup;
 import org.openide.util.NbBundle;
 /**
  *
@@ -32,16 +27,16 @@ import org.openide.util.NbBundle;
     displayName="#BladeResolver",
     extension={ "blade.php" }
 )
-public class BladeProjectSupport {
+public class BladeIndexSupport {
     private static final Logger LOGGER = Logger.getLogger(BladeIndex.class.getSimpleName());
-    private static final WeakHashMap<Project, BladeProjectSupport> INSTANCIES = new WeakHashMap<>();
+    private static final WeakHashMap<Project, BladeIndexSupport> INSTANCIES = new WeakHashMap<>();
 
     /**
      * 
      * @param source
      * @return 
      */
-    public static BladeProjectSupport findFor(Source source) {
+    public static BladeIndexSupport findFor(Source source) {
 	FileObject fo = source.getFileObject();
 	if (fo == null) {
 	    return null;
@@ -50,7 +45,7 @@ public class BladeProjectSupport {
 	}
     }
 
-    public static BladeProjectSupport findFor(Document doc) {
+    public static BladeIndexSupport findFor(Document doc) {
 	return findFor(DataLoadersBridge.getDefault().getFileObject(doc));
     }
 
@@ -62,7 +57,7 @@ public class BladeProjectSupport {
      * @param fo
      * @return 
      */
-    public static BladeProjectSupport findFor(FileObject fo) {
+    public static BladeIndexSupport findFor(FileObject fo) {
 	try {
 	    Project p = FileOwnerQuery.getOwner(fo);
             String projectName = p.getClass().getSimpleName();
@@ -81,9 +76,9 @@ public class BladeProjectSupport {
                 }
             }
             synchronized (INSTANCIES) {
-		BladeProjectSupport instance = INSTANCIES.get(p);
+		BladeIndexSupport instance = INSTANCIES.get(p);
 		if (instance == null) {
-		    instance = new BladeProjectSupport(p);
+		    instance = new BladeIndexSupport(p);
 		    INSTANCIES.put(p, instance);
 		}
                 return instance;
@@ -97,7 +92,7 @@ public class BladeProjectSupport {
     private final Project project;
     private final BladeIndex index;
 
-    public BladeProjectSupport(Project project) throws IOException {
+    public BladeIndexSupport(Project project) throws IOException {
 	this.project = project;
 	this.index = BladeIndex.create(project);
     }

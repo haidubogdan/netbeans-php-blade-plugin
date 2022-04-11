@@ -37,7 +37,7 @@
  *
  * Contributor(s):
  */
-package org.netbeans.modules.php.blade.editor.ui.options;
+package org.netbeans.modules.php.blade.project;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.prefs.PreferenceChangeEvent;
@@ -48,6 +48,7 @@ import org.netbeans.modules.php.blade.editor.BladeLanguage;
 import org.openide.util.WeakListeners;
 
 /**
+ * TODO delete
  * Based on PHP. Options for Auto Completion.
  */
 public final class OptionsUtils {

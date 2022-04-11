@@ -41,12 +41,15 @@
  */
 package org.netbeans.modules.php.blade.editor;
 
+import java.io.File;
 import java.lang.reflect.Field;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.netbeans.api.project.FileOwnerQuery;
 import org.netbeans.api.project.Project;
+import org.netbeans.modules.php.blade.project.BladeProjectProperties;
 import org.openide.filesystems.FileObject;
+import org.openide.filesystems.FileUtil;
 
 /**
  *
@@ -86,16 +89,38 @@ public class Utils {
     public static String convertToBladePath(FileObject fileObject) {
         Project project = FileOwnerQuery.getOwner(fileObject);
         FileObject projectRoot = project.getProjectDirectory();
-        String relativeFilePath = fileObject.getPath().replace(projectRoot.getPath() + "/", "");
-        int firstViewFolderIndex = relativeFilePath.indexOf("views/");
-        if (firstViewFolderIndex >= 0) {
-            relativeFilePath = relativeFilePath.substring(firstViewFolderIndex + "views/".length());
+        String sp = "/";
+        String relativeFilePath = fileObject.getPath().replace(projectRoot.getPath() + sp, "");
+        
+        String[] views = BladeProjectProperties.getInstance().getViewsPathList();
+        
+        if (views.length > 0){
+            String filePath = fileObject.getPath();
+            //should sort by length
+            for (String view : views){
+                File viewPath = new File(view);
+                if (!viewPath.exists()){
+                    continue;
+                }
+                //TODO find a way to have the same path format
+                FileObject viewFileObj = FileUtil.toFileObject(viewPath);
+                String viewFilePath = viewFileObj.getPath() + sp;
+                if (filePath.startsWith(viewFilePath)){
+                    relativeFilePath = filePath.substring(viewFilePath.length());
+                    break;
+                }
+            }
         } else {
-            LOGGER.log(Level.FINE, "blade file is outside the views direcotry {0}", fileObject.getPath());
+            int firstViewFolderIndex = relativeFilePath.indexOf("views" + sp);
+            if (firstViewFolderIndex >= 0) {
+                relativeFilePath = relativeFilePath.substring(firstViewFolderIndex + ("views" + sp).length());
+            } else {
+                LOGGER.log(Level.FINE, "blade file is outside the views direcotry {0}", fileObject.getPath());
+            }
         }
 
         relativeFilePath = relativeFilePath.substring(0, relativeFilePath.length() - (".blade.php".length()));
-        relativeFilePath = relativeFilePath.replace("/", ".");
+        relativeFilePath = relativeFilePath.replace(sp, ".");
         return relativeFilePath;
     }
 }

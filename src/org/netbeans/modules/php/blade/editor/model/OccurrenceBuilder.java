@@ -10,7 +10,7 @@ import java.util.Map;
 import java.util.Set;
 import org.netbeans.modules.csl.api.OffsetRange;
 import org.netbeans.modules.csl.spi.ParserResult;
-import org.netbeans.modules.php.blade.editor.BladeProjectSupport;
+import org.netbeans.modules.php.blade.editor.BladeIndexSupport;
 import org.netbeans.modules.php.blade.editor.BladeLanguage;
 import org.netbeans.modules.php.blade.editor.index.api.BladeIndex;
 import org.netbeans.modules.php.blade.editor.index.api.IndexedElement;
@@ -58,7 +58,7 @@ public class OccurrenceBuilder {
         BladeIndex index = null;
         if (parserResult != null) {
             FileObject fileObject = parserResult.getSnapshot().getSource().getFileObject();
-            BladeProjectSupport sup = BladeProjectSupport.findFor(fileObject);
+            BladeIndexSupport sup = BladeIndexSupport.findFor(fileObject);
             index = sup.getIndex();
         }
 

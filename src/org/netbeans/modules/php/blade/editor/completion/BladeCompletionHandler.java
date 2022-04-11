@@ -41,6 +41,7 @@
  */
 package org.netbeans.modules.php.blade.editor.completion;
 
+import java.io.File;
 import org.netbeans.modules.php.blade.editor.model.api.BladePathElement;
 import java.io.StringReader;
 import java.util.ArrayList;
@@ -48,6 +49,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -66,10 +68,11 @@ import org.netbeans.modules.csl.api.CodeCompletionResult;
 import org.netbeans.modules.csl.api.CompletionProposal;
 import org.netbeans.modules.csl.api.Documentation;
 import org.netbeans.modules.csl.api.ElementHandle;
+import org.netbeans.modules.csl.api.OffsetRange;
 import org.netbeans.modules.csl.api.ParameterInfo;
 import org.netbeans.modules.csl.spi.DefaultCompletionResult;
 import org.netbeans.modules.csl.spi.ParserResult;
-import org.netbeans.modules.php.blade.editor.BladeProjectSupport;
+import org.netbeans.modules.php.blade.editor.BladeIndexSupport;
 import org.netbeans.modules.php.blade.editor.BladeSyntax;
 import org.netbeans.modules.php.blade.editor.completion.BladeCompletionContextFinder.KeywordCompletionType;
 import org.netbeans.modules.php.blade.editor.completion.BladeCompletionContextFinder.CompletionContext;
@@ -78,8 +81,30 @@ import org.netbeans.modules.php.blade.editor.completion.BladeCompletionItem.Sect
 import org.netbeans.modules.php.blade.editor.index.api.BladeIndex;
 import org.netbeans.modules.php.blade.editor.index.api.IndexedElement;
 import org.netbeans.modules.php.blade.editor.parsing.ParsingUtils;
+import org.netbeans.modules.php.blade.editor.parsing.astnodes.ASTNode;
+import org.netbeans.modules.php.blade.editor.parsing.astnodes.visitors.DefaultVisitor;
+import org.netbeans.modules.php.blade.project.BladeProjectProperties;
+import org.netbeans.modules.php.blade.project.CustomDirectives;
+import org.netbeans.modules.php.blade.project.CustomDirectives.DirectiveNames;
+import org.netbeans.modules.php.editor.api.ElementQuery;
+import org.netbeans.modules.php.editor.api.NameKind;
+import org.netbeans.modules.php.editor.api.PhpElementKind;
+import org.netbeans.modules.php.editor.api.QualifiedName;
+import org.netbeans.modules.php.editor.api.elements.ClassElement;
+import org.netbeans.modules.php.editor.api.elements.MethodElement;
 import org.netbeans.modules.php.editor.csl.PHPLanguage;
+import org.netbeans.modules.php.editor.model.FileScope;
+import org.netbeans.modules.php.editor.model.IndexScope;
+import org.netbeans.modules.php.editor.model.ModelUtils;
+import org.netbeans.modules.php.editor.model.NamespaceScope;
+import org.netbeans.modules.php.editor.model.Occurence;
+import org.netbeans.modules.php.editor.model.Scope;
+import org.netbeans.modules.php.editor.parser.astnodes.Expression;
+import org.netbeans.modules.php.editor.parser.astnodes.FunctionInvocation;
+import org.netbeans.modules.php.editor.parser.astnodes.Identifier;
+import org.netbeans.modules.php.editor.parser.astnodes.Scalar;
 import org.openide.filesystems.FileObject;
+import org.openide.filesystems.FileUtil;
 import org.openide.util.NbBundle;
 
 public class BladeCompletionHandler implements CodeCompletionHandler2 {
@@ -162,7 +187,7 @@ public class BladeCompletionHandler implements CodeCompletionHandler2 {
         //TODO we can move the context finder here and update some values directly
         //we have also get Prefix function
         request.context = BladeCompletionContextFinder.find(request.parserResult, caretOffset);
-        BladeProjectSupport sup = BladeProjectSupport.findFor(fileObject);
+        BladeIndexSupport sup = BladeIndexSupport.findFor(fileObject);
         if (sup != null) {
             request.index = sup.getIndex();
         }
@@ -183,6 +208,7 @@ public class BladeCompletionHandler implements CodeCompletionHandler2 {
             case DIRECTIVE:
                 completeDirectives(completionProposals, request);
                 completeKeywords(completionProposals, request);
+                completeCustomDirectives(completionProposals, request);
                 break;
             case PHP:
             case BLADE_ECHO:    
@@ -215,6 +241,25 @@ public class BladeCompletionHandler implements CodeCompletionHandler2 {
             }
         }
     }
+    
+    private void completeCustomDirectives(final List<CompletionProposal> completionProposals, final CompletionRequest request){
+        Map<FileObject, DirectiveNames> customDirectives = CustomDirectives.getInstance().getCustomDirectives();
+        
+        if (customDirectives.isEmpty()){
+            return;
+        }
+        
+        for (Map.Entry<FileObject, DirectiveNames> entry : customDirectives.entrySet()){
+            List<String> directiveNames = entry.getValue().getList();
+            for (String directiveName : directiveNames){
+                if (startsWith(directiveName, request.prefix)) {
+                    GeneratedDirectiveElement element = new GeneratedDirectiveElement(directiveName, entry.getKey());
+                    completionProposals.add(new BladeCompletionItem.DirectiveItem(element, request));
+                }
+            }
+        }
+    }
+    
 
     private void completeKeywords(final List<CompletionProposal> completionProposals, final CompletionRequest request) {
         for (String keyword : BLADE_KEYWORDS) {

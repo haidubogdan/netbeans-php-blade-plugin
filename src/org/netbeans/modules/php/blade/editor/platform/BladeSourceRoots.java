@@ -8,7 +8,20 @@ import java.util.logging.Logger;
 import org.netbeans.api.project.Project;
 
 /**
- *
+ * TODO
+ * to have a source folder from vendor
+ * a blade view folder for views, it should be detected automatically in the future it can be part of a framework
+ * TODO cacheDir
+ * https://github.com/apache/netbeans/blob/c084119009d2e0f736f225d706bc1827af283501/php/php.symfony2/src/org/netbeans/modules/php/symfony2/SymfonyVersion.java
+ * 
+ * TODO composer dependency
+ * https://github.com/apache/netbeans/blob/c084119009d2e0f736f225d706bc1827af283501/php/php.composer/src/org/netbeans/modules/php/composer/ui/PhpModuleExtenderPanel.java
+ * 
+ * https://github.com/junichi11/cakephp-netbeans/blob/132bb656f9e2caad0bff5b7daa94c8ab084e8cf9/src/org/cakephp/netbeans/modules/CakePhpModule.java
+ * 
+ * for versioning
+ * https://github.com/junichi11/cakephp-netbeans/blob/132bb656f9e2caad0bff5b7daa94c8ab084e8cf9/src/org/cakephp/netbeans/versions/CakeVersion.java
+ * 
  * @author bhaidu
  */
 public final class BladeSourceRoots {

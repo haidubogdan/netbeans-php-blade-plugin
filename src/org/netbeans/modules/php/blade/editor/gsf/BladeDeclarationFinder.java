@@ -17,15 +17,13 @@ import org.netbeans.modules.csl.api.HtmlFormatter;
 import org.netbeans.modules.csl.api.Modifier;
 import org.netbeans.modules.csl.api.OffsetRange;
 import org.netbeans.modules.csl.spi.ParserResult;
-import org.netbeans.modules.php.blade.editor.BladeProjectSupport;
-import org.netbeans.modules.php.blade.editor.completion.BladeCompletionItem;
+import org.netbeans.modules.php.blade.editor.BladeIndexSupport;
 import org.netbeans.modules.php.blade.editor.index.api.BladeIndex;
 import org.netbeans.modules.php.blade.editor.index.api.IndexedElement;
 import org.netbeans.modules.php.blade.editor.lexer.BladeLexerUtils;
 import org.netbeans.modules.php.blade.editor.lexer.BladeTokenId;
 import org.netbeans.modules.php.blade.editor.model.Model;
 import org.netbeans.modules.php.blade.editor.model.api.BladeElement;
-import org.netbeans.modules.php.blade.editor.model.api.BladePathElement;
 import org.netbeans.modules.php.blade.editor.parsing.BladeParserResult;
 import org.netbeans.modules.php.editor.CodeUtils;
 import org.netbeans.modules.php.editor.api.ElementQuery;
@@ -296,7 +294,7 @@ public class BladeDeclarationFinder implements DeclarationFinder {
                 return alternatives;
             } else {
                 //TODO check if there is an alternative using occurence here also ?
-                BladeProjectSupport sup = BladeProjectSupport.findFor(info.getSnapshot().getSource().getFileObject());
+                BladeIndexSupport sup = BladeIndexSupport.findFor(info.getSnapshot().getSource().getFileObject());
                 if (sup != null) {
                     BladeIndex index = sup.getIndex();
                     Collection<IndexedElement> bladeViews;

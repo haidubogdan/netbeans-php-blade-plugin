@@ -44,7 +44,7 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 import org.netbeans.modules.php.blade.editor.BladeLanguage;
 import org.netbeans.modules.php.blade.editor.lexer.BladeTokenId;
-import org.netbeans.modules.php.blade.editor.ui.options.OptionsUtils;
+import org.netbeans.modules.php.blade.project.OptionsUtils;
 import org.netbeans.api.editor.mimelookup.MimePath;
 import org.netbeans.api.editor.mimelookup.MimeRegistration;
 import org.netbeans.api.editor.mimelookup.MimeRegistrations;
