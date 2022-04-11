@@ -682,6 +682,19 @@ CLOSE_BLADE_PHP = "@endphp";
     return BladeTokenId.T_HTML; 
 }
 
+<ST_HTML>{DIRECTIVE_PREFIX}[A-Za-z0-9+_-\!]+[\.][A-Za-z0-9+_\.-]+ {
+    //email test
+    String yytext = yytext();
+    return BladeTokenId.T_HTML; 
+}
+
+
+<ST_HTML>{DIRECTIVE_PREFIX}[A-Za-z0-9+_-\!]+[\)] {
+    //email test
+    String yytext = yytext();
+    return BladeTokenId.T_HTML; 
+}
+
 <ST_HTML>{DIRECTIVE_PREFIX}{LABEL} {
    String yytext = yytext();
    pushState(ST_PHP_LOOKING_FOR_DIRECTIVE_ARG);
