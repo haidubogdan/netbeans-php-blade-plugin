@@ -48,12 +48,16 @@ import javax.swing.SwingUtilities;
 import javax.swing.text.Document;
 import org.netbeans.api.lexer.TokenHierarchy;
 import org.netbeans.api.lexer.TokenSequence;
+import org.netbeans.api.project.Project;
+import org.netbeans.api.project.FileOwnerQuery;
 import org.netbeans.editor.BaseDocument;
 import org.netbeans.modules.csl.api.Formatter;
 import org.netbeans.modules.csl.spi.ParserResult;
 import org.netbeans.modules.editor.indent.spi.Context;
 import org.netbeans.modules.php.blade.editor.BladeLanguage;
 import org.netbeans.modules.php.blade.editor.formatter.IndentationCounter.Indentation;
+import org.netbeans.modules.php.blade.project.BladeProjectProperties;
+import org.openide.filesystems.FileObject;
 
 /**
  *
@@ -69,6 +73,13 @@ public class BladeFormatter implements Formatter {
 
     @Override
     public void reformat(Context context, ParserResult info) {
+        FileObject file = info.getSnapshot().getSource().getFileObject();
+        Project project = FileOwnerQuery.getOwner (file);
+        boolean reformattingEnabled = BladeProjectProperties.getInstance(project).isAutoFormattingEnabled();
+        if (!reformattingEnabled){
+            return;
+        }
+        
         long start = System.currentTimeMillis();
         Runnable rn = new Runnable() {
             @Override

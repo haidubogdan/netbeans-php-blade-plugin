@@ -63,6 +63,7 @@ public final class BladeProjectProperties {
     private static final String BLADE_VERSION = "blade.version"; // NOI18N
     private static final String COMPILER_PATH_LIST = "compiler.path.list";
     private static final String VIEW_PATH_LIST = "views.path.list";
+    private static final String AUTO_FORMATTING = "auto.formatting";
     private Project project;
 
     private BladeProjectProperties() {
@@ -105,6 +106,10 @@ public final class BladeProjectProperties {
     public void setCompilerPathList(DefaultListModel<String> list){
         String includePath = UiOptionsUtils.encodeToStrings(list.elements());
         getPreferences().put(COMPILER_PATH_LIST, includePath);
+    }
+    
+    public void setEnableAutoFormatting(boolean status){
+        getPreferences().putBoolean(AUTO_FORMATTING, status);
     }
     
     public void setViewsPathList(DefaultListModel<String> list){
@@ -157,6 +162,10 @@ public final class BladeProjectProperties {
             return encodedCompilerPathList.split("\\|", -1);
         }
         return paths;
+    }
+    
+    public boolean isAutoFormattingEnabled() {
+        return getPreferences().getBoolean(AUTO_FORMATTING, false);
     }
     
     public void addPreferenceChangeListener(PreferenceChangeListener preferenceChangeListener) {

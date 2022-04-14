@@ -100,13 +100,17 @@ public final class BladeOptionsPanel extends javax.swing.JPanel {
             }
         });
         bladeVersionComboBox.setModel(new BladeVersionComboBoxModel( BladeProjectProperties.getInstance(project).getDefaultBladeVersion()));
+        bladeAutoFormattingCheckbox.setSelected(BladeProjectProperties.getInstance(project).isAutoFormattingEnabled());
     }
      
     public void storeData(){
         Object selectedItem = bladeVersionComboBox.getModel().getSelectedItem();
-        BladeProjectProperties.getInstance(project).setDefaultBladeVersion((BladeVersion) selectedItem);
+        BladeProjectProperties projectProperties = BladeProjectProperties.getInstance(project);
+                
+        projectProperties.setDefaultBladeVersion((BladeVersion) selectedItem);
         DefaultListModel viewsPathModel = (DefaultListModel) viewsPathList.getModel();
-        BladeProjectProperties.getInstance(project).setViewsPathList(viewsPathModel);
+        projectProperties.setViewsPathList(viewsPathModel);
+        projectProperties.setEnableAutoFormatting(bladeAutoFormattingCheckbox.isSelected());
     }
       
     public void addChangeListener(ChangeListener listener) {
@@ -139,6 +143,7 @@ public final class BladeOptionsPanel extends javax.swing.JPanel {
         jLabel3 = new javax.swing.JLabel();
         jLabel4 = new javax.swing.JLabel();
         reindexViewFolderButton = new javax.swing.JButton();
+        bladeAutoFormattingCheckbox = new javax.swing.JCheckBox();
 
         org.openide.awt.Mnemonics.setLocalizedText(bladeOptionsLabel, org.openide.util.NbBundle.getMessage(BladeOptionsPanel.class, "BladeOptionsPanel.bladeOptionsLabel.text")); // NOI18N
 
@@ -187,6 +192,13 @@ public final class BladeOptionsPanel extends javax.swing.JPanel {
             }
         });
 
+        org.openide.awt.Mnemonics.setLocalizedText(bladeAutoFormattingCheckbox, org.openide.util.NbBundle.getMessage(BladeOptionsPanel.class, "BladeOptionsPanel.bladeAutoFormattingCheckbox.text")); // NOI18N
+        bladeAutoFormattingCheckbox.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                bladeAutoFormattingCheckboxActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
@@ -204,6 +216,7 @@ public final class BladeOptionsPanel extends javax.swing.JPanel {
                             .addComponent(reindexViewFolderButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(bladeAutoFormattingCheckbox)
                             .addComponent(bladeOptionsLabel)
                             .addComponent(jLabel1)
                             .addComponent(reindexViewsButton)
@@ -244,7 +257,9 @@ public final class BladeOptionsPanel extends javax.swing.JPanel {
                     .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 125, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(33, 33, 33)
                 .addComponent(reindexViewsButton)
-                .addContainerGap(102, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(bladeAutoFormattingCheckbox)
+                .addContainerGap(70, Short.MAX_VALUE))
         );
     }// </editor-fold>//GEN-END:initComponents
 
@@ -332,9 +347,14 @@ public final class BladeOptionsPanel extends javax.swing.JPanel {
             }
         }
     }//GEN-LAST:event_reindexViewFolderButtonActionPerformed
+
+    private void bladeAutoFormattingCheckboxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_bladeAutoFormattingCheckboxActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_bladeAutoFormattingCheckboxActionPerformed
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton addViewFolderButton;
+    private javax.swing.JCheckBox bladeAutoFormattingCheckbox;
     private javax.swing.JLabel bladeOptionsLabel;
     private javax.swing.JComboBox<BladeVersion> bladeVersionComboBox;
     private javax.swing.JLabel bladeVersionLabel;
