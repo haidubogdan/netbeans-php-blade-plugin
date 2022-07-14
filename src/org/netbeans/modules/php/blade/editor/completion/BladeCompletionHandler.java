@@ -110,6 +110,7 @@ public class BladeCompletionHandler implements CodeCompletionHandler2 {
         BLADE_DIRECTIVES.put("@checked", KeywordCompletionType.WITH_ARG); //NOI18N
         BLADE_DIRECTIVES.put("@selected", KeywordCompletionType.WITH_ARG); //NOI18N
         BLADE_DIRECTIVES.put("@disabled", KeywordCompletionType.WITH_ARG); //NOI18N
+        BLADE_DIRECTIVES.put("@required", KeywordCompletionType.WITH_ARG); //NOI18N
         BLADE_DIRECTIVES.put("@push", KeywordCompletionType.WITH_ARG); //NOI18N
         BLADE_DIRECTIVES.put("@once", KeywordCompletionType.WITH_ARG); //NOI18N
         BLADE_DIRECTIVES.put("@pushOnce", KeywordCompletionType.WITH_ARG); //NOI18N
