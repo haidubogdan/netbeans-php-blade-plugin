@@ -7,15 +7,19 @@ package org.netbeans.modules.php.blade.editor.parsing.astnodes;
 public class DirectiveExpressionBlock extends DirectiveStatement {
 
     protected ArgumentExpression expression;
+    protected DirectiveEndTag endtag;
     private final Block body;
 
-    public DirectiveExpressionBlock(int start, int end, DirectiveName directive, ArgumentExpression expression, Block body) {
+    public DirectiveExpressionBlock(int start, int end, DirectiveName directive,
+            ArgumentExpression expression,
+            Block body, DirectiveEndTag endTag) {
         super(start, end, directive);
         this.body = body;
         if (expression == null) {
             throw new IllegalArgumentException();
         }
         this.expression = expression;
+        this.endtag = endtag;
     }
 
     public Block getBody() {
@@ -29,6 +33,10 @@ public class DirectiveExpressionBlock extends DirectiveStatement {
 
     public ArgumentExpression getArgumentExpression() {
         return this.expression;
+    }
+    
+    public DirectiveEndTag getDirectiveEndTag() {
+        return this.endtag;
     }
 
     public Expression getLabel() {

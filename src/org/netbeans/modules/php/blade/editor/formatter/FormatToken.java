@@ -121,14 +121,26 @@ public class FormatToken {
     public static class IndentToken extends FormatToken {
 
         private int delta;
+        private int tokenSpaceCount;
 
         public IndentToken(int offset, int delta) {
             super(Kind.INDENT, offset, null);
             this.delta = delta;
+            this.tokenSpaceCount = 0;
+        }
+        
+        public IndentToken(int offset, int delta, int tokenSpaceCount) {
+            super(Kind.INDENT, offset, null);
+            this.delta = delta;
+            this.tokenSpaceCount = tokenSpaceCount;
         }
 
         public int getDelta() {
             return delta;
+        }
+        
+        public int tokenSpaceCount() {
+            return tokenSpaceCount;
         }
     }
     

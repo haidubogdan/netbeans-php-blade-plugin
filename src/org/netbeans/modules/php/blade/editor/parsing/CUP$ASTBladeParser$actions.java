@@ -20,6 +20,7 @@ import org.netbeans.modules.php.blade.editor.parsing.astnodes.BladeSectionStatem
 import org.netbeans.modules.php.blade.editor.parsing.astnodes.BladeSwitchStatement;
 import org.netbeans.modules.php.blade.editor.parsing.astnodes.BladeYieldStatement;
 import org.netbeans.modules.php.blade.editor.parsing.astnodes.Block;
+import org.netbeans.modules.php.blade.editor.parsing.astnodes.DirectiveEndTag;
 import org.netbeans.modules.php.blade.editor.parsing.astnodes.DirectiveName;
 import org.netbeans.modules.php.blade.editor.parsing.astnodes.DirectiveWithArgument;
 import org.netbeans.modules.php.blade.editor.parsing.astnodes.Expression;
@@ -416,7 +417,8 @@ class CUP$ASTBladeParser$actions {
 		
     Block block = new Block(statementListleft, statementListright, statementList);
     DirectiveName directive = new DirectiveName(dleft, dright, d.toString());
-    RESULT = new BladeSectionStatement(dleft, endright, directive, label, block);
+    DirectiveEndTag endTag = new DirectiveEndTag(endleft, endright, end.toString());
+    RESULT = new BladeSectionStatement(dleft, endright, directive, label, block, endTag);
 
               CUP$ASTBladeParser$result = parser.getSymbolFactory().newSymbol("d_section_statement",16, ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-3)), ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), RESULT);
             }
@@ -658,7 +660,8 @@ class CUP$ASTBladeParser$actions {
     PhpExpression phpExpression = new PhpExpression(exprleft, exprright, expr.toString());
     DirectiveName directive = new DirectiveName(dleft, dright, d.toString());
     ArgumentExpression argexpr = new ArgumentExpression(phpExpression, poleft, pcright);
-    RESULT = new BladeSwitchStatement(dleft, endright, directive, argexpr, block);
+    DirectiveEndTag endTag = new DirectiveEndTag(endleft, endright, end.toString());
+    RESULT = new BladeSwitchStatement(dleft, endright, directive, argexpr, block, endTag);
 
               CUP$ASTBladeParser$result = parser.getSymbolFactory().newSymbol("statement",5, ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-5)), ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), RESULT);
             }
@@ -685,7 +688,8 @@ class CUP$ASTBladeParser$actions {
     PhpExpression phpExpression = new PhpExpression(exprleft, exprright, expr.toString());
     DirectiveName directive = new DirectiveName(dleft, dright, d.toString());
     ArgumentExpression argexpr = new ArgumentExpression(phpExpression, exprleft, exprright);
-    RESULT = new BladeConditionStatement(dleft, endright, directive, argexpr, block);
+    DirectiveEndTag endTag = new DirectiveEndTag(endleft, endright, end.toString());
+    RESULT = new BladeConditionStatement(dleft, endright, directive, argexpr, block, endTag);
 
               CUP$ASTBladeParser$result = parser.getSymbolFactory().newSymbol("statement",5, ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-3)), ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), RESULT);
             }
@@ -721,7 +725,8 @@ class CUP$ASTBladeParser$actions {
     PhpExpression ifExpr = new PhpExpression(sleft, sright, s.toString());
     DirectiveName directive = new DirectiveName(dleft, dright, d.toString());
     ArgumentExpression expr = new ArgumentExpression(ifExpr, sleft, sright);
-    RESULT = new BladeIfStatement(dleft, endright, directive, expr, block);
+    DirectiveEndTag endTag = new DirectiveEndTag(endleft, endright, end.toString());
+    RESULT = new BladeIfStatement(dleft, endright, directive, expr, block, endTag);
 
               CUP$ASTBladeParser$result = parser.getSymbolFactory().newSymbol("statement",5, ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-4)), ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), RESULT);
             }
@@ -748,7 +753,8 @@ class CUP$ASTBladeParser$actions {
     PhpExpression loopExpr = new PhpExpression(sleft, sright, s.toString());
     DirectiveName directive = new DirectiveName(dleft, dright, d.toString());
     ArgumentExpression expr = new ArgumentExpression(loopExpr, sleft, sright);
-    RESULT = new BladeForStatement(dleft, endright, directive, expr, block);
+    DirectiveEndTag endTag = new DirectiveEndTag(endleft, endright, end.toString());
+    RESULT = new BladeForStatement(dleft, endright, directive, expr, block, endTag);
 
               CUP$ASTBladeParser$result = parser.getSymbolFactory().newSymbol("statement",5, ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-3)), ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), RESULT);
             }
@@ -775,7 +781,8 @@ class CUP$ASTBladeParser$actions {
     PhpExpression loopExpr = new PhpExpression(sleft, sright, s.toString());
     DirectiveName directive = new DirectiveName(dleft, dright, d.toString());
     ArgumentExpression expr = new ArgumentExpression(loopExpr, sleft, sright);
-    RESULT = new BladeForeachStatement(dleft, endright, directive, expr, block);
+    DirectiveEndTag endTag = new DirectiveEndTag(endleft, endright, end.toString());
+    RESULT = new BladeForeachStatement(dleft, endright, directive, expr, block, endTag);
 
               CUP$ASTBladeParser$result = parser.getSymbolFactory().newSymbol("statement",5, ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-3)), ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), RESULT);
             }
@@ -810,6 +817,9 @@ class CUP$ASTBladeParser$actions {
         if (v instanceof String){
             //stop at first string
             strPath = (String) v;
+            break;
+        } else if ((v instanceof Variable) && !v.toString().startsWith("$")){
+            strPath = v.toString();
             break;
         }
     }
@@ -849,6 +859,9 @@ class CUP$ASTBladeParser$actions {
         if (v instanceof String){
             //stop at first string
             strPath = (String) v;
+            break;
+        } else if ((v instanceof Variable) && !v.toString().startsWith("$")){
+            strPath = v.toString();
             break;
         }
     }
@@ -952,7 +965,7 @@ class CUP$ASTBladeParser$actions {
     PhpExpression parameter = new PhpExpression(pleft, pright, p.toString());
     DirectiveName directive = new DirectiveName(extsleft, extsright, exts.toString());
     ArgumentExpression expr = new ArgumentExpression(path, poleft, endright, parameter);
-    RESULT = new BladeExtendsStatement(extsleft, endright, directive, expr, block);
+    RESULT = new BladeExtendsStatement(extsleft, endright, directive, expr, block, null);
 
               CUP$ASTBladeParser$result = parser.getSymbolFactory().newSymbol("statement",5, ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-5)), ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), RESULT);
             }
@@ -972,7 +985,7 @@ class CUP$ASTBladeParser$actions {
     //for the moment until we find to make use of <<EOL>>
     Block block = null;
     DirectiveName directive = new DirectiveName(extsleft, extsright, exts.toString());
-    RESULT = new BladeExtendsStatement(extsleft, pathright, directive, path, block);
+    RESULT = new BladeExtendsStatement(extsleft, pathright, directive, path, block, null);
 
               CUP$ASTBladeParser$result = parser.getSymbolFactory().newSymbol("statement",5, ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-1)), ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), RESULT);
             }

@@ -10,8 +10,10 @@ package org.netbeans.modules.php.blade.editor.parsing.astnodes;
  */
 public class BladeConditionStatement extends DirectiveExpressionBlock implements StructureModelItem {
 
-    public BladeConditionStatement(int start, int end, DirectiveName directive, ArgumentExpression expression, Block body) {
-        super(start, end, directive, expression, body);
+    public BladeConditionStatement(int start, int end, DirectiveName directive,
+            ArgumentExpression expression,
+            Block body, DirectiveEndTag endtag) {
+        super(start, end, directive, expression, body, endtag);
     }
 
     @Override

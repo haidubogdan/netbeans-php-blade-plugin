@@ -252,7 +252,7 @@ public class BladeDeclarationFinder implements DeclarationFinder {
 
         if (model != null) {
             org.netbeans.modules.php.blade.editor.model.OccurencesSupport occurencesSupport = model.getOccurencesSupport(info, carretOffset);
-            org.netbeans.modules.php.blade.editor.model.api.Occurence underCaret = occurencesSupport.getOccurence();
+            org.netbeans.modules.php.blade.editor.model.api.Occurence underCaret = occurencesSupport.getOccurence(BladeElement.Kind.YIELD);
             if (underCaret != null) {
                 DeclarationLocation alternatives = DeclarationLocation.NONE;
                 for (BladeElement element : underCaret.getAllDeclarations()) {
@@ -280,7 +280,7 @@ public class BladeDeclarationFinder implements DeclarationFinder {
         DeclarationLocation alternatives = DeclarationLocation.NONE;
         if (model != null) {
             org.netbeans.modules.php.blade.editor.model.OccurencesSupport occurencesSupport = model.getOccurencesSupport(info, carretOffset);
-            org.netbeans.modules.php.blade.editor.model.api.Occurence underCaret = occurencesSupport.getOccurence();
+            org.netbeans.modules.php.blade.editor.model.api.Occurence underCaret = occurencesSupport.getOccurence(BladeElement.Kind.VIEW_PATH);
             if (underCaret != null) {
                 for (BladeElement element : underCaret.getAllDeclarations()) {
                     DeclarationLocation declLocation = new DeclarationLocation(

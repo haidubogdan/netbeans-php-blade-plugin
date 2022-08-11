@@ -15,6 +15,7 @@ import org.openide.util.RequestProcessor;
 import javax.swing.text.DefaultStyledDocument;
 import javax.swing.text.BadLocationException;
 import java.util.Collection;
+import java.util.Map;
 
 /**
  *
@@ -99,19 +100,19 @@ public class ModelVisitor extends DefaultPathVisitor {
     }
 
     @CheckForNull
-    public Occurence getOccurence(int offset) {
+    public Occurence getOccurence(BladeElement.Kind kind, int offset) {
         if (occurencesBuilder != null) {
-            return occurencesBuilder.build(offset);
+            return occurencesBuilder.build(kind, offset);
         }
         return null;
     }
 
     @CheckForNull
-    public List<Occurence> getOccurence(BladeElement element) {
+    public Map<BladeElement.Kind, List<Occurence>> getOccurence(BladeElement element) {
         if (occurencesBuilder != null) {
             return occurencesBuilder.build(element);
         }
-        return Collections.emptyList();
+        return Collections.emptyMap();
     }
 
     private Document createDocument(String mimeType, String contents) {

@@ -119,7 +119,7 @@ public class TokenFormatter {
 
                 Whitespace ws;
                 FormatToken formatToken;
-                FormatToken lastIndentToken = null;
+                FormatToken.IndentToken lastIndentToken = null;
                 FormatToken lastFormatToken = null;
                 FormatToken lastWhitespaceToken = null;
                 try {
@@ -130,83 +130,98 @@ public class TokenFormatter {
                         FormatToken.Kind id = formatToken.getId();
                         changeOffset = formatToken.getOffset();
                         int spaceCount = 0;
+                        int indentValue = 0;
                         int totalIndent = 0;
+                        boolean endTag = false;
                         switch (id) {
                             case WHITESPACE:
                                 lastWhitespaceToken = formatToken;
                                 break;
-                            case WHITESPACE_INDENT:
-                                lastIndentToken = formatToken;
-                                break;
                             case INDENT:
                                 if (formatToken instanceof FormatToken.IndentToken) {
                                     FormatToken.IndentToken indentToken = (FormatToken.IndentToken) formatToken;
+                                    lastIndentToken = indentToken;
+                                    indentValue = indentToken.getDelta();
                                     indent += indentToken.getDelta();
+                                    int xxx = 1;
                                 } else if (formatToken instanceof FormatToken.HtmlIndentToken) {
                                     //FormatToken.HtmlIndentToken indentToken = (FormatToken.HtmlIndentToken) formatToken;
                                     //htmlIndent = indentToken.getDelta();
                                 }
                                 break;
+                            case WHITESPACE_BEFORE_DIRECTIVE_ENDTAG:
+                                endTag = true;
                             case WHITESPACE_BEFORE_DIRECTIVE_START_TAG:
                             case WHITESPACE_BEFORE_DIRECTIVE_TAG:
-                            case WHITESPACE_BEFORE_DIRECTIVE_ENDTAG:
-                                htmlIndent = suggestedIndent(changeOffset);
-                                htmlIndent = 0;
-                                int decrementOffset = 0;
-                                if (id == FormatToken.Kind.WHITESPACE_BEFORE_DIRECTIVE_ENDTAG) {
-                                    decrementOffset = 4;
+                                int indentInsert = indent;
+                                if (lastIndentToken != null){
+                                    spaceCount = lastIndentToken.tokenSpaceCount();
                                 }
-
-                                if (lastFormatToken != null && lastFormatToken.isWhitespace()) {
-
+                                if (indent > 0 && indent >= spaceCount){
+                                    if (endTag){
+                                        //indent -= indentValue;
+                                    }
+                                    insert(changeOffset, delta, new String(new char[indent]).replace("\0", " "));
+                                } else {
+                                    //might need to replace
                                 }
-                                int currentLine = LineDocumentUtils.getLineStart(doc, changeOffset + delta);
-                                if (lastIndentToken != null && lastIndentToken.isWhitespace()) {
-                                    int indentOffset = 0;
-                                    int newLineIndex = 0;
-                                    while (newLineIndex < lastIndentToken.getOldText().length()
-                                            && lastIndentToken.getOldText().charAt(newLineIndex) == '\n') {
-                                        newLineIndex++;
-                                        indentOffset++;
-                                    }
-                                    if (isOnSameLine(changeOffset + delta, lastIndentToken.getOffset() + indentOffset)) {
-                                        String whitespace = lastIndentToken.getOldText();
-                                        if (whitespace != null && whitespace.length() > 1) {
-                                            for (char c : whitespace.toCharArray()) {
-                                                if (c == ' ') {
-                                                    spaceCount++;
-                                                }
-                                            }
-                                        }
-                                        totalIndent = indent + htmlIndent - decrementOffset;
-                                        if (totalIndent > 0) {
-                                            if (spaceCount < totalIndent) {
-                                                insert(changeOffset, delta, new String(new char[totalIndent]).replace("\0", " "));
-                                            } else {
-                                                //might have to replace
-                                                int diffWhitespace = totalIndent - spaceCount;
-                                                if (diffWhitespace > 0) {
-                                                    replace(lastIndentToken.getOffset() + indentOffset, delta, diffWhitespace, new String(new char[diffWhitespace]).replace("\0", " "));
-                                                } else {
-                                                    diffWhitespace = Math.abs(diffWhitespace);
-                                                    //replace(lastIndentToken.getOffset() + indentOffset, delta, diffWhitespace, "");
-                                                }
-                                            }
-                                        } else if (totalIndent == 0) {
-                                            if (spaceCount > 0) {
-                                                //replace(lastIndentToken.getOffset() + indentOffset, delta, spaceCount, "");
-                                            }
-                                        }
-                                    }
-                                } else if (currentLine == 0) {
-                                    //first row
-                                    if (lastWhitespaceToken != null) {
-                                        int diffWhitespace = changeOffset - lastWhitespaceToken.getOffset();
-                                        if (diffWhitespace > 0) {
-                                            //replace(lastWhitespaceToken.getOffset(), delta, diffWhitespace, "");
-                                        }
-                                    }
-                                }
+//                                htmlIndent = suggestedIndent(changeOffset);
+//                                htmlIndent = 0;
+//                                int decrementOffset = 0;
+//                                if (id == FormatToken.Kind.WHITESPACE_BEFORE_DIRECTIVE_ENDTAG) {
+//                                    decrementOffset = 4;
+//                                }
+//
+//                                if (lastFormatToken != null && lastFormatToken.isWhitespace()) {
+//
+//                                }
+//                                int currentLine = LineDocumentUtils.getLineStart(doc, changeOffset + delta);
+//                                if (lastIndentToken != null && lastIndentToken.isWhitespace()) {
+//                                    int indentOffset = 0;
+//                                    int newLineIndex = 0;
+//                                    while (newLineIndex < lastIndentToken.getOldText().length()
+//                                            && lastIndentToken.getOldText().charAt(newLineIndex) == '\n') {
+//                                        newLineIndex++;
+//                                        indentOffset++;
+//                                    }
+//                                    if (isOnSameLine(changeOffset + delta, lastIndentToken.getOffset() + indentOffset)) {
+//                                        String whitespace = lastIndentToken.getOldText();
+//                                        if (whitespace != null && whitespace.length() > 1) {
+//                                            for (char c : whitespace.toCharArray()) {
+//                                                if (c == ' ') {
+//                                                    spaceCount++;
+//                                                }
+//                                            }
+//                                        }
+//                                        totalIndent = indent + htmlIndent - decrementOffset;
+//                                        if (totalIndent > 0) {
+//                                            if (spaceCount < totalIndent) {
+//                                                insert(changeOffset, delta, new String(new char[totalIndent]).replace("\0", " "));
+//                                            } else {
+//                                                //might have to replace
+//                                                int diffWhitespace = totalIndent - spaceCount;
+//                                                if (diffWhitespace > 0) {
+//                                                    replace(lastIndentToken.getOffset() + indentOffset, delta, diffWhitespace, new String(new char[diffWhitespace]).replace("\0", " "));
+//                                                } else {
+//                                                    diffWhitespace = Math.abs(diffWhitespace);
+//                                                    //replace(lastIndentToken.getOffset() + indentOffset, delta, diffWhitespace, "");
+//                                                }
+//                                            }
+//                                        } else if (totalIndent == 0) {
+//                                            if (spaceCount > 0) {
+//                                                //replace(lastIndentToken.getOffset() + indentOffset, delta, spaceCount, "");
+//                                            }
+//                                        }
+//                                    }
+//                                } else if (currentLine == 0) {
+//                                    //first row
+//                                    if (lastWhitespaceToken != null) {
+//                                        int diffWhitespace = changeOffset - lastWhitespaceToken.getOffset();
+//                                        if (diffWhitespace > 0) {
+//                                            //replace(lastWhitespaceToken.getOffset(), delta, diffWhitespace, "");
+//                                        }
+//                                    }
+//                                }
                                 break;
                             case WHITESPACE_BEFORE_HTML:
                                  if (lastFormatToken != null && lastFormatToken.getId() == FormatToken.Kind.WHITESPACE_AFTER_ECHO) {
@@ -330,7 +345,7 @@ public class TokenFormatter {
             private void insert(int offset, int deltaOffset, String newString) {
                 try {
                     String oldText = doc.getText(offset + deltaOffset, newString.length());
-                    if (oldText.charAt(0) == '\n') {
+                    if (oldText.length() > 0 && oldText.charAt(0) == '\n') {
                         offset += 1;
                     }
                     delta += newString.length();

@@ -60,12 +60,12 @@ public class BladeIndexSupport {
     public static BladeIndexSupport findFor(FileObject fo) {
 	try {
 	    Project p = FileOwnerQuery.getOwner(fo);
-            String projectName = p.getClass().getSimpleName();
             //Sources sources = ProjectUtils.getSources(p);
             //SourceGroup[] sgs = sources.getSourceGroups(Sources.TYPE_GENERIC); // org.netbeans.api.java.project.JavaProjectConstants.SOURCES_TYPE_JAVA
             if (p == null) {
 		return null;
 	    }
+            String projectName = p.getClass().getSimpleName();
             //might be an internal project from a composer file detection
             if (!(projectName.equals("PhpProject"))){
                 FileObject parent = p.getProjectDirectory().getParent();

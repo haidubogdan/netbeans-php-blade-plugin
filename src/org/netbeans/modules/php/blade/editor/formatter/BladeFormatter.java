@@ -75,6 +75,18 @@ public class BladeFormatter implements Formatter {
     public void reformat(Context context, ParserResult info) {
         FileObject file = info.getSnapshot().getSource().getFileObject();
         Project project = FileOwnerQuery.getOwner (file);
+        if (project == null){
+            return;
+        }
+        String projectName = project.getClass().getSimpleName();
+        if (!(projectName.equals("PhpProject"))){
+            FileObject parent = project.getProjectDirectory().getParent();
+            project = FileOwnerQuery.getOwner(parent); //getting the parent project
+            if (project == null || !(project.getClass().getSimpleName().equals("PhpProject"))) {
+                LOGGER.log(Level.WARNING, "project for blade file not found {0}", file.getPath());
+                return;
+            }
+        }
         boolean reformattingEnabled = BladeProjectProperties.getInstance(project).isAutoFormattingEnabled();
         if (!reformattingEnabled){
             return;

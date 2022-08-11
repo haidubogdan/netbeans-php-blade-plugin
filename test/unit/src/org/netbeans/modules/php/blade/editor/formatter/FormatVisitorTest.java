@@ -113,7 +113,7 @@ public class FormatVisitorTest extends BladeTestBase {
 //        BaseDocument doc = (BaseDocument) parsingUtils.openDocument(fo);
         BaseDocument doc = getDocument(content, BladeLanguage.BLADE_MIME_TYPE, BladeTokenId.language());
         TokenFormatter.DocumentOptions docOptions = new TokenFormatter.DocumentOptions(doc);
-        FormatVisitor formatVisitor = new FormatVisitor(doc, ts, docOptions, 0, 0, doc.getLength());
+        FormatVisitor formatVisitor = new FormatVisitor(doc, docOptions, 0, 0, doc.getLength());
         ASTBladeScanner scanner = new ASTBladeScanner(new StringReader(content));
         ASTBladeParser parser = new ASTBladeParser(scanner);
         Symbol root = parser.parse();

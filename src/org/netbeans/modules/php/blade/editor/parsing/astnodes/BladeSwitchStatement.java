@@ -9,8 +9,10 @@ package org.netbeans.modules.php.blade.editor.parsing.astnodes;
  * @author bhaidu
  */
 public class BladeSwitchStatement extends DirectiveExpressionBlock implements StructureModelItem {
-    public BladeSwitchStatement(int start, int end, DirectiveName directive, ArgumentExpression expression, Block body) {
-        super(start, end, directive, expression, body);
+    public BladeSwitchStatement(int start, int end, DirectiveName directive,
+            ArgumentExpression expression,
+            Block body, DirectiveEndTag endtag) {
+        super(start, end, directive, expression, body, endtag);
     }
 
     @Override

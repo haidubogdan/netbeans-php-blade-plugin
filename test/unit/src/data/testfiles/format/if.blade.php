@@ -1,6 +1,9 @@
-    
+<div @if ($x) @endif >sss</div>
+    @for($x as $x)
+    {{$xx}}
+@endfor
+@section('sds')
     @if($x)
-    @php
-$xx = 1;
-@endphp
-@endif 
+    
+    @endif
+@endsection

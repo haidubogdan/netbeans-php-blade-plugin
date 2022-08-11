@@ -1,6 +1,7 @@
 package org.netbeans.modules.php.blade.editor.model;
 
 import org.netbeans.api.annotations.common.CheckForNull;
+import org.netbeans.modules.php.blade.editor.model.api.BladeElement;
 import org.netbeans.modules.php.blade.editor.model.api.Occurence;
 
 /**
@@ -19,9 +20,9 @@ public class OccurencesSupport {
     }
     
     @CheckForNull
-    public synchronized Occurence getOccurence() {
+    public synchronized Occurence getOccurence(BladeElement.Kind kind) {
         if (occurence == null) {
-            occurence = modelVisitor.getOccurence(offset);
+            occurence = modelVisitor.getOccurence(kind, offset);
         }
         return occurence;
     }

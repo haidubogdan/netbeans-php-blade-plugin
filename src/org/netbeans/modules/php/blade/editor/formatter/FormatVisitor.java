@@ -5,7 +5,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.StringTokenizer;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import javax.swing.text.BadLocationException;
 import org.netbeans.api.editor.document.LineDocumentUtils;
 import org.netbeans.api.lexer.Token;
 import org.netbeans.api.lexer.TokenSequence;
@@ -17,18 +19,19 @@ import org.netbeans.modules.php.blade.editor.lexer.BladeLexerUtils;
 import org.netbeans.modules.php.blade.editor.lexer.BladeTokenId;
 import org.netbeans.modules.php.blade.editor.parsing.astnodes.ASTNode;
 import org.netbeans.modules.php.blade.editor.parsing.astnodes.*;
+import org.netbeans.modules.php.blade.editor.parsing.astnodes.visitors.DefaultVisitor;
+import org.openide.util.Exceptions;
 
 /**
  * TODO treate else if bug if last element is a endif and next is directive tag
  *
  * @author bhaidu
  */
-public class FormatVisitor implements Visitor {
+public class FormatVisitor extends DefaultVisitor {
 
     private static final Logger LOGGER = Logger.getLogger(FormatVisitor.class.getName());
-    private final BaseDocument document;
+    private final BaseDocument doc;
     private final List<FormatToken> formatTokens;
-    private final TokenSequence<? extends BladeTokenId> ts;
     private final LinkedList<ASTNode> path;
     private final DocumentOptions options;
     private final int caretOffset;
@@ -39,311 +42,156 @@ public class FormatVisitor implements Visitor {
     boolean blockIsInline = false;
     boolean insideHtmlElementTag = false;
     int lastWhitespaceOffset = -1;
+    int lastNodeStartOffset;
+    int lastNodeEndOffset;
+    InLineHtml lastHtmlNode;
+    int lastDocLineStart;
+    int lastDocLineEnd;
+    int lastHtmlLineStart;
+    int lastHtmlLineEnd;
+    boolean lastHtmlEndsInNewLine;
+    private final Pattern newLineEndPattern = Pattern.compile("\\n([ ]+)$");
 
     public FormatVisitor(BaseDocument document, DocumentOptions documentOptions, final int caretOffset, final int startOffset, final int endOffset) {
-        this(document, BladeLexerUtils.getBladeMarkupTokenSequence(document, 0), documentOptions, caretOffset, startOffset, endOffset);
-    }
-
-    public FormatVisitor(BaseDocument document, TokenSequence<? extends BladeTokenId> tseq, DocumentOptions documentOptions, final int caretOffset, final int startOffset, final int endOffset) {
-        this.document = document;
-        ts = tseq;
+        this.doc = document;
         path = new LinkedList<>();
         options = documentOptions;
-        formatTokens = new ArrayList<>(ts == null ? 1 : ts.tokenCount() * 2);
+        formatTokens = new ArrayList<>();
+        formatTokens.add(new FormatToken.InitToken());
         this.caretOffset = caretOffset;
         this.startOffset = startOffset;
         this.endOffset = endOffset;
-        formatTokens.add(new FormatToken.InitToken());
     }
 
+
+    @Override
+    public void visit(BladeProgram program) {
+        super.visit(program);
+    }
+
+    @Override
+    public void scan(ASTNode node) {
+        if (node == null){
+            return;
+        }
+        if (node instanceof BladeProgram){
+            super.scan(node);
+            return;
+        }
+        
+        if (node instanceof InLineHtml){
+            if (((InLineHtml) node).getContent().length() == 0){
+                return;
+            }
+        }
+
+        int currentDocLineStart  = 0;
+        int currentDocLineEnd = 0;
+        boolean parseError = false;
+        try {
+            currentDocLineStart = LineDocumentUtils.getLineIndex(doc, node.getStartOffset());
+            currentDocLineEnd = LineDocumentUtils.getLineIndex(doc, node.getEndOffset());
+        } catch (BadLocationException ex) {
+            parseError = true;
+            //Exceptions.printStackTrace(ex);
+        }
+        
+        lastNodeStartOffset = node.getStartOffset();
+        lastNodeEndOffset = node.getEndOffset();
+        
+        if (!parseError){
+            lastDocLineStart = currentDocLineStart;
+            lastDocLineEnd = currentDocLineEnd;
+        }
+        
+        node.accept(this);
+
+        if (node instanceof DirectiveExpressionBlock){
+            DirectiveExpressionBlock directiveBlockNode = (DirectiveExpressionBlock) node;
+            String directiveName = directiveBlockNode.getDirectiveName().toString();
+            int directiveOffset = directiveBlockNode.getDirectiveName().getStartOffset();
+            if (!lastHtmlEndsInNewLine && lastDocLineStart == lastHtmlLineEnd){
+                int x = 1;
+            } else {
+                formatTokens.add(
+                        new FormatToken.WsDirectiveToken(FormatToken.Kind.WHITESPACE_BEFORE_DIRECTIVE_START_TAG,
+                                directiveOffset, directiveName));
+            }
+            if (directiveBlockNode.getBody() == null){
+                return;
+            }
+            this.scan(directiveBlockNode.getBody().getStatements());
+            DirectiveEndTag directiveEndTag = directiveBlockNode.getDirectiveEndTag();
+            if (directiveEndTag  != null){
+                 formatTokens.add(
+                        new FormatToken.WsDirectiveToken(FormatToken.Kind.WHITESPACE_BEFORE_DIRECTIVE_ENDTAG,
+                                directiveEndTag.getStartOffset(), directiveEndTag.getName()));
+            }
+        }
+    }
+    
+    @Override
     public void scan(Iterable<? extends ASTNode> nodes) {
         if (nodes != null) {
             for (ASTNode n : nodes) {
                 if (n.getStartOffset() < startOffset) {//in case of selection formatting
-                    break;
+                    continue;
                 }
 
                 if (n.getEndOffset() > endOffset) {//in case of selection formatting
                     break;
                 }
-                scan(n);
+                this.scan(n);
             }
         }
     }
 
-    @Override
-    public void visit(BladeProgram program) {
-        //INIT TAG
-        if (ts != null) {
-            path.addFirst(program);
-            ts.move(0);
-            ts.moveNext();
-            ts.movePrevious();
-            scan(program.getStatements());
-            path.removeFirst();
-        }
-    }
-
-    public void scan(ASTNode node) {
-        if (node == null) {
-            return;
-        }
-
-        if (node.getStartOffset() < startOffset) {
-            return;
-        }
-
-        if (node.getEndOffset() > endOffset) {
-            return;
-        }
-
-        if (ts.token() != null && ts.offset() < node.getStartOffset()) {
-            while (moveNext() && ts.offset() < node.getStartOffset()) {
-                //check for whitespaces
-                BladeTokenId idBefore = ts.token().id();
-                switch (idBefore) {
-                    case WHITESPACE:
-                    case NEWLINE:
-                        int offsetD = ts.offset();
-                        if (lastWhitespaceOffset != offsetD) {
-                            lastWhitespaceOffset = offsetD;
-                            formatTokens.addAll(resolveWhitespaceTokens());
-                        }
-                        break;
-                }
-            }
-        }
-
-        ts.move(node.getStartOffset());
-
-        if (ts.token() == null) {
-            if (!moveNext()) {
-                return;
-            }
-        }
-
-        if (ts.token() == null) {
-            return;
-        }
-
-        int currentOffset = ts.offset();
-
-        if (currentOffset > endOffset) {
-            //it's over the selection
-            return;
-        }
-
-        BladeTokenId id = ts.token().id();
-
-        //add the first whitespaces
-        switch (id) {
-            case WHITESPACE:
-            case NEWLINE:
-                int offsetD = ts.offset();
-                if (lastWhitespaceOffset != offsetD) {
-                    lastWhitespaceOffset = offsetD;
-                    formatTokens.addAll(resolveWhitespaceTokens());
-                }
-                moveNext();
-                break;
-        }
-
-        path.addFirst(node);
-        if (node instanceof DirectiveExpressionBlock) {
-            DirectiveExpressionBlock d = (DirectiveExpressionBlock) node;
-            addDirectiveBlockWSTokens(d);
-        } else if (node instanceof InlineDirectiveStatement) {
-            InlineDirectiveStatement d = (InlineDirectiveStatement) node;
-            addDirectiveInlineWSTokens(d);
-        }
-        node.accept(this);
-        path.removeFirst();
-    }
-
-    @Override
-    public void visit(DirectiveExpressionBlock node) {
-        scan(node.getBody().getStatements());
-    }
+//
+//    @Override
+//    public void visit(DirectiveExpressionBlock node) {
+//        scan(node.getBody().getStatements());
+//    }
 
     @Override
     public void visit(InLineHtml node) {
-        BladeTokenId id = ts.token().id();
-        String text = ts.token().text().toString();
-        if (text.equals("\n")) {
-            //result.add(new FormatToken(FormatToken.Kind.WHITESPACE_INDENT, tokenStartOffset, adjustLastWhitespaceToken(ts.token())));
-            return;
-        }
-        if (id.equals(BladeTokenId.T_HTML)) {
-            setBlockLineInlineStatus(node);
-        }
-        if (blockIsInline) {
-            //insideHtmlElementTag = false;
-            //return;
-        }
-        String content = node.getContent();
-
-        if (content == null || content.length() == 0 || content.trim().length() == 0) {
-            if (id.equals(BladeTokenId.T_HTML)) {
-                //insideHtmlElementTag = false;
+       String content = node.getContent();
+       boolean isSimpleWhitespace = content.matches("^[ \t\r]+$");
+       lastHtmlNode = node;
+       lastHtmlLineStart = lastDocLineStart;
+       lastHtmlLineEnd = lastDocLineEnd;
+       Matcher m = newLineEndPattern.matcher(content);
+       boolean hasMatches =  m.matches();
+       lastHtmlEndsInNewLine = content.endsWith("\n") || hasMatches;
+       //??
+       if (lastHtmlEndsInNewLine){
+            String val = hasMatches ? m.group(1) : "";
+            if (content.length() == 1){
+                //formatTokens.add(new FormatToken.IndentToken(node.getStartOffset(), options.indentSize, val.length()));
+            } else {
+                formatTokens.add(new FormatToken.IndentToken(node.getStartOffset(), options.indentSize, val.length()));
             }
-            return;
-        }
-
-        if (Character.isWhitespace(content.charAt(0))) {
-            int offsetD = ts.offset();
-            if (lastWhitespaceOffset != offsetD && Character.isWhitespace(text.charAt(0))) {
-                lastWhitespaceOffset = offsetD;
-                formatTokens.addAll(resolveWhitespaceTokens());
-            } else if (lastWhitespaceOffset != node.getStartOffset() && Character.isWhitespace(content.charAt(0))) {
-                lastWhitespaceOffset = node.getStartOffset();
-                formatTokens.addAll(resolveWhitespaceTokens());
-            }
-            while (moveNext() && ts.offset() < node.getStartOffset() && ts.token().id() == BladeTokenId.T_HTML) {
-                if (lastWhitespaceOffset != ts.offset()) {
-                    lastWhitespaceOffset = ts.offset();
-                    formatTokens.addAll(resolveWhitespaceTokens());
-                }
-            }
-            if (ts.token().id() != BladeTokenId.T_HTML) {
-                ts.movePrevious();
-            }
-        }
-
-        id = ts.token().id();
-        text = ts.token().text().toString();
-
-        switch (id) {
-            case WHITESPACE:
-            case NEWLINE:
-                if (moveNext()) {
-                    id = ts.token().id();
-                }
-                break;
-        }
-
-        if (id.equals(BladeTokenId.T_HTML)) {
-            formatTokens.add(new FormatToken(FormatToken.Kind.WHITESPACE_BEFORE_HTML, ts.offset()));
-            //formatTokens.add(new FormatToken(FormatToken.Kind.HTML, ts.offset(), ts.token().text().toString()));
-            String htmlText = ts.token().text().toString();
-            StringTokenizer st = new StringTokenizer(htmlText, "<", true);
-            int openTagBalance = 0;
-            boolean tagDetected = false;
-            while (st.hasMoreTokens()) {
-                String token = st.nextToken();
-                if (token.indexOf("<") > -1) {
-                    openTagBalance++;
-                    tagDetected = true;
-                }
-                if (token.indexOf(">") > -1) {
-                    openTagBalance--;
-                }
-            }
-
-            insideHtmlElementTag = openTagBalance > 0 && tagDetected;
-
-            formatTokens.add(new FormatToken(FormatToken.Kind.WHITESPACE_AFTER_HTML, ts.offset()));
-        }
+       }
+       //find out if it's a directive new line
     }
 
     @Override
     public void visit(BladeEchoStatement node) {
-        BladeTokenId id = ts.token().id();
-        if (!id.equals(BladeTokenId.T_BLADE_OPEN_ECHO) && !id.equals(BladeTokenId.T_BLADE_OPEN_ECHO_ESCAPED)) {
-            ts.movePrevious();
-        }
-        switch (id) {
-            case T_BLADE_OPEN_ECHO:
-            case T_BLADE_OPEN_ECHO_ESCAPED:
-                formatTokens.add(new FormatToken(FormatToken.Kind.WHITESPACE_BEFORE_ECHO, ts.offset()));
-                formatTokens.add(new FormatToken(FormatToken.Kind.TEXT, ts.offset(), ts.token().text().toString()));
-                break;
-        }
-
-        ts.move(node.getEndOffset());
-        ts.movePrevious();
-        Token token = ts.token();
-        String text = ts.token().text().toString();
-        if (ts.token().id().equals(BladeTokenId.T_BLADE_CLOSE_ECHO)) {
-            formatTokens.add(new FormatToken(FormatToken.Kind.TEXT, ts.offset(), ts.token().text().toString()));
-            formatTokens.add(new FormatToken(FormatToken.Kind.WHITESPACE_AFTER_ECHO, ts.offset(), ts.token().text().toString()));
-        }
+        
     }
 
     @Override
     public void visit(BladeComment node) {
-        BladeTokenId id = ts.token().id();
-        if (!id.equals(BladeTokenId.T_BLADE_COMMENT)) {
-            ts.movePrevious();
-        }
-
-        if (id.equals(BladeTokenId.T_BLADE_COMMENT) && ts.token().text().toString().trim().equals("{{--")) {
-            formatTokens.add(new FormatToken(FormatToken.Kind.WHITESPACE_BEFORE_BLADE_COMMENT, ts.offset()));
-            formatTokens.add(new FormatToken(FormatToken.Kind.TEXT, ts.offset(), ts.token().text().toString()));
-        }
-        moveNext();
-        while (ts.token().id() == BladeTokenId.T_BLADE_COMMENT && ts.offset() < node.getEndOffset() && ts.token().text().toString().trim() != "--}}") {
-            formatTokens.add(new FormatToken(FormatToken.Kind.TEXT, ts.offset(), ts.token().text().toString()));
-            moveNext();
-        }
-        id = ts.token().id();
-        if (id.equals(BladeTokenId.T_BLADE_COMMENT) && ts.token().text().toString().trim().equals("--}}")) {
-            //formatTokens.add(new FormatToken(FormatToken.Kind.TEXT, ts.offset(), ts.token().text().toString()));
-            formatTokens.add(new FormatToken(FormatToken.Kind.WHITESPACE_AFTER_BLADE_COMMENT, ts.offset()));
-        }
-        int debug = 3;
+        
     }
 
     @Override
     public void visit(InLineBladePhp node) {
-        //TODO move into a function
-        BladeTokenId id = ts.token().id();
-        String tText = ts.token().text().toString();
-
-        if (!tText.startsWith("@")) {
-            ts.movePrevious();
-            if (ts.token() == null) {
-                return;
-            }
-            tText = ts.token().text().toString();
-
-            if (!tText.startsWith("@")) {
-                return;
-            }
-        }
-        id = ts.token().id();
-        if (insideHtmlElementTag) {
-            formatTokens.add(new FormatToken(FormatToken.Kind.WHITESPACE_BEFORE_DIRECTIVE_TAG_INSIDE_HTML_TAG, ts.offset()));
-        } else {
-            formatTokens.add(new FormatToken.PhpBladeToken(FormatToken.Kind.WHITESPACE_BEFORE_BLADE_PHP, ts.offset(), ts.token().text().toString()));
-        }
-        //formatTokens.add(new FormatToken(FormatToken.Kind.TEXT, ts.offset(), ts.token().text().toString()));
-
-        if (insideHtmlElementTag) {
-            return;
-        }
-
-        moveNext();
-        id = ts.token().id();
-
-        if (id.equals(BladeTokenId.T_BLADE_PHP)) {
-            formatTokens.add(new FormatToken.PhpBladeToken(FormatToken.Kind.WHITESPACE_BEFORE_BLADE_PHP_BODY, ts.offset(),
-                    ts.token().text().toString()));
-            //formatTokens.add(new FormatToken(FormatToken.Kind.TEXT, ts.offset(), ts.token().text().toString()));
-        }
-
-        moveNext();
-        id = ts.token().id();
-        tText = ts.token().text().toString();
-
-        if (tText.equals("@endphp")) {
-            formatTokens.add(new FormatToken.PhpBladeToken(FormatToken.Kind.WHITESPACE_BEFORE_BLADE_PHP, ts.offset(),
-                    ts.token().text().toString()));
-            //formatTokens.add(new FormatToken(FormatToken.Kind.TEXT, ts.offset(), ts.token().text().toString()));
-        }
+        
     }
 
     @Override
     public void visit(BladeForStatement node) {
+        int x = 3;
     }
 
     @Override
@@ -356,7 +204,6 @@ public class FormatVisitor implements Visitor {
 
     @Override
     public void visit(BladeIfStatement node) {
-
     }
 
     @Override
@@ -397,161 +244,11 @@ public class FormatVisitor implements Visitor {
     }
 
     private void addDirectiveBlockWSTokens(DirectiveExpressionBlock node) {
-        BladeTokenId id = ts.token().id();
         
-        if (!hasDirectiveStart(ts.token().text())) {
-            ts.movePrevious();
-            if (ts.token() == null) {
-                return;
-            }
-
-            if (!hasDirectiveStart(ts.token().text())) {
-                return;
-            }
-        }
-
-        setBlockLineInlineStatus(node);
-        formatTokens.add(new FormatToken.WsDirectiveToken(FormatToken.Kind.WHITESPACE_BEFORE_DIRECTIVE_START_TAG,
-                ts.offset(), ts.token().text().toString()));
-        formatTokens.add(new FormatToken(FormatToken.Kind.TEXT, ts.offset(), ts.token().text().toString()));
-
-        while (moveNext() && ts.offset() < node.getArgumentExpression().getStartOffset() - 1) {
-            BladeTokenId btid = ts.token().id();
-            String tt = ts.token().text().toString();
-            if (isWhitespaceToken(btid) && lastWhitespaceOffset != ts.offset()) {
-                lastWhitespaceOffset = ts.offset();
-                formatTokens.addAll(resolveWhitespaceTokens());
-            }
-        }
-
-        //left paren
-        ts.move(node.getArgumentExpression().getStartOffset() - 1);
-        if (!ts.movePrevious()) {
-            moveNext();
-        }
-
-        if (ts.token() == null) {
-            return;
-        }
-        String text = ts.token().text().toString();
-        int offset = ts.offset();
-
-        if (ts.token().id().equals(BladeTokenId.BLADE_PHP_TOKEN)) {
-            formatTokens.add(new FormatToken(FormatToken.Kind.WHITESPACE_BEFORE_DIRECTIVE_PAREN, ts.offset()));
-            formatTokens.add(new FormatToken(FormatToken.Kind.TEXT, ts.offset(), ts.token().text().toString()));
-        }
-
-        //right paren
-        ts.move(node.getArgumentExpression().getEndOffset());
-        ts.movePrevious();
-        Token token = ts.token();
-        text = ts.token().text().toString();
-        if (ts.token().id().equals(BladeTokenId.BLADE_PHP_TOKEN)) {
-            formatTokens.add(new FormatToken(FormatToken.Kind.TEXT, ts.offset(), ts.token().text().toString()));
-            //formatTokens.add(new FormatToken(FormatToken.Kind.WHITESPACE_AFTER_DIRECTIVE_PAREN, ts.offset()));
-            if (!blockIsInline) {
-                formatTokens.add(new FormatToken.IndentToken(ts.offset(), options.indentSize));
-            }
-        }
-
-        if (node.getBody() != null) {
-            scan(node.getBody().getStatements());
-        }
-
-        //TODO check for whitespace 
-        if (formatTokens.size() > 1) {
-            FormatToken lastFormatToken = formatTokens.get(formatTokens.size() - 1);
-            int lastoffset = lastFormatToken.getOffset();
-            ts.move(lastoffset);
-            while (moveNext() && ts.offset() < node.getEndOffset()) {
-                BladeTokenId btid = ts.token().id();
-                String tt = ts.token().text().toString();
-                if (isWhitespaceToken(btid) && lastWhitespaceOffset != ts.offset()) {
-                    lastWhitespaceOffset = ts.offset();
-                    formatTokens.addAll(resolveWhitespaceTokens());
-                }
-            }
-        }
-
-        ts.move(node.getEndOffset());
-
-        if (ts.movePrevious()) {
-            if (!hasDirectiveStart(ts.token().text())) {
-                //it's not a valid endtag 
-                //TODO treat extends
-                return;
-            }
-            if (!blockIsInline) {
-                formatTokens.add(new FormatToken(FormatToken.Kind.WHITESPACE_DECREMENT_INDENT, ts.offset()));
-            }
-            formatTokens.add(new FormatToken.WsDirectiveToken(FormatToken.Kind.WHITESPACE_BEFORE_DIRECTIVE_ENDTAG, ts.offset(),
-                    ts.token().text().toString()));
-            formatTokens.add(new FormatToken(FormatToken.Kind.TEXT, ts.offset(), ts.token().text().toString()));
-            formatTokens.add(new FormatToken(FormatToken.Kind.WHITESPACE_AFTER_DIRECTIVE_ENDTAG, ts.offset()));
-        }
-
-        moveNext();
     }
 
     private void addDirectiveInlineWSTokens(InlineDirectiveStatement node) {
-        BladeTokenId id = ts.token().id();
-        String tText = ts.token().text().toString();
-
-        if (!tText.startsWith("@")) {
-            ts.movePrevious();
-            if (ts.token() == null) {
-                return;
-            }
-            tText = ts.token().text().toString();
-
-            if (!tText.startsWith("@")) {
-                return;
-            }
-        }
-
-        id = ts.token().id();
-        if (insideHtmlElementTag) {
-            formatTokens.add(new FormatToken(FormatToken.Kind.WHITESPACE_BEFORE_DIRECTIVE_TAG_INSIDE_HTML_TAG, ts.offset()));
-        } else {
-            formatTokens.add(new FormatToken.WsDirectiveToken(FormatToken.Kind.WHITESPACE_BEFORE_DIRECTIVE_TAG, ts.offset(), ts.token().text().toString()));
-        }
-        formatTokens.add(new FormatToken(FormatToken.Kind.TEXT, ts.offset(), ts.token().text().toString()));
-
-        //left paren
-        ts.move(node.getArgumentExpression().getStartOffset() - 1);
-        ts.movePrevious();
-
-        while (ts.token() != null && ts.token().id() != BladeTokenId.BLADE_PHP_TOKEN
-                && ts.offset() < node.getArgumentExpression().getStartOffset()) {
-            moveNext();
-        }
-
-        if (ts.token() == null) {
-            return;
-        }
-
-        String text = ts.token().text().toString();
-        int offset = ts.offset();
-
-        if (ts.token().id().equals(BladeTokenId.BLADE_PHP_TOKEN)) {
-            formatTokens.add(new FormatToken(FormatToken.Kind.WHITESPACE_BEFORE_DIRECTIVE_PAREN, ts.offset()));
-            formatTokens.add(new FormatToken(FormatToken.Kind.TEXT, ts.offset(), ts.token().text().toString()));
-        }
-
-        //right paren
-        ts.move(node.getArgumentExpression().getEndOffset());
-        ts.movePrevious();
-        Token token = ts.token();
-        text = ts.token().text().toString();
-        if (ts.token() != null && ts.token().id().equals(BladeTokenId.T_BLADE_PHP_VAR)) {
-            moveNext();
-        }
-        if (ts.token() == null) {
-            return;
-        }
-        if (ts.token().id().equals(BladeTokenId.BLADE_PHP_TOKEN)) {
-            formatTokens.add(new FormatToken(FormatToken.Kind.TEXT, ts.offset(), ts.token().text().toString()));
-        }
+        
     }
 
     private boolean isWhitespaceToken(BladeTokenId id) {
@@ -583,70 +280,19 @@ public class FormatVisitor implements Visitor {
 
     private List<FormatToken> resolveWhitespaceTokens() {
         final List<FormatToken> result = new LinkedList<>();
-        int countNewLines = countOfNewLines(ts.token().text());
-        String tokenText = ts.token().text().toString();
-        int tokenStartOffset = ts.offset();
-        if (countNewLines > 0) {
-            result.add(new FormatToken(FormatToken.Kind.WHITESPACE_INDENT, tokenStartOffset, adjustLastWhitespaceToken(ts.token())));
-        } else {
-            int tokenEndOffset = tokenStartOffset + ts.token().length();
-            if (GsfUtilities.isCodeTemplateEditing(document)
-                    && caretOffset > tokenStartOffset
-                    && caretOffset < tokenEndOffset
-                    && tokenStartOffset > startOffset
-                    && tokenEndOffset < endOffset) {
-                int devideIndex = caretOffset - tokenStartOffset;
-                String firstTextPart = tokenText.substring(0, devideIndex);
-                result.add(new FormatToken(FormatToken.Kind.WHITESPACE, tokenStartOffset, firstTextPart));
-                result.add(new FormatToken(FormatToken.Kind.WHITESPACE, tokenStartOffset + firstTextPart.length(), tokenText.substring(devideIndex)));
-            } else {
-                result.add(new FormatToken(FormatToken.Kind.WHITESPACE, tokenStartOffset, adjustLastWhitespaceToken(ts.token())));
-            }
-        }
+        
         return result;
     }
 
     private String adjustLastWhitespaceToken(Token<? extends BladeTokenId> token) {
-        String result;
-        String tokenText = token.text().toString();
-        boolean isLast;
-        if (ts.moveNext()) {
-            isLast = false;
-            ts.movePrevious();
-        } else {
-            isLast = true;
-        }
-        if (isLast) {
-            int firstNewLineOffset = tokenText.indexOf('\n');
-            result = tokenText.substring(0, firstNewLineOffset) + tokenText.substring(firstNewLineOffset + 1);
-        } else {
-            result = tokenText;
-        }
+        String result = "";
+        
         return result;
     }
 
-    private boolean moveNext() {
-        boolean value = ts.moveNext();
-        if (value) {
-            FormatToken last = formatTokens.get(formatTokens.size() - 1);
-            value = !(last.getId() == FormatToken.Kind.TEXT && last.getOffset() >= ts.offset());
-        }
-        return value;
-    }
-
-    private int countOfNewLines(CharSequence chs) {
-        int count = 0;
-        for (int i = 0; i < chs.length(); i++) {
-            if (chs.charAt(i) == '\n') { // NOI18N
-                count++;
-            }
-        }
-        return count;
-    }
-
     private void setBlockLineInlineStatus(ASTNode node) {
-        int startLine = LineDocumentUtils.getLineStart(document, node.getStartOffset());
-        int endLine = LineDocumentUtils.getLineStart(document, node.getEndOffset());
+        int startLine = LineDocumentUtils.getLineStart(doc, node.getStartOffset());
+        int endLine = LineDocumentUtils.getLineStart(doc, node.getEndOffset());
         blockIsInline = startLine == endLine;
     }
 

@@ -32,7 +32,8 @@ public class OccurrenceBuilder {
 
     private final Map<String, Map<OffsetRange, Item>> holder;
     private final ParserResult parserResult;
-    private final List<Occurence> cachedOccurences;
+    private final Map<BladeElement.Kind, List<Occurence>> cachedOccurences;
+    
     private volatile ElementInfo elementInfo;
 
     OccurrenceBuilder() {
@@ -44,13 +45,23 @@ public class OccurrenceBuilder {
         holder = new HashMap<>();
         //should search for yields
         this.parserResult = null;
-        this.cachedOccurences = new ArrayList<>();
+        this.cachedOccurences = new HashMap<BladeElement.Kind, List<Occurence>>() {
+            {
+                put(BladeElement.Kind.VIEW_PATH, new ArrayList<>());
+                put(BladeElement.Kind.YIELD, new ArrayList<>());
+            }
+        };
     }
 
     public OccurrenceBuilder(ParserResult parserResult) {
         holder = new HashMap<>();
         this.parserResult = parserResult;
-        this.cachedOccurences = new ArrayList<>();
+        this.cachedOccurences = new HashMap<BladeElement.Kind, List<Occurence>>() {
+            {
+                put(BladeElement.Kind.VIEW_PATH, new ArrayList<>());
+                put(BladeElement.Kind.YIELD, new ArrayList<>());
+            }
+        };
     }
 
     public void build() {
@@ -79,7 +90,7 @@ public class OccurrenceBuilder {
                         int debug = 1;
                     }
 
-                    buildDeclaration(elementInfo, cachedOccurences);
+                    buildDeclaration(elementInfo, BladeElement.Kind.YIELD,  cachedOccurences);
                     break;
                 }
                 case INCLUDE:
@@ -93,7 +104,7 @@ public class OccurrenceBuilder {
                         int debug = 1;
                     }
 
-                    buildDeclaration(elementInfo, cachedOccurences);
+                    buildDeclaration(elementInfo, BladeElement.Kind.VIEW_PATH, cachedOccurences);
                     break; 
                 }    
             }
@@ -102,25 +113,29 @@ public class OccurrenceBuilder {
         //can parse the php statements
     }
 
-    List<Occurence> build(final BladeElement element) {
+    Map<BladeElement.Kind, List<Occurence>> build(final BladeElement element) {
         if (setElementInfo(element)) {
             build();
         }
-        return new ArrayList<>(cachedOccurences);
+        return cachedOccurences;
     }
 
-    Occurence build(final int offset) {
-        Occurence retval = findOccurenceByOffset(offset);
+    Occurence build(BladeElement.Kind kind, final int offset) {
+        Occurence retval = findOccurenceByOffset(kind, offset);
         if (retval == null && setElementInfo(offset)) {
             build();
-            retval = findOccurenceByOffset(offset);
+            retval = findOccurenceByOffset(kind, offset);
         }
         return retval;
     }
 
-    private Occurence findOccurenceByOffset(final int offset) {
+    private Occurence findOccurenceByOffset(BladeElement.Kind kind, final int offset) {
         Occurence retval = null;
-        for (Occurence occ : cachedOccurences) {
+        List<Occurence> occurenceList = cachedOccurences.get(kind);
+        if (occurenceList == null){
+            return retval;
+        }
+        for (Occurence occ : occurenceList) {
             assert occ != null;
             if (occ.getOccurenceRange().containsInclusive(offset)) {
                 retval = occ;
@@ -156,8 +171,12 @@ public class OccurrenceBuilder {
         }
     }
 
-    private void buildDeclaration(ElementInfo nodeCtxInfo, final List<Occurence> occurences) {
+    private void buildDeclaration(ElementInfo nodeCtxInfo, BladeElement.Kind kind, final Map<BladeElement.Kind, List<Occurence>> occurences) {
         String idName = nodeCtxInfo.getLabel();
+        List<Occurence> occurenceList = occurences.get(kind);
+        if (occurenceList == null){
+            occurenceList = new ArrayList<>();
+        }
         Set<? extends BladeElement> elements = nodeCtxInfo.getDeclarations();
         Collection<BladeElement> declarations = new ArrayList<BladeElement>();
         for (BladeElement element : elements) {
@@ -167,7 +186,9 @@ public class OccurrenceBuilder {
                 declarations.add(declaration);
             }
         }
-        occurences.add(new OccurenceImpl(declarations, nodeCtxInfo.getRange()));
+        
+        occurenceList.add(new OccurenceImpl(declarations, nodeCtxInfo.getRange()));
+        occurences.put(kind, occurenceList);
     }
 
     public void addOccurrence(String name, OffsetRange range, DeclarationScope whereUsed, BladeDirective currentParent, boolean leftSite) {
@@ -255,7 +276,7 @@ public class OccurrenceBuilder {
         }
 
         @Override
-        public Collection<Occurence> getAllOccurences() {
+        public Map<BladeElement.Kind, List<Occurence>> getAllOccurences() {
             return cachedOccurences;
         }
     }

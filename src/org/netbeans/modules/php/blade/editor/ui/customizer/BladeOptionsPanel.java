@@ -193,11 +193,6 @@ public final class BladeOptionsPanel extends javax.swing.JPanel {
         });
 
         org.openide.awt.Mnemonics.setLocalizedText(bladeAutoFormattingCheckbox, org.openide.util.NbBundle.getMessage(BladeOptionsPanel.class, "BladeOptionsPanel.bladeAutoFormattingCheckbox.text")); // NOI18N
-        bladeAutoFormattingCheckbox.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                bladeAutoFormattingCheckboxActionPerformed(evt);
-            }
-        });
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
@@ -347,10 +342,6 @@ public final class BladeOptionsPanel extends javax.swing.JPanel {
             }
         }
     }//GEN-LAST:event_reindexViewFolderButtonActionPerformed
-
-    private void bladeAutoFormattingCheckboxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_bladeAutoFormattingCheckboxActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_bladeAutoFormattingCheckboxActionPerformed
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton addViewFolderButton;

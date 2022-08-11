@@ -1,6 +1,8 @@
 package org.netbeans.modules.php.blade.editor.model.api;
 
 import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 import org.netbeans.modules.csl.api.OffsetRange;
 
 /**
@@ -26,7 +28,7 @@ public interface Occurence {
     /**mostly the same as getDeclaration. In case of __constructor are different*/
     //PhpElementKind getKind();
     Collection<? extends BladeElement> getAllDeclarations();
-    Collection<Occurence> getAllOccurences();
+    Map<BladeElement.Kind, List<Occurence>> getAllOccurences();
     OffsetRange getOccurenceRange();
 
 }
