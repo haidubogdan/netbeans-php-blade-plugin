@@ -159,7 +159,8 @@ public enum BladeTokenId implements TokenId {
 
                     switch (id){
                         case T_HTML:
-                        case NEWLINE:    
+                        case NEWLINE:
+                        case WHITESPACE:    
                            //html embedding not working well
                            lang = HTMLTokenId.language();
                            join_sections = true;

@@ -130,7 +130,14 @@ public class FormatVisitor extends DefaultVisitor {
                         new FormatToken.WsDirectiveToken(endTagkind,
                                 directiveEndTag.getStartOffset(), lastSpaceCount, directiveEndTag.getName(), currentDocLineStart));
             }
-        } else if (node instanceof BladeConstDirectiveStatement) {
+        } else if (node instanceof InlineDirectiveStatement) {
+            InlineDirectiveStatement directiveNode = (InlineDirectiveStatement) node;
+            int directiveOffset = directiveNode.getDirectiveName().getStartOffset();
+            String directiveName = directiveNode.getDirectiveName().getName();
+            formatTokens.add(
+                    new FormatToken.WsDirectiveToken(FormatToken.Kind.WHITESPACE_BEFORE_INLINE_DIRECTIVE_TAG,
+                            directiveOffset, lastSpaceCount, directiveName, currentDocLineStart));
+        }else if (node instanceof BladeConstDirectiveStatement) {
             BladeConstDirectiveStatement directiveNode = (BladeConstDirectiveStatement) node;
             int directiveOffset = directiveNode.getDirectiveName().getStartOffset();
             String directiveName = directiveNode.getDirectiveName().getName();
@@ -183,7 +190,7 @@ public class FormatVisitor extends DefaultVisitor {
             space++;
         }
         lastSpaceCount = space;
-        if (lastHtmlEndsInNewLine && space > 0) {
+        if (lastHtmlEndsInNewLine) {
             formatTokens.add(new FormatToken.HtmlIndentToken(node.getStartOffset(), space, lastDocLineStart));
         }
         //find out if it's a directive new line
