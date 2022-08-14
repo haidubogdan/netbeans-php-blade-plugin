@@ -19,7 +19,7 @@ public class DirectiveExpressionBlock extends DirectiveStatement {
             throw new IllegalArgumentException();
         }
         this.expression = expression;
-        this.endtag = endtag;
+        this.endtag = endTag;
     }
 
     public Block getBody() {

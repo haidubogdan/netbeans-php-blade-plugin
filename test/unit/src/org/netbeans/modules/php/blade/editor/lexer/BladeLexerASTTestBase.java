@@ -57,7 +57,9 @@ public class BladeLexerASTTestBase extends BladeTestBase {
             result.append(fieldName);
             result.append(" ");
             if (symbol.value != null) {
+                result.append("`");
                 result.append(BladeLexerUtils.replaceLinesAndTabs(symbol.value.toString()));
+                result.append("`");
             } else {
                 result.append("null");
             }

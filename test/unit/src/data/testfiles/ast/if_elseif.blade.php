@@ -1,8 +1,10 @@
-@if ($test)
-    @if($t)
-    @endif
-@elseif($tt)
+@section('xx')
+@include('yyy')
+@endsection
 
-@endif
-        
-    
+<script>
+    var = 1;
+    const x = {
+     x:"ss"//s   
+    }
+</script>

@@ -99,7 +99,7 @@ public class TokenFormatter {
                 }
                 
                 MutableTextInput mti = (MutableTextInput) doc.getProperty(MutableTextInput.class);
-                int indent = docOptions.initialIndent;
+                int indent = 0;
                 int lastBladeIndent = 0;
                 boolean caretInTemplateSolved = false;
                 final Deque<Integer> lastDirectiveStartIndent = new ArrayDeque<>();
@@ -121,7 +121,6 @@ public class TokenFormatter {
                 FormatToken formatToken;
                 FormatToken.IndentToken lastIndentToken = null;
                 FormatToken lastFormatToken = null;
-                FormatToken lastWhitespaceToken = null;
                 try {
                     mti.tokenHierarchyControl().setActive(false);
                     start.set(System.currentTimeMillis());
@@ -130,98 +129,40 @@ public class TokenFormatter {
                         FormatToken.Kind id = formatToken.getId();
                         changeOffset = formatToken.getOffset();
                         int spaceCount = 0;
-                        int indentValue = 0;
                         int totalIndent = 0;
-                        boolean endTag = false;
                         switch (id) {
-                            case WHITESPACE:
-                                lastWhitespaceToken = formatToken;
+                            case WHITESPACE_BEFORE_DIRECTIVE_TAG:
                                 break;
-                            case INDENT:
-                                if (formatToken instanceof FormatToken.IndentToken) {
-                                    FormatToken.IndentToken indentToken = (FormatToken.IndentToken) formatToken;
-                                    lastIndentToken = indentToken;
-                                    indentValue = indentToken.getDelta();
-                                    indent += indentToken.getDelta();
-                                    int xxx = 1;
-                                } else if (formatToken instanceof FormatToken.HtmlIndentToken) {
-                                    //FormatToken.HtmlIndentToken indentToken = (FormatToken.HtmlIndentToken) formatToken;
-                                    //htmlIndent = indentToken.getDelta();
+                            case WHITESPACE_BEFORE_DIRECTIVE_START_TAG:
+                                if (formatToken instanceof FormatToken.WsDirectiveToken) {
+                                    FormatToken.WsDirectiveToken wsDirectiveToken = (FormatToken.WsDirectiveToken) formatToken;
+                                    int wsBeforeDirective = wsDirectiveToken.getWsBefore();
+                                    if (indent > 0 && indent > wsBeforeDirective){
+                                        insert(changeOffset, delta, new String(new char[indent - wsBeforeDirective]).replace("\0", " "));
+                                    }
+                                    indent+=4;
                                 }
                                 break;
                             case WHITESPACE_BEFORE_DIRECTIVE_ENDTAG:
-                                endTag = true;
-                            case WHITESPACE_BEFORE_DIRECTIVE_START_TAG:
-                            case WHITESPACE_BEFORE_DIRECTIVE_TAG:
-                                int indentInsert = indent;
-                                if (lastIndentToken != null){
-                                    spaceCount = lastIndentToken.tokenSpaceCount();
-                                }
-                                if (indent > 0 && indent >= spaceCount){
-                                    if (endTag){
-                                        //indent -= indentValue;
+                                if (formatToken instanceof FormatToken.WsDirectiveToken) {
+                                    FormatToken.WsDirectiveToken wsDirectiveToken = (FormatToken.WsDirectiveToken) formatToken;
+                                    int wsBeforeDirective = wsDirectiveToken.getWsBefore();
+                                    indent = Math.max(0, indent-=4);
+                                    if (indent > 0 && indent > wsBeforeDirective){
+                                        insert(changeOffset, delta, new String(new char[indent - wsBeforeDirective]).replace("\0", " "));
                                     }
-                                    insert(changeOffset, delta, new String(new char[indent]).replace("\0", " "));
-                                } else {
-                                    //might need to replace
                                 }
-//                                htmlIndent = suggestedIndent(changeOffset);
-//                                htmlIndent = 0;
-//                                int decrementOffset = 0;
-//                                if (id == FormatToken.Kind.WHITESPACE_BEFORE_DIRECTIVE_ENDTAG) {
-//                                    decrementOffset = 4;
-//                                }
-//
-//                                if (lastFormatToken != null && lastFormatToken.isWhitespace()) {
-//
-//                                }
-//                                int currentLine = LineDocumentUtils.getLineStart(doc, changeOffset + delta);
-//                                if (lastIndentToken != null && lastIndentToken.isWhitespace()) {
-//                                    int indentOffset = 0;
-//                                    int newLineIndex = 0;
-//                                    while (newLineIndex < lastIndentToken.getOldText().length()
-//                                            && lastIndentToken.getOldText().charAt(newLineIndex) == '\n') {
-//                                        newLineIndex++;
-//                                        indentOffset++;
-//                                    }
-//                                    if (isOnSameLine(changeOffset + delta, lastIndentToken.getOffset() + indentOffset)) {
-//                                        String whitespace = lastIndentToken.getOldText();
-//                                        if (whitespace != null && whitespace.length() > 1) {
-//                                            for (char c : whitespace.toCharArray()) {
-//                                                if (c == ' ') {
-//                                                    spaceCount++;
-//                                                }
-//                                            }
-//                                        }
-//                                        totalIndent = indent + htmlIndent - decrementOffset;
-//                                        if (totalIndent > 0) {
-//                                            if (spaceCount < totalIndent) {
-//                                                insert(changeOffset, delta, new String(new char[totalIndent]).replace("\0", " "));
-//                                            } else {
-//                                                //might have to replace
-//                                                int diffWhitespace = totalIndent - spaceCount;
-//                                                if (diffWhitespace > 0) {
-//                                                    replace(lastIndentToken.getOffset() + indentOffset, delta, diffWhitespace, new String(new char[diffWhitespace]).replace("\0", " "));
-//                                                } else {
-//                                                    diffWhitespace = Math.abs(diffWhitespace);
-//                                                    //replace(lastIndentToken.getOffset() + indentOffset, delta, diffWhitespace, "");
-//                                                }
-//                                            }
-//                                        } else if (totalIndent == 0) {
-//                                            if (spaceCount > 0) {
-//                                                //replace(lastIndentToken.getOffset() + indentOffset, delta, spaceCount, "");
-//                                            }
-//                                        }
-//                                    }
-//                                } else if (currentLine == 0) {
-//                                    //first row
-//                                    if (lastWhitespaceToken != null) {
-//                                        int diffWhitespace = changeOffset - lastWhitespaceToken.getOffset();
-//                                        if (diffWhitespace > 0) {
-//                                            //replace(lastWhitespaceToken.getOffset(), delta, diffWhitespace, "");
-//                                        }
-//                                    }
-//                                }
+                                break;  
+                            case WHITESPACE_BEFORE_INLINE_DIRECTIVE_TAG:
+                                if (formatToken instanceof FormatToken.WsDirectiveToken) {
+                                    FormatToken.WsDirectiveToken wsDirectiveToken = (FormatToken.WsDirectiveToken) formatToken;
+                                    int wsBeforeDirective = wsDirectiveToken.getWsBefore();
+                                    if (indent > 0 && indent > wsBeforeDirective){
+                                        insert(changeOffset, delta, new String(new char[indent - wsBeforeDirective]).replace("\0", " "));
+                                    }
+                                 }
+                                break;
+                            case WHITESPACE_BEFORE_INLINE_DIRECTIVE_START_TAG:
                                 break;
                             case WHITESPACE_BEFORE_HTML:
                                  if (lastFormatToken != null && lastFormatToken.getId() == FormatToken.Kind.WHITESPACE_AFTER_ECHO) {
@@ -232,9 +173,6 @@ public class TokenFormatter {
                                     //blocking html indent until fixes to inline attributes are fixed
                                     //insert(changeOffset - 1, delta, new String(new char[indent]).replace("\0", " "));
                                 }
-                                break;
-                            case WHITESPACE_DECREMENT_INDENT:
-                                indent -= 4;
                                 break;
                             case WHITESPACE_BEFORE_DIRECTIVE_PAREN:
                                 if (lastFormatToken != null

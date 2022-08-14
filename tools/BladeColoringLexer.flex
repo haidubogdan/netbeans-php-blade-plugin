@@ -264,7 +264,7 @@ CLOSE_BLADE_PHP = "@endphp";
     return BladeTokenId.WHITESPACE;
 }
 
-<ST_HTML>(([^<@{}]|"<"[^?%<])+)|"<" {
+<ST_HTML>(([^<@({{|}})*]|"<"[^?%<])+)|"<" {
 	int wstart = 0;
     int firstReverseNW = yytext().length() - 1;
 	  String text = yytext();

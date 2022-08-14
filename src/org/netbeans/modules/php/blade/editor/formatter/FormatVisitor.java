@@ -49,8 +49,8 @@ public class FormatVisitor extends DefaultVisitor {
     int lastDocLineEnd;
     int lastHtmlLineStart;
     int lastHtmlLineEnd;
+    int lastSpaceCount = 0;
     boolean lastHtmlEndsInNewLine;
-    private final Pattern newLineEndPattern = Pattern.compile("\\n([ ]+)$");
 
     public FormatVisitor(BaseDocument document, DocumentOptions documentOptions, final int caretOffset, final int startOffset, final int endOffset) {
         this.doc = document;
@@ -63,7 +63,6 @@ public class FormatVisitor extends DefaultVisitor {
         this.endOffset = endOffset;
     }
 
-
     @Override
     public void visit(BladeProgram program) {
         super.visit(program);
@@ -71,21 +70,21 @@ public class FormatVisitor extends DefaultVisitor {
 
     @Override
     public void scan(ASTNode node) {
-        if (node == null){
+        if (node == null) {
             return;
         }
-        if (node instanceof BladeProgram){
+        if (node instanceof BladeProgram) {
             super.scan(node);
             return;
         }
-        
-        if (node instanceof InLineHtml){
-            if (((InLineHtml) node).getContent().length() == 0){
+
+        if (node instanceof InLineHtml) {
+            if (((InLineHtml) node).getContent().length() == 0) {
                 return;
             }
         }
 
-        int currentDocLineStart  = 0;
+        int currentDocLineStart = 0;
         int currentDocLineEnd = 0;
         boolean parseError = false;
         try {
@@ -95,41 +94,52 @@ public class FormatVisitor extends DefaultVisitor {
             parseError = true;
             //Exceptions.printStackTrace(ex);
         }
-        
+
         lastNodeStartOffset = node.getStartOffset();
         lastNodeEndOffset = node.getEndOffset();
-        
-        if (!parseError){
+
+        if (!parseError) {
             lastDocLineStart = currentDocLineStart;
             lastDocLineEnd = currentDocLineEnd;
         }
-        
+
         node.accept(this);
 
-        if (node instanceof DirectiveExpressionBlock){
+        if (node instanceof DirectiveExpressionBlock) {
             DirectiveExpressionBlock directiveBlockNode = (DirectiveExpressionBlock) node;
-            String directiveName = directiveBlockNode.getDirectiveName().toString();
+            String directiveName = directiveBlockNode.getDirectiveName().getName();
             int directiveOffset = directiveBlockNode.getDirectiveName().getStartOffset();
-            if (!lastHtmlEndsInNewLine && lastDocLineStart == lastHtmlLineEnd){
-                int x = 1;
-            } else {
-                formatTokens.add(
-                        new FormatToken.WsDirectiveToken(FormatToken.Kind.WHITESPACE_BEFORE_DIRECTIVE_START_TAG,
-                                directiveOffset, directiveName));
-            }
-            if (directiveBlockNode.getBody() == null){
+            boolean isInline = !lastHtmlEndsInNewLine && lastDocLineStart == lastHtmlLineEnd;
+            FormatToken.Kind startTagKind = (isInline) ?
+                    FormatToken.Kind.WHITESPACE_BEFORE_INLINE_DIRECTIVE_START_TAG : 
+                    FormatToken.Kind.WHITESPACE_BEFORE_DIRECTIVE_START_TAG;
+            formatTokens.add(
+                    new FormatToken.WsDirectiveToken(startTagKind,
+                            directiveOffset, lastSpaceCount, directiveName, currentDocLineStart));
+            if (directiveBlockNode.getBody() == null) {
                 return;
             }
+            formatTokens.add(new FormatToken.DirectiveIndentToken(node.getStartOffset(), 0, lastDocLineStart));
             this.scan(directiveBlockNode.getBody().getStatements());
             DirectiveEndTag directiveEndTag = directiveBlockNode.getDirectiveEndTag();
-            if (directiveEndTag  != null){
-                 formatTokens.add(
-                        new FormatToken.WsDirectiveToken(FormatToken.Kind.WHITESPACE_BEFORE_DIRECTIVE_ENDTAG,
-                                directiveEndTag.getStartOffset(), directiveEndTag.getName()));
+            if (directiveEndTag != null) {
+                FormatToken.Kind endTagkind = (isInline) ? 
+                        FormatToken.Kind.WHITESPACE_BEFORE_INLINE_DIRECTIVE_ENDTAG :
+                        FormatToken.Kind.WHITESPACE_BEFORE_DIRECTIVE_ENDTAG;
+                formatTokens.add(
+                        new FormatToken.WsDirectiveToken(endTagkind,
+                                directiveEndTag.getStartOffset(), lastSpaceCount, directiveEndTag.getName(), currentDocLineStart));
             }
+        } else if (node instanceof BladeConstDirectiveStatement) {
+            BladeConstDirectiveStatement directiveNode = (BladeConstDirectiveStatement) node;
+            int directiveOffset = directiveNode.getDirectiveName().getStartOffset();
+            String directiveName = directiveNode.getDirectiveName().getName();
+            formatTokens.add(
+                    new FormatToken.WsDirectiveToken(FormatToken.Kind.WHITESPACE_BEFORE_INLINE_DIRECTIVE_TAG,
+                            directiveOffset, lastSpaceCount, directiveName, currentDocLineStart));
         }
     }
-    
+
     @Override
     public void scan(Iterable<? extends ASTNode> nodes) {
         if (nodes != null) {
@@ -146,47 +156,52 @@ public class FormatVisitor extends DefaultVisitor {
         }
     }
 
-//
-//    @Override
-//    public void visit(DirectiveExpressionBlock node) {
-//        scan(node.getBody().getStatements());
-//    }
-
     @Override
     public void visit(InLineHtml node) {
-       String content = node.getContent();
-       boolean isSimpleWhitespace = content.matches("^[ \t\r]+$");
-       lastHtmlNode = node;
-       lastHtmlLineStart = lastDocLineStart;
-       lastHtmlLineEnd = lastDocLineEnd;
-       Matcher m = newLineEndPattern.matcher(content);
-       boolean hasMatches =  m.matches();
-       lastHtmlEndsInNewLine = content.endsWith("\n") || hasMatches;
-       //??
-       if (lastHtmlEndsInNewLine){
-            String val = hasMatches ? m.group(1) : "";
-            if (content.length() == 1){
-                //formatTokens.add(new FormatToken.IndentToken(node.getStartOffset(), options.indentSize, val.length()));
-            } else {
-                formatTokens.add(new FormatToken.IndentToken(node.getStartOffset(), options.indentSize, val.length()));
+        String content = node.getContent();
+        boolean isSimpleWhitespace = content.matches("^[ \t\r]+$");
+        lastHtmlNode = node;
+        lastHtmlLineStart = lastDocLineStart;
+        lastHtmlLineEnd = lastDocLineEnd;
+        boolean hasMatches = false;
+        lastHtmlEndsInNewLine = content.endsWith("\n");
+
+        char[] chars = content.toCharArray();
+        for (int i = 0; i < chars.length / 2; i++) {
+            int temp = chars[i];
+            chars[i] = chars[chars.length - i - 1];
+            chars[chars.length - i - 1] = (char) temp;
+        }
+        int space = 0;
+        for (int i = 0; i < chars.length; i++) {
+            if (!Character.isSpaceChar(chars[i])) {
+                if (chars[i] == '\n') {
+                    lastHtmlEndsInNewLine = true;
+                }
+                break;
             }
-       }
-       //find out if it's a directive new line
+            space++;
+        }
+        lastSpaceCount = space;
+        if (lastHtmlEndsInNewLine && space > 0) {
+            formatTokens.add(new FormatToken.HtmlIndentToken(node.getStartOffset(), space, lastDocLineStart));
+        }
+        //find out if it's a directive new line
     }
 
     @Override
     public void visit(BladeEchoStatement node) {
-        
+
     }
 
     @Override
     public void visit(BladeComment node) {
-        
+
     }
 
     @Override
     public void visit(InLineBladePhp node) {
-        
+
     }
 
     @Override
@@ -244,11 +259,11 @@ public class FormatVisitor extends DefaultVisitor {
     }
 
     private void addDirectiveBlockWSTokens(DirectiveExpressionBlock node) {
-        
+
     }
 
     private void addDirectiveInlineWSTokens(InlineDirectiveStatement node) {
-        
+
     }
 
     private boolean isWhitespaceToken(BladeTokenId id) {
@@ -280,13 +295,13 @@ public class FormatVisitor extends DefaultVisitor {
 
     private List<FormatToken> resolveWhitespaceTokens() {
         final List<FormatToken> result = new LinkedList<>();
-        
+
         return result;
     }
 
     private String adjustLastWhitespaceToken(Token<? extends BladeTokenId> token) {
         String result = "";
-        
+
         return result;
     }
 

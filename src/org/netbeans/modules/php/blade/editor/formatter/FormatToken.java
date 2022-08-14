@@ -47,7 +47,10 @@ public class FormatToken {
         LINE_COMMENT,
         COMMENT,
         COMMENT_START,
-        COMMENT_END;
+        COMMENT_END, 
+        WHITESPACE_BEFORE_INLINE_DIRECTIVE_START_TAG,
+        WHITESPACE_BEFORE_INLINE_DIRECTIVE_TAG,
+        WHITESPACE_BEFORE_INLINE_DIRECTIVE_ENDTAG;
     }
 
     private int offset;
@@ -55,17 +58,19 @@ public class FormatToken {
     private boolean whitespace;
     private boolean breakable;
     private String oldText;
+    private int line;
 
-    public FormatToken(Kind id, int offset) {
-        this(id, offset, null);
+    public FormatToken(Kind id, int offset, int line) {
+        this(id, offset, null, line);
     }
 
-    public FormatToken(Kind id, int offset, String oldText) {
+    public FormatToken(Kind id, int offset, String oldText, int line) {
         this.offset = offset;
         this.id = id;
         this.oldText = oldText;
         this.whitespace = isWhitespace(id);
         this.breakable = true;
+        this.line = line;
     }
 
     public Kind getId() {
@@ -88,6 +93,10 @@ public class FormatToken {
         return whitespace;
     }
 
+    public int getLine() {
+        return line;
+    }
+        
     private boolean isWhitespace(Kind kind) {
         return kind != Kind.TEXT
                 && kind != Kind.UNBREAKABLE_SEQUENCE_START
@@ -105,7 +114,7 @@ public class FormatToken {
         boolean hasHTML;
 
         public InitToken() {
-            super(Kind.INIT_TAG, 0);
+            super(Kind.INIT_TAG, 0, 0);
             hasHTML = false;
         }
 
@@ -123,14 +132,14 @@ public class FormatToken {
         private int delta;
         private int tokenSpaceCount;
 
-        public IndentToken(int offset, int delta) {
-            super(Kind.INDENT, offset, null);
+        public IndentToken(int offset, int delta, int line) {
+            super(Kind.INDENT, offset, null, line);
             this.delta = delta;
             this.tokenSpaceCount = 0;
         }
         
-        public IndentToken(int offset, int delta, int tokenSpaceCount) {
-            super(Kind.INDENT, offset, null);
+        public IndentToken(int offset, int delta, int tokenSpaceCount, int line) {
+            super(Kind.INDENT, offset, null, line);
             this.delta = delta;
             this.tokenSpaceCount = tokenSpaceCount;
         }
@@ -147,14 +156,20 @@ public class FormatToken {
     public static class WsDirectiveToken extends FormatToken {
 
         private String directive;
+        private int wsBefore;
 
-        public WsDirectiveToken(Kind ws, int offset, String directive) {
-            super(ws, offset, null);
+        public WsDirectiveToken(Kind ws, int offset, int wsBefore, String directive, int line) {
+            super(ws, offset, null, line);
             this.directive = directive;
+            this.wsBefore = wsBefore;
         }
 
         public String getDirective() {
             return directive;
+        }
+
+        public int getWsBefore() {
+            return wsBefore;
         }
     }
     
@@ -162,8 +177,8 @@ public class FormatToken {
 
         private String text;
 
-        public PhpBladeToken(Kind ws, int offset, String text) {
-            super(ws, offset, null);
+        public PhpBladeToken(Kind ws, int offset, String text, int line) {
+            super(ws, offset, null, line);
             this.text = text;
         }
 
@@ -176,8 +191,8 @@ public class FormatToken {
 
         private String directive;
 
-        public WsPhpToken(Kind ws, int offset, String directive) {
-            super(ws, offset, null);
+        public WsPhpToken(Kind ws, int offset, String directive, int line) {
+            super(ws, offset, null, line);
             this.directive = directive;
         }
 
@@ -190,8 +205,8 @@ public class FormatToken {
 
         private int delta;
 
-        public HtmlIndentToken(int offset, int delta) {
-            super(Kind.INDENT, offset, null);
+        public HtmlIndentToken(int offset, int delta, int line) {
+            super(Kind.INDENT, offset, null, line);
             this.delta = delta;
         }
 
@@ -200,4 +215,17 @@ public class FormatToken {
         }
     }
 
+    public static class DirectiveIndentToken extends FormatToken {
+
+        private int delta;
+
+        public DirectiveIndentToken(int offset, int delta, int line) {
+            super(Kind.INDENT, offset, null, line);
+            this.delta = delta;
+        }
+
+        public int getDelta() {
+            return delta;
+        }
+    }
 }

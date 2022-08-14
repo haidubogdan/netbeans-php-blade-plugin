@@ -58,6 +58,9 @@ public class FormatVisitorTest extends BladeTestBase {
                 CharSequence text = ts.token().text();
                 result.append(ts.index());
                 result.append(" ");
+                result.append(" line : ");
+                result.append(tokenF.getLine());
+                result.append(" ");
                 result.append(tokenId.name());
                 result.append(" ");
                 result.append(BladeLexerUtils.replaceLinesAndTabs(text.toString()));

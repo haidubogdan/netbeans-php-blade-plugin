@@ -14,7 +14,6 @@ import org.openide.filesystems.FileObject;
 %public
 %class ASTBladeScanner
 %cup
-%implements Scanner
 %char
 %line
 %column
@@ -35,6 +34,9 @@ import org.openide.filesystems.FileObject;
     private FileObject currentFile;
     private String fakePhpEmbeddingText = "";
     private int lastEmbeddedPos = -1;
+    private boolean zzEOFDone = false;
+    private int whitespaceCounter = 0;
+    private String fakeWhitespaceText = "";
 
     public void reset(java.io.Reader reader) {
         yyreset(reader);
@@ -76,6 +78,12 @@ import org.openide.filesystems.FileObject;
     private Symbol createFullSymbol(int symbolNumber) {
         Symbol symbol = createSymbol(symbolNumber);
         symbol.value = yytext();
+        return symbol;
+    }
+
+    private Symbol createFakeWSSymbol(int symbolNumber) {
+        Symbol symbol = createSymbol(symbolNumber);
+        symbol.value = fakeWhitespaceText;
         return symbol;
     }
 
@@ -306,7 +314,10 @@ COMMENT_END="--}}"
     pushState(ST_BLADE_DIRECTIVE);
     if (yylength() > 0){
         yypushback(1);
-        return createFullSymbol(ASTBladeSymbols.T_INLINE_HTML);
+        String tokenText = yytext();
+        if (!tokenText.equals("@")){
+            return createFullSymbol(ASTBladeSymbols.T_INLINE_HTML);
+        }
     }
 }
 
@@ -405,6 +416,8 @@ COMMENT_END="--}}"
     /* control statements */
 
     "@switch" {
+        whitespaceCounter = 0;
+        fakeWhitespaceText = "";
     	pushState(ST_LOOK_FOR_DIRECTIVE_ARGUMENTS);
     	return createFullSymbol(ASTBladeSymbols.T_BLADE_SWITCH);
     }
@@ -438,6 +451,8 @@ COMMENT_END="--}}"
              pushState(ST_PHP_CONDITION_EXPRESSION);
              return createFullSymbol(ASTBladeSymbols.T_BLADE_CONDITION_OPEN_TAG);
        }
+       whitespaceCounter = 0;
+       fakeWhitespaceText = "";
        pushState(ST_LOOK_FOR_DIRECTIVE_ARGUMENTS);
        return createFullSymbol(ASTBladeSymbols.T_BLADE_DIRECTIVE);
     }
@@ -455,18 +470,33 @@ COMMENT_END="--}}"
     //directiveParBalance++;
     popState();
     yypushback(1);
+    whitespaceCounter = 0;
+    fakeWhitespaceText = "";
     pushState(ST_BLADE_PARAMETER_EXPRESSION);
+    
     return createSymbol(ASTBladeSymbols.T_OPEN_PARENTHESE);
 }       
 
 <ST_LOOK_FOR_DIRECTIVE_ARGUMENTS>{WHITESPACE} {
-    
+    //look for directive arguments
+    String tokenText = yytext();
+    int debug = 1;
+    whitespaceCounter++;
+    fakeWhitespaceText += tokenText;
 }
 
 <ST_LOOK_FOR_DIRECTIVE_ARGUMENTS>{ANY_CHAR} {
-   yybegin(YYINITIAL);
-   yypushback(1);
-   return createFullSymbol(ASTBladeSymbols.T_INLINE_HTML); 
+    yybegin(YYINITIAL);
+    yypushback(1);
+    int length = yylength();
+    String tokenText = yytext();
+    if (!tokenText.equals("@")){
+        if (tokenText.length() == 0 && whitespaceCounter > 0){
+            return createFakeWSSymbol(ASTBladeSymbols.T_INLINE_HTML);
+        } else if (length > 0){
+            return createFullSymbol(ASTBladeSymbols.T_INLINE_HTML);
+        }
+    }
 }
 
 <ST_BLADE_INCLUDE_ARGS> {
