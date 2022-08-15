@@ -6,7 +6,6 @@ import java.util.Iterator;
 import java.util.List;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListModel;
-import org.netbeans.modules.php.blade.api.BladeCompilerPath.Item;
 import org.netbeans.modules.php.blade.api.BladeVersion;
 
 /**

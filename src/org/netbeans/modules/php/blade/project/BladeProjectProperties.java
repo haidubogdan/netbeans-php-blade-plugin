@@ -47,7 +47,6 @@ import javax.swing.DefaultListModel;
 import org.netbeans.api.project.Project;
 import org.netbeans.api.project.ProjectUtils;
 import org.netbeans.modules.php.blade.api.BladeVersion;
-import org.netbeans.modules.php.blade.editor.BladePreferences;
 import org.netbeans.modules.php.blade.ui.UiOptionsUtils;
 //import org.netbeans.modules.php.blade.editor.actions.ToggleBlockCommentAction;
 import org.openide.util.NbPreferences;

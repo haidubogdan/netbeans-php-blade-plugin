@@ -282,7 +282,6 @@ public final class BladeOptionsPanel extends javax.swing.JPanel {
     }//GEN-LAST:event_removeViewFolderButtonActionPerformed
 
     private void reindexViewsButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_reindexViewsButtonActionPerformed
-        // TODO add your handling code here:
         String[] views = BladeProjectProperties.getInstance(project).getViewsPathList();
         
         if (views.length > 0){

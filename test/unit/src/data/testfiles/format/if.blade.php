@@ -1,3 +1,9 @@
-@section('xx')
-@include('yyy')
-@endsection
+@section("footer")
+    @if($x)
+
+    @elseif($x)
+
+        @else
+
+    @endif
+@endsection  

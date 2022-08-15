@@ -37,6 +37,7 @@ import org.openide.filesystems.FileObject;
     private boolean zzEOFDone = false;
     private int whitespaceCounter = 0;
     private String fakeWhitespaceText = "";
+    private boolean elseifOpened = true;
 
     public void reset(java.io.Reader reader) {
         yyreset(reader);
@@ -400,16 +401,36 @@ COMMENT_END="--}}"
     /*if */
     "@if" {
         pushState(ST_PHP_CONDITION_EXPRESSION);
+        elseifOpened = false;
         return createFullSymbol(ASTBladeSymbols.T_BLADE_IF);
     }
 
     "@elseif" {
+        if (elseifOpened) {
+            int yylength = yylength();
+            //fake symbol to mark a closign elseif
+            yypushback(yylength);
+            elseifOpened = false;
+            return createSymbol(ASTBladeSymbols.T_BLADE_ELSEIF_END);
+        }
+
         pushState(ST_PHP_CONDITION_EXPRESSION);
+        elseifOpened = true;
+        
         return createFullSymbol(ASTBladeSymbols.T_BLADE_ELSEIF);
     }
 
     "@endif" {
+        if (elseifOpened) {
+            int yylength = yylength();
+            //fake symbol to mark a closign elseif
+            yypushback(yylength);
+            elseifOpened = false;
+            return createSymbol(ASTBladeSymbols.T_BLADE_ELSEIF_END);
+        }
         popState();
+        elseifOpened = false;
+        int yylength = yylength();
         return createFullSymbol(ASTBladeSymbols.T_BLADE_ENDIF);
     }
 

@@ -113,6 +113,7 @@ terminal T_BLADE_FOR;
 terminal T_BLADE_ENDFOR;
 terminal T_BLADE_IF, T_BLADE_CONDITION_OPEN_TAG;
 terminal T_BLADE_ELSEIF;
+terminal T_BLADE_ELSEIF_END; //pseudo symbol to mark a else if end
 terminal T_BLADE_ENDIF;
 terminal T_BLADE_SWITCH, T_BLADE_ENDSWITCH;
 terminal T_BLADE_DIRECTIVE;
@@ -142,7 +143,6 @@ non terminal ArgumentExpression yield_label_expression;
 non terminal Expression yield_label;
 non terminal Variable variable;
 non terminal section_param;
-non terminal List[] elseif_list;
 
 non terminal Statement directive_statement;
 non terminal directive_identifier;
@@ -307,18 +307,20 @@ directive_statement:stm {:
     DirectiveEndTag endTag = new DirectiveEndTag(endleft, endright, end.toString());
     RESULT = new BladeForStatement(dleft, endright, directive, expr, block, endTag);
 :}
-| T_BLADE_IF:d T_PHP_CONDITION_EXPRESSION:s inner_statement_list:statementList elseif_list:elseif T_BLADE_ENDIF:end {:
-
-	for (int i=0 ; i < elseif[0].size() ; i++) {
-			//TODO add a else logic
-        //int debug = 3;
-    }
-
+| T_BLADE_IF:d T_PHP_CONDITION_EXPRESSION:s inner_statement_list:statementList T_BLADE_ENDIF:end {:
     Block block = new Block(statementListleft, statementListright, statementList);
     PhpExpression ifExpr = new PhpExpression(sleft, sright, s.toString());
     DirectiveName directive = new DirectiveName(dleft, dright, d.toString());
     ArgumentExpression expr = new ArgumentExpression(ifExpr, sleft, sright);
     DirectiveEndTag endTag = new DirectiveEndTag(endleft, endright, end.toString());
+    RESULT = new BladeIfStatement(dleft, endright, directive, expr, block, endTag);
+:}
+| T_BLADE_ELSEIF:d T_PHP_CONDITION_EXPRESSION:s inner_statement_list:statementList T_BLADE_ELSEIF_END:end {:
+    Block block = new Block(statementListleft, statementListright, statementList);
+    PhpExpression ifExpr = new PhpExpression(sleft, sright, s.toString());
+    DirectiveName directive = new DirectiveName(dleft, dright, d.toString());
+    ArgumentExpression expr = new ArgumentExpression(ifExpr, sleft, sright);
+    DirectiveEndTag endTag = new DirectiveEndTag(endleft, endright, "elseifend");
     RESULT = new BladeIfStatement(dleft, endright, directive, expr, block, endTag);
 :}
 | T_BLADE_CONDITION_OPEN_TAG:d T_PHP_CONDITION_EXPRESSION:expr inner_statement_list:statementList T_BLADE_ENDIF:end {:
@@ -517,28 +519,5 @@ T_STRING:path {:
 | error:expr
 {:
     RESULT = new ASTErrorExpression(exprleft, exprright);
-:}
-;
-
-/* else if */
-elseif_list ::=
-/* empty */
-{:
-    List listConditions = new LinkedList();
-    List listStatements = new LinkedList();
-    List listTokens = new LinkedList();
-
-    List[] returnList = new List[] { listConditions, listStatements, listTokens };
-
-    RESULT = returnList;
-:}
-
-| elseif_list:elseifList T_BLADE_ELSEIF:d T_PHP_CONDITION_EXPRESSION inner_statement_list:statementList
-{:
-    Block block = new Block(statementListleft, statementListright, statementList);
-//    ((LinkedList)elseifList[0]).addFirst(condition);
-    ((LinkedList)elseifList[1]).addFirst(block);
-
-    RESULT = elseifList;
 :}
 ;

@@ -1,13 +1,10 @@
 package org.netbeans.modules.php.blade.editor.ui.customizer;
 
 import java.awt.EventQueue;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
 import java.io.File;
 import javax.swing.DefaultListModel;
 import javax.swing.event.ChangeListener;
 import org.netbeans.api.project.Project;
-import org.netbeans.modules.php.blade.api.BladeCompilerPath.Item;
 import org.netbeans.modules.php.blade.project.BladeProjectProperties;
 import org.openide.filesystems.FileChooserBuilder;
 import org.openide.filesystems.FileUtil;

@@ -3,27 +3,21 @@ package org.netbeans.modules.php.blade.editor.formatter;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.StringTokenizer;
 import java.util.logging.Logger;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import javax.swing.text.BadLocationException;
 import org.netbeans.api.editor.document.LineDocumentUtils;
 import org.netbeans.api.lexer.Token;
-import org.netbeans.api.lexer.TokenSequence;
 import org.netbeans.api.lexer.TokenUtilities;
 import org.netbeans.editor.BaseDocument;
-import org.netbeans.modules.csl.spi.GsfUtilities;
 import org.netbeans.modules.php.blade.editor.formatter.TokenFormatter.DocumentOptions;
-import org.netbeans.modules.php.blade.editor.lexer.BladeLexerUtils;
 import org.netbeans.modules.php.blade.editor.lexer.BladeTokenId;
 import org.netbeans.modules.php.blade.editor.parsing.astnodes.ASTNode;
 import org.netbeans.modules.php.blade.editor.parsing.astnodes.*;
 import org.netbeans.modules.php.blade.editor.parsing.astnodes.visitors.DefaultVisitor;
-import org.openide.util.Exceptions;
+
 
 /**
- * TODO treate else if bug if last element is a endif and next is directive tag
+ * TODO treate else if bug : if last element is a endif and next is directive tag
  *
  * @author bhaidu
  */

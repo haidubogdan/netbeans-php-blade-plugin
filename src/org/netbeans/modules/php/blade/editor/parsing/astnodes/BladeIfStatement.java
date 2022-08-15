@@ -22,7 +22,7 @@ public class BladeIfStatement extends DirectiveExpressionBlock implements Struct
 
     @Override
     public String toString() {
-        return "@if"; //NOI18N
+        return this.getDirectiveName().getName(); //NOI18N
     }
 
 }

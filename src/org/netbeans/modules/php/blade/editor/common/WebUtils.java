@@ -28,7 +28,8 @@ import org.openide.util.Parameters;
 
 /**
  *
- * @author bhaidu
+ * copied from netbeans common to avoid importing package
+ * 
  */
 public class WebUtils {
 
@@ -90,47 +91,33 @@ public class WebUtils {
                 file = new File(importedFileName);
             }
 
-            if (file != null) {
-                if (!isAbsolute(file, importedFileName)) {
-                    //relative to the current file's folder - let's resolve
-                    FileObject parent = source.getParent();
-                    if(parent != null) {
-                        FileObject resolvedFileObject = parent.getFileObject(URLDecoder.decode(importedFileName, "UTF-8")); //NOI18N
-                        //test if the link is resolved to something else than the parent file,
-                        //which may happen at least in the case of empty importedFileName string
-                        if (resolvedFileObject != null &&
-                                resolvedFileObject.isValid() &&
-                                !resolvedFileObject.equals(parent)) {
-                            //normalize the file (may contain xxx/../../yyy parts which
-                            //causes that fileobject representing the same file are not equal
-                            File resolvedFile = FileUtil.toFile(resolvedFileObject);
-                            if(resolvedFile != null) {
-                                FileObject resolvedFileObjectInCanonicalForm = FileUtil.toFileObject(resolvedFile);
-                                //find out the base folder - bottom most folder of the link
-                                FileObject linkBase = findRelativeLinkBase(source, importedFileName);
-                                FileReference ref = new FileReference(source, resolvedFileObjectInCanonicalForm, linkBase, importedFileName, FileReferenceType.RELATIVE);
-                                return ref;
-                            }
-                        }
+            if (file == null) {
+                return null;
+            }
+            
+            if (isAbsolute(file, importedFileName)){
+                return null;
+            }
+            
+            //relative to the current file's folder - let's resolve
+            FileObject parent = source.getParent();
+            if(parent != null) {
+                FileObject resolvedFileObject = parent.getFileObject(URLDecoder.decode(importedFileName, "UTF-8")); //NOI18N
+                //test if the link is resolved to something else than the parent file,
+                //which may happen at least in the case of empty importedFileName string
+                if (resolvedFileObject != null &&
+                        resolvedFileObject.isValid() &&
+                        !resolvedFileObject.equals(parent)) {
+                    //normalize the file (may contain xxx/../../yyy parts which
+                    //causes that fileobject representing the same file are not equal
+                    File resolvedFile = FileUtil.toFile(resolvedFileObject);
+                    if(resolvedFile != null) {
+                        FileObject resolvedFileObjectInCanonicalForm = FileUtil.toFileObject(resolvedFile);
+                        //find out the base folder - bottom most folder of the link
+                        FileObject linkBase = findRelativeLinkBase(source, importedFileName);
+                        FileReference ref = new FileReference(source, resolvedFileObjectInCanonicalForm, linkBase, importedFileName, FileReferenceType.RELATIVE);
+                        return ref;
                     }
-                } else {
-                    //absolute web path
-//                    FileObject webRoot = ProjectWebRootQuery.getWebRoot(source); //find web root
-//                    if(UNIT_TESTING) {
-//                        webRoot = WEB_ROOT;
-//                    }
-//                    if(webRoot != null) {
-//                        //resolve the link relative to the web root
-//                        String path = file.getAbsolutePath();
-//                        if (path.length() > webRoot.getPath().length() && webRoot.getPath().equals(path.substring(0, webRoot.getPath().length()))) {
-//                            path = path.substring(webRoot.getPath().length());
-//                        }
-//                        FileObject resolved = webRoot.getFileObject(path);
-//                        if (resolved != null && resolved.isValid()) {
-//                            FileReference ref = new FileReference(source, resolved, webRoot, importedFileName, FileReferenceType.ABSOLUTE);
-//                            return ref;
-//                        }
-//                    }
                 }
             }
 

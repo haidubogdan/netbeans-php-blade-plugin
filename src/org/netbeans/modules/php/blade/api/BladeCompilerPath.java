@@ -6,7 +6,11 @@ import java.util.logging.Logger;
 import org.openide.filesystems.FileObject;
 
 /**
- *
+ * 
+ * for the moment nothing implemented here
+ * 
+ * this might be a way to find the blade version and possible blade directives definitions
+ * 
  * @author bhaidu
  */
 public class BladeCompilerPath {
@@ -37,7 +41,6 @@ public class BladeCompilerPath {
         assert Thread.holdsLock(BladeCompilerPath.class);
 
        // List<FileObject> preindexedFolders = PhpSourcePath.getPreindexedFolders();
-        // XXX disabled, unit tests failures
         //assert !preindexedFolders.contains(null) : "Preindexed folders contains null";
         //FileObject sfsFolder = FileUtil.getConfigFile("PHP/RuntimeLibraries"); // NOI18N
         //List<FileObject> folders = new ArrayList<>(preindexedFolders.size() + 1);

@@ -39,7 +39,8 @@ import org.openide.util.lookup.ServiceProvider;
 import org.openide.windows.TopComponent;
 
 /**
- *
+ * disabled for the moment due to bugs on refactor copy action
+ * 
  * @author bhaidu
  */
 //@ServiceProvider(service = ActionsImplementationProvider.class, position = 1060)

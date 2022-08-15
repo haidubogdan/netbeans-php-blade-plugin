@@ -51,7 +51,6 @@ public class TokenFormatter {
         public int indentArrayItems;
         public int margin;
         public int tabSize;
-        public int beforeDirectiveTagPlacement;
         public boolean expandTabsToSpaces;
 
         public DocumentOptions(BaseDocument doc) {
@@ -59,7 +58,6 @@ public class TokenFormatter {
             continualIndentSize = codeStyle.getContinuationIndentSize();
             initialIndent = codeStyle.getInitialIndent();
             indentSize = codeStyle.getIndentSize();
-            beforeDirectiveTagPlacement = 4;
             margin = codeStyle.getRightMargin();
             tabSize = codeStyle.getTabSize();
             expandTabsToSpaces = codeStyle.expandTabToSpaces();
@@ -100,27 +98,12 @@ public class TokenFormatter {
                 
                 MutableTextInput mti = (MutableTextInput) doc.getProperty(MutableTextInput.class);
                 int indent = 0;
-                int lastBladeIndent = 0;
-                boolean caretInTemplateSolved = false;
-                final Deque<Integer> lastDirectiveStartIndent = new ArrayDeque<>();
-                int deltaForLastMoveBeforeLineComment = 0;
                 int index = 0;
-                int newLines;
-                //int delta = 0;
-                int column = 0;
-                int countSpaces;
-                String newText = null;
-                String oldText;
-                //ass all directives are standalone we will need it
                 int htmlIndent = 0;
-                boolean lastH = false;
                 int changeOffset = -1;
-                boolean stopReplace = false;
-
-                Whitespace ws;
                 FormatToken formatToken;
-                FormatToken.IndentToken lastIndentToken = null;
                 FormatToken lastFormatToken = null;
+                int indentSize = docOptions.indentSize;
                 try {
                     mti.tokenHierarchyControl().setActive(false);
                     start.set(System.currentTimeMillis());
@@ -128,7 +111,6 @@ public class TokenFormatter {
                         formatToken = formatTokens.get(index);
                         FormatToken.Kind id = formatToken.getId();
                         changeOffset = formatToken.getOffset();
-                        int spaceCount = 0;
                         int totalIndent = 0;
                         switch (id) {
                             case WHITESPACE_BEFORE_DIRECTIVE_TAG:
@@ -136,19 +118,27 @@ public class TokenFormatter {
                             case WHITESPACE_BEFORE_DIRECTIVE_START_TAG:
                                 if (formatToken instanceof FormatToken.WsDirectiveToken) {
                                     FormatToken.WsDirectiveToken wsDirectiveToken = (FormatToken.WsDirectiveToken) formatToken;
+                                    boolean incrementIndent = !wsDirectiveToken.getDirective().equals("@elseif");
+                                    boolean alignIdentation = wsDirectiveToken.getDirective().equals("@elseif");
                                     int wsBeforeDirective = wsDirectiveToken.getWsBefore();
-                                    if (indent > 0 && indent > wsBeforeDirective){
-                                        insert(changeOffset, delta, new String(new char[indent - wsBeforeDirective]).replace("\0", " "));
+                                    if (indent > 0 && indent > wsBeforeDirective) {
+                                        int offsetIndent = indent - wsBeforeDirective;
+                                        if (alignIdentation) {
+                                            offsetIndent = Math.max(0, offsetIndent -= indentSize);
+                                        }
+                                        insert(changeOffset, delta, new String(new char[offsetIndent]).replace("\0", " "));
                                     }
-                                    indent+=4;
+                                    if (incrementIndent){
+                                        indent += indentSize;
+                                    }
                                 }
                                 break;
                             case WHITESPACE_BEFORE_DIRECTIVE_ENDTAG:
                                 if (formatToken instanceof FormatToken.WsDirectiveToken) {
                                     FormatToken.WsDirectiveToken wsDirectiveToken = (FormatToken.WsDirectiveToken) formatToken;
                                     int wsBeforeDirective = wsDirectiveToken.getWsBefore();
-                                    indent = Math.max(0, indent-=4);
-                                    if (indent > 0 && indent > wsBeforeDirective){
+                                    indent = Math.max(0, indent -= indentSize);
+                                    if (indent > 0 && indent > wsBeforeDirective) {
                                         insert(changeOffset, delta, new String(new char[indent - wsBeforeDirective]).replace("\0", " "));
                                     }
                                 }
@@ -157,14 +147,19 @@ public class TokenFormatter {
                                 if (formatToken instanceof FormatToken.WsDirectiveToken) {
                                     FormatToken.WsDirectiveToken wsDirectiveToken = (FormatToken.WsDirectiveToken) formatToken;
                                     int wsBeforeDirective = wsDirectiveToken.getWsBefore();
-                                    if (indent > 0 && indent > wsBeforeDirective){
-                                        insert(changeOffset, delta, new String(new char[indent - wsBeforeDirective]).replace("\0", " "));
+                                    if (indent > 0 && indent > wsBeforeDirective) {
+                                        int offsetIndent = indent - wsBeforeDirective;
+                                        if (wsDirectiveToken.getDirective().equals("@else")) {
+                                            offsetIndent = Math.max(0, offsetIndent -= indentSize);
+                                        }
+                                        insert(changeOffset, delta, new String(new char[offsetIndent]).replace("\0", " "));
                                     }
                                  }
                                 break;
                             case WHITESPACE_BEFORE_INLINE_DIRECTIVE_START_TAG:
                                 break;
                             case WHITESPACE_BEFORE_HTML:
+                                //for the moment we will not complicate with indenting html also
                                  if (lastFormatToken != null && lastFormatToken.getId() == FormatToken.Kind.WHITESPACE_AFTER_ECHO) {
                                      break;
                                 }
@@ -267,6 +262,10 @@ public class TokenFormatter {
                 return 0;
             }
 
+            /**
+             * for the moment it can be dangerous
+             * we will stick just to indenting
+             */
             private void replace(int offset, int deltaOffset, int vlength, String newString) {
                 try {
                     String oldText = doc.getText(offset + deltaOffset, vlength);

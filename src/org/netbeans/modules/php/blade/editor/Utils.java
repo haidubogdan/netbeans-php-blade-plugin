@@ -97,7 +97,9 @@ public class Utils {
         Arrays.sort(views, new java.util.Comparator<String>() {
             @Override
             public int compare(String s1, String s2) {
-                // TODO: Argument validation (nullity, length)
+                if (s1 == null || s2 == null){
+                    return 0;
+                }
                 return s2.length() - s1.length();// comparision
             }
         });
