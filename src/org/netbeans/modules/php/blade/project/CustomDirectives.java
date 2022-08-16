@@ -6,6 +6,8 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.WeakHashMap;
+import org.netbeans.api.project.Project;
 import org.netbeans.modules.php.blade.editor.completion.BladeCompletionHandler;
 import org.netbeans.modules.php.blade.editor.parsing.ParsingUtils;
 import org.netbeans.modules.php.editor.parser.astnodes.Expression;
@@ -22,27 +24,39 @@ import org.openide.filesystems.FileUtil;
  * @author bhaidu
  */
 public final class CustomDirectives {
-
-    private static CustomDirectives INSTANCE = new CustomDirectives();
+    private final Project project;
+     private static final Map<Project, CustomDirectives> INSTANCES = new WeakHashMap<>();
     private Map<FileObject, DirectiveNames> customDirectives = new LinkedHashMap<FileObject, DirectiveNames>();
     private final FileChangeListener fileChangeListener = new FileChangeListenerImpl();
 
-    public static CustomDirectives getInstance() {
+    public static CustomDirectives getInstance(Project project) {
         int x = 3;
-        return INSTANCE;
+        if(project == null) {
+            throw new NullPointerException("No project found");
+        }
+        synchronized (INSTANCES) {
+            CustomDirectives customDirective = INSTANCES.get(project);
+            if(customDirective == null) {
+                customDirective = new CustomDirectives(project);
+                INSTANCES.put(project, customDirective);
+            }
+            return customDirective;
+        }
     }
 
-    public static CustomDirectives resetInstance() {
-        INSTANCE = new CustomDirectives();
-        return INSTANCE;
+    public static CustomDirectives resetInstance(Project project) {
+        CustomDirectives customDirective = new CustomDirectives(project);
+        INSTANCES.put(project, customDirective);
+        return customDirective;
     }
     
-    private CustomDirectives() {
+    private CustomDirectives(Project project) {
+        this.project = project;
         extractCustomDirectives();
     }
 
     private void extractCustomDirectives() {
-        String[] compilerPathList = BladeProjectProperties.getInstance().getCompilerPathList();
+        String[] compilerPathList = BladeProjectProperties.getInstance(project).getCompilerPathList();
 
         if (compilerPathList.length == 0) {
             return;
@@ -159,7 +173,7 @@ public final class CustomDirectives {
 
         private void processFile(FileObject file) {
             assert file.isData() : file;
-            CustomDirectives.getInstance().rescanFile(file);
+            CustomDirectives.getInstance(project).rescanFile(file);
         }
 
     }

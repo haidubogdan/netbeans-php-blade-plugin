@@ -34,7 +34,7 @@ public class BladeDirectives extends javax.swing.JPanel {
     public void storeData(){
         DefaultListModel pathModel = (DefaultListModel) customDirectivePathList.getModel();
         BladeProjectProperties.getInstance(project).setCompilerPathList(pathModel);
-        CustomDirectives.resetInstance();
+        CustomDirectives.resetInstance(project);
     }
     
     public void addChangeListener(ChangeListener listener) {

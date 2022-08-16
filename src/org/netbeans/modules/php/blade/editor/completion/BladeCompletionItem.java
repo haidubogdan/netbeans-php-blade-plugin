@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.Set;
 import javax.swing.ImageIcon;
 import org.netbeans.api.editor.EditorRegistry;
+import org.netbeans.api.project.Project;
 import org.netbeans.modules.csl.api.CompletionProposal;
 import org.netbeans.modules.csl.api.ElementHandle;
 import org.netbeans.modules.csl.api.ElementKind;
@@ -254,5 +255,6 @@ public class BladeCompletionItem implements CompletionProposal {
         public BladeParserResult parserResult;
         public BladeCompletionContextFinder.CompletionContext context;
         public BladeIndex index;
+        public Project project;
     }
 }

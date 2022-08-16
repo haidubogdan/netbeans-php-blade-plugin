@@ -59,6 +59,7 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 import javax.swing.text.JTextComponent;
 import org.netbeans.api.editor.document.LineDocumentUtils;
+import org.netbeans.api.project.Project;
 import org.netbeans.editor.BaseDocument;
 import org.netbeans.modules.php.blade.editor.parsing.BladeParserResult;
 import org.netbeans.modules.csl.api.CodeCompletionContext;
@@ -175,6 +176,7 @@ public class BladeCompletionHandler implements CodeCompletionHandler2 {
         request.context = BladeCompletionContextFinder.find(request.parserResult, caretOffset);
         BladeIndexSupport sup = BladeIndexSupport.findFor(fileObject);
         if (sup != null) {
+            request.project = sup.getProject();
             request.index = sup.getIndex();
         }
         doCompletion(completionProposals, request);
@@ -229,7 +231,11 @@ public class BladeCompletionHandler implements CodeCompletionHandler2 {
     }
     
     private void completeCustomDirectives(final List<CompletionProposal> completionProposals, final CompletionRequest request){
-        Map<FileObject, DirectiveNames> customDirectives = CustomDirectives.getInstance().getCustomDirectives();
+        Project project = request.project;
+        if (project == null){
+            return;
+        }
+        Map<FileObject, DirectiveNames> customDirectives = CustomDirectives.getInstance(project).getCustomDirectives();
         
         if (customDirectives.isEmpty()){
             return;

@@ -96,7 +96,7 @@ public class BladeIndexSupport {
     public BladeIndexSupport(Project project) throws IOException {
 	this.project = project;
 	this.index = BladeIndex.create(project);
-        CustomDirectives.getInstance();
+        CustomDirectives.getInstance(project);
     }
 
     public BladeIndex getIndex() {
