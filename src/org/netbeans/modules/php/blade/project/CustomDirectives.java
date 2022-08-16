@@ -23,14 +23,20 @@ import org.openide.filesystems.FileUtil;
  */
 public final class CustomDirectives {
 
-    private static final CustomDirectives INSTANCE = new CustomDirectives();
+    private static CustomDirectives INSTANCE = new CustomDirectives();
     private Map<FileObject, DirectiveNames> customDirectives = new LinkedHashMap<FileObject, DirectiveNames>();
     private final FileChangeListener fileChangeListener = new FileChangeListenerImpl();
 
     public static CustomDirectives getInstance() {
+        int x = 3;
         return INSTANCE;
     }
 
+    public static CustomDirectives resetInstance() {
+        INSTANCE = new CustomDirectives();
+        return INSTANCE;
+    }
+    
     private CustomDirectives() {
         extractCustomDirectives();
     }
@@ -148,7 +154,7 @@ public final class CustomDirectives {
 
         @Override
         public void fileDataCreated(FileEvent fe) {
-            
+            int test = 3;
         }
 
         private void processFile(FileObject file) {

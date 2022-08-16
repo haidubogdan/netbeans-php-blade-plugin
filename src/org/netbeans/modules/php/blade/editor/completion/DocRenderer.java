@@ -9,8 +9,9 @@ import java.util.logging.Logger;
 import org.netbeans.modules.csl.api.Documentation;
 import org.netbeans.modules.csl.api.ElementKind;
 import org.netbeans.modules.csl.spi.ParserResult;
+import org.netbeans.modules.php.blade.editor.model.api.CustomDirectiveElement;
 import org.openide.util.NbBundle;
-
+import org.netbeans.modules.csl.api.ElementHandle;
 /**
  *
  * @author bhaidu
@@ -42,8 +43,28 @@ final class DocRenderer {
 
         return bladeDocumentation.createDocumentation(locationHeader);
     }
+    
+    static Documentation document(ParserResult info, CustomDirectiveElement element) {
+        BladeDocumentation bladeDocumentation = BladeDocumentation.NONE;
+        final CCDocHtmlFormatter locationHeader = new CCDocHtmlFormatter();
+        CCDocHtmlFormatter header = new CCDocHtmlFormatter();
+        header.appendText("Custom Directive - ");
+        header.appendHtml("<font size=\"+1\">"); //NOI18N
+        header.name(ElementKind.PARAMETER, true);
+        header.appendText(element.getName());
+        header.name(ElementKind.PARAMETER, false);
+        header.appendHtml("</font>"); //N
+        if (element.getFileObject() != null) {
+            String location = element.getFileObject().getPath();
+            locationHeader.appendHtml(String.format("<div align=\"right\"><font size=-1>%s</font></div>", location));  //NOI18N
+        }
 
-    private static BladeDocumentation getBladeDocumentation(final BladePathElement element, final CCDocHtmlFormatter header) {
+        bladeDocumentation = getBladeDocumentation(element, header);
+
+        return bladeDocumentation.createDocumentation(locationHeader);
+    }
+
+    private static BladeDocumentation getBladeDocumentation(final ElementHandle element, final CCDocHtmlFormatter header) {
         BladeDocExtractor bladeDocExtractor = new BladeDocExtractor(header, element);
         return bladeDocExtractor.getBladeDocumentation();
     }
@@ -53,9 +74,9 @@ final class DocRenderer {
         private final CCDocHtmlFormatter header;
         private final StringBuilder phpDoc = new StringBuilder();
         ;
-        private final BladePathElement element;
+        private final ElementHandle element;
 
-        public BladeDocExtractor(CCDocHtmlFormatter header, BladePathElement element) {
+        public BladeDocExtractor(CCDocHtmlFormatter header, ElementHandle element) {
             this.header = header;
             this.element = element;
         }

@@ -6,6 +6,7 @@ import javax.swing.DefaultListModel;
 import javax.swing.event.ChangeListener;
 import org.netbeans.api.project.Project;
 import org.netbeans.modules.php.blade.project.BladeProjectProperties;
+import org.netbeans.modules.php.blade.project.CustomDirectives;
 import org.openide.filesystems.FileChooserBuilder;
 import org.openide.filesystems.FileUtil;
 import org.openide.util.ChangeSupport;
@@ -33,6 +34,7 @@ public class BladeDirectives extends javax.swing.JPanel {
     public void storeData(){
         DefaultListModel pathModel = (DefaultListModel) customDirectivePathList.getModel();
         BladeProjectProperties.getInstance(project).setCompilerPathList(pathModel);
+        CustomDirectives.resetInstance();
     }
     
     public void addChangeListener(ChangeListener listener) {

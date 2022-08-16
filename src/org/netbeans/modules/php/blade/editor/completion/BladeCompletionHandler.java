@@ -80,6 +80,7 @@ import org.netbeans.modules.php.blade.editor.completion.BladeCompletionItem.Comp
 import org.netbeans.modules.php.blade.editor.completion.BladeCompletionItem.SectionCompletionItem;
 import org.netbeans.modules.php.blade.editor.index.api.BladeIndex;
 import org.netbeans.modules.php.blade.editor.index.api.IndexedElement;
+import org.netbeans.modules.php.blade.editor.model.api.CustomDirectiveElement;
 import org.netbeans.modules.php.blade.editor.parsing.ParsingUtils;
 import org.netbeans.modules.php.blade.project.CustomDirectives;
 import org.netbeans.modules.php.blade.project.CustomDirectives.DirectiveNames;
@@ -238,7 +239,7 @@ public class BladeCompletionHandler implements CodeCompletionHandler2 {
             List<String> directiveNames = entry.getValue().getList();
             for (String directiveName : directiveNames){
                 if (startsWith(directiveName, request.prefix)) {
-                    GeneratedDirectiveElement element = new GeneratedDirectiveElement(directiveName, entry.getKey());
+                    CustomDirectiveElement element = new CustomDirectiveElement(directiveName, entry.getKey());
                     completionProposals.add(new BladeCompletionItem.DirectiveItem(element, request));
                 }
             }
@@ -526,6 +527,16 @@ public class BladeCompletionHandler implements CodeCompletionHandler2 {
             //we can add the filename
             if (elementHandle.getFileObject() != null) {
                 BladePathElement bladeElement = (BladePathElement) elementHandle;
+                result = DocRenderer.document(parserResult, bladeElement);
+            } else {
+                String tooltip = elementHandle.getName();
+                result = Documentation.create(String.format("<div align=\"right\"><font size=-1>%s</font></div>", tooltip),
+                        BladeSyntax.getDocumentationUrl());
+            }
+        } else if (elementHandle instanceof CustomDirectiveElement) {
+            //we can add the filename
+            if (elementHandle.getFileObject() != null) {
+                CustomDirectiveElement bladeElement = (CustomDirectiveElement) elementHandle;
                 result = DocRenderer.document(parserResult, bladeElement);
             } else {
                 String tooltip = elementHandle.getName();

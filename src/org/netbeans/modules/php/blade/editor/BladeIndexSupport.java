@@ -12,6 +12,7 @@ import org.netbeans.modules.csl.api.DataLoadersBridge;
 
 import org.netbeans.modules.parsing.api.Source;
 import org.netbeans.modules.php.blade.editor.index.api.BladeIndex;
+import org.netbeans.modules.php.blade.project.CustomDirectives;
 import org.openide.filesystems.FileObject;
 import org.openide.filesystems.MIMEResolver;
 import org.openide.util.Exceptions;
@@ -95,6 +96,7 @@ public class BladeIndexSupport {
     public BladeIndexSupport(Project project) throws IOException {
 	this.project = project;
 	this.index = BladeIndex.create(project);
+        CustomDirectives.getInstance();
     }
 
     public BladeIndex getIndex() {
