@@ -17,7 +17,7 @@ public class BladeSyntax {
 
     static {
         try {
-            documentationUrl = new URL("https://laravel.com/docs/8.x/blade"); //NOI18N
+            documentationUrl = new URL("https://laravel.com/docs/blade"); //NOI18N
         } catch (MalformedURLException ex) {
 
         }
@@ -27,12 +27,13 @@ public class BladeSyntax {
     public static String CLOSE_COMMENT = "--}}";
     
     public final static Collection<String> INLINE_DIRECTIVES = Arrays.asList(
-        "@include", "@includeIf", "@extends", "@includeWhen", "@includeUnless",
-        "@section" //can be inline
+        "@extends", "@include", "@includeIf", "@includeWhen", "@includeUnless", "@includeFirst",
+        "@section", "@empty" //can be inline
     );
     
     public final static Collection<String> DIRECTIVES_WITH_VIEW_PATH = Arrays.asList(
-            "@include", "@includeIf", "@extends", "@includeWhen", "@includeUnless"
+        "@extends", "@include", "@includeIf", "@includeWhen", "@includeUnless", "@includeFirst",
+        "@each"
     );
 
     public static Collection<String> DIRECTIVES_WITH_ENDTAGS = Arrays.asList(
