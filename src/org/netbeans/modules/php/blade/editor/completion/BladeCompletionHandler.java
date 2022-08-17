@@ -113,6 +113,8 @@ public class BladeCompletionHandler implements CodeCompletionHandler2 {
         BLADE_DIRECTIVES.put("@selected", KeywordCompletionType.WITH_ARG); //NOI18N
         BLADE_DIRECTIVES.put("@disabled", KeywordCompletionType.WITH_ARG); //NOI18N
         BLADE_DIRECTIVES.put("@required", KeywordCompletionType.WITH_ARG); //NOI18N
+        BLADE_DIRECTIVES.put("@readonly", KeywordCompletionType.WITH_ARG); //NOI18N
+        BLADE_DIRECTIVES.put("@class", KeywordCompletionType.WITH_ARG); //NOI18N
         BLADE_DIRECTIVES.put("@push", KeywordCompletionType.WITH_ARG); //NOI18N
         BLADE_DIRECTIVES.put("@once", KeywordCompletionType.WITH_ARG); //NOI18N
         BLADE_DIRECTIVES.put("@pushOnce", KeywordCompletionType.WITH_ARG); //NOI18N
@@ -120,12 +122,20 @@ public class BladeCompletionHandler implements CodeCompletionHandler2 {
         BLADE_DIRECTIVES.put("@extends", KeywordCompletionType.WITH_ARG); //NOI18N
         BLADE_DIRECTIVES.put("@include", KeywordCompletionType.WITH_ARG); //NOI18N
         BLADE_DIRECTIVES.put("@includeIf", KeywordCompletionType.WITH_ARG); //NOI18N
+        BLADE_DIRECTIVES.put("@includeWhen", KeywordCompletionType.WITH_ARG); //NOI18N
+        BLADE_DIRECTIVES.put("@includeUnless", KeywordCompletionType.WITH_ARG); //NOI18N
+        BLADE_DIRECTIVES.put("@includeFirst", KeywordCompletionType.WITH_ARG); //NOI18N
         BLADE_DIRECTIVES.put("@inject", KeywordCompletionType.WITH_ARG); //NOI18N
         BLADE_DIRECTIVES.put("@if", KeywordCompletionType.WITH_ARG_AND_ENDTAG); //NOI18N
+        BLADE_DIRECTIVES.put("@each", KeywordCompletionType.WITH_ARG); //NOI18N
         BLADE_DIRECTIVES.put("@for", KeywordCompletionType.WITH_ARG_AND_ENDTAG); //NOI18N
         BLADE_DIRECTIVES.put("@foreach", KeywordCompletionType.WITH_ARG_AND_ENDTAG); //NOI18N
         BLADE_DIRECTIVES.put("@forelse", KeywordCompletionType.WITH_ARG_AND_ENDTAG); //NOI18N
-        BLADE_DIRECTIVES.put("@production", KeywordCompletionType.WITH_ARG_AND_ENDTAG); //NOI18N
+        BLADE_DIRECTIVES.put("@verbatim", KeywordCompletionType.WITH_ENDTAG); //NOI18N
+        BLADE_DIRECTIVES.put("@production", KeywordCompletionType.WITH_ENDTAG); //NOI18N
+        BLADE_DIRECTIVES.put("@unless", KeywordCompletionType.WITH_ARG_AND_ENDTAG); //NOI18N
+        BLADE_DIRECTIVES.put("@isset", KeywordCompletionType.WITH_ARG_AND_ENDTAG); //NOI18N
+        BLADE_DIRECTIVES.put("@empty", KeywordCompletionType.WITH_ARG_AND_ENDTAG); //NOI18N
         BLADE_DIRECTIVES.put("@auth", KeywordCompletionType.WITH_ARG_AND_ENDTAG); //NOI18N
         BLADE_DIRECTIVES.put("@guest", KeywordCompletionType.WITH_ARG_AND_ENDTAG); //NOI18N
         BLADE_DIRECTIVES.put("@switch", KeywordCompletionType.WITH_ARG_AND_ENDTAG); //NOI18N
