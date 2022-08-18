@@ -438,6 +438,10 @@ CLOSE_BLADE_PHP = "@endphp";
     return BladeTokenId.T_BLADE_EXTENDS;
 }
 
+<ST_HTML> "@each" {
+    pushState(ST_PHP_LOOKING_FOR_DIRECTIVE_ARG);
+    return BladeTokenId.T_BLADE_EACH;
+}
 
 /* loop statements */
 

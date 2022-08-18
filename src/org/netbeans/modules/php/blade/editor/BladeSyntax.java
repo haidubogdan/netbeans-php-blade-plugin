@@ -28,7 +28,7 @@ public class BladeSyntax {
     
     public final static Collection<String> INLINE_DIRECTIVES = Arrays.asList(
         "@extends", "@include", "@includeIf", "@includeWhen", "@includeUnless", "@includeFirst",
-        "@section", "@empty" //can be inline
+        "@section", "@empty", "@each" //can be inline
     );
     
     public final static Collection<String> DIRECTIVES_WITH_VIEW_PATH = Arrays.asList(

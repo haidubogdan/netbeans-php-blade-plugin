@@ -35,7 +35,8 @@ abstract class BaseOccurence implements OccurenceElement {
         //TODO move logic in BladeSyntax class
         switch (name){
             case "@includeIf":
-            case "@include": {
+            case "@include":
+            case "@each":{
                 kind = BladeElement.Kind.INCLUDE;
                 break;
             }

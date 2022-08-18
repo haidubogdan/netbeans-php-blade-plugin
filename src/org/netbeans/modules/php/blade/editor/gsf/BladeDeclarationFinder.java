@@ -188,7 +188,7 @@ public class BladeDeclarationFinder implements DeclarationFinder {
                             return new DeclarationContext(textPhp, DeclarationType.PHP);
                         }
                     }
-                } else if (ttText.equals("@include") || ttText.equals("@extends") || ttText.equals("@includeIf")) {
+                } else if (ttText.equals("@include") || ttText.equals("@extends") || ttText.equals("@includeIf") || ttText.equals("@each")) {
                     //TODO use maybe BladeSyntax for category
                     return new DeclarationContext(pathValue, DeclarationType.INCLUDE);
                 } else if (ttText.equals("@section")) {

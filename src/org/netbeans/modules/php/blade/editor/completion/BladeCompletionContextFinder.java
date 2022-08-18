@@ -76,7 +76,7 @@ public class BladeCompletionContextFinder {
     );
 
     private final static Collection<BladeTokenId> PATH_KEYWORDS_TOKEN = Arrays.asList(
-            BladeTokenId.T_BLADE_INCLUDE, BladeTokenId.T_BLADE_EXTENDS
+            BladeTokenId.T_BLADE_INCLUDE, BladeTokenId.T_BLADE_EXTENDS, BladeTokenId.T_BLADE_EACH
     );
 
     private final static Collection<BladeTokenId> SECTION_KEYWORDS_TOKEN = Arrays.asList(
@@ -112,7 +112,7 @@ public class BladeCompletionContextFinder {
         BladeTokenId id = token.id();
 
         if (PATH_KEYWORDS_TOKEN.contains(id)) {
-            return CompletionContext.PATH; //@include or @extends
+            return CompletionContext.PATH; //@include | @extends | @each
         }
         if (SECTION_KEYWORDS_TOKEN.contains(id)) {
             return CompletionContext.SECTION;

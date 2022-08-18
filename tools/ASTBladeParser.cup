@@ -106,6 +106,7 @@ terminal T_BLADE_ENDSECTION, T_BLADE_STOP, T_BLADE_OVERWRITE, T_BLADE_APPEND;
 terminal T_BLADE_SHOW;
 terminal T_BLADE_EXTENDS;
 terminal T_BLADE_YIELD;
+terminal T_BLADE_EACH;
 
 terminal T_BLADE_FOREACH;
 terminal T_BLADE_ENDFOREACH;
@@ -290,6 +291,28 @@ directive_statement:stm {:
     Variable parameter = new Variable(0, 1, strV);
     ArgumentExpression expr = new ArgumentExpression(label, poleft, endright, parameter);
     RESULT = new BladeIncludeStatement(dleft, endright, directive, expr);
+:}
+| T_BLADE_EACH:d T_OPEN_PARENTHESE:po variableList:varList T_COMMA T_PHP_PARAMETER_EXPRESSION:p T_CLOSE_PARENTHESE:end {:
+    String strPath = "";
+    String strV = "";
+    Object v;
+    for (int i=0 ; i < varList.size() ; i++) {
+        
+        v = varList.get(i);
+        if (v instanceof String){
+            //stop at first string
+            strPath = (String) v;
+            break;
+        } else if ((v instanceof Variable) && !v.toString().startsWith("$")){
+            strPath = v.toString();
+            break;
+        }
+    }
+    PathExpression label = new PathExpression(varListleft, varListright, strPath);
+    DirectiveName directive = new DirectiveName(dleft, dright, d.toString());
+    Variable parameter = new Variable(0, 1, strV);
+    ArgumentExpression expr = new ArgumentExpression(label, poleft, endright, parameter);
+    RESULT = new BladeEachStatement(dleft, endright, directive, expr);
 :}
 | T_BLADE_FOREACH:d T_PHP_LOOP_EXPRESSION:s inner_statement_list:statementList T_BLADE_ENDFOREACH:end {:
     Block block = new Block(statementListleft, statementListright, statementList);

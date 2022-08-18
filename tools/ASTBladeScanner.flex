@@ -448,6 +448,11 @@ COMMENT_END="--}}"
     	return createFullSymbol(ASTBladeSymbols.T_BLADE_ENDSWITCH);
     }
 
+    "@each" {
+        pushState(ST_BLADE_INCLUDE_ARGS);
+        return createFullSymbol(ASTBladeSymbols.T_BLADE_EACH);
+    }
+
     "@php"{WHITESPACE}~"@endphp" {
         popState();
         addBladePhpInline();

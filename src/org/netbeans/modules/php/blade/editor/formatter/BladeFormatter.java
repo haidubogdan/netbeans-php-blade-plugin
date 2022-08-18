@@ -74,6 +74,9 @@ public class BladeFormatter implements Formatter {
     @Override
     public void reformat(Context context, ParserResult info) {
         FileObject file = info.getSnapshot().getSource().getFileObject();
+        if (file == null){
+            return;
+        }
         Project project = FileOwnerQuery.getOwner (file);
         if (project == null){
             return;
