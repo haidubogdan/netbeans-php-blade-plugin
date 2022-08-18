@@ -57,7 +57,7 @@ class CUP$ASTBladeParser$actions {
       switch (CUP$ASTBladeParser$act_num)
         {
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 50: // path ::= error 
+          case 51: // path ::= error 
             {
               Expression RESULT =null;
 		int exprleft = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()).left;
@@ -71,7 +71,7 @@ class CUP$ASTBladeParser$actions {
           return CUP$ASTBladeParser$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 49: // path ::= T_PHP_PARAMETER_EXPRESSION 
+          case 50: // path ::= T_PHP_PARAMETER_EXPRESSION 
             {
               Expression RESULT =null;
 		int pathleft = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()).left;
@@ -88,7 +88,7 @@ class CUP$ASTBladeParser$actions {
           return CUP$ASTBladeParser$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 48: // path ::= T_STRING 
+          case 49: // path ::= T_STRING 
             {
               Expression RESULT =null;
 		int pathleft = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()).left;
@@ -109,7 +109,7 @@ class CUP$ASTBladeParser$actions {
           return CUP$ASTBladeParser$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 47: // path_expression ::= T_OPEN_PARENTHESE path T_CLOSE_PARENTHESE 
+          case 48: // path_expression ::= T_OPEN_PARENTHESE path T_CLOSE_PARENTHESE 
             {
               ArgumentExpression RESULT =null;
 		int oleft = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-2)).left;
@@ -129,7 +129,7 @@ class CUP$ASTBladeParser$actions {
           return CUP$ASTBladeParser$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 46: // variableList ::= 
+          case 47: // variableList ::= 
             {
               List RESULT =null;
 		
@@ -140,7 +140,7 @@ class CUP$ASTBladeParser$actions {
           return CUP$ASTBladeParser$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 45: // variableList ::= variableList variable 
+          case 46: // variableList ::= variableList variable 
             {
               List RESULT =null;
 		int statementListleft = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-1)).left;
@@ -161,7 +161,7 @@ class CUP$ASTBladeParser$actions {
           return CUP$ASTBladeParser$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 44: // variable ::= variable T_NEKUDA variable 
+          case 45: // variable ::= variable T_NEKUDA variable 
             {
               Variable RESULT =null;
 		int expr1left = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-2)).left;
@@ -183,7 +183,7 @@ class CUP$ASTBladeParser$actions {
           return CUP$ASTBladeParser$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 43: // variable ::= T_PHP_PARAMETER_EXPRESSION 
+          case 44: // variable ::= T_PHP_PARAMETER_EXPRESSION 
             {
               Variable RESULT =null;
 		int varleft = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()).left;
@@ -195,7 +195,7 @@ class CUP$ASTBladeParser$actions {
           return CUP$ASTBladeParser$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 42: // variable ::= T_STRING 
+          case 43: // variable ::= T_STRING 
             {
               Variable RESULT =null;
 		int varleft = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()).left;
@@ -216,7 +216,7 @@ class CUP$ASTBladeParser$actions {
           return CUP$ASTBladeParser$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 41: // variable ::= T_VARIABLE 
+          case 42: // variable ::= T_VARIABLE 
             {
               Variable RESULT =null;
 		int varleft = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()).left;
@@ -233,7 +233,7 @@ class CUP$ASTBladeParser$actions {
           return CUP$ASTBladeParser$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 40: // yield_label ::= T_PHP_PARAMETER_EXPRESSION 
+          case 41: // yield_label ::= T_PHP_PARAMETER_EXPRESSION 
             {
               Expression RESULT =null;
 		int labelleft = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()).left;
@@ -250,7 +250,7 @@ class CUP$ASTBladeParser$actions {
           return CUP$ASTBladeParser$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 39: // yield_label ::= T_STRING 
+          case 40: // yield_label ::= T_STRING 
             {
               Expression RESULT =null;
 		int labelleft = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()).left;
@@ -270,7 +270,7 @@ class CUP$ASTBladeParser$actions {
           return CUP$ASTBladeParser$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 38: // yield_label_expression ::= T_OPEN_PARENTHESE yield_label T_CLOSE_PARENTHESE 
+          case 39: // yield_label_expression ::= T_OPEN_PARENTHESE yield_label T_CLOSE_PARENTHESE 
             {
               ArgumentExpression RESULT =null;
 		int poleft = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-2)).left;
@@ -290,7 +290,7 @@ class CUP$ASTBladeParser$actions {
           return CUP$ASTBladeParser$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 37: // end_section ::= T_BLADE_OVERWRITE 
+          case 38: // end_section ::= T_BLADE_OVERWRITE 
             {
               Object RESULT =null;
 		int tokenleft = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()).left;
@@ -302,7 +302,7 @@ class CUP$ASTBladeParser$actions {
           return CUP$ASTBladeParser$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 36: // end_section ::= T_BLADE_APPEND 
+          case 37: // end_section ::= T_BLADE_APPEND 
             {
               Object RESULT =null;
 		int tokenleft = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()).left;
@@ -316,7 +316,7 @@ class CUP$ASTBladeParser$actions {
           return CUP$ASTBladeParser$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 35: // end_section ::= T_BLADE_STOP 
+          case 36: // end_section ::= T_BLADE_STOP 
             {
               Object RESULT =null;
 		int tokenleft = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()).left;
@@ -330,7 +330,7 @@ class CUP$ASTBladeParser$actions {
           return CUP$ASTBladeParser$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 34: // end_section ::= T_BLADE_SHOW 
+          case 35: // end_section ::= T_BLADE_SHOW 
             {
               Object RESULT =null;
 		int tokenleft = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()).left;
@@ -344,7 +344,7 @@ class CUP$ASTBladeParser$actions {
           return CUP$ASTBladeParser$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 33: // end_section ::= T_BLADE_ENDSECTION 
+          case 34: // end_section ::= T_BLADE_ENDSECTION 
             {
               Object RESULT =null;
 		int tokenleft = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()).left;
@@ -358,7 +358,7 @@ class CUP$ASTBladeParser$actions {
           return CUP$ASTBladeParser$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 32: // d_section_statement ::= T_BLADE_SECTION yield_label_expression inner_statement_list end_section 
+          case 33: // d_section_statement ::= T_BLADE_SECTION yield_label_expression inner_statement_list end_section 
             {
               Statement RESULT =null;
 		int dleft = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-3)).left;
@@ -384,7 +384,7 @@ class CUP$ASTBladeParser$actions {
           return CUP$ASTBladeParser$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 31: // d_section_statement ::= T_BLADE_SECTION T_OPEN_PARENTHESE yield_label T_COMMA T_PHP_PARAMETER_EXPRESSION T_CLOSE_PARENTHESE 
+          case 32: // d_section_statement ::= T_BLADE_SECTION T_OPEN_PARENTHESE yield_label T_COMMA T_PHP_PARAMETER_EXPRESSION T_CLOSE_PARENTHESE 
             {
               Statement RESULT =null;
 		int dleft = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-5)).left;
@@ -413,7 +413,7 @@ class CUP$ASTBladeParser$actions {
           return CUP$ASTBladeParser$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 30: // directive_statement ::= d_section_statement 
+          case 31: // directive_statement ::= d_section_statement 
             {
               Statement RESULT =null;
 		int stmleft = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()).left;
@@ -427,7 +427,7 @@ class CUP$ASTBladeParser$actions {
           return CUP$ASTBladeParser$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 29: // statement ::= error 
+          case 30: // statement ::= error 
             {
               Statement RESULT =null;
 		int theErrorleft = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()).left;
@@ -442,7 +442,7 @@ class CUP$ASTBladeParser$actions {
           return CUP$ASTBladeParser$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 28: // statement ::= T_BLADE_COMMENT 
+          case 29: // statement ::= T_BLADE_COMMENT 
             {
               Statement RESULT =null;
 		int commentleft = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()).left;
@@ -458,7 +458,7 @@ class CUP$ASTBladeParser$actions {
           return CUP$ASTBladeParser$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 27: // statement ::= T_NEKUDA 
+          case 28: // statement ::= T_NEKUDA 
             {
               Statement RESULT =null;
 		int htmlleft = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()).left;
@@ -474,7 +474,7 @@ class CUP$ASTBladeParser$actions {
           return CUP$ASTBladeParser$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 26: // statement ::= T_STRING 
+          case 27: // statement ::= T_STRING 
             {
               Statement RESULT =null;
 		int htmlleft = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()).left;
@@ -490,7 +490,7 @@ class CUP$ASTBladeParser$actions {
           return CUP$ASTBladeParser$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 25: // statement ::= T_BLADE_INLINE_PHP 
+          case 26: // statement ::= T_BLADE_INLINE_PHP 
             {
               Statement RESULT =null;
 		int phpleft = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()).left;
@@ -505,7 +505,7 @@ class CUP$ASTBladeParser$actions {
           return CUP$ASTBladeParser$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 24: // statement ::= T_INLINE_PHP 
+          case 25: // statement ::= T_INLINE_PHP 
             {
               Statement RESULT =null;
 		int phpleft = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()).left;
@@ -520,7 +520,7 @@ class CUP$ASTBladeParser$actions {
           return CUP$ASTBladeParser$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 23: // statement ::= T_INLINE_HTML 
+          case 24: // statement ::= T_INLINE_HTML 
             {
               Statement RESULT =null;
 		int htmlleft = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()).left;
@@ -535,7 +535,7 @@ class CUP$ASTBladeParser$actions {
           return CUP$ASTBladeParser$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 22: // statement ::= T_BLADE_OPEN_ECHO T_BLADE_PHP_ECHO T_BLADE_CLOSE_ECHO 
+          case 23: // statement ::= T_BLADE_OPEN_ECHO T_BLADE_PHP_ECHO T_BLADE_CLOSE_ECHO 
             {
               Statement RESULT =null;
 		int tokenleft = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-2)).left;
@@ -556,7 +556,7 @@ class CUP$ASTBladeParser$actions {
           return CUP$ASTBladeParser$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 21: // statement ::= T_BLADE_DIRECTIVE 
+          case 22: // statement ::= T_BLADE_DIRECTIVE 
             {
               Statement RESULT =null;
 		int dleft = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()).left;
@@ -571,7 +571,7 @@ class CUP$ASTBladeParser$actions {
           return CUP$ASTBladeParser$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 20: // statement ::= T_BLADE_DIRECTIVE T_OPEN_PARENTHESE T_PHP_PARAMETER_EXPRESSION T_CLOSE_PARENTHESE 
+          case 21: // statement ::= T_BLADE_DIRECTIVE T_OPEN_PARENTHESE T_PHP_PARAMETER_EXPRESSION T_CLOSE_PARENTHESE 
             {
               Statement RESULT =null;
 		int dleft = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-3)).left;
@@ -593,7 +593,7 @@ class CUP$ASTBladeParser$actions {
           return CUP$ASTBladeParser$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 19: // statement ::= T_BLADE_SWITCH T_OPEN_PARENTHESE T_PHP_PARAMETER_EXPRESSION T_CLOSE_PARENTHESE inner_statement_list T_BLADE_ENDSWITCH 
+          case 20: // statement ::= T_BLADE_SWITCH T_OPEN_PARENTHESE T_PHP_PARAMETER_EXPRESSION T_CLOSE_PARENTHESE inner_statement_list T_BLADE_ENDSWITCH 
             {
               Statement RESULT =null;
 		int dleft = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-5)).left;
@@ -623,6 +623,34 @@ class CUP$ASTBladeParser$actions {
     RESULT = new BladeSwitchStatement(dleft, endright, directive, argexpr, block, endTag);
 
               CUP$ASTBladeParser$result = parser.getSymbolFactory().newSymbol("statement",5, ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-5)), ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), RESULT);
+            }
+          return CUP$ASTBladeParser$result;
+
+          /*. . . . . . . . . . . . . . . . . . . .*/
+          case 19: // statement ::= T_BLADE_CONDITION_OPEN_TAG T_PHP_CONDITION_EXPRESSION inner_statement_list T_BLADE_ELSEIF_END T_BLADE_ENDIF 
+            {
+              Statement RESULT =null;
+		int dleft = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-4)).left;
+		int dright = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-4)).right;
+		Object d = (Object)((java_cup.runtime.Symbol) CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-4)).value;
+		int exprleft = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-3)).left;
+		int exprright = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-3)).right;
+		Object expr = (Object)((java_cup.runtime.Symbol) CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-3)).value;
+		int statementListleft = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-2)).left;
+		int statementListright = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-2)).right;
+		List statementList = (List)((java_cup.runtime.Symbol) CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-2)).value;
+		int endleft = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()).left;
+		int endright = ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()).right;
+		Object end = (Object)((java_cup.runtime.Symbol) CUP$ASTBladeParser$stack.peek()).value;
+		
+    Block block = new Block(statementListleft, statementListright, statementList);
+    PhpExpression phpExpression = new PhpExpression(exprleft, exprright, expr.toString());
+    DirectiveName directive = new DirectiveName(dleft, dright, d.toString());
+    ArgumentExpression argexpr = new ArgumentExpression(phpExpression, exprleft, exprright);
+    DirectiveEndTag endTag = new DirectiveEndTag(endleft, endright, end.toString());
+    RESULT = new BladeConditionStatement(dleft, endright, directive, argexpr, block, endTag);
+
+              CUP$ASTBladeParser$result = parser.getSymbolFactory().newSymbol("statement",5, ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.elementAt(CUP$ASTBladeParser$top-4)), ((java_cup.runtime.Symbol)CUP$ASTBladeParser$stack.peek()), RESULT);
             }
           return CUP$ASTBladeParser$result;
 

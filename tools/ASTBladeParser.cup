@@ -331,6 +331,14 @@ directive_statement:stm {:
     DirectiveEndTag endTag = new DirectiveEndTag(endleft, endright, end.toString());
     RESULT = new BladeConditionStatement(dleft, endright, directive, argexpr, block, endTag);
 :}
+| T_BLADE_CONDITION_OPEN_TAG:d T_PHP_CONDITION_EXPRESSION:expr inner_statement_list:statementList T_BLADE_ELSEIF_END T_BLADE_ENDIF:end {:
+    Block block = new Block(statementListleft, statementListright, statementList);
+    PhpExpression phpExpression = new PhpExpression(exprleft, exprright, expr.toString());
+    DirectiveName directive = new DirectiveName(dleft, dright, d.toString());
+    ArgumentExpression argexpr = new ArgumentExpression(phpExpression, exprleft, exprright);
+    DirectiveEndTag endTag = new DirectiveEndTag(endleft, endright, end.toString());
+    RESULT = new BladeConditionStatement(dleft, endright, directive, argexpr, block, endTag);
+:}
 | T_BLADE_SWITCH:d T_OPEN_PARENTHESE:po T_PHP_PARAMETER_EXPRESSION:expr T_CLOSE_PARENTHESE:pc inner_statement_list:statementList T_BLADE_ENDSWITCH:end {:
     Block block = new Block(statementListleft, statementListright, statementList);
     PhpExpression phpExpression = new PhpExpression(exprleft, exprright, expr.toString());

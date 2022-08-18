@@ -122,8 +122,10 @@ public class BladeTypedTextInterceptor implements TypedTextInterceptor {
             }
         } else if (ch == ' ') {
             Token<?> token = ts.token();
+            Object t_id = token.id();
+            String tText = token.text().toString();
             if (token.id().equals(BladeTokenId.T_BLADE_PHP_ECHO) || 
-                    (token.id().equals(BladeTokenId.T_BLADE_COMMENT) && token.text().toString().length() > 4)){
+                    (token.id().equals(BladeTokenId.T_BLADE_COMMENT) && token.text().toString().endsWith("--}}"))){
                 //we are inside an existing echo or comment
                 return;
             }
@@ -306,7 +308,8 @@ public class BladeTypedTextInterceptor implements TypedTextInterceptor {
     }
 
     @MimeRegistrations(value = {
-        @MimeRegistration(mimeType = BladeLanguage.BLADE_MIME_TYPE, service = TypedTextInterceptor.Factory.class)
+        @MimeRegistration(mimeType = BladeLanguage.BLADE_MIME_TYPE, service = TypedTextInterceptor.Factory.class),
+        @MimeRegistration(mimeType = "text/xhtml", service = TypedTextInterceptor.Factory.class)
     })
     public static class Factory implements TypedTextInterceptor.Factory {
 

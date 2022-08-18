@@ -1,12 +1,8 @@
-@if($x)
-<div></div>
-    @elseif($x)
-        @section("")
-
-        @endsection
-<div></div>
-    @elseif($x - 1)
-    @include("xx")
-    @else
-<div></div>
-@endif
+@extends ("newBladeTemplate9")
+@section("ss")
+    @hasSection("sss")
+        @if($x)
+    
+        @endif
+    @endif
+@endsection
