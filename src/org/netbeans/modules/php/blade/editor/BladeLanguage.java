@@ -90,6 +90,8 @@ public class BladeLanguage extends DefaultLanguageConfig {
     public BladeLanguage() {
         super();
     }
+    
+    public static volatile Boolean hasQuote = false;
     public static final String BLADE_MIME_TYPE = "text/x-blade";
 
     @Override
@@ -180,9 +182,12 @@ public class BladeLanguage extends DefaultLanguageConfig {
          * the editor
          */
         //also used for completion items filtering!
+        if (c == '"' || c == '\''){
+            hasQuote = true;
+        }
         return Character.isJavaIdentifierPart(c)
                 || (c == '-') || (c == '@')
-                || (c == '.') || (c == '_');
+                || (hasQuote && c == '.') || (c == '_');
     }
     //TODO semantyc analyser ??
     
