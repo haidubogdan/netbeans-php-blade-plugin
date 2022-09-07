@@ -4,6 +4,8 @@ package org.netbeans.modules.php.blade.editor.parsing;
 import java_cup.runtime.*;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 import org.netbeans.modules.php.blade.editor.BladeSyntax;
 import org.netbeans.modules.php.editor.parser.PHPParseResult;
 import org.netbeans.modules.php.blade.editor.common.ByteStack;
@@ -41,6 +43,8 @@ import org.openide.filesystems.FileObject;
     private int whitespaceCounter = 0;
     private String fakeWhitespaceText = "";
     private boolean elseifOpened = true;
+    private Map<Integer, Integer> elseif_balance_buffer = new HashMap<>();
+    private int ifBalance = 0;
     private Collection<String> parameterList = new ArrayList<String>();
 
     public void reset(java.io.Reader reader) {
@@ -418,36 +422,43 @@ COMMENT_END="--}}"
     /*if */
     "@if" {
         pushState(ST_PHP_CONDITION_EXPRESSION);
-        elseifOpened = false;
+        ifBalance++;
+        elseif_balance_buffer.put(ifBalance, 0);
         return createFullSymbol(ASTBladeSymbols.T_BLADE_IF);
     }
 
     "@elseif" {
-        if (elseifOpened) {
+        if (elseif_balance_buffer.get(ifBalance) > 0) {
             int yylength = yylength();
             //fake symbol to mark a closign elseif
             yypushback(yylength);
-            elseifOpened = false;
+            int currentElseIfBalance = elseif_balance_buffer.get(ifBalance);
+            elseif_balance_buffer.put(ifBalance, currentElseIfBalance--);
             return createSymbol(ASTBladeSymbols.T_BLADE_ELSEIF_END);
         }
 
         pushState(ST_PHP_CONDITION_EXPRESSION);
-        elseifOpened = true;
+        int currentElseIfBalance = elseif_balance_buffer.get(ifBalance);
+        elseif_balance_buffer.put(ifBalance, currentElseIfBalance++);
         
         return createFullSymbol(ASTBladeSymbols.T_BLADE_ELSEIF);
     }
 
     "@endif" {
-        if (elseifOpened) {
+        if (elseif_balance_buffer.get(ifBalance) != null && elseif_balance_buffer.get(ifBalance) > 0) {
             int yylength = yylength();
-            //fake symbol to mark a closign elseif
+            //fake symbol to mark a closing elseif
             yypushback(yylength);
-            elseifOpened = false;
+            int currentElseIfBalance = elseif_balance_buffer.get(ifBalance);
+            elseif_balance_buffer.put(ifBalance, currentElseIfBalance--);
             return createSymbol(ASTBladeSymbols.T_BLADE_ELSEIF_END);
         }
+        elseif_balance_buffer.remove(ifBalance);
+        ifBalance--;
+
         popState();
-        elseifOpened = false;
         int yylength = yylength();
+
         return createFullSymbol(ASTBladeSymbols.T_BLADE_ENDIF);
     }
 
