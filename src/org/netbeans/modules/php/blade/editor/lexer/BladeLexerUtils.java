@@ -41,6 +41,7 @@
  */
 package org.netbeans.modules.php.blade.editor.lexer;
 
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import javax.swing.text.Document;
@@ -128,6 +129,42 @@ public final class BladeLexerUtils {
                 blockBalance--;
                 if (blockBalance == 0) {
                     return new OffsetRange(ts.offset(), ts.offset() + down.length());
+                }
+            } else if (ttext.equals(up)) {
+                blockBalance++;
+            }
+        }
+        return OffsetRange.NONE;
+    }
+    
+    public static OffsetRange findFwd(TokenSequence<? extends BladeTokenId> ts, String down, String up, Collection<String> optionalMatches) {
+        int blockBalance = 1;
+        while (ts.moveNext()) {
+            Token<? extends BladeTokenId> token = ts.token();
+            String ttext = token.text().toString().trim();
+
+            if (ttext.equals(down)) {
+                blockBalance--;
+                if (blockBalance == 0) {
+                    return new OffsetRange(ts.offset(), ts.offset() + down.length());
+                }
+            } else if (ttext.equals(up) || (!optionalMatches.isEmpty() && optionalMatches.contains(ttext))) {
+                blockBalance++;
+            }
+        }
+        return OffsetRange.NONE;
+    }
+    
+    public static OffsetRange findBack(TokenSequence<? extends BladeTokenId> ts, String down, String up, Collection<String> optionalMatches) {
+        int blockBalance = 1;
+        while (ts.movePrevious()) {
+            Token<? extends BladeTokenId> token = ts.token();
+            String ttext = token.text().toString().trim();
+
+            if (ttext.equals(down) || (!optionalMatches.isEmpty() && optionalMatches.contains(ttext))) {
+                blockBalance--;
+                if (blockBalance == 0) {
+                    return new OffsetRange(ts.offset(), ts.offset() + ttext.length());
                 }
             } else if (ttext.equals(up)) {
                 blockBalance++;

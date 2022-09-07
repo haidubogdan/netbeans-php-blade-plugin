@@ -41,8 +41,10 @@
  */
 package org.netbeans.modules.php.blade.editor;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
 import javax.swing.text.AbstractDocument;
@@ -74,6 +76,14 @@ public class BladeBracesMatcher implements BracesMatcher {
             BladeTokenId.T_BLADE_FOR,
             BladeTokenId.T_BLADE_FOREACH,
             BladeTokenId.T_BLADE_SECTION
+    );
+    
+    private static Collection<BladeTokenId> TOKEN_END_TAGS = Arrays.asList(
+            BladeTokenId.T_BLADE_ENDFOREACH,
+            BladeTokenId.T_BLADE_ENDFOR,
+            BladeTokenId.T_BLADE_ENDIF,
+            BladeTokenId.T_BLADE_ENDSECTION,
+            BladeTokenId.T_BLADE_ENDPHP
     );
     
     private BladeBracesMatcher(MatcherContext context) {
@@ -115,6 +125,8 @@ public class BladeBracesMatcher implements BracesMatcher {
                     return new int[]{toffs, toffs + tText.trim().length()};
                 } else if (BladeSyntax.DIRECTIVES_WITH_ENDTAGS.contains(tText.trim())) {
                     return new int[]{toffs, toffs + tText.trim().length()};
+                } else if (BladeSyntax.CONDITIONAL_DIRECTIVES.contains(tText.trim())) {
+                    return new int[]{toffs, toffs + tText.trim().length()};
                 } else if (id == BladeTokenId.BLADE_PHP_TOKEN && tText.trim().equals("(")){
                     ts.move(searchOffset - 1);
                     if (!ts.movePrevious()) {
@@ -126,6 +138,8 @@ public class BladeBracesMatcher implements BracesMatcher {
                     if (TOKENS_WITH_ENDTAGS.contains(dToken.id())) {
                         return new int[]{directiveOffs, directiveOffs + dText.trim().length()};
                     }
+                } else if (TOKEN_END_TAGS.contains(id)){
+                    return new int[]{toffs, toffs + tText.length()};
                 }
             }
             return null;
@@ -158,6 +172,7 @@ public class BladeBracesMatcher implements BracesMatcher {
                 OffsetRange r;
                 Token<? extends BladeTokenId> t = ts.token();
                 String tText = t.text().toString();
+                BladeTokenId id = t.id();
                 if (t.id() == BladeTokenId.T_BLADE_OPEN_ECHO) {
                     r = BladeLexerUtils.findFwd(ts, BladeTokenId.T_BLADE_CLOSE_ECHO, "}}");
                     return new int[]{r.getStart(), r.getEnd()};
@@ -172,7 +187,21 @@ public class BladeBracesMatcher implements BracesMatcher {
                     String name = tText.trim().substring(1);
                     r = BladeLexerUtils.findFwd(ts, "@end" + name, tText.trim());
                     return new int[]{r.getStart(), r.getEnd()};
-                } 
+                } else if (TOKEN_END_TAGS.contains(id)) {
+                    String tokenTest = tText.trim();
+                    String name = "@" +  tokenTest.substring(4);
+                    Collection<String> optionalMatches = new ArrayList<String>() {};
+                    if (tokenTest.equals("@endif")){
+                        optionalMatches.add("@hasSection");
+                        optionalMatches.add("@missingSection");
+                    } 
+                    r = BladeLexerUtils.findBack(ts, name, tText.trim(), optionalMatches);
+                    return new int[]{r.getStart(), r.getEnd()};
+                } else if (BladeSyntax.CONDITIONAL_DIRECTIVES.contains(tText.trim())) {
+                    Collection<String> optionalMatches = Arrays.asList("@hasSection", "@missingSection");
+                    r = BladeLexerUtils.findFwd(ts, "@endif", tText.trim(), optionalMatches);
+                    return new int[]{r.getStart(), r.getEnd()};
+                }
             }
             return null;
         } finally {

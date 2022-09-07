@@ -101,6 +101,8 @@ terminal T_INLINE_HTML, T_INLINE_PHP;
 terminal T_BLADE_COMMENT, T_BLADE_OPEN_ECHO, T_BLADE_CLOSE_ECHO;
 terminal T_BLADE_INLINE_PHP;
 terminal T_BLADE_INCLUDE;
+terminal T_BLADE_INCLUDE_FIRST, T_BLADE_INCLUDE_CONDITIONAL;
+terminal T_PARAMETER_EXPRESSION;
 terminal T_BLADE_SECTION;
 terminal T_BLADE_ENDSECTION, T_BLADE_STOP, T_BLADE_OVERWRITE, T_BLADE_APPEND;
 terminal T_BLADE_SHOW;
@@ -144,6 +146,7 @@ non terminal ArgumentExpression yield_label_expression;
 non terminal Expression yield_label;
 non terminal Variable variable;
 non terminal section_param;
+non terminal possible_include_render_params;
 
 non terminal Statement directive_statement;
 non terminal directive_identifier;
@@ -291,6 +294,20 @@ directive_statement:stm {:
     Variable parameter = new Variable(0, 1, strV);
     ArgumentExpression expr = new ArgumentExpression(label, poleft, endright, parameter);
     RESULT = new BladeIncludeStatement(dleft, endright, directive, expr);
+:}
+| T_BLADE_INCLUDE_CONDITIONAL:d T_OPEN_PARENTHESE:po T_PARAMETER_EXPRESSION:b T_COMMA  T_PARAMETER_EXPRESSION:path_list possible_include_render_params:param T_CLOSE_PARENTHESE:end {:
+    DirectiveName directive = new DirectiveName(dleft, dright, d.toString());
+    PathExpression label = new PathExpression(path_listleft, path_listright, path_list.toString());
+    Variable parameter = new Variable(0, 1, "");
+    ArgumentExpression expr = new ArgumentExpression(label, poleft, endright, parameter);
+    RESULT = new BladeConditionalIncludeStatement(dleft, endright, directive, expr);
+:}
+| T_BLADE_INCLUDE_FIRST:d T_OPEN_PARENTHESE:po T_PARAMETER_EXPRESSION:path_list possible_include_render_params:param T_CLOSE_PARENTHESE:end {:
+    DirectiveName directive = new DirectiveName(dleft, dright, d.toString());
+    PathExpression label = new PathExpression(path_listleft, path_listright, path_list.toString());
+    Variable parameter = new Variable(0, 1, "");
+    ArgumentExpression expr = new ArgumentExpression(label, poleft, endright, parameter);
+    RESULT = new BladeIncludeFirstStatement(dleft, endright, directive, expr);
 :}
 | T_BLADE_EACH:d T_OPEN_PARENTHESE:po variableList:varList T_COMMA T_PHP_PARAMETER_EXPRESSION:p T_CLOSE_PARENTHESE:end {:
     String strPath = "";
@@ -441,6 +458,14 @@ T_BLADE_SECTION:d T_OPEN_PARENTHESE:po yield_label:label T_COMMA T_PHP_PARAMETER
     RESULT = new BladeSectionStatement(dleft, endright, directive, label, block, endTag);
 :};
 
+possible_include_render_params::=
+T_COMMA T_PARAMETER_EXPRESSION:param {:
+    //todo add 
+:}
+| /* empty */ {:
+
+:}
+;
 
 end_section ::=
 T_BLADE_ENDSECTION:token{: 

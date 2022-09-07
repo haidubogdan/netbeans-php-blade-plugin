@@ -18,6 +18,7 @@ import org.netbeans.modules.csl.api.Modifier;
 import org.netbeans.modules.csl.api.OffsetRange;
 import org.netbeans.modules.csl.spi.ParserResult;
 import org.netbeans.modules.php.blade.editor.BladeIndexSupport;
+import static org.netbeans.modules.php.blade.editor.BladeSyntax.DIRECTIVES_WITH_VIEW_PATH;
 import org.netbeans.modules.php.blade.editor.index.api.BladeIndex;
 import org.netbeans.modules.php.blade.editor.index.api.IndexedElement;
 import org.netbeans.modules.php.blade.editor.lexer.BladeLexerUtils;
@@ -98,12 +99,16 @@ public class BladeDeclarationFinder implements DeclarationFinder {
             TokenSequence<? extends PHPTokenId> tsPhp = BladeLexerUtils.getPhpTokenSequence(th, lexOffset);
             Token<?> tokenPhp = tsPhp.token();
             if (tokenPhp != null) {
-                /**
-                 * TODO simulate occurence builder from php
-                 */
                 TokenId phpId = tokenPhp.id();
-                String textPhp = tokenPhp.text().toString().trim();
                 if (phpId.equals(PHPTokenId.PHP_STRING) || phpId.equals(PHPTokenId.PHP_VARIABLE)) {
+                    return new OffsetRange(tsPhp.offset(), tsPhp.offset() + tokenPhp.length());
+                }
+            }
+        } else if (id.equals(BladeTokenId.T_BLADE_PHP_VAR)){
+            TokenSequence<? extends PHPTokenId> tsPhp = BladeLexerUtils.getPhpTokenSequence(th, lexOffset);
+            Token<?> tokenPhp = tsPhp.token();
+            if (tokenPhp != null) {
+                if (tokenPhp.id().equals(PHPTokenId.PHP_CONSTANT_ENCAPSED_STRING)) {
                     return new OffsetRange(tsPhp.offset(), tsPhp.offset() + tokenPhp.length());
                 }
             }
@@ -173,22 +178,28 @@ public class BladeDeclarationFinder implements DeclarationFinder {
                 if (BladeTokenId.BLADE_PHP_STRING.equals(tokenId)) {
                     pathValue = token.text().toString().trim();
                     pathValue = pathValue.substring(1, pathValue.length() - 1);
-                } else if (BladeTokenId.T_BLADE_PHP_VAR.equals(tokenId) && BladeLexerUtils.textIsStringWithQuotes(ttText)) {
-                    pathValue = token.text().toString().trim();
-                    pathValue = pathValue.substring(1, pathValue.length() - 1);
+                } else if (BladeTokenId.T_BLADE_PHP_VAR.equals(tokenId)) {
+                    TokenHierarchy<Document> th = TokenHierarchy.get(doc);
+                    TokenSequence<? extends PHPTokenId> tsPhp = BladeLexerUtils.getPhpTokenSequence(th, carretOffset);
+                    Token<?> tokenPhp = tsPhp.token();
+                    if (tokenPhp != null) {
+                        if (tokenPhp.id().equals(PHPTokenId.PHP_CONSTANT_ENCAPSED_STRING)) {
+                            pathValue = tokenPhp.text().toString();
+                            pathValue = pathValue.substring(1, pathValue.length() - 1);
+                        }
+                    }
                 } else if (BladeTokenId.T_PHP == tokenId || BladeTokenId.T_BLADE_PHP == tokenId) {
                     TokenHierarchy<Document> th = TokenHierarchy.get(doc);
                     TokenSequence<? extends PHPTokenId> tsPhp = BladeLexerUtils.getPhpTokenSequence(th, carretOffset);
                     Token<?> tokenPhp = tsPhp.token();
                     if (tokenPhp != null) {
-                        //TODO test request processor flow @link https://github.com/apache/netbeans/blob/master/php/php.editor/src/org/netbeans/modules/php/editor/csl/DeclarationFinderImpl.java
                         TokenId phpId = tokenPhp.id();
                         String textPhp = tokenPhp.text().toString().trim();
                         if (phpId.equals(PHPTokenId.PHP_STRING) || phpId.equals(PHPTokenId.PHP_VARIABLE)) {
                             return new DeclarationContext(textPhp, DeclarationType.PHP);
                         }
                     }
-                } else if (ttText.equals("@include") || ttText.equals("@extends") || ttText.equals("@includeIf") || ttText.equals("@each")) {
+                } else if (DIRECTIVES_WITH_VIEW_PATH.contains(ttText)) {
                     //TODO use maybe BladeSyntax for category
                     return new DeclarationContext(pathValue, DeclarationType.INCLUDE);
                 } else if (ttText.equals("@section")) {

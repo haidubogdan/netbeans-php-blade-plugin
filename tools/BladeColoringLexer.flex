@@ -264,7 +264,7 @@ CLOSE_BLADE_PHP = "@endphp";
     return BladeTokenId.WHITESPACE;
 }
 
-<ST_HTML>(([^<@({{|}})*]|"<"[^?%<])+)|"<" {
+<ST_HTML>(([^<@({{|}}|/*)+]|"<"[^?%<])+)|"<" {
 	int wstart = 0;
     int firstReverseNW = yytext().length() - 1;
 	  String text = yytext();
@@ -720,6 +720,16 @@ CLOSE_BLADE_PHP = "@endphp";
     pushState(ST_BLADE_ECHO_ESCAPED);
     return BladeTokenId.T_BLADE_OPEN_ECHO_ESCAPED;
 }
+
+<ST_HTML>"/" ["*"]+ {
+    //html comment
+    return BladeTokenId.T_HTML;
+}
+
+<ST_HTML>["*"]+ "/" {
+  return BladeTokenId.T_HTML;  
+}
+
 
 
 <ST_BLADE_ECHO> {CLOSE_ECHO} {

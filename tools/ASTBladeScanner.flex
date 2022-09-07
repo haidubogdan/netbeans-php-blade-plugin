@@ -2,6 +2,8 @@
 package org.netbeans.modules.php.blade.editor.parsing;
 
 import java_cup.runtime.*;
+import java.util.ArrayList;
+import java.util.Collection;
 import org.netbeans.modules.php.blade.editor.BladeSyntax;
 import org.netbeans.modules.php.editor.parser.PHPParseResult;
 import org.netbeans.modules.php.blade.editor.common.ByteStack;
@@ -29,6 +31,7 @@ import org.openide.filesystems.FileObject;
     private int yy_old_pushbackPos;
     private int whitespaceEndPosition;
     private int directiveParBalance = 0;
+    private int directiveBracketBalance = 0;
     private String phpConditionText = "";
     private String phpParameterExpressionText = "";
     private FileObject currentFile;
@@ -38,6 +41,7 @@ import org.openide.filesystems.FileObject;
     private int whitespaceCounter = 0;
     private String fakeWhitespaceText = "";
     private boolean elseifOpened = true;
+    private Collection<String> parameterList = new ArrayList<String>();
 
     public void reset(java.io.Reader reader) {
         yyreset(reader);
@@ -240,7 +244,10 @@ COMMENT_END="--}}"
 %state ST_BLADE_ECHO_ESCAPED
 %state ST_BLADE_PARAMETER_EXPRESSION
 %state ST_LOOK_FOR_DIRECTIVE_ARGUMENTS
+%state ST_ARGUMENT_EXPRESSION_LIST
+%state ST_ARGUMENT_LIST
 %state ST_HTML_COMMENT
+%state ST_ARRAY_ARG
 
 %%
 /* @ will activate ST_BLADE_DIRECTIVE pushback -> end la new line sau ")" */
@@ -307,7 +314,7 @@ COMMENT_END="--}}"
     return createFullSymbol(ASTBladeSymbols.T_INLINE_HTML);
 }
 
-<YYINITIAL>"@"[\#|\&] {
+<YYINITIAL>"@"[\#|\&|\-] {
     return createFullSymbol(ASTBladeSymbols.T_INLINE_HTML);
 }
 
@@ -369,6 +376,16 @@ COMMENT_END="--}}"
     "@include" | "@includeIf" {
        pushState(ST_BLADE_INCLUDE_ARGS);
        return createFullSymbol(ASTBladeSymbols.T_BLADE_INCLUDE);
+    }
+
+    "@includeWhen" | "@includeUnless" {
+       pushState(ST_ARGUMENT_EXPRESSION_LIST);
+       return createFullSymbol(ASTBladeSymbols.T_BLADE_INCLUDE_CONDITIONAL);
+    }
+
+    "@includeFirst" {
+       pushState(ST_ARGUMENT_EXPRESSION_LIST);
+       return createFullSymbol(ASTBladeSymbols.T_BLADE_INCLUDE_FIRST);
     }
 
     /* loops */
@@ -503,7 +520,7 @@ COMMENT_END="--}}"
     return createSymbol(ASTBladeSymbols.T_OPEN_PARENTHESE);
 }       
 
-<ST_LOOK_FOR_DIRECTIVE_ARGUMENTS>{WHITESPACE} {
+<ST_LOOK_FOR_DIRECTIVE_ARGUMENTS, ST_ARGUMENT_EXPRESSION_LIST>{WHITESPACE} {
     //look for directive arguments
     String tokenText = yytext();
     int debug = 1;
@@ -511,7 +528,84 @@ COMMENT_END="--}}"
     fakeWhitespaceText += tokenText;
 }
 
-<ST_LOOK_FOR_DIRECTIVE_ARGUMENTS>{ANY_CHAR} {
+<ST_ARGUMENT_EXPRESSION_LIST>"(" {
+    popState();
+    phpParameterExpressionText = "";
+    parameterList = new ArrayList<String>();
+    whitespaceCounter = 0;
+    fakeWhitespaceText = "";
+    pushState(ST_ARGUMENT_LIST);
+    return createFullSymbol(ASTBladeSymbols.T_OPEN_PARENTHESE);
+}
+
+<ST_ARGUMENT_EXPRESSION_LIST>")" {
+    yybegin(YYINITIAL);
+    return createFullSymbol(ASTBladeSymbols.T_CLOSE_PARENTHESE);
+}
+
+<ST_ARGUMENT_LIST>"[" {
+   directiveBracketBalance = 0; 
+   yypushback(1);
+   pushState(ST_ARRAY_ARG);
+}
+
+<ST_ARGUMENT_LIST>"(" {
+    directiveParBalance++;
+    phpParameterExpressionText += yytext();
+}
+
+<ST_ARGUMENT_LIST>")" {
+    directiveParBalance--;
+    if (directiveParBalance == 0 ){
+        pushState(ST_ARGUMENT_EXPRESSION_LIST);
+        yypushback(1);
+    } else {
+        phpParameterExpressionText += yytext();
+    }
+    if (directiveParBalance == 0 && phpParameterExpressionText.length() > 0) {
+         parameterList.add(phpParameterExpressionText);
+         Symbol expr = createPhpParameterExpression(ASTBladeSymbols.T_PARAMETER_EXPRESSION);
+         phpParameterExpressionText = "";
+         return expr;
+     }
+}
+
+<ST_ARGUMENT_LIST>[^\,\@] {
+    phpParameterExpressionText += yytext();
+}
+
+<ST_ARGUMENT_LIST>"," {
+    if (phpParameterExpressionText.length() > 0) {
+        directiveParBalance = 1;
+        directiveBracketBalance = 0;
+        parameterList.add(phpParameterExpressionText);
+        yypushback(1);
+        Symbol expr = createPhpParameterExpression(ASTBladeSymbols.T_PARAMETER_EXPRESSION);
+        phpParameterExpressionText = "";
+        return expr;
+    }
+    return createFullSymbol(ASTBladeSymbols.T_COMMA);
+}
+
+<ST_ARRAY_ARG>"[" {
+   phpParameterExpressionText += yytext();
+   directiveBracketBalance++; 
+}
+
+<ST_ARRAY_ARG>"]" {
+   directiveBracketBalance--; 
+   phpParameterExpressionText += yytext();
+   if (directiveBracketBalance == 0){
+    pushState(ST_ARGUMENT_LIST);
+    return createPhpParameterExpression(ASTBladeSymbols.T_PARAMETER_EXPRESSION);
+   }
+}
+
+<ST_ARRAY_ARG>[^\[\]] {
+   phpParameterExpressionText += yytext();
+}
+
+<ST_LOOK_FOR_DIRECTIVE_ARGUMENTS, ST_ARGUMENT_EXPRESSION_LIST, ST_ARGUMENT_LIST>{ANY_CHAR} {
     yybegin(YYINITIAL);
     yypushback(1);
     int length = yylength();

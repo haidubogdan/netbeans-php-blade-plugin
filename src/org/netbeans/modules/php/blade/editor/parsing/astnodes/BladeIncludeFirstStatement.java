@@ -1,13 +1,17 @@
 package org.netbeans.modules.php.blade.editor.parsing.astnodes;
 
 /**
- * @include
+ *
+ * @includeFirst
+ * @includeWhen
+ * @includeIf
+ * @includeUnless
  * 
  * @author bhaidu
  */
-public class BladeIncludeStatement extends InlineDirectiveStatement {
+public class BladeIncludeFirstStatement extends InlineDirectiveStatement {
 
-    public BladeIncludeStatement(int start, int end, DirectiveName directive, ArgumentExpression label) {
+    public BladeIncludeFirstStatement(int start, int end, DirectiveName directive, ArgumentExpression label) {
         super(start, end, directive, label);
     }
 

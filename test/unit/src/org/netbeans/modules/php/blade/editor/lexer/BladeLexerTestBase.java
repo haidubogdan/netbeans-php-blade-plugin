@@ -36,9 +36,9 @@ public class BladeLexerTestBase extends BladeTestBase {
             result.append(ts.index());
             result.append(" ");
             result.append(tokenId.name());
-            result.append(" *");
+            result.append(" `");
             result.append(BladeLexerUtils.replaceLinesAndTabs(text.toString()));
-            result.append("*\n");
+            result.append("`\n");
         }
         return result.toString();
     }
