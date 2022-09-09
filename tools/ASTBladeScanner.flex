@@ -432,14 +432,14 @@ COMMENT_END="--}}"
             int yylength = yylength();
             //fake symbol to mark a closign elseif
             yypushback(yylength);
-            int currentElseIfBalance = elseif_balance_buffer.get(ifBalance);
-            elseif_balance_buffer.put(ifBalance, currentElseIfBalance--);
+            int currentElseIfBalance = elseif_balance_buffer.get(ifBalance)-1;
+            elseif_balance_buffer.put(ifBalance, currentElseIfBalance);
             return createSymbol(ASTBladeSymbols.T_BLADE_ELSEIF_END);
         }
 
         pushState(ST_PHP_CONDITION_EXPRESSION);
-        int currentElseIfBalance = elseif_balance_buffer.get(ifBalance);
-        elseif_balance_buffer.put(ifBalance, currentElseIfBalance++);
+        int currentElseIfBalance = elseif_balance_buffer.get(ifBalance)+1;
+        elseif_balance_buffer.put(ifBalance, currentElseIfBalance);
         
         return createFullSymbol(ASTBladeSymbols.T_BLADE_ELSEIF);
     }
@@ -449,8 +449,8 @@ COMMENT_END="--}}"
             int yylength = yylength();
             //fake symbol to mark a closing elseif
             yypushback(yylength);
-            int currentElseIfBalance = elseif_balance_buffer.get(ifBalance);
-            elseif_balance_buffer.put(ifBalance, currentElseIfBalance--);
+            int currentElseIfBalance = elseif_balance_buffer.get(ifBalance)-1;
+            elseif_balance_buffer.put(ifBalance, currentElseIfBalance);
             return createSymbol(ASTBladeSymbols.T_BLADE_ELSEIF_END);
         }
         elseif_balance_buffer.remove(ifBalance);
@@ -567,13 +567,13 @@ COMMENT_END="--}}"
 
 <ST_ARGUMENT_LIST>")" {
     directiveParBalance--;
-    if (directiveParBalance == 0 ){
+    if (directiveParBalance <= 0 ){
         pushState(ST_ARGUMENT_EXPRESSION_LIST);
         yypushback(1);
-    } else {
+    } else if(directiveParBalance > 0) {
         phpParameterExpressionText += yytext();
     }
-    if (directiveParBalance == 0 && phpParameterExpressionText.length() > 0) {
+    if (directiveParBalance <= 0 && phpParameterExpressionText.length() > 0) {
          parameterList.add(phpParameterExpressionText);
          Symbol expr = createPhpParameterExpression(ASTBladeSymbols.T_PARAMETER_EXPRESSION);
          phpParameterExpressionText = "";

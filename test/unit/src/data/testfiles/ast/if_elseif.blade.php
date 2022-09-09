@@ -1,10 +1,1 @@
-@if($x)
-
-@elseif($x)
-
-@elseif($x)
-    @if($x)
-
-    @endif
-@endif
-
+@includeFirst(['test1', 'admin'], $var)

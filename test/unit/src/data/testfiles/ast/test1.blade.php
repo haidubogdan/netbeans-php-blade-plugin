@@ -1,1 +1,3 @@
-@include('sss.sss')
+@can($x)
+
+@endcan

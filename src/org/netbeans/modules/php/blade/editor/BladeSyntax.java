@@ -59,7 +59,8 @@ public class BladeSyntax {
             "@error",
             "@can",
             "@canany",
-            "@cannot"
+            "@cannot",
+            "@forelse"
     );
     
     public final static Collection<String> CONDITIONAL_DIRECTIVES = Arrays.asList(

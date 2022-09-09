@@ -140,6 +140,12 @@ public class BladeBracesMatcher implements BracesMatcher {
                     }
                 } else if (TOKEN_END_TAGS.contains(id)){
                     return new int[]{toffs, toffs + tText.length()};
+                } else if(tText.trim().startsWith("@end")){
+                    String tagOpen = "@" + tText.trim().substring(4);
+                    if (BladeSyntax.DIRECTIVES_WITH_ENDTAGS.contains(tagOpen)) {
+                        return new int[]{toffs, toffs + tText.trim().length()};
+                    }
+                    return null;
                 }
             }
             return null;
@@ -201,6 +207,13 @@ public class BladeBracesMatcher implements BracesMatcher {
                     Collection<String> optionalMatches = Arrays.asList("@hasSection", "@missingSection");
                     r = BladeLexerUtils.findFwd(ts, "@endif", tText.trim(), optionalMatches);
                     return new int[]{r.getStart(), r.getEnd()};
+                } else if(tText.trim().startsWith("@end")){
+                    String tagOpen = "@" + tText.trim().substring(4);
+                    if (BladeSyntax.DIRECTIVES_WITH_ENDTAGS.contains(tagOpen)) {
+                        r = BladeLexerUtils.findBack(ts, tagOpen, tText.trim(), new ArrayList<String>() {});
+                        return new int[]{r.getStart(), r.getEnd()};
+                    }
+                    return null;
                 }
             }
             return null;
