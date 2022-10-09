@@ -178,7 +178,7 @@ public class BladeCompletionItem implements CompletionProposal {
             String name;
             switch (type) {
                 case SIMPLE:
-                    return null;
+                    return "";
                 case WITH_ARG:
                     name = getName();
                     builder.append(name);
@@ -203,6 +203,7 @@ public class BladeCompletionItem implements CompletionProposal {
                     builder.append("\n@end");
                     builder.append(name.substring(1));
                     break;
+                    
             }
             return builder.toString();
         }

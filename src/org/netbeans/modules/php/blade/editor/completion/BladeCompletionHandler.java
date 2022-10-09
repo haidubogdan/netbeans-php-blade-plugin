@@ -252,7 +252,13 @@ public class BladeCompletionHandler implements CodeCompletionHandler2 {
         }
         
         for (Map.Entry<FileObject, DirectiveNames> entry : customDirectives.entrySet()){
+            if (!entry.getKey().isValid()){
+                continue;
+            }
             List<String> directiveNames = entry.getValue().getList();
+            if (directiveNames == null){
+                continue;
+            }
             for (String directiveName : directiveNames){
                 if (startsWith(directiveName, request.prefix)) {
                     CustomDirectiveElement element = new CustomDirectiveElement(directiveName, entry.getKey());
