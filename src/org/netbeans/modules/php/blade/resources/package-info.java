@@ -3,7 +3,11 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-@TemplateRegistration(folder = "PHP", content = "BladeTemplate.blade.php")
+@TemplateRegistration(
+        folder = "Scripting",
+        category = "PHP",
+        content = "BladeTemplate.blade.php",
+        displayName = "#blade_template_displayName")
 package org.netbeans.modules.php.blade.resources;
 
 import org.netbeans.api.templates.TemplateRegistration;
