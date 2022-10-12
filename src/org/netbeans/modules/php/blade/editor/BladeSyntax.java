@@ -25,15 +25,19 @@ public class BladeSyntax {
 
     public static String OPEN_COMMENT = "{{--";
     public static String CLOSE_COMMENT = "--}}";
-    
+    public static String OPEN_ECHO = "{{";
+    public static String CLOSE_ECHO = "}}";
+    public static String OPEN_ECHO_ESCAPED = "{!!";
+    public static String CLOSE_ECHO_ESCAPED = "!!}";
+
     public final static Collection<String> INLINE_DIRECTIVES = Arrays.asList(
-        "@extends", "@include", "@includeIf", "@includeWhen", "@includeUnless", "@includeFirst",
-        "@section", "@empty", "@each" //can be inline
+            "@extends", "@include", "@includeIf", "@includeWhen", "@includeUnless", "@includeFirst",
+            "@section", "@empty", "@each" //can be inline
     );
-    
+
     public final static Collection<String> DIRECTIVES_WITH_VIEW_PATH = Arrays.asList(
-        "@extends", "@include", "@includeIf", "@includeWhen", "@includeUnless", "@includeFirst",
-        "@each"
+            "@extends", "@include", "@includeIf", "@includeWhen", "@includeUnless", "@includeFirst",
+            "@each"
     );
 
     public static Collection<String> DIRECTIVES_WITH_ENDTAGS = Arrays.asList(
@@ -62,12 +66,39 @@ public class BladeSyntax {
             "@cannot",
             "@forelse"
     );
-    
-    public final static Collection<String> CONDITIONAL_DIRECTIVES = Arrays.asList(
-        "@hasSection", "@sectionMissing"
+
+    public static Collection<String> DIRECTIVES_WITH_EXPRESSION = Arrays.asList(
+            "@if",
+            "@for", //not really a expression, but it's not relevant for the moment
+            "@foreach",
+            "@while",
+            "@error",
+            "@can",
+            "@canany",
+            "@cannot",
+            "@forelse",
+            "@unless"
+    );
+
+    public static Collection<String> DIRECTIVES_WITH_OR_WITHOUT_EXPRESSION = Arrays.asList(
+            "@auth",
+            "@guest"
+    );
+
+    public static Collection<String> DIRECTIVES_WITH_PARAMETERS = Arrays.asList(
+            "@verbatim",
+            "@else"
     );
     
-    public static URL getDocumentationUrl(){
+    public static Collection<String> DIRECTIVES_WITHOUT_PARAMETERS = Arrays.asList(
+            
+    );
+
+    public final static Collection<String> CONDITIONAL_DIRECTIVES = Arrays.asList(
+            "@hasSection", "@sectionMissing"
+    );
+
+    public static URL getDocumentationUrl() {
         return documentationUrl;
     }
 }

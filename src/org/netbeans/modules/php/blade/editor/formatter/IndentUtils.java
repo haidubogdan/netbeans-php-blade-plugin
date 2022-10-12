@@ -107,13 +107,13 @@ public final class IndentUtils {
                 return previousIndent;
             }
             Token<? extends BladeTokenId> token = ts.token();
-            while (!(token.id() == BladeTokenId.BLADE_PHP_TOKEN
+            while (!(token.id() == BladeTokenId.T_BLADE_LPAREN
                     && (TokenUtilities.textEquals(token.text(), "(") // NOI18N
                     || TokenUtilities.textEquals(token.text(), "["))) // NOI18N
                     && ts.movePrevious()) {
                 token = ts.token();
             }
-            if (token.id() == BladeTokenId.BLADE_PHP_TOKEN) {
+            if (token.id() == BladeTokenId.T_BLADE_LPAREN) {
                 while (token.id() != BladeTokenId.T_BLADE_SECTION
                         && token.id() != BladeTokenId.T_BLADE_IF
                         && token.id() != BladeTokenId.T_BLADE_ELSEIF

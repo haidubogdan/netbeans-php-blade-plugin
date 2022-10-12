@@ -71,7 +71,7 @@ public class BladeCompletionContextFinder {
     }
 
     private final static Collection<BladeTokenId> CTX_DELIMITERS = Arrays.asList(
-            BladeTokenId.T_BLADE_DIRECTIVE_PREFIX, BladeTokenId.T_BLADE_DIRECTIVE,
+            BladeTokenId.T_BLADE_DIRECTIVE,
             BladeTokenId.T_BLADE_IF, BladeTokenId.T_BLADE_FOR, BladeTokenId.T_BLADE_FOREACH
     );
 
@@ -174,7 +174,7 @@ public class BladeCompletionContextFinder {
                 return CompletionContext.SECTION;
             } else if (BladeSyntax.DIRECTIVES_WITH_VIEW_PATH.contains(tText)){
                 return CompletionContext.PATH;
-            } else if (id.equals(BladeTokenId.T_BLADE_DIRECTIVE) || id.equals(BladeTokenId.T_BLADE_DIRECTIVE_PREFIX)) {
+            } else if (id.equals(BladeTokenId.T_BLADE_DIRECTIVE)) {
                 return CompletionContext.DIRECTIVE;
             } else if (PHP_KEYWORDS_TOKEN.contains(id)) {
                 //we are inside brakets from an expression

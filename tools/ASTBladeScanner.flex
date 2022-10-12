@@ -314,6 +314,10 @@ COMMENT_END="--}}"
     //no break;
 }
 
+<YYINITIAL>"@@" {
+    return createFullSymbol(ASTBladeSymbols.T_INLINE_HTML);
+}
+
 <YYINITIAL>"@"[ ]*[\d\(\#\.\{\'\"]+ {
     return createFullSymbol(ASTBladeSymbols.T_INLINE_HTML);
 }

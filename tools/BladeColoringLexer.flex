@@ -42,6 +42,8 @@
 
 package org.netbeans.modules.php.blade.editor.lexer;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.netbeans.spi.lexer.LexerInput;
 import org.netbeans.spi.lexer.LexerRestartInfo;
 import org.netbeans.modules.php.blade.editor.common.ByteStack;
@@ -61,8 +63,10 @@ import org.netbeans.modules.php.blade.editor.common.ByteStack;
     private ByteStack stack = new ByteStack();
     private LexerInput input;
     private int parenBalanceInDirective = 0; //for directive arguments
-    private boolean argHasVariable = false;
+    private int parameterExpressionLength = 0;
     private int pushBackCount = 0;
+    //[\"][^\:\"]+[\:]{1}[^\:]
+    private Pattern freezePhpPattern = Pattern.compile("[^\\:\\\"\\)]+[\\:]{1}[^\\:]", Pattern.CASE_INSENSITIVE);
 
     public BladeColoringLexer(LexerRestartInfo info) {
         this.input = info.input();
@@ -104,8 +108,6 @@ import org.netbeans.modules.php.blade.editor.common.ByteStack;
             LexerState state = (LexerState) obj;
             return (this.stack.equals(state.stack)
                 && (this.zzState == state.zzState)
-                //&& (this.zzLexicalState == state.zzLexicalState)
-                //&& (this.parenBalanceInDirective == state.parenBalanceInDirective)
                 );
         }
 
@@ -152,49 +154,6 @@ import org.netbeans.modules.php.blade.editor.common.ByteStack;
         yybegin(state);
     }
 
-    /**
-     * Returns the smallest of multiple index values.
-     *
-     * @param values values
-     * @return the smallest of multiple index values, -1 if all values are -1
-     */
-    private static int minIndex(int... values) {
-        assert values.length != 0 : "No values"; // NOI18N
-        boolean first = true;
-        int min = -1;
-        for (int value : values) {
-            if (value == -1) {
-                continue;
-            }
-            if (first) {
-                first = false;
-                min = value;
-                continue;
-            }
-            min = Math.min(min, value);
-        }
-        return min;
-    }
-
-    /**
-     * Get the first whitespace index of text.
-     *
-     * @param text the text
-     * @return the first index of whitespace if whitespace exists, otherwise -1
-     */
-    private static int firstWhitespaceIndexOf(String text) {
-        return minIndex(
-            text.indexOf(' '),
-            text.indexOf('\n'),
-            text.indexOf('\r'),
-            text.indexOf('\t')
-        );
-    }
-
-    private boolean isWhitespace(){
-    	return yytext().replaceAll("\\s+","").length() == 0;
-    }
-
 %}
 
 
@@ -217,26 +176,21 @@ import org.netbeans.modules.php.blade.editor.common.ByteStack;
 %state ST_INLINE_PHP
 %state ST_BLADE_PHP
 %state ST_BLADE_ECHO
+%state ST_VALIDATE_BLADE_ECHO
 %state ST_BLADE_ECHO_ESCAPED
 %state ST_DIRECTIVE
 %state ST_COMMENT
-%state ST_HIGHLIGHTING_ERROR
 %state ST_CLOSE_BLADE_PHP
-%state ST_PHP_LOOKING_FOR_DIRECTIVE_ARG
-%state ST_PHP_LOOKING_FOR_DIRECTIVE_PARAM
-%state ST_LOOKING_FOR_SECOND_PARAMETER
+%state ST_LOOKING_FOR_PARAMETER_EXPRESSION
+%state ST_BLADE_PARAMETER_EXPRESSION
 %state ST_BLADE_ARGUMENT
-%state ST_PHP_LOOP_EXPR
-%state ST_PHP_IF_EXPR
-%state ST_PHP_LOOKING_FOR_IF_EXPR
-%state ST_PHP_LOOKING_FOR_LOOP_EXPR
 %state ST_AFTER_DIRECTIVE_ARG
 
-WHITESPACE=[ \t\r\n]+
+WHITESPACE=[ \t\r]+
 NEWLINE=("\r"|"\n"|"\r\n")
 
-OPEN_ECHO="{{"
-CLOSE_ECHO="}}"
+OPEN_BLADE_ECHO="{{"
+CLOSE_BLADE_ECHO="}}"
 
 OPEN_ECHO_ESCAPED="{!!"
 CLOSE_ECHO_ESCAPED="!!}"
@@ -247,77 +201,33 @@ COMMENT_END="--}}"
 LABEL=([[:letter:]_]|[\u007f-\u00ff])([[:letter:][:digit:]_]|[\u007f-\u00ff])*
 ANY_CHAR=[^]
 DIRECTIVE_PREFIX = "@"
+DIRECTIVE_NAME = {DIRECTIVE_PREFIX}{LABEL}
 OPEN_PHP="<?php"
 CLOSE_PHP="?>"
-CLOSE_BLADE_PHP = "@endphp";
+
+OPEN_PHP_ECHO = "<?="
 %%
 
-<ST_HTML>{NEWLINE} {
-	String yytext = yytext();
-	//whitespace
-    return BladeTokenId.NEWLINE;
-}
+//inline php states
 
-<ST_HTML>{WHITESPACE} {
-	String yytext = yytext();
-	//whitespace
-    return BladeTokenId.WHITESPACE;
-}
-
-<ST_HTML>(([^<@({{|}}|/*)+]|"<"[^?%<])+)|"<" {
-	int wstart = 0;
-    int firstReverseNW = yytext().length() - 1;
-	  String text = yytext();
-	  int textLength = yylength();
-	  boolean foundWhitespace = false;
-      
-  	if (text.trim().length() == textLength){
-      	return BladeTokenId.T_HTML;
-    }
-    
-    pushBackCount = 0;
-
-    while (firstReverseNW >= 0) {
-        Character c = yytext().charAt(firstReverseNW);
-        if (!Character.isWhitespace(yytext().charAt(firstReverseNW))){
-            firstReverseNW++;
-            break;
-        }
-        foundWhitespace = true;
-        firstReverseNW--;
-    }
-    if (foundWhitespace && firstReverseNW > 0) {
-        int diff = yylength() - firstReverseNW;
-        yypushback(diff);
-        String ddText = text.substring(0, firstReverseNW);
-        int dd = 1;
-    }
-    return BladeTokenId.T_HTML;
-}
-
-<ST_HTML>"<?xml" [^<]* "?>" {
-	return BladeTokenId.T_XML;
-}
-
-
-<ST_HTML> {OPEN_PHP} {
+<ST_HTML>{OPEN_PHP} {
     pushState(ST_PHP);
-    return BladeTokenId.T_OPEN_PHP;
+    return BladeTokenId.T_OPEN_PHP_SCRIPT;
 }
 
-<ST_HTML> "<?=" {
+<ST_HTML>{OPEN_PHP_ECHO} {
     pushState(ST_PHP_ECHO);
     return BladeTokenId.T_PHP_OPEN_ECHO;
 }
 
-<ST_PHP> {CLOSE_PHP} {
-	if (yylength() == 2){
-	    popState(); 
-		return BladeTokenId.T_CLOSE_PHP;
-	}
-	yypushback(2);
-    return BladeTokenId.T_PHP;
+//php directive state
+
+<ST_HTML>"@php" {
+    pushState(ST_BLADE_PHP);
+    return BladeTokenId.T_BLADE_PHP_OPEN;
 }
+
+//php state
 
 <ST_PHP>~{CLOSE_PHP} {
     if (yylength() == 2){
@@ -356,19 +266,8 @@ CLOSE_BLADE_PHP = "@endphp";
   }
 }
 
-<ST_HTML> "@php" {
-    pushState(ST_BLADE_PHP);
-    return BladeTokenId.T_BLADE_PHP_OPEN;
-}
-
-<ST_BLADE_PHP> {CLOSE_BLADE_PHP} {
-    String ttext = yytext();
-    popState();
-    return BladeTokenId.T_BLADE_ENDPHP;
-}
-
 <ST_BLADE_PHP>{WHITESPACE}?~"@endphp" {
-	String ttext = yytext();
+    String ttext = yytext();
     popState();
     if (yylength() == "@endphp".length()){
         return BladeTokenId.T_BLADE_ENDPHP;
@@ -378,11 +277,167 @@ CLOSE_BLADE_PHP = "@endphp";
     return BladeTokenId.T_BLADE_PHP;
 }
 
+<ST_HTML>{
+    "@yield" { 
+        pushState(ST_LOOKING_FOR_PARAMETER_EXPRESSION);
+        return BladeTokenId.T_BLADE_YIELD;
+    }
+    "@section" {
+       pushState(ST_LOOKING_FOR_PARAMETER_EXPRESSION);
+       return BladeTokenId.T_BLADE_SECTION;
+   }
+}
+
+<ST_HTML>{
+    "@parent" { return BladeTokenId.T_BLADE_PARENT;}
+    "@stop" { return BladeTokenId.T_BLADE_STOP;}
+    "@endsection" { 
+        return BladeTokenId.T_BLADE_ENDSECTION;
+    }
+}
+
+//includes
+
+<ST_HTML>{
+    "@include" { 
+        pushState(ST_LOOKING_FOR_PARAMETER_EXPRESSION);
+        return BladeTokenId.T_BLADE_INCLUDE;
+    }
+    "@extends" { 
+        pushState(ST_LOOKING_FOR_PARAMETER_EXPRESSION);
+        return BladeTokenId.T_BLADE_EXTENDS;
+    }
+    "@each" { 
+        pushState(ST_LOOKING_FOR_PARAMETER_EXPRESSION);
+        return BladeTokenId.T_BLADE_EACH;
+    }
+    "@extends" { 
+        pushState(ST_LOOKING_FOR_PARAMETER_EXPRESSION);
+        return BladeTokenId.T_BLADE_EACH;
+    }
+}
+
+//loops
+
+<ST_HTML>{
+    "@foreach" { 
+        pushState(ST_LOOKING_FOR_PARAMETER_EXPRESSION);
+        return BladeTokenId.T_BLADE_FOREACH;
+    }
+    "@for" { 
+        pushState(ST_LOOKING_FOR_PARAMETER_EXPRESSION);
+        return BladeTokenId.T_BLADE_FOR;
+    }
+}
+
+<ST_HTML>{
+    "@endforeach" {
+        return BladeTokenId.T_BLADE_ENDFOREACH;
+    }
+    "@endfor" {
+        return BladeTokenId.T_BLADE_ENDFOR;
+    }
+}
+
+
+//conditional
+
+<ST_HTML>{
+    "@if" { 
+        pushState(ST_LOOKING_FOR_PARAMETER_EXPRESSION);
+        return BladeTokenId.T_BLADE_FOREACH;
+    }
+    "@elseif" { 
+        pushState(ST_LOOKING_FOR_PARAMETER_EXPRESSION);
+        return BladeTokenId.T_BLADE_FOR;
+    }
+}
+
+<ST_HTML>{
+    "@else" {
+        return BladeTokenId.T_BLADE_ELSE;
+    }
+    "@endif" {
+        return BladeTokenId.T_BLADE_ENDIF;
+    }
+}
+
+<ST_LOOKING_FOR_PARAMETER_EXPRESSION>{WHITESPACE}+ {
+    return BladeTokenId.WHITESPACE;
+}
+
+<ST_LOOKING_FOR_PARAMETER_EXPRESSION>"()" {
+   parenBalanceInDirective = 0;
+   popState();
+   return BladeTokenId.T_HTML;
+}
+
+<ST_LOOKING_FOR_PARAMETER_EXPRESSION>"(" {
+   pushState(ST_BLADE_PARAMETER_EXPRESSION);
+   parenBalanceInDirective = 1;
+   parameterExpressionLength = 0;
+   return BladeTokenId.T_BLADE_LPAREN;
+}
+
+<ST_LOOKING_FOR_PARAMETER_EXPRESSION>")" {
+   parenBalanceInDirective = 0;
+   popState();
+   return BladeTokenId.T_BLADE_RPAREN;
+}
+
+<ST_LOOKING_FOR_PARAMETER_EXPRESSION>{ANY_CHAR} {
+    if (yylength() > 0){
+        yypushback(1);
+    }
+    popState();
+}
+
+<ST_BLADE_PARAMETER_EXPRESSION>"(" {
+   parenBalanceInDirective++;
+}
+
+<ST_BLADE_PARAMETER_EXPRESSION>"{"? + ([^\:\"\)]+ ":") [^\:]  {
+    //php lexer embedding freeze issue when you type / delete a double colon at the start of the script
+    if (parameterExpressionLength == 0) {
+        popState();
+        popState();
+        parameterExpressionLength = 0;
+        return  BladeTokenId.T_HTML;
+    }
+}
+
+<ST_BLADE_PARAMETER_EXPRESSION>")" {
+   parenBalanceInDirective--;
+   if (parenBalanceInDirective == 0) {
+      yypushback(1);
+      popState();
+      return BladeTokenId.T_BLADE_PHP_EXPRESSION;
+   }
+}
+
+<ST_BLADE_PARAMETER_EXPRESSION>{WHITESPACE} {
+    String text = yytext();
+    parameterExpressionLength+= yylength();
+}
+<ST_BLADE_PARAMETER_EXPRESSION>{ANY_CHAR} {
+    parameterExpressionLength =0;
+}
+
+<ST_HTML>"@@" {
+    //escape directive rule
+    return BladeTokenId.T_HTML;
+}
+
+<ST_HTML>{DIRECTIVE_NAME} {
+    String ttext = yytext();
+    pushState(ST_LOOKING_FOR_PARAMETER_EXPRESSION);
+    return BladeTokenId.T_BLADE_DIRECTIVE;
+}
+
 <ST_HTML> {COMMENT_START} {
     pushState(ST_COMMENT);
     return BladeTokenId.T_BLADE_COMMENT;
 }
-
 
 <ST_COMMENT> {COMMENT_END} {
     popState();
@@ -394,322 +449,15 @@ CLOSE_BLADE_PHP = "@endphp";
     return BladeTokenId.T_BLADE_COMMENT;
 }
 
-<ST_COMMENT> <<EOF>> {
+<ST_COMMENT><<EOF>> {
+//??
   if (input.readLength() > 0) {
     input.backup(1);  // backup eof
-    return BladeTokenId.T_BLADE_COMMENT;
   }
-  else {
-      return null;
-  }
+  return BladeTokenId.T_BLADE_COMMENT;
 }
 
-<ST_HTML> {CLOSE_BLADE_PHP} {
-    return BladeTokenId.T_BLADE_ENDPHP;
-}
-
-/* layout tokens */
-
-<ST_HTML> "@yield" {
-	pushState(ST_PHP_LOOKING_FOR_DIRECTIVE_ARG);
-    return BladeTokenId.T_BLADE_YIELD;
-}
-
-<ST_HTML> "@section" {
-    pushState(ST_PHP_LOOKING_FOR_DIRECTIVE_ARG);
-    return BladeTokenId.T_BLADE_SECTION;
-}
-
-<ST_HTML> "@parent" {
-    return BladeTokenId.T_BLADE_PARENT;
-}
-
-<ST_HTML> "@stop" {
-    return BladeTokenId.T_BLADE_STOP;
-}
-
-<ST_HTML> "@include" {
-	pushState(ST_PHP_LOOKING_FOR_DIRECTIVE_ARG);
-    return BladeTokenId.T_BLADE_INCLUDE;
-}
-
-<ST_HTML> "@extends" {
-	pushState(ST_PHP_LOOKING_FOR_DIRECTIVE_ARG);
-    return BladeTokenId.T_BLADE_EXTENDS;
-}
-
-<ST_HTML> "@each" {
-    pushState(ST_PHP_LOOKING_FOR_DIRECTIVE_ARG);
-    return BladeTokenId.T_BLADE_EACH;
-}
-
-/* loop statements */
-
-<ST_HTML> "@foreach" {
-    pushState(ST_PHP_LOOKING_FOR_LOOP_EXPR);
-    return BladeTokenId.T_BLADE_FOREACH;
-}
-
-<ST_HTML> "@for" {
-    pushState(ST_PHP_LOOKING_FOR_LOOP_EXPR);
-    return BladeTokenId.T_BLADE_FOR;
-}
-
-<ST_HTML> "@if" {
-    pushState(ST_PHP_LOOKING_FOR_IF_EXPR);
-    return BladeTokenId.T_BLADE_IF;
-}
-
-<ST_HTML> "@else" {
-    return BladeTokenId.T_BLADE_ELSE;
-}
-
-<ST_HTML> "@elseif" {
-    pushState(ST_PHP_LOOKING_FOR_IF_EXPR);
-    return BladeTokenId.T_BLADE_ELSEIF;
-}
-
-<ST_HTML> "@endsection" {
-    return BladeTokenId.T_BLADE_ENDSECTION;
-}
-
-<ST_PHP_LOOKING_FOR_DIRECTIVE_ARG>"(" {
-	//directive paranthesis
-	parenBalanceInDirective++;
-	pushState(ST_BLADE_ARGUMENT);
-    return BladeTokenId.BLADE_PHP_TOKEN;
-}
-
-<ST_PHP_LOOKING_FOR_DIRECTIVE_ARG>")" {
-    //directive end
-    parenBalanceInDirective--;
-    String yytext = yytext();
-    if (parenBalanceInDirective == 0){
-        yybegin(ST_AFTER_DIRECTIVE_ARG);
-    }
-    return BladeTokenId.BLADE_PHP_TOKEN;
-}
-
-<ST_AFTER_DIRECTIVE_ARG>{WHITESPACE} {
-	yybegin(ST_HTML);
-	return BladeTokenId.WHITESPACE;
-}
-
-<ST_AFTER_DIRECTIVE_ARG>{ANY_CHAR} {
-	yypushback(yylength());
-	yybegin(ST_HTML);
-}
-
-<ST_PHP_LOOKING_FOR_DIRECTIVE_ARG>\" | ">" {
-	//inline div tag directive
-	yybegin(ST_HTML);
-	return BladeTokenId.T_HTML;
-}
-
-<ST_PHP_LOOKING_FOR_DIRECTIVE_ARG>{NEWLINE}+ {
-	//unfinished directive arg
-	yybegin(ST_HTML);
-    return BladeTokenId.WHITESPACE;
-}
-
-<ST_BLADE_ARGUMENT>")" {
-    //directive end
-    parenBalanceInDirective--;
-    String yytext = yytext();
-    if (yylength() == 1 && parenBalanceInDirective == 0){
-        yybegin(ST_AFTER_DIRECTIVE_ARG);
-        return BladeTokenId.BLADE_PHP_TOKEN;
-    }
-    if (parenBalanceInDirective <= 0){
-    	parenBalanceInDirective++;
-	    yypushback(1);
-    	return BladeTokenId.T_BLADE_PHP_VAR;
-    }
-
-}
-
-<ST_BLADE_ARGUMENT>\" ([^\"])* \" {
-	//should have a flag for include
-	//string debug
-	String yytext = yytext();
-	int debug = 1;
-	//might catch other values also
-	if (yytext.startsWith("\"")){
-            return BladeTokenId.BLADE_PHP_STRING;
-	}
-}
-
-<ST_BLADE_ARGUMENT>"'" ([^'])* "'" {
-	//string debug
-	String yytext = yytext();
-	int debug = 1;
-	//might catch other values also
-	if (yytext.startsWith("'")){
-		return BladeTokenId.BLADE_PHP_STRING;
-	}
-}
-
-<ST_BLADE_ARGUMENT>"," {
-	//debug comma value
-	String yytext = yytext();
-	int debug = 5;
-	pushState(ST_LOOKING_FOR_SECOND_PARAMETER);
-	if (yylength() == 1) {
-		return BladeTokenId.T_BLADE_COMMA;
-	}
-}
-
-<ST_BLADE_ARGUMENT>{ANY_CHAR} {
-	//search for next tokens
-}
-
-<ST_LOOKING_FOR_SECOND_PARAMETER>"(" {
-	//second param state
-	String yytext = yytext();
-	parenBalanceInDirective++;
-	if (yylength() == 1 && parenBalanceInDirective == 1){
-		return BladeTokenId.BLADE_PHP_TOKEN;
-	}
-}
-
-<ST_LOOKING_FOR_SECOND_PARAMETER>")" {
-	//second param state
-    String yytext = yytext();
-    parenBalanceInDirective--;
-    if (yylength() == 1){
-    	parenBalanceInDirective=0;
-        yybegin(ST_AFTER_DIRECTIVE_ARG);
-        return BladeTokenId.BLADE_PHP_TOKEN;
-    }
-    if (parenBalanceInDirective <= 0){
-		yypushback(1);
-        return BladeTokenId.T_BLADE_PHP_VAR;
-    }
-}
-
-<ST_LOOKING_FOR_SECOND_PARAMETER>{ANY_CHAR} {
-	//second param state
-}
-
-<ST_PHP_LOOKING_FOR_IF_EXPR, ST_PHP_LOOKING_FOR_LOOP_EXPR>{WHITESPACE}+"(" {
-	String yytext = yytext();
-	yypushback(1);
-	return BladeTokenId.WHITESPACE;
-}
-
-<ST_PHP_LOOKING_FOR_IF_EXPR, ST_PHP_LOOKING_FOR_LOOP_EXPR>"(" {
-	
-	switch (zzLexicalState) {
-            case ST_PHP_LOOKING_FOR_IF_EXPR:
-                    popState();
-                    pushState(ST_PHP_IF_EXPR);
-                    break;
-            case ST_PHP_LOOKING_FOR_LOOP_EXPR:
-                    popState();
-                    pushState(ST_PHP_LOOP_EXPR);
-                    break;
-	}
-	parenBalanceInDirective++;
-	return BladeTokenId.BLADE_PHP_TOKEN;
-}
-
-<ST_PHP_LOOKING_FOR_DIRECTIVE_ARG>{WHITESPACE}+ {
-    String yytext = yytext();
-    if (yytext.contains("\n")){
-        //finish searching for arguments
-        yybegin(ST_HTML);
-    }
-    if (isWhitespace()){
-    	return BladeTokenId.WHITESPACE;
-    }
-    
-}
-
-<ST_PHP_LOOKING_FOR_DIRECTIVE_ARG, ST_PHP_LOOKING_FOR_IF_EXPR, ST_PHP_LOOKING_FOR_LOOP_EXPR>{ANY_CHAR} {
-	//any char directive arg
-    String yytext = yytext();
-    int debug = 1;
-    //wait until something relevant is found
-}
-
-<ST_PHP_IF_EXPR, ST_PHP_LOOP_EXPR>{WHITESPACE}+ {
-
-}
-
-<ST_PHP_IF_EXPR, ST_PHP_LOOP_EXPR>"(" {
-	String yytext = yytext();
-	parenBalanceInDirective++;
-	if (yylength() == 1 && parenBalanceInDirective == 1){
-		return BladeTokenId.BLADE_PHP_TOKEN;
-	}
-}
-
-<ST_PHP_IF_EXPR, ST_PHP_LOOP_EXPR>")" {
-    String yytext = yytext();
-    parenBalanceInDirective--;
-    if (yylength() == 1){
-    	parenBalanceInDirective=0;
-        yybegin(ST_AFTER_DIRECTIVE_ARG);
-        return BladeTokenId.BLADE_PHP_TOKEN;
-    }
-    if (parenBalanceInDirective == 0){
-    	yypushback(1);
-    	switch (zzLexicalState) {
-        case ST_PHP_IF_EXPR:
-                return BladeTokenId.T_BLADE_PHP_COND;
-        case ST_PHP_LOOP_EXPR:
-                return BladeTokenId.T_BLADE_PHP_LOOP_PARAM;
-        } 
-    }
-}
-
-<ST_PHP_IF_EXPR, ST_PHP_LOOP_EXPR>{ANY_CHAR} {
-    String yytext = yytext();
-    int debug = 1;
-    //wait until something relevant is found
-}
-
-<ST_HTML> "@endforeach" {
-    return BladeTokenId.T_BLADE_ENDFOREACH;
-}
-
-<ST_HTML> "@endfor" {
-    return BladeTokenId.T_BLADE_ENDFOR;
-}
-
-<ST_HTML> "@endif" {
-    return BladeTokenId.T_BLADE_ENDIF;
-}
-
-<ST_HTML>"@"[ ]*[\d\(\#\.\{\'\"]+ {
-    String yytext = yytext();
-    return BladeTokenId.T_HTML; 
-}
-
-<ST_HTML>{DIRECTIVE_PREFIX}[A-Za-z0-9+_-\!]+[\.][A-Za-z0-9+_\.-]+ {
-    //email test
-    String yytext = yytext();
-    return BladeTokenId.T_HTML; 
-}
-
-
-<ST_HTML>{DIRECTIVE_PREFIX}[A-Za-z0-9+_-\!]+[\)] {
-    //email test
-    String yytext = yytext();
-    return BladeTokenId.T_HTML; 
-}
-
-<ST_HTML>{DIRECTIVE_PREFIX}{LABEL} {
-   String yytext = yytext();
-   pushState(ST_PHP_LOOKING_FOR_DIRECTIVE_ARG);
-   return BladeTokenId.T_BLADE_DIRECTIVE; 
-}
-
-<ST_HTML>{DIRECTIVE_PREFIX}{WHITESPACE} {
-   return BladeTokenId.T_HTML; 
-}
-
-<ST_HTML> {OPEN_ECHO} {
+<ST_HTML> {OPEN_BLADE_ECHO} {
     String yytext = yytext();
     pushState(ST_BLADE_ECHO);
     return BladeTokenId.T_BLADE_OPEN_ECHO;
@@ -721,30 +469,24 @@ CLOSE_BLADE_PHP = "@endphp";
     return BladeTokenId.T_BLADE_OPEN_ECHO_ESCAPED;
 }
 
-<ST_HTML>"/" ["*"]+ {
-    //html comment
-    return BladeTokenId.T_HTML;
-}
-
-<ST_HTML>["*"]+ "/" {
-  return BladeTokenId.T_HTML;  
-}
-
-
-
-<ST_BLADE_ECHO> {CLOSE_ECHO} {
+<ST_BLADE_ECHO> {CLOSE_BLADE_ECHO} {
     String yytext = yytext();
     popState();
     return BladeTokenId.T_BLADE_CLOSE_ECHO;
 }
 
-<ST_BLADE_ECHO>~{CLOSE_ECHO} {
+<ST_BLADE_ECHO>~{CLOSE_BLADE_ECHO} {
     String yytext = yytext();
     if (yylength() == 2){
     	popState();
     	return BladeTokenId.T_BLADE_CLOSE_ECHO;
     }
     yypushback(2);
+
+    Matcher matcher = freezePhpPattern.matcher(yytext);
+    if(matcher.find()) {
+        return BladeTokenId.T_HTML;
+    }
     return BladeTokenId.T_BLADE_PHP_ECHO;
 }
 
@@ -761,6 +503,10 @@ CLOSE_BLADE_PHP = "@endphp";
     	return BladeTokenId.T_BLADE_CLOSE_ECHO;
     }
     yypushback(3);
+    Matcher matcher = freezePhpPattern.matcher(yytext);
+    if(matcher.find()) {
+        return BladeTokenId.T_HTML;
+    }
     return BladeTokenId.T_BLADE_PHP_ECHO;
 }
 
@@ -771,37 +517,37 @@ CLOSE_BLADE_PHP = "@endphp";
     return BladeTokenId.T_HTML;
 }
 
-<ST_BLADE_ECHO, ST_BLADE_ECHO_ESCAPED> {WHITESPACE}+ {
+<ST_BLADE_ECHO, ST_BLADE_ECHO_ESCAPED>{WHITESPACE}+ {
     //no break;
+    parameterExpressionLength += yylength();
+}
+
+<ST_HTML>{NEWLINE}+ {
+    String yytext = yytext();
+	//whitespace
+    return BladeTokenId.NEWLINE;
+}
+
+<ST_HTML>{WHITESPACE}+ {
+	String yytext = yytext();
+	//whitespace
+    return BladeTokenId.WHITESPACE;
+}
+
+<ST_HTML>(([^<@({{|}}|/*|\n)+]|"<"[^?%<])+)|"<" {
+   return  BladeTokenId.T_HTML; 
+}
+
+<ST_HTML>"<?xml" [^<]* "?>" {
+	return BladeTokenId.T_XML;
 }
 
 <ST_HTML>{ANY_CHAR} {
-	//wait until something relevent is found
+   return  BladeTokenId.T_HTML;
 }
 
-/* ============================================
-   Stay in this state until we find a whitespace.
-   After we find a whitespace we go the the prev state and try again from the next token.
-   ============================================ */
-<ST_HIGHLIGHTING_ERROR> {
-    {WHITESPACE} {
-        popState();
-        return BladeTokenId.WHITESPACE;
-    }
+<ST_PHP, ST_BLADE_ECHO, ST_BLADE_ECHO_ESCAPED, ST_BLADE_PHP> {
     . {
-        return BladeTokenId.T_HTML;
-    }
-}
-
-/* ============================================
-   This rule must be the last in the section!!
-   it should contain all the states.
-   ============================================ */
-<ST_HTML, ST_BLADE_ECHO, ST_PHP, ST_BLADE_ECHO_ESCAPED, ST_BLADE_PHP> {
-    . {
-        //if (yylength() > 1) {
-        //    yypushback(1);
-        //}
-        //pushState(ST_HIGHLIGHTING_ERROR);
+        //skipp
     }
 }

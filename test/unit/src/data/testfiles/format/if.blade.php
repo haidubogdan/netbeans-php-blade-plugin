@@ -3,7 +3,7 @@
 
     @elseif($x)
 
-        @else
+@else
 
     @endif
 @endsection  

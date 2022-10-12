@@ -172,6 +172,18 @@ public final class BladeLexerUtils {
         }
         return OffsetRange.NONE;
     }
+    
+    public static OffsetRange findBack(TokenSequence<? extends BladeTokenId> ts, BladeTokenId tokenDownId, String down) {
+        while (ts.movePrevious()) {
+            Token<? extends BladeTokenId> token = ts.token();
+            BladeTokenId id = token.id();
+            if (id == tokenDownId) {
+                return new OffsetRange(ts.offset(), ts.offset() + down.length());
+            }
+        }
+
+        return OffsetRange.NONE;
+    }
 
     public static OffsetRange findEndFwd(TokenSequence<? extends BladeTokenId> ts, BladeTokenId tokenDownId, String down) {
         while (ts.moveNext()) {
