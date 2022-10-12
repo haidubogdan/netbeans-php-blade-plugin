@@ -64,8 +64,7 @@ import org.netbeans.spi.lexer.LexerRestartInfo;
  */
 public enum BladeTokenId implements TokenId {
     //coloring values
-    T_BLADE_PHP_VAR(null, "blade_php_var"), //TODO rename with expression
-    T_BLADE_FOREACH_ARG(null, "blade_php_var"),
+    T_BLADE_PHP_EXPRESSION(null, "blade_php_var"), //TODO rename with expression
     T_BLADE_COMMENT( null, "blade_comment" ),
     T_BLADE_DIRECTIVE(null, "blade_directive"),
     T_BLADE_OTHER( null, "blade_other" ),
@@ -73,12 +72,14 @@ public enum BladeTokenId implements TokenId {
     T_BLADE_OPEN_ECHO_ESCAPED( null, "blade_echo" ),
     T_BLADE_CLOSE_ECHO( null, "blade_echo" ),
     T_BLADE_CLOSE_ECHO_ESCAPED( null, "blade_echo" ),
+    //DIRECTIVES
     T_BLADE_PHP_OPEN(null, "blade_directive"),
     T_BLADE_YIELD(null, "blade_directive"),
     T_BLADE_PARENT(null, "blade_directive"),
-    T_BLADE_EXTENDS(null, "blade_directive"),
     T_BLADE_SECTION(null, "blade_directive"),
+    T_BLADE_EXTENDS(null, "blade_directive"),
     T_BLADE_INCLUDE(null, "blade_directive"),
+    T_BLADE_EACH(null, "blade_directive"),
     T_BLADE_FOREACH(null, "blade_directive"),
     T_BLADE_IF(null, "blade_directive"),
     T_BLADE_ELSE(null, "blade_directive"),
@@ -88,11 +89,10 @@ public enum BladeTokenId implements TokenId {
     T_BLADE_ENDSECTION(null, "blade_directive"),
     T_BLADE_STOP(null, "blade_directive"),
     T_BLADE_FOR(null, "blade_directive"),
-    T_BLADE_COMMA(null, "html"),
-    T_DIRECTIVE_ARG(null, "blade_directive_arg"),
     T_BLADE_ENDFOR(null, "blade_directive"),
     T_BLADE_ENDIF(null, "blade_directive"),
-    BLADE_PHP_TOKEN(null, "token"),
+    T_BLADE_LPAREN(null, "token"),
+    T_BLADE_RPAREN(null, "token"),
     BLADE_PHP_STRING(null, "string"),
     T_PHP(null, "php"),
     T_PHP_ECHO(null, "php"),
@@ -102,13 +102,12 @@ public enum BladeTokenId implements TokenId {
     T_BLADE_PHP_COND(null, "php"),
     T_HTML( null, "html" ),
     T_XML( null, "html" ),
-    T_OPEN_PHP(null, "html"),
+    T_OPEN_PHP_SCRIPT(null, "html"),
     T_CLOSE_PHP(null, "html"),
     T_PHP_OPEN_ECHO(null, "html"),
-    T_BLADE_DIRECTIVE_PREFIX( null, "blade_directive" ),
     NEWLINE(null, "whitespace"),
     WHITESPACE(null, "whitespace"), 
-    T_BLADE_EACH(null, "blade_directive")
+    UNKNOWN_TOKEN(null, "other")
     ;
     
     private final String fixedText;
@@ -177,15 +176,9 @@ public enum BladeTokenId implements TokenId {
                             break;
                         case T_PHP_ECHO:
                             //no break    
-                        case T_BLADE_PHP_VAR:
+                        case T_BLADE_PHP_EXPRESSION:
                             //no break
                         case T_BLADE_PHP_ECHO:
-                            //no break
-                        case T_DIRECTIVE_ARG:
-                            //no break
-                        case T_BLADE_PHP_COND:
-                            //no break
-                        case T_BLADE_PHP_LOOP_PARAM:    
                             //affects inline tokens ? maybe use top lexer ?
                             lang = PHPTokenId.languageInPHP();
                             join_sections = true;

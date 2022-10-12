@@ -44,9 +44,6 @@ package org.netbeans.modules.php.blade.editor;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.logging.Level;
 import javax.swing.text.AbstractDocument;
 import javax.swing.text.BadLocationException;
 import org.netbeans.modules.php.blade.editor.lexer.BladeLexerUtils;
@@ -54,14 +51,12 @@ import org.netbeans.modules.php.blade.editor.lexer.BladeTokenId;
 import org.netbeans.api.lexer.Token;
 import org.netbeans.api.lexer.TokenSequence;
 import org.netbeans.modules.csl.api.OffsetRange;
-import org.netbeans.modules.php.blade.editor.lexer.BladeLexer;
 import org.netbeans.spi.editor.bracesmatching.BracesMatcher;
 import org.netbeans.spi.editor.bracesmatching.BracesMatcherFactory;
 import org.netbeans.spi.editor.bracesmatching.MatcherContext;
 
 /**
  * highlight block tags directives
- * TODO do bi-directional highlighting
  * TODO maybe use a block scope impl
  * 
  * @author Haidu Bogdan
@@ -75,7 +70,7 @@ public class BladeBracesMatcher implements BracesMatcher {
             BladeTokenId.T_BLADE_IF,
             BladeTokenId.T_BLADE_FOR,
             BladeTokenId.T_BLADE_FOREACH,
-            BladeTokenId.T_BLADE_SECTION
+            BladeTokenId.T_BLADE_SECTION //@section with second parameter can be standalone also
     );
     
     private static Collection<BladeTokenId> TOKEN_END_TAGS = Arrays.asList(
@@ -84,6 +79,16 @@ public class BladeBracesMatcher implements BracesMatcher {
             BladeTokenId.T_BLADE_ENDIF,
             BladeTokenId.T_BLADE_ENDSECTION,
             BladeTokenId.T_BLADE_ENDPHP
+    );
+    
+    private static Collection<BladeTokenId> TOKEN_OPEN_TAGS = Arrays.asList(
+        BladeTokenId.T_BLADE_OPEN_ECHO,
+        BladeTokenId.T_BLADE_OPEN_ECHO_ESCAPED
+    );
+    
+    private static Collection<BladeTokenId> TOKEN_CLOSE_TAGS = Arrays.asList(
+        BladeTokenId.T_BLADE_CLOSE_ECHO,
+        BladeTokenId.T_BLADE_CLOSE_ECHO_ESCAPED
     );
     
     private BladeBracesMatcher(MatcherContext context) {
@@ -115,9 +120,7 @@ public class BladeBracesMatcher implements BracesMatcher {
                 int toffs = ts.offset();
                 String tText = t.text().toString();
                 BladeTokenId id = t.id();
-                if (id == BladeTokenId.T_BLADE_OPEN_ECHO) {
-                    return new int[]{toffs, toffs + tText.length()};
-                } else if (id == BladeTokenId.T_BLADE_OPEN_ECHO_ESCAPED) {
+                if (TOKEN_OPEN_TAGS.contains(id) || TOKEN_CLOSE_TAGS.contains(id)) {
                     return new int[]{toffs, toffs + tText.length()};
                 } else if (id == BladeTokenId.T_BLADE_COMMENT && tText.equals(BladeSyntax.OPEN_COMMENT)) {
                     return new int[]{toffs, toffs + tText.length()};
@@ -127,7 +130,8 @@ public class BladeBracesMatcher implements BracesMatcher {
                     return new int[]{toffs, toffs + tText.trim().length()};
                 } else if (BladeSyntax.CONDITIONAL_DIRECTIVES.contains(tText.trim())) {
                     return new int[]{toffs, toffs + tText.trim().length()};
-                } else if (id == BladeTokenId.BLADE_PHP_TOKEN && tText.trim().equals("(")){
+                } else if (id == BladeTokenId.T_BLADE_LPAREN){
+                    //we will try to get the directive tag
                     ts.move(searchOffset - 1);
                     if (!ts.movePrevious()) {
                         continue;
@@ -180,12 +184,18 @@ public class BladeBracesMatcher implements BracesMatcher {
                 String tText = t.text().toString();
                 BladeTokenId id = t.id();
                 if (t.id() == BladeTokenId.T_BLADE_OPEN_ECHO) {
-                    r = BladeLexerUtils.findFwd(ts, BladeTokenId.T_BLADE_CLOSE_ECHO, "}}");
+                    r = BladeLexerUtils.findFwd(ts, BladeTokenId.T_BLADE_CLOSE_ECHO, BladeSyntax.CLOSE_ECHO);
+                    return new int[]{r.getStart(), r.getEnd()};
+                } else if (t.id() == BladeTokenId.T_BLADE_CLOSE_ECHO) {
+                    r = BladeLexerUtils.findBack(ts, BladeTokenId.T_BLADE_OPEN_ECHO, BladeSyntax.OPEN_ECHO);
                     return new int[]{r.getStart(), r.getEnd()};
                 } else if (t.id() == BladeTokenId.T_BLADE_OPEN_ECHO_ESCAPED) {
-                    r = BladeLexerUtils.findFwd(ts, BladeTokenId.T_BLADE_CLOSE_ECHO_ESCAPED, "!!}");
+                    r = BladeLexerUtils.findFwd(ts, BladeTokenId.T_BLADE_CLOSE_ECHO_ESCAPED, BladeSyntax.CLOSE_ECHO_ESCAPED);
                     return new int[]{r.getStart(), r.getEnd()};
-                } else if (t.id() == BladeTokenId.T_BLADE_COMMENT && tText.equals(BladeSyntax.OPEN_COMMENT)) {
+                } else if (t.id() == BladeTokenId.T_BLADE_CLOSE_ECHO_ESCAPED) {
+                    r = BladeLexerUtils.findBack(ts, BladeTokenId.T_BLADE_OPEN_ECHO_ESCAPED, BladeSyntax.OPEN_ECHO_ESCAPED);
+                    return new int[]{r.getStart(), r.getEnd()};
+                }  else if (t.id() == BladeTokenId.T_BLADE_COMMENT && tText.equals(BladeSyntax.OPEN_COMMENT)) {
                     //we just need the end token occurence
                     r = BladeLexerUtils.findEndFwd(ts, BladeTokenId.T_BLADE_COMMENT, BladeSyntax.CLOSE_COMMENT);
                     return new int[]{r.getStart(), r.getEnd()};

@@ -52,6 +52,7 @@ import org.netbeans.api.lexer.Token;
 import org.netbeans.api.lexer.TokenHierarchy;
 import org.netbeans.api.lexer.TokenSequence;
 import org.netbeans.editor.BaseDocument;
+import org.netbeans.modules.php.blade.editor.BladeSyntax;
 
 import org.netbeans.spi.editor.typinghooks.TypedTextInterceptor;
 import org.openide.util.Exceptions;
@@ -142,14 +143,14 @@ public class BladeTypedTextInterceptor implements TypedTextInterceptor {
 
             try {
                 String s = doc.getText(caretOffset - 2, 2);
-                String expectedBracket = "{{";
+                String expectedBracket = BladeSyntax.OPEN_ECHO;
                 
                 if ("!!".equals(s) && caretOffset > 3) {
                     s = doc.getText(caretOffset - 3, 3);
-                    expectedBracket = "{!!";
+                    expectedBracket = BladeSyntax.OPEN_ECHO_ESCAPED;
                 } else if ("--".equals(s) && caretOffset > 4) {
                     s = doc.getText(caretOffset - 4, 4);
-                    expectedBracket = "{{--";
+                    expectedBracket = BladeSyntax.OPEN_COMMENT;
                 }
                 token = ts.token();
                 
@@ -285,11 +286,11 @@ public class BladeTypedTextInterceptor implements TypedTextInterceptor {
     private static String matching(String token) {
         switch (token) {
             case "{{":
-                return "}}";
+                return BladeSyntax.CLOSE_ECHO;
             case "{!!":
-                return "!!}";
+                return BladeSyntax.CLOSE_ECHO_ESCAPED;
             case "{{--":
-                return "--}}";
+                return BladeSyntax.CLOSE_COMMENT;
             default:
                 return token;
         }

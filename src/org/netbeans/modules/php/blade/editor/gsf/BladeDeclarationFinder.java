@@ -104,7 +104,7 @@ public class BladeDeclarationFinder implements DeclarationFinder {
                     return new OffsetRange(tsPhp.offset(), tsPhp.offset() + tokenPhp.length());
                 }
             }
-        } else if (id.equals(BladeTokenId.T_BLADE_PHP_VAR)){
+        } else if (id.equals(BladeTokenId.T_BLADE_PHP_EXPRESSION)){
             TokenSequence<? extends PHPTokenId> tsPhp = BladeLexerUtils.getPhpTokenSequence(th, lexOffset);
             Token<?> tokenPhp = tsPhp.token();
             if (tokenPhp != null) {
@@ -178,7 +178,7 @@ public class BladeDeclarationFinder implements DeclarationFinder {
                 if (BladeTokenId.BLADE_PHP_STRING.equals(tokenId)) {
                     pathValue = token.text().toString().trim();
                     pathValue = pathValue.substring(1, pathValue.length() - 1);
-                } else if (BladeTokenId.T_BLADE_PHP_VAR.equals(tokenId)) {
+                } else if (BladeTokenId.T_BLADE_PHP_EXPRESSION.equals(tokenId)) {
                     TokenHierarchy<Document> th = TokenHierarchy.get(doc);
                     TokenSequence<? extends PHPTokenId> tsPhp = BladeLexerUtils.getPhpTokenSequence(th, carretOffset);
                     Token<?> tokenPhp = tsPhp.token();

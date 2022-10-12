@@ -3,5 +3,5 @@ AutoUpdate-Show-In-Client: true
 OpenIDE-Module: php.blade
 OpenIDE-Module-Layer: org/netbeans/modules/php/blade/resources/layer.xml
 OpenIDE-Module-Localizing-Bundle: org/netbeans/modules/php/blade/resources/Bundle.properties
-OpenIDE-Module-Specification-Version: 1.0.0.24
+OpenIDE-Module-Specification-Version: 1.0.0.27
 
