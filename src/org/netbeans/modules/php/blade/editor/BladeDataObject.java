@@ -2,6 +2,11 @@ package org.netbeans.modules.php.blade.editor;
 
 import java.io.IOException;
 import org.netbeans.api.annotations.common.StaticResource;
+import static org.netbeans.modules.php.blade.editor.BladeDataObject.ACTIONS;
+import static org.netbeans.modules.php.blade.editor.BladeLanguage.BLADE_MIME_TYPE;
+import org.openide.awt.ActionID;
+import org.openide.awt.ActionReference;
+import org.openide.awt.ActionReferences;
 import org.openide.filesystems.FileObject;
 import org.openide.filesystems.MIMEResolver;
 import org.openide.loaders.DataNode;
@@ -24,10 +29,13 @@ import org.openide.util.UserCancelException;
         displayName = "#LBL_Blade_LOADER",
         position = 1
 )
+
 @NbBundle.Messages({
     "LBL_Blade_LOADER=Blade template files"
 })
 public class BladeDataObject extends MultiDataObject implements CookieSet.Factory {
+    
+    
     @StaticResource
     private static final String ICON_LOCATION = "org/netbeans/modules/php/blade/resources/icon.png"; //NOI18N
 
@@ -35,21 +43,8 @@ public class BladeDataObject extends MultiDataObject implements CookieSet.Factor
 
     public BladeDataObject(FileObject pf, UniFileLoader loader) throws DataObjectExistsException {
         super(pf, loader);
-        CookieSet set = getCookieSet();
-        set.add(BladeEditorSupport.class, this);
-        set.assign(SaveAsCapable.class, new SaveAsCapable() {
-            //TO DO STUDY IF RENAMING can be done here
-            @Override
-            public void saveAs(FileObject folder, String fileName) throws IOException {
-                BladeEditorSupport es = getLookup().lookup(BladeEditorSupport.class);
-                try {
-                    //es.updateEncoding();
-                    es.saveAs(folder, fileName);
-                } catch (UserCancelException e) {
-                    //ignore, just not save anything
-                }
-            }
-        });
+        registerEditor(BLADE_MIME_TYPE, true);
+        //getCookieSet().add(BladeEditorSupport.class, this);
     }
 
     /*package*/ CookieSet getCookieSet0() {

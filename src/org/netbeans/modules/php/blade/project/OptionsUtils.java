@@ -39,70 +39,18 @@
  */
 package org.netbeans.modules.php.blade.project;
 
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.prefs.PreferenceChangeEvent;
-import java.util.prefs.PreferenceChangeListener;
-import java.util.prefs.Preferences;
-import org.netbeans.api.editor.mimelookup.MimeLookup;
-import org.netbeans.modules.php.blade.editor.BladeLanguage;
-import org.openide.util.WeakListeners;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.List;
 
-/**
- * TODO delete
- * Based on PHP. Options for Auto Completion.
- */
 public final class OptionsUtils {
 
-    private static final AtomicBoolean INITED = new AtomicBoolean(false);
-
-    public static final String AUTO_COMPLETION_ECHO_DELIMITERS = "bladeAutoCompletionEchoDelimiters"; // NOI18N
-    public static final String AUTO_COMPLETION_ESCAPED_ECHO_DELIMITERS = "bladeAutoCompletionEscapedEchoDelimiters"; // NOI18N
-
-    private static Boolean autoCompletionEchoDelimiter = null;
-    private static Boolean autoCompletionEscapedEchoDelimiter = null;
-
-    // default values
-    public static final boolean AUTO_COMPLETION_ECHO_DELIMITER_DEFAULT = true;
-    public static final boolean AUTO_COMPLETION_ESCAPED_ECHO_DELIMITER_DEFAULT = true;
-
-    private static Preferences PREFERENCES;
-
-    private static final PreferenceChangeListener PREFERENCES_TRACKER = new PreferenceChangeListener() {
-        @Override
-        public void preferenceChange(PreferenceChangeEvent evt) {
-            String settingName = evt == null ? null : evt.getKey();
-
-            if (settingName == null || AUTO_COMPLETION_ECHO_DELIMITERS.equals(settingName)) {
-                autoCompletionEchoDelimiter = PREFERENCES.getBoolean(AUTO_COMPLETION_ECHO_DELIMITERS,
-                        AUTO_COMPLETION_ECHO_DELIMITER_DEFAULT);
-            }
-            if (settingName == null || AUTO_COMPLETION_ESCAPED_ECHO_DELIMITERS.equals(settingName)) {
-                autoCompletionEscapedEchoDelimiter = PREFERENCES.getBoolean(AUTO_COMPLETION_ESCAPED_ECHO_DELIMITERS,
-                        AUTO_COMPLETION_ESCAPED_ECHO_DELIMITER_DEFAULT);
-            }
+    public static String implodeToString(Enumeration<String> list) {
+        List<String> result = new ArrayList<>();
+        while (list.hasMoreElements()) {
+            result.add(list.nextElement());
         }
-    };
 
-    private OptionsUtils() {
-    }
-
-    public static boolean autoCompletionEchoDelimiter() {
-        lazyInit();
-        assert autoCompletionEchoDelimiter != null;
-        return autoCompletionEchoDelimiter;
-    }
-
-    public static boolean autoCompletionEscapedEchoDelimiter() {
-        lazyInit();
-        assert autoCompletionEscapedEchoDelimiter != null;
-        return autoCompletionEscapedEchoDelimiter;
-    }
-
-    private static void lazyInit() {
-        if (INITED.compareAndSet(false, true)) {
-            PREFERENCES = MimeLookup.getLookup(BladeLanguage.BLADE_MIME_TYPE).lookup(Preferences.class);
-            PREFERENCES.addPreferenceChangeListener(WeakListeners.create(PreferenceChangeListener.class, PREFERENCES_TRACKER, PREFERENCES));
-            PREFERENCES_TRACKER.preferenceChange(null);
-        }
+        return String.join("|", result);
     }
 }

@@ -48,6 +48,7 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.event.ChangeListener;
+import org.netbeans.api.lexer.Language;
 import org.netbeans.modules.csl.api.OffsetRange;
 import org.netbeans.modules.csl.spi.GsfUtilities;
 import org.netbeans.modules.parsing.api.Snapshot;
@@ -64,9 +65,10 @@ import org.openide.loaders.DataObject;
 import org.openide.util.Exceptions;
 import org.netbeans.modules.php.blade.editor.BladeDataLoader;
 import org.netbeans.modules.php.blade.editor.BladeDataObject;
+import static org.netbeans.modules.php.blade.editor.BladeLanguage.BLADE_MIME_TYPE;
 import org.openide.loaders.DataLoader;
 import org.openide.loaders.DataObjectNotFoundException;
-
+import org.openide.text.DataEditorSupport;
 /**
  *
  * @author Haidu Bogdan
@@ -80,34 +82,7 @@ public class BladeParser extends Parser {
     @Override
     public void parse(Snapshot snapshot, Task task, SourceModificationEvent event) throws ParseException {
         this.snapshot = snapshot;
-
-        FileObject currentFile = snapshot.getSource().getFileObject();
-        if (task.getClass().getName().startsWith("org.netbeans.modules.parsing.impl.indexing.RepositoryUpdater")) {
-            boolean isCached = RepositoryUpdater.getDefault().isCacheFile(currentFile);
-            if (!isCached) {
-                final DataObject od;
-                try {
-                    od = DataObject.find(currentFile);
-                    if (!(od instanceof BladeDataObject)){
-                        boolean isValid = od.isValid();
-                        DataLoader gdl = od.getLoader();
-                        
-                        try {
-                            //reloading the file
-                            //need to get the blade data loader from another file
-                            if (!(gdl instanceof BladeDataLoader)) {
-                                BladeDataLoader bl = new BladeDataLoader();
-                                bl.markFile(currentFile);
-                            }
-                        } catch (Exception ex) {
-                            //Exceptions.printStackTrace(ex);
-                        }
-                    }
-                } catch (DataObjectNotFoundException ex) {
-                    Exceptions.printStackTrace(ex);
-                }
-            }
-        }
+        checkMimeReload(task);
         try {
             int caretOffset = GsfUtilities.getLastKnownCaretOffset(snapshot, event);
             Context context = new Context(snapshot, caretOffset);
@@ -159,6 +134,37 @@ public class BladeParser extends Parser {
         }
 
     }
+    
+    private void checkMimeReload(Task task) {
+
+        FileObject currentFile = snapshot.getSource().getFileObject();
+        String fileName = currentFile.getNameExt();
+        if (!fileName.endsWith(".blade.php")){
+            //no need to refresh file mime type
+            return;
+        }
+        if (!task.getClass().getName().startsWith("org.netbeans.modules.parsing.impl.indexing.RepositoryUpdater")) {
+            return;
+        }
+        if (RepositoryUpdater.getDefault().isCacheFile(currentFile)) {
+            return;
+        }
+        final DataObject od;
+        try {
+            od = DataObject.find(currentFile);
+            Language lang = od.getLookup().lookup(Language.class);
+            if(lang == null || lang.mimeType().equals(BLADE_MIME_TYPE)){
+                return;
+            }
+            DataEditorSupport ed = od.getLookup().lookup(DataEditorSupport.class);
+            //TODO ADD A POPUP TO EXPLAIN THE PROCESS
+            ed.setMIMEType(BLADE_MIME_TYPE);
+            ed.close();
+            ed.open();
+        } catch (DataObjectNotFoundException ex) {
+            Exceptions.printStackTrace(ex);
+        }
+    }
 
     @Override
     public Result getResult(Task task) throws ParseException {
@@ -197,7 +203,7 @@ public class BladeParser extends Parser {
 
         @Override
         public String toString() {
-            return "PHPParser.Context(" + snapshot.getSource().getFileObject() + ")"; // NOI18N
+            return "Bladearser.Context(" + snapshot.getSource().getFileObject() + ")"; // NOI18N
         }
 
         public Snapshot getSnapshot() {

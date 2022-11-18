@@ -5,6 +5,53 @@
 <project name="php.blade" default="netbeans" basedir="." xmlns:artifact="antlib:org.apache.maven.artifact.ant">
     <description>Builds, tests, and runs the project php.blade.</description>
     <import file="nbproject/build-impl.xml"/>
+    <!-- JFlex handling (download and taskdef) -->
+    <target name="prepare-jflex" depends="build-init">
+        <echo>
+            Checking the Jflex file
+        </echo>
+        <taskdef name="jflex"
+                 classname="JFlex.anttask.JFlexTask"
+                 classpath="${basedir}/external/JFlex.jar" onerror="fail"/>
+    </target>
+    
+    <!-- BLADE section - generating BLADE lexer -->
+    <target name="netbeans-extra" depends="prepare-jflex">
+        <jflex file="tools/BladeColoringLexer.flex" skel="tools/blade_coloring.skeleton" destdir="src" nobak="true"/>
+        <!--patching the lexer customisation-->
+        <replace file="src/org/netbeans/modules/php/blade/editor/lexer/BladeColoringLexer.java">
+            <replacetoken>      yychar+= zzMarkedPosL-zzStartRead;&#xA;&#xA;</replacetoken>
+            <replacevalue></replacevalue>
+        </replace>
+        <replace file="src/org/netbeans/modules/php/blade/editor/lexer/BladeColoringLexer.java">
+            <replacetoken><![CDATA[
+          if (zzCurrentPosL < zzEndReadL)
+            zzInput = zzBufferL[zzCurrentPosL++];
+          else if (zzAtEOF) {
+            zzInput = YYEOF;
+            break zzForAction;
+          }
+          else {
+            // store back cached positions
+            zzCurrentPos  = zzCurrentPosL;
+            zzMarkedPos   = zzMarkedPosL;
+            boolean eof = zzRefill();
+            // get translated positions and possibly new buffer
+            zzCurrentPosL  = zzCurrentPos;
+            zzMarkedPosL   = zzMarkedPos;
+            zzBufferL      = zzBuffer;
+            zzEndReadL     = zzEndRead;
+            if (eof) {
+              zzInput = YYEOF;
+              break zzForAction;
+            }
+            else {
+              zzInput = zzBufferL[zzCurrentPosL++];
+            }
+          }]]></replacetoken>
+            <replacevalue></replacevalue>
+        </replace>
+    </target>
     <path id="maven-ant-tasks.classpath" path="lib/maven-ant-tasks-2.1.3.jar" />
     <typedef resource="org/apache/maven/artifact/ant/antlib.xml" uri="antlib:org.apache.maven.artifact.ant" classpathref="maven-ant-tasks.classpath" />
 

@@ -1,3 +1,1 @@
-@test(["{$x:fff}"])
-
-@test($x::ss)
+<div>xxx@test.com</div>

@@ -58,6 +58,7 @@ import org.netbeans.modules.csl.spi.CommentHandler;
 import org.netbeans.modules.csl.spi.DefaultLanguageConfig;
 import org.netbeans.modules.csl.spi.LanguageRegistration;
 import org.netbeans.modules.parsing.spi.Parser;
+import static org.netbeans.modules.php.blade.editor.BladeLanguage.ACTIONS;
 import org.netbeans.modules.php.blade.editor.gsf.BladeCommentHandler;
 import org.netbeans.modules.php.blade.editor.gsf.BladeDeclarationFinder;
 import org.netbeans.modules.php.blade.editor.gsf.BladeOcurrencesFinder;
@@ -65,7 +66,12 @@ import org.netbeans.modules.php.blade.editor.gsf.BladeStructureScanner;
 import org.netbeans.modules.php.blade.editor.gsf.BladeTypeSearcher;
 import org.netbeans.modules.php.blade.editor.lexer.BladeTokenId;
 import org.netbeans.modules.php.blade.editor.verification.BladeHintsProvider;
+import org.openide.awt.ActionID;
+import org.openide.awt.ActionReference;
+import org.openide.awt.ActionReferences;
+import org.openide.filesystems.MIMEResolver;
 import org.openide.util.Lookup;
+import org.openide.util.NbBundle;
 import org.openide.util.NbBundle.Messages;
 import org.openide.windows.TopComponent;
 
@@ -73,7 +79,29 @@ import org.openide.windows.TopComponent;
  *
  * @author Haidu Bogdan
  */
+@MIMEResolver.Registration(
+        resource = "../resources/mime-resolver.xml",
+        displayName = "#LBL_Blade_LOADER",
+        position = 1
+)
+
+@NbBundle.Messages({
+    "LBL_Blade_LOADER=Blade template files"
+})
 @LanguageRegistration(mimeType = "text/x-blade", useMultiview = true)
+@ActionReferences({
+    @ActionReference(id = @ActionID(category = "System", id = "org.openide.actions.OpenAction"), path = ACTIONS, position = 100),
+    @ActionReference(id = @ActionID(category = "Edit", id = "org.openide.actions.CutAction"), path = ACTIONS, position = 300, separatorBefore = 200),
+    @ActionReference(id = @ActionID(category = "Edit", id = "org.openide.actions.CopyAction"), path = ACTIONS, position = 400),
+    @ActionReference(id = @ActionID(category = "Edit", id = "org.openide.actions.PasteAction"), path = ACTIONS, position = 500, separatorAfter = 600),
+    @ActionReference(id = @ActionID(category = "System", id = "org.openide.actions.NewAction"), path = ACTIONS, position = 700),
+    @ActionReference(id = @ActionID(category = "Edit", id = "org.openide.actions.DeleteAction"), path = ACTIONS, position = 800),
+    @ActionReference(id = @ActionID(category = "System", id = "org.openide.actions.RenameAction"), path = ACTIONS, position = 900, separatorAfter = 1000),
+    @ActionReference(id = @ActionID(category = "System", id = "org.openide.actions.SaveAsTemplateAction"), path = ACTIONS, position = 1100, separatorAfter = 1200),
+    @ActionReference(id = @ActionID(category = "System", id = "org.openide.actions.FileSystemAction"), path = ACTIONS, position = 1300, separatorAfter = 1400),
+    @ActionReference(id = @ActionID(category = "System", id = "org.openide.actions.ToolsAction"), path = ACTIONS, position = 1500),
+    @ActionReference(id = @ActionID(category = "System", id = "org.openide.actions.PropertiesAction"), path = ACTIONS, position = 1600)
+})
 public class BladeLanguage extends DefaultLanguageConfig {
     @Messages("CTL_SourceTabCaption=&Source")
     @MultiViewElement.Registration(
@@ -92,6 +120,7 @@ public class BladeLanguage extends DefaultLanguageConfig {
     }
     
     public static volatile Boolean hasQuote = false;
+    public static final String ACTIONS = "Loaders/" + BladeLanguage.BLADE_MIME_TYPE + "/Actions";
     public static final String BLADE_MIME_TYPE = "text/x-blade";
 
     @Override

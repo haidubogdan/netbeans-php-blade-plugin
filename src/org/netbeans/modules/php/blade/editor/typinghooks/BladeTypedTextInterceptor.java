@@ -44,7 +44,6 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 import org.netbeans.modules.php.blade.editor.BladeLanguage;
 import org.netbeans.modules.php.blade.editor.lexer.BladeTokenId;
-import org.netbeans.modules.php.blade.project.OptionsUtils;
 import org.netbeans.api.editor.mimelookup.MimePath;
 import org.netbeans.api.editor.mimelookup.MimeRegistration;
 import org.netbeans.api.editor.mimelookup.MimeRegistrations;
@@ -297,8 +296,7 @@ public class BladeTypedTextInterceptor implements TypedTextInterceptor {
     }
 
     private static boolean doNotAutoCompleteQuotesAndBrackets(char c) {
-        return (isQuote(c) && !OptionsUtils.autoCompletionEchoDelimiter())
-                || (isBracket(c) && !TypingHooksUtils.isInsertMatchingEnabled());
+        return isBracket(c) && !TypingHooksUtils.isInsertMatchingEnabled();
     }
     
     private static boolean isClosingBracketMissing(char close) throws BadLocationException {

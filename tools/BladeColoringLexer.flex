@@ -200,6 +200,7 @@ COMMENT_END="--}}"
 
 LABEL=([[:letter:]_]|[\u007f-\u00ff])([[:letter:][:digit:]_]|[\u007f-\u00ff])*
 ANY_CHAR=[^]
+EMAIL= "@" {LABEL}? "." 
 DIRECTIVE_PREFIX = "@"
 DIRECTIVE_NAME = {DIRECTIVE_PREFIX}{LABEL}
 OPEN_PHP="<?php"
@@ -428,6 +429,11 @@ OPEN_PHP_ECHO = "<?="
     return BladeTokenId.T_HTML;
 }
 
+<ST_HTML>{EMAIL} {
+    //email format
+    return BladeTokenId.T_HTML;
+}
+
 <ST_HTML>{DIRECTIVE_NAME} {
     String ttext = yytext();
     pushState(ST_LOOKING_FOR_PARAMETER_EXPRESSION);
@@ -534,7 +540,11 @@ OPEN_PHP_ECHO = "<?="
     return BladeTokenId.WHITESPACE;
 }
 
-<ST_HTML>(([^<@({{|}}|/*|\n)+]|"<"[^?%<])+)|"<" {
+<ST_HTML>"/>" {
+   return  BladeTokenId.T_HTML; 
+}
+
+<ST_HTML>(([^<@({{|}}|/*|\n)+]|"<"[^?%<({{|}})])+)|"<" {
    return  BladeTokenId.T_HTML; 
 }
 

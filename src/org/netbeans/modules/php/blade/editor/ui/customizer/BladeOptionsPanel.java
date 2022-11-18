@@ -42,26 +42,18 @@
 package org.netbeans.modules.php.blade.editor.ui.customizer;
 
 import java.awt.EventQueue;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.util.Enumeration;
 import javax.swing.DefaultListModel;
 import javax.swing.JComboBox;
-import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
 import org.netbeans.api.project.Project;
 import org.netbeans.modules.parsing.api.indexing.IndexingManager;
 import org.netbeans.modules.php.blade.api.BladeVersion;
-import org.netbeans.modules.php.blade.editor.index.BladeIndexer;
 import org.netbeans.modules.php.blade.project.BladeProjectProperties;
-import org.netbeans.modules.php.blade.ui.UiOptionsUtils.BladeVersionComboBoxModel;
+import org.netbeans.modules.php.blade.editor.ui.model.BladeVersionComboBoxModel;
 import org.netbeans.spi.options.OptionsPanelController;
 import org.openide.filesystems.FileChooserBuilder;
 import org.openide.filesystems.FileObject;

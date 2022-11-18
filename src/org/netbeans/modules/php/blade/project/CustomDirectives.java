@@ -24,19 +24,20 @@ import org.openide.filesystems.FileUtil;
  * @author bhaidu
  */
 public final class CustomDirectives {
+
     private final Project project;
-     private static final Map<Project, CustomDirectives> INSTANCES = new WeakHashMap<>();
+    private static final Map<Project, CustomDirectives> INSTANCES = new WeakHashMap<>();
     private Map<FileObject, DirectiveNames> customDirectives = new LinkedHashMap<FileObject, DirectiveNames>();
     private final FileChangeListener fileChangeListener = new FileChangeListenerImpl();
 
     public static CustomDirectives getInstance(Project project) {
         int x = 3;
-        if(project == null) {
+        if (project == null) {
             throw new NullPointerException("No project found");
         }
         synchronized (INSTANCES) {
             CustomDirectives customDirective = INSTANCES.get(project);
-            if(customDirective == null) {
+            if (customDirective == null) {
                 customDirective = new CustomDirectives(project);
                 INSTANCES.put(project, customDirective);
             }
@@ -49,7 +50,7 @@ public final class CustomDirectives {
         INSTANCES.put(project, customDirective);
         return customDirective;
     }
-    
+
     private CustomDirectives(Project project) {
         this.project = project;
         extractCustomDirectives();
@@ -62,42 +63,37 @@ public final class CustomDirectives {
             return;
         }
         for (String path : compilerPathList) {
-            if (path.equals("")){
+            if (path.equals("")) {
                 continue;
             }
             File file = new File(path);
-            if (!file.exists()){
+            if (!file.exists()) {
                 //remove
                 continue;
             }
             FileUtil.addRecursiveListener(fileChangeListener, file);
             FileObject fileObj = FileUtil.toFileObject(file);
-            ParsingUtils parsingUtils = new ParsingUtils();
-            parsingUtils.parseFileObject(fileObj);
-            FunctionInvocationVisitor functionInvocationVisitor = new FunctionInvocationVisitor();
-            if (parsingUtils.getParserResult() != null && parsingUtils.getParserResult().getProgram() != null) {
-                parsingUtils.getParserResult().getProgram().accept(functionInvocationVisitor);
-                List<String> directiveNames = functionInvocationVisitor.getDirectiveNames();
-                if (!directiveNames.isEmpty()) {
-                    customDirectives.put(fileObj, new DirectiveNames(directiveNames));
-                }
-            }
+            addDirectiveNamesFromFile(fileObj);
         }
 
     }
-    
-    private void rescanFile(FileObject file){
+
+    private void rescanFile(FileObject file) {
         DirectiveNames entry = customDirectives.get(file);
-        if (entry != null){
-            ParsingUtils parsingUtils = new ParsingUtils();
-            parsingUtils.parseFileObject(file);
-            FunctionInvocationVisitor functionInvocationVisitor = new FunctionInvocationVisitor();
-            if (parsingUtils.getParserResult() != null && parsingUtils.getParserResult().getProgram() != null) {
-                parsingUtils.getParserResult().getProgram().accept(functionInvocationVisitor);
-                List<String> directiveNames = functionInvocationVisitor.getDirectiveNames();
-                if (!directiveNames.isEmpty()) {
-                    customDirectives.put(file, new DirectiveNames(directiveNames));
-                }
+        if (entry != null) {
+            addDirectiveNamesFromFile(file);
+        }
+    }
+
+    private void addDirectiveNamesFromFile(FileObject file) {
+        ParsingUtils parsingUtils = new ParsingUtils();
+        parsingUtils.parseFileObject(file);
+        FunctionInvocationVisitor functionInvocationVisitor = new FunctionInvocationVisitor();
+        if (parsingUtils.getParserResult() != null && parsingUtils.getParserResult().getProgram() != null) {
+            parsingUtils.getParserResult().getProgram().accept(functionInvocationVisitor);
+            List<String> directiveNames = functionInvocationVisitor.getDirectiveNames();
+            if (!directiveNames.isEmpty()) {
+                customDirectives.put(file, new DirectiveNames(directiveNames));
             }
         }
     }
@@ -119,6 +115,11 @@ public final class CustomDirectives {
         }
     }
 
+    /**
+     * we are scanning the php ast nodes to search for the use of directive
+     * method the first parameter of the called method will be the custom
+     * directive name
+     */
     private class FunctionInvocationVisitor extends org.netbeans.modules.php.editor.parser.astnodes.visitors.DefaultVisitor {
 
         private final List<String> directiveNames;
@@ -158,7 +159,7 @@ public final class CustomDirectives {
 
         @Override
         public void fileFolderCreated(FileEvent fe) {
-            
+
         }
 
         @Override
@@ -168,7 +169,7 @@ public final class CustomDirectives {
 
         @Override
         public void fileDataCreated(FileEvent fe) {
-            int test = 3;
+
         }
 
         private void processFile(FileObject file) {

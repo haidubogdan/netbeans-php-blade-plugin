@@ -80,20 +80,6 @@ public class BladeSyntax {
             "@unless"
     );
 
-    public static Collection<String> DIRECTIVES_WITH_OR_WITHOUT_EXPRESSION = Arrays.asList(
-            "@auth",
-            "@guest"
-    );
-
-    public static Collection<String> DIRECTIVES_WITH_PARAMETERS = Arrays.asList(
-            "@verbatim",
-            "@else"
-    );
-    
-    public static Collection<String> DIRECTIVES_WITHOUT_PARAMETERS = Arrays.asList(
-            
-    );
-
     public final static Collection<String> CONDITIONAL_DIRECTIVES = Arrays.asList(
             "@hasSection", "@sectionMissing"
     );

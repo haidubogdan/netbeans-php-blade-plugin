@@ -47,8 +47,6 @@ import javax.swing.DefaultListModel;
 import org.netbeans.api.project.Project;
 import org.netbeans.api.project.ProjectUtils;
 import org.netbeans.modules.php.blade.api.BladeVersion;
-import org.netbeans.modules.php.blade.ui.UiOptionsUtils;
-//import org.netbeans.modules.php.blade.editor.actions.ToggleBlockCommentAction;
 import org.openide.util.NbPreferences;
 
 /**
@@ -103,7 +101,7 @@ public final class BladeProjectProperties {
     }
     
     public void setCompilerPathList(DefaultListModel<String> list){
-        String includePath = UiOptionsUtils.encodeToStrings(list.elements());
+        String includePath = OptionsUtils.implodeToString(list.elements());
         getPreferences().put(COMPILER_PATH_LIST, includePath);
     }
     
@@ -112,7 +110,7 @@ public final class BladeProjectProperties {
     }
     
     public void setViewsPathList(DefaultListModel<String> list){
-        String includePath = UiOptionsUtils.encodeToStrings(list.elements());
+        String includePath = OptionsUtils.implodeToString(list.elements());
         getPreferences().put(VIEW_PATH_LIST, includePath);
     }
     
