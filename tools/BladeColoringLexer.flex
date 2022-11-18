@@ -440,9 +440,15 @@ OPEN_PHP_ECHO = "<?="
     return BladeTokenId.T_BLADE_DIRECTIVE;
 }
 
+
 <ST_HTML> {COMMENT_START} {
     pushState(ST_COMMENT);
     return BladeTokenId.T_BLADE_COMMENT;
+}
+
+<ST_HTML> "{{-" {
+    //incomplete comment
+    return BladeTokenId.T_HTML;
 }
 
 <ST_COMMENT> {COMMENT_END} {
@@ -456,11 +462,10 @@ OPEN_PHP_ECHO = "<?="
 }
 
 <ST_COMMENT><<EOF>> {
-//??
-  if (input.readLength() > 0) {
-    input.backup(1);  // backup eof
+  popState();
+  if (yylength() > 0){
+    return BladeTokenId.T_HTML;
   }
-  return BladeTokenId.T_BLADE_COMMENT;
 }
 
 <ST_HTML> {OPEN_BLADE_ECHO} {

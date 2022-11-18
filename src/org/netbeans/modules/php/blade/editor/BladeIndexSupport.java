@@ -22,12 +22,12 @@ import org.openide.util.NbBundle;
  * @author bhaidu
  */
 @NbBundle.Messages("BladeResolver=Blade Files")
-@MIMEResolver.ExtensionRegistration(
-    mimeType=BladeLanguage.BLADE_MIME_TYPE,
-    position=300,
-    displayName="#BladeResolver",
-    extension={ "blade.php" }
-)
+//@MIMEResolver.ExtensionRegistration(
+//    mimeType=BladeLanguage.BLADE_MIME_TYPE,
+//    position=300,
+//    displayName="#BladeResolver",
+//    extension={ "blade.php" }
+//)
 public class BladeIndexSupport {
     private static final Logger LOGGER = Logger.getLogger(BladeIndex.class.getSimpleName());
     private static final WeakHashMap<Project, BladeIndexSupport> INSTANCIES = new WeakHashMap<>();

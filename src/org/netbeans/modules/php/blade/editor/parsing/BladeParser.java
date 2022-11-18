@@ -41,6 +41,8 @@
  */
 package org.netbeans.modules.php.blade.editor.parsing;
 
+import java.beans.PropertyVetoException;
+import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -48,9 +50,11 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.event.ChangeListener;
+import javax.swing.text.StyledDocument;
 import org.netbeans.api.lexer.Language;
 import org.netbeans.modules.csl.api.OffsetRange;
 import org.netbeans.modules.csl.spi.GsfUtilities;
+import org.netbeans.modules.editor.NbEditorDocument;
 import org.netbeans.modules.parsing.api.Snapshot;
 import org.netbeans.modules.parsing.api.Task;
 import org.netbeans.modules.parsing.impl.indexing.RepositoryUpdater;
@@ -63,12 +67,11 @@ import org.netbeans.modules.php.blade.editor.parsing.astnodes.Statement;
 import org.openide.filesystems.FileObject;
 import org.openide.loaders.DataObject;
 import org.openide.util.Exceptions;
-import org.netbeans.modules.php.blade.editor.BladeDataLoader;
-import org.netbeans.modules.php.blade.editor.BladeDataObject;
 import static org.netbeans.modules.php.blade.editor.BladeLanguage.BLADE_MIME_TYPE;
 import org.openide.loaders.DataLoader;
 import org.openide.loaders.DataObjectNotFoundException;
 import org.openide.text.DataEditorSupport;
+
 /**
  *
  * @author Haidu Bogdan
@@ -134,12 +137,15 @@ public class BladeParser extends Parser {
         }
 
     }
-    
+
     private void checkMimeReload(Task task) {
 
         FileObject currentFile = snapshot.getSource().getFileObject();
+        if (currentFile == null) {
+            return;
+        }
         String fileName = currentFile.getNameExt();
-        if (!fileName.endsWith(".blade.php")){
+        if (!fileName.endsWith(".blade.php")) {
             //no need to refresh file mime type
             return;
         }
@@ -149,18 +155,32 @@ public class BladeParser extends Parser {
         if (RepositoryUpdater.getDefault().isCacheFile(currentFile)) {
             return;
         }
+
         final DataObject od;
         try {
             od = DataObject.find(currentFile);
-            Language lang = od.getLookup().lookup(Language.class);
-            if(lang == null || lang.mimeType().equals(BLADE_MIME_TYPE)){
-                return;
-            }
             DataEditorSupport ed = od.getLookup().lookup(DataEditorSupport.class);
-            //TODO ADD A POPUP TO EXPLAIN THE PROCESS
-            ed.setMIMEType(BLADE_MIME_TYPE);
-            ed.close();
-            ed.open();
+            boolean docIsLoaded = ed.isDocumentLoaded();
+            StyledDocument doc = ed.getDocument();
+            if (doc != null) {
+                String docMimeType = doc.getProperty("mimeType").toString();
+                if (docMimeType.equals(BLADE_MIME_TYPE)) {
+                    return;
+                }
+            }
+
+            try {
+                od.setValid(false);
+                //TODO we will need a syncronized task
+                DataObject od2 = DataObject.find(currentFile);
+                DataEditorSupport ed2 = od2.getLookup().lookup(DataEditorSupport.class);
+                if (docIsLoaded){
+                    ed2.open();
+                }
+            } catch (PropertyVetoException ex) {
+                Exceptions.printStackTrace(ex);
+            }
+
         } catch (DataObjectNotFoundException ex) {
             Exceptions.printStackTrace(ex);
         }
