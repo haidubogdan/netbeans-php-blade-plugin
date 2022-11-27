@@ -328,7 +328,7 @@ public class BladeCompletionHandler implements CodeCompletionHandler2 {
         String queryText = "";
         int startInput = -1;
 
-        if (request.context == CompletionContext.SECTION_LABEL) {
+        if (request.context.equals(CompletionContext.SECTION_LABEL)) {
             startInput = request.prefix.indexOf("\"");
             if (startInput < 0) {
                 startInput = request.prefix.indexOf("'");

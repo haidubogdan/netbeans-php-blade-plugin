@@ -5,6 +5,7 @@ import org.openide.util.NbBundle;
 
 /**
  * Illuminate/View versioning
+ * for the moment not used for specific flows
  *
  * @author bhaidu
  */
@@ -28,9 +29,9 @@ public enum BladeVersion {
     }
 
     /**
-     * Always return the latest PHP version.
+     * Always return the latest BLADE version.
      *
-     * @return the latest PHP version
+     * @return the latest BLADE version
      */
     public static BladeVersion getDefault() {
         BladeVersion[] phpVersions = BladeVersion.values();
@@ -38,21 +39,21 @@ public enum BladeVersion {
     }
 
     /**
-     * Return legacy PHP version, the one before the latest one.
+     * Return legacy BLADE version, the one before the latest one.
      * <p>
-     * This usually means the oldest yet supported PHP version.
+     * This usually means the oldest yet supported BLADE version.
      *
-     * @return the legacy PHP version
+     * @return the legacy BLADE version
      * @since 2.41
      */
     public static BladeVersion getLegacy() {
-        BladeVersion[] phpVersions = BladeVersion.values();
-        for (BladeVersion phpVersion : phpVersions) {
+        BladeVersion[] bladeVersions = BladeVersion.values();
+        for (BladeVersion phpVersion : bladeVersions) {
             if (phpVersion.isSupportedVersion()) {
                 return phpVersion;
             }
         }
-        return phpVersions[phpVersions.length - 2];
+        return bladeVersions[bladeVersions.length - 2];
     }
 
     /**
@@ -72,7 +73,7 @@ public enum BladeVersion {
     }
 
     /**
-     * Check whether this is supported version yet by PHP official.
+     * Check whether this is supported version yet by BLADE official.
      *
      * @return {@code true} if this is supported version, {@code false}
      * otherwise

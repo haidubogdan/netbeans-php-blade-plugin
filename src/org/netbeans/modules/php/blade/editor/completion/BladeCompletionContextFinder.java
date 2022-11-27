@@ -115,7 +115,7 @@ public class BladeCompletionContextFinder {
             return CompletionContext.PATH; //@include | @extends | @each
         }
         if (SECTION_KEYWORDS_TOKEN.contains(id)) {
-            return CompletionContext.SECTION;
+            return CompletionContext.SECTION_LABEL;
         }
         if (CTX_DELIMITERS.contains(id)) {
             //TODO have a scope offset range impl to detect if in 
@@ -171,7 +171,7 @@ public class BladeCompletionContextFinder {
             BladeTokenId id = cToken.id();
             String tText = cToken.text().toString().trim();
             if (id.equals(BladeTokenId.T_BLADE_SECTION)){
-                return CompletionContext.SECTION;
+                return CompletionContext.SECTION_LABEL;
             } else if (BladeSyntax.DIRECTIVES_WITH_VIEW_PATH.contains(tText)){
                 return CompletionContext.PATH;
             } else if (id.equals(BladeTokenId.T_BLADE_DIRECTIVE)) {
