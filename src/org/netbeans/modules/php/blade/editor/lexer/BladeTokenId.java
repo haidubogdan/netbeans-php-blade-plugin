@@ -59,42 +59,49 @@ import org.netbeans.spi.lexer.Lexer;
 import org.netbeans.spi.lexer.LexerRestartInfo;
 
 /**
- *
+ * TODO ADD COMMENTS
+ * 
  * @author Haidu Bogdan
  */
 public enum BladeTokenId implements TokenId {
-    //coloring values
-    T_BLADE_PHP_EXPRESSION(null, "blade_php_var"), //TODO rename with expression
+    T_BLADE_CLOSE_ECHO( "}}", "blade_echo"),
+    T_BLADE_OPEN_ECHO( "{{", "blade_echo" , T_BLADE_CLOSE_ECHO),
+    T_BLADE_CLOSE_ECHO_ESCAPED( "!!}", "blade_echo"),
+    T_BLADE_OPEN_ECHO_ESCAPED( "{!!", "blade_echo", T_BLADE_CLOSE_ECHO_ESCAPED ),
+    T_BLADE_CLOSE_COMMENT( "--}}", "blade_comment"),
+    T_BLADE_OPEN_COMMENT( "{{--", "blade_comment", T_BLADE_CLOSE_COMMENT ),
+    //DIRECTIVES
+    T_BLADE_ENDPHP("@endphp", "blade_directive"),
+    T_BLADE_PHP_OPEN("@php", "blade_directive", T_BLADE_ENDPHP),
+    T_BLADE_ENDSECTION("@endsection", "blade_directive"),
+    T_BLADE_SECTION("@section", "blade_directive", T_BLADE_ENDSECTION),
+    T_BLADE_YIELD("@yield", "blade_directive"),
+    T_BLADE_PARENT("@parent", "blade_directive"),
+    T_BLADE_EXTENDS("@extends", "blade_directive"),
+    T_BLADE_INCLUDE("@include", "blade_directive"),
+    T_BLADE_EACH("@each", "blade_directive"),
+    T_BLADE_FOREACH("@foreach", "blade_directive"),
+    T_BLADE_FOR("@for", "blade_directive"),
+    T_BLADE_IF("@if", "blade_directive"),
+    T_BLADE_ELSE("@else", "blade_directive"),
+    T_BLADE_ELSEIF("@elseif", "blade_directive"),
+    T_BLADE_ENDFOREACH("@endforeach", "blade_directive"),
+    
+    T_BLADE_STOP("@stop", "blade_directive"),
+    T_BLADE_ENDFOR("@endfor", "blade_directive"),
+    T_BLADE_ENDIF("@endif", "blade_directive"),
+    //DEFAULT SYNTAX ELEMENTS
+    T_BLADE_LPAREN("(", "token"),
+    T_BLADE_RPAREN(")", "token"),
+    T_OPEN_PHP_SCRIPT("<?php", "html"),
+    T_CLOSE_PHP("?>", "html"),
+    T_PHP_OPEN_ECHO("<?=", "html"),
+    
     T_BLADE_COMMENT( null, "blade_comment" ),
     T_BLADE_DIRECTIVE(null, "blade_directive"),
-    T_BLADE_OTHER( null, "blade_other" ),
-    T_BLADE_OPEN_ECHO( null, "blade_echo" ),
-    T_BLADE_OPEN_ECHO_ESCAPED( null, "blade_echo" ),
-    T_BLADE_CLOSE_ECHO( null, "blade_echo" ),
-    T_BLADE_CLOSE_ECHO_ESCAPED( null, "blade_echo" ),
-    //DIRECTIVES
-    T_BLADE_PHP_OPEN(null, "blade_directive"),
-    T_BLADE_YIELD(null, "blade_directive"),
-    T_BLADE_PARENT(null, "blade_directive"),
-    T_BLADE_SECTION(null, "blade_directive"),
-    T_BLADE_EXTENDS(null, "blade_directive"),
-    T_BLADE_INCLUDE(null, "blade_directive"),
-    T_BLADE_EACH(null, "blade_directive"),
-    T_BLADE_FOREACH(null, "blade_directive"),
-    T_BLADE_IF(null, "blade_directive"),
-    T_BLADE_ELSE(null, "blade_directive"),
-    T_BLADE_ELSEIF(null, "blade_directive"),
-    T_BLADE_ENDPHP(null, "blade_directive"),
-    T_BLADE_ENDFOREACH(null, "blade_directive"),
-    T_BLADE_ENDSECTION(null, "blade_directive"),
-    T_BLADE_STOP(null, "blade_directive"),
-    T_BLADE_FOR(null, "blade_directive"),
-    T_BLADE_ENDFOR(null, "blade_directive"),
-    T_BLADE_ENDIF(null, "blade_directive"),
-    T_BLADE_LPAREN(null, "token"),
-    T_BLADE_RPAREN(null, "token"),
-    BLADE_PHP_STRING(null, "string"),
+    //embeded texts token
     T_PHP(null, "php"),
+    T_BLADE_PHP_EXPRESSION(null, "blade_php_var"), //TODO rename with expression
     T_PHP_ECHO(null, "php"),
     T_BLADE_PHP(null, "php"),
     T_BLADE_PHP_ECHO(null, "blade_php_echo"),
@@ -102,22 +109,40 @@ public enum BladeTokenId implements TokenId {
     T_BLADE_PHP_COND(null, "php"),
     T_HTML( null, "html" ),
     T_XML( null, "html" ),
-    T_OPEN_PHP_SCRIPT(null, "html"),
-    T_CLOSE_PHP(null, "html"),
-    T_PHP_OPEN_ECHO(null, "html"),
-    NEWLINE(null, "whitespace"),
+    NEWLINE("\n", "whitespace"),
     WHITESPACE(null, "whitespace"), 
     UNKNOWN_TOKEN(null, "other")
     ;
     
     private final String fixedText;
     private final String primaryCategory;
+    public BladeTokenId pair;
+    
+    /**
+     * ENUM ??
+     * pairing tags for backward searching braces
+     */
+    static final Map<BladeTokenId, BladeTokenId> BLADE_OPEN_PAIR = new HashMap<>();
+    
+    static {
+        BLADE_OPEN_PAIR.put(T_BLADE_CLOSE_ECHO, T_BLADE_OPEN_ECHO);
+        BLADE_OPEN_PAIR.put(T_BLADE_CLOSE_ECHO_ESCAPED, T_BLADE_CLOSE_ECHO_ESCAPED);
+        BLADE_OPEN_PAIR.put(T_BLADE_CLOSE_COMMENT, T_BLADE_OPEN_COMMENT);
+        BLADE_OPEN_PAIR.put(T_BLADE_ENDPHP, T_BLADE_PHP_OPEN);
+    }
 
     BladeTokenId( String fixedText, String primaryCategory ) {
         this.fixedText = fixedText;
         this.primaryCategory = primaryCategory;
+        this.pair = null;
     }
 
+    BladeTokenId( String fixedText, String primaryCategory, BladeTokenId pair ) {
+        this.fixedText = fixedText;
+        this.primaryCategory = primaryCategory;
+        this.pair = pair;
+    }
+    
     public String fixedText() {
         return fixedText;
     }
@@ -127,7 +152,11 @@ public enum BladeTokenId implements TokenId {
         return primaryCategory;
     }
     
-   private static final Language<BladeTokenId> LANGUAGE =
+    public BladeTokenId getOpenPair(BladeTokenId token){
+        return BLADE_OPEN_PAIR.get(token);
+    }
+    
+    private static final Language<BladeTokenId> LANGUAGE =
             new LanguageHierarchy<BladeTokenId>() {
                 @Override
                 protected Collection<BladeTokenId> createTokenIds() {

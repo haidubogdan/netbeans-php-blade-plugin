@@ -7,7 +7,7 @@ import java.util.Collection;
 
 /**
  * list of blade syntax info
- * @link https://laravel.com/docs/8.x/blade
+ * @link https://laravel.com/docs/blade
  *
  * @author bhaidu
  */
@@ -23,8 +23,6 @@ public class BladeSyntax {
         }
     }
 
-    public static String OPEN_COMMENT = "{{--";
-    public static String CLOSE_COMMENT = "--}}";
     public static String OPEN_ECHO = "{{";
     public static String CLOSE_ECHO = "}}";
     public static String OPEN_ECHO_ESCAPED = "{!!";

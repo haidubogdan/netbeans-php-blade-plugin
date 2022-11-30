@@ -65,10 +65,7 @@ public class IndentationCounter {
             
             while (ts.movePrevious()) {
                 id = ts.token().id();
-                if (id == BladeTokenId.BLADE_PHP_STRING){
-                    hasArguments= true;
-                    //TODO add a TAG UTIL
-                } else if (hasArguments == true & (id == BladeTokenId.T_BLADE_DIRECTIVE || id == BladeTokenId.T_BLADE_SECTION)){
+                if (hasArguments == true & (id == BladeTokenId.T_BLADE_DIRECTIVE || id == BladeTokenId.T_BLADE_SECTION)){
                     newIndent = Utilities.getRowIndent(doc, caretLineStart);
                     break;
                 }

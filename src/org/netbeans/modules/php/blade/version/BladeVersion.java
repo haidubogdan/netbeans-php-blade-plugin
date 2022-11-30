@@ -1,6 +1,7 @@
-package org.netbeans.modules.php.blade.api;
+package org.netbeans.modules.php.blade.version;
 
 import java.time.LocalDate;
+import org.netbeans.modules.php.blade.version.Bundle;
 import org.openide.util.NbBundle;
 
 /**

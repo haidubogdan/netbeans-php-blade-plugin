@@ -39,7 +39,9 @@
  */
 package org.netbeans.modules.php.blade.editor.typinghooks;
 
-import java.util.logging.Logger;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 import org.netbeans.modules.php.blade.editor.BladeLanguage;
@@ -48,19 +50,41 @@ import org.netbeans.api.editor.mimelookup.MimePath;
 import org.netbeans.api.editor.mimelookup.MimeRegistration;
 import org.netbeans.api.editor.mimelookup.MimeRegistrations;
 import org.netbeans.api.lexer.Token;
-import org.netbeans.api.lexer.TokenHierarchy;
-import org.netbeans.api.lexer.TokenSequence;
 import org.netbeans.editor.BaseDocument;
-import org.netbeans.modules.php.blade.editor.BladeSyntax;
-
+import org.netbeans.modules.php.blade.editor.lexer.BladeLexerUtils;
 import org.netbeans.spi.editor.typinghooks.TypedTextInterceptor;
-import org.openide.util.Exceptions;
 
+/**
+ * auto complete for
+ * '[', '(', '\'', '"'
+ * 
+ * and for "{{ ", "{!! ", "{{--"
+ * 
+ * space char (' ') is the trigger for the blade echo and comment tags
+ * 
+ * @author bhaidu
+ */
 public class BladeTypedTextInterceptor implements TypedTextInterceptor {
 
     private final boolean isBlade;
-    private boolean codeTemplateEditing;
-    private static final Logger LOGGER = Logger.getLogger(BladeTypedTextInterceptor.class.getName());
+
+    static final Map<Character, Character> CHAR_PAIR = new HashMap<>();
+
+    /**
+     * auto complete char pair
+     */
+    static {
+        CHAR_PAIR.put('(', ')');
+        CHAR_PAIR.put('[', ']');
+        CHAR_PAIR.put('\'', '\'');
+        CHAR_PAIR.put('"', '"');
+    }
+    
+    static BladeTokenId validTokenList[] = {
+        BladeTokenId.T_BLADE_OPEN_ECHO,
+        BladeTokenId.T_BLADE_OPEN_ECHO_ESCAPED,
+        BladeTokenId.T_BLADE_OPEN_COMMENT
+    };
 
     private BladeTypedTextInterceptor(MimePath mimePath) {
         String path = mimePath.getPath();
@@ -74,102 +98,55 @@ public class BladeTypedTextInterceptor implements TypedTextInterceptor {
 
     @Override
     public void insert(MutableContext context) throws BadLocationException {
-        if (!isBlade) {
-            return;
-        }
-        Document document = context.getDocument();
-        BaseDocument doc = (BaseDocument) document;
         int caretOffset = context.getOffset();
-        String selection = context.getReplacedText();
+
+        if (caretOffset == 0 || !isBlade) {
+            return;
+        }
+
         char ch = context.getText().charAt(0);
-        if (doNotAutoCompleteQuotesAndBrackets(ch) || caretOffset == 0) {
-            return;
-        }
-        TokenHierarchy<Document> th = TokenHierarchy.get(document);
-        TokenSequence<BladeTokenId> ts = th.tokenSequence(BladeTokenId.language());
 
-        if (ts == null) {
-            return;
-        }
-        ts.move(caretOffset);
-        if (!ts.moveNext() && !ts.movePrevious()) {
+        //simple char completion
+        if (CHAR_PAIR.containsKey(ch)) {
+            completePairChar(context, ch, CHAR_PAIR.get(ch));
             return;
         }
 
-        boolean skipQuote = false;
-        boolean isInString = false;
-
-        // complete quote or bracket
-        if (isOpeningBracket(ch) || isQuote(ch)) {
-            if (selection != null && selection.length() > 0) {
-                surroundSelectionWithChars(selection, ch, context);
-            } else {
-                completeQuoteAndBracket(context, ch);
-            }
+        if (ch != ' ') {
+            return;
         }
 
-        // skip the same closing char
-        if ((isClosingBracket(ch) || isQuote(ch))
-                && TypingHooksUtils.sameAsExistingChar(doc, ch, caretOffset)) {
-            if (isInString) {
-                if (!skipQuote && isQuote(ch) && !TypingHooksUtils.isEscapeSequence(doc, caretOffset)) {
-                    skipNextChar(context, ch, document, caretOffset);
-                }
-            } else {
-                if (!skipQuote && !isClosingBracketMissing(ch)) {
-                    skipNextChar(context, ch, document, caretOffset);
-                }
-            }
-        } else if (ch == ' ') {
-            Token<?> token = ts.token();
-            Object t_id = token.id();
-            String tText = token.text().toString();
-            if (token.id().equals(BladeTokenId.T_BLADE_PHP_ECHO) || 
-                    (token.id().equals(BladeTokenId.T_BLADE_COMMENT) && token.text().toString().endsWith("--}}"))){
-                //we are inside an existing echo or comment
-                return;
-            }
+        Document document = context.getDocument();
 
-            /**
-            * blade bracket completer
-            * one directional only 
-            * for 
-            * echo {{ }}
-            * echo escaped {!! !!}
-            * comment {{-- --}}
-            * 
-            */
+        //we are offseting the carret to -1
+        Token<? extends BladeTokenId> token = BladeLexerUtils.getOffsetToken(document, caretOffset - 1);
 
-            try {
-                String s = doc.getText(caretOffset - 2, 2);
-                String expectedBracket = BladeSyntax.OPEN_ECHO;
-                
-                if ("!!".equals(s) && caretOffset > 3) {
-                    s = doc.getText(caretOffset - 3, 3);
-                    expectedBracket = BladeSyntax.OPEN_ECHO_ESCAPED;
-                } else if ("--".equals(s) && caretOffset > 4) {
-                    s = doc.getText(caretOffset - 4, 4);
-                    expectedBracket = BladeSyntax.OPEN_COMMENT;
-                }
-                token = ts.token();
-                
-                if (token.text().toString().startsWith("}")){
-                    return;
-                }
-                
-                String text = token.text().toString();
-                if (expectedBracket.equals(s)) { // NOI18N
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("  ");
-                    String completeBracket = matching(expectedBracket);
-                    sb.append(completeBracket);
-                    
-                    context.setText(sb.toString(), 1);
-                }
-            } catch (BadLocationException ble) {
-                Exceptions.printStackTrace(ble);
-            }
+        if (token == null) {
+            return;
         }
+
+        BladeTokenId id = token.id();
+        //String tokenText = token.text().toString();
+        //BaseDocument doc = (BaseDocument) document;
+        
+        /**
+         * blade bracket completer only for echo {{ }} echo
+         * escaped {!! !!} comment {{-- --}}
+         *
+         */
+
+        if (!Arrays.asList(validTokenList).contains(id)) {
+            return;
+        }
+
+        String pairText = id.pair.fixedText();
+        
+        StringBuilder sb = new StringBuilder();
+        sb.append("  ");
+        String completeBracket = pairText;
+        sb.append(completeBracket);
+
+        context.setText(sb.toString(), 1);
     }
 
     @Override
@@ -188,127 +165,27 @@ public class BladeTypedTextInterceptor implements TypedTextInterceptor {
     }
 
     /**
-     * Surround the selected text with chars("", '', (), []).
-     * <b>NOTE:</b> Replace the surrounding chars if the text is already
-     * surrounded with chars.
-     *
-     * @param selection the selected text
-     * @param ch the opening bracket
-     * @param context the context
+     * simple char context completion
+     * 
+     * @param context
+     * @param chopen
+     * @param chclose 
      */
-    private void surroundSelectionWithChars(String selection, char ch, MutableContext context) {
-        char firstChar = selection.charAt(0);
-        if (firstChar != ch) {
-            char lastChar = selection.charAt(selection.length() - 1);
-            StringBuilder sb = new StringBuilder();
-            sb.append(ch);
-            if (selection.length() > 1
-                    && (isOpeningBracket(firstChar) || isQuote(firstChar))
-                    && lastChar == matching(firstChar)) {
-                String innerText = selection.substring(1, selection.length() - 1);
-                sb.append(innerText);
-            } else {
-                sb.append(selection);
-            }
-            sb.append(matching(ch));
-            String text = sb.toString();
-            context.setText(text, text.length());
-        }
-    }
-
-    private void skipNextChar(MutableContext context, char ch, Document document, int dotPos) throws BadLocationException {
-        context.setText(Character.toString(ch), 1);
-        document.remove(dotPos, 1);
-    }
-
-    private void completeQuoteAndBracket(MutableContext context, char bracket) throws BadLocationException {
-        if (codeTemplateEditing) {
-            String text = context.getText() + bracket;
-            context.setText(text, text.length() - 1);
-            return;
-        }
-
+    private void completePairChar(MutableContext context, char chopen, char chclose) {
         StringBuilder sb = new StringBuilder();
-        sb.append(bracket);
-        sb.append(matching(bracket));
+        sb.append(chopen);
+        sb.append(chclose);
         String text = sb.toString();
         context.setText(text, 1);
     }
 
-    private static boolean isBracket(char c) {
-        return isOpeningBracket(c) || isClosingBracket(c);
-    }
-
-    private static boolean isOpeningBracket(char c) {
-        switch (c) {
-            case '(': // no break
-            case '[': // no break
-                return true;
-            default:
-                return false;
-        }
-    }
-
-    private static boolean isClosingBracket(char c) {
-        switch (c) {
-            case ')': // no break
-            case ']': // no break
-                return true;
-            default:
-                return false;
-        }
-    }
-
-    private static boolean isQuote(char ch) {
-        return ch == '"' || ch == '\'';
-    }
-
-    private static char matching(char c) {
-        switch (c) {
-            case '"':
-                return '"';
-            case '\'':
-                return '\'';
-            case '(':
-                return ')';
-            case '[':
-                return ']';
-            case ')':
-                return '(';
-            case ']':
-                return '[';
-            default:
-                return c;
-        }
-    }
-    
-    private static String matching(String token) {
-        switch (token) {
-            case "{{":
-                return BladeSyntax.CLOSE_ECHO;
-            case "{!!":
-                return BladeSyntax.CLOSE_ECHO_ESCAPED;
-            case "{{--":
-                return BladeSyntax.CLOSE_COMMENT;
-            default:
-                return token;
-        }
-    }
-
-    private static boolean doNotAutoCompleteQuotesAndBrackets(char c) {
-        return isBracket(c) && !TypingHooksUtils.isInsertMatchingEnabled();
-    }
-    
-    private static boolean isClosingBracketMissing(char close) throws BadLocationException {
-        if (!isClosingBracket(close)) {
-            return false;
-        }
-        return false;
-    }
-
+    /**
+     * register for HTML also
+     */
     @MimeRegistrations(value = {
         @MimeRegistration(mimeType = BladeLanguage.BLADE_MIME_TYPE, service = TypedTextInterceptor.Factory.class),
-        @MimeRegistration(mimeType = "text/xhtml", service = TypedTextInterceptor.Factory.class)
+        @MimeRegistration(mimeType = "text/xhtml", service = TypedTextInterceptor.Factory.class),
+        @MimeRegistration(mimeType = "text/html", service = TypedTextInterceptor.Factory.class)
     })
     public static class Factory implements TypedTextInterceptor.Factory {
 

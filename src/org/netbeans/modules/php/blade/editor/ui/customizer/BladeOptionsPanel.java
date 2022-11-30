@@ -51,7 +51,7 @@ import javax.swing.JComboBox;
 import javax.swing.event.ChangeListener;
 import org.netbeans.api.project.Project;
 import org.netbeans.modules.parsing.api.indexing.IndexingManager;
-import org.netbeans.modules.php.blade.api.BladeVersion;
+import org.netbeans.modules.php.blade.version.BladeVersion;
 import org.netbeans.modules.php.blade.project.BladeProjectProperties;
 import org.netbeans.modules.php.blade.editor.ui.model.BladeVersionComboBoxModel;
 import org.netbeans.spi.options.OptionsPanelController;

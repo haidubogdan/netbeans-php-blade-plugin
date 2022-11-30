@@ -1,4 +1,4 @@
-package org.netbeans.modules.php.blade.api;
+package org.netbeans.modules.php.blade.version;
 
 import java.util.ArrayList;
 import java.util.List;

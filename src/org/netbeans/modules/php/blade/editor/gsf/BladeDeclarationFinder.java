@@ -93,9 +93,7 @@ public class BladeDeclarationFinder implements DeclarationFinder {
         String text = token.text().toString().trim();
         int tokeLength = ts.offset() + token.length();
 
-        if (BladeTokenId.BLADE_PHP_STRING == id) {
-            return new OffsetRange(ts.offset(), tokeLength);
-        } else if (BladeTokenId.T_PHP == id || BladeTokenId.T_BLADE_PHP == id) {
+        if (BladeTokenId.T_PHP == id || BladeTokenId.T_BLADE_PHP == id) {
             TokenSequence<? extends PHPTokenId> tsPhp = BladeLexerUtils.getPhpTokenSequence(th, lexOffset);
             Token<?> tokenPhp = tsPhp.token();
             if (tokenPhp != null) {
@@ -175,10 +173,7 @@ public class BladeDeclarationFinder implements DeclarationFinder {
                 }
                 TokenId tokenId = token.id();
                 String ttText = token.text().toString().trim();
-                if (BladeTokenId.BLADE_PHP_STRING.equals(tokenId)) {
-                    pathValue = token.text().toString().trim();
-                    pathValue = pathValue.substring(1, pathValue.length() - 1);
-                } else if (BladeTokenId.T_BLADE_PHP_EXPRESSION.equals(tokenId)) {
+                if (BladeTokenId.T_BLADE_PHP_EXPRESSION.equals(tokenId)) {
                     TokenHierarchy<Document> th = TokenHierarchy.get(doc);
                     TokenSequence<? extends PHPTokenId> tsPhp = BladeLexerUtils.getPhpTokenSequence(th, carretOffset);
                     Token<?> tokenPhp = tsPhp.token();

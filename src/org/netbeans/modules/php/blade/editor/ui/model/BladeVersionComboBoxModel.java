@@ -1,7 +1,7 @@
 package org.netbeans.modules.php.blade.editor.ui.model;
 
 import javax.swing.DefaultComboBoxModel;
-import org.netbeans.modules.php.blade.api.BladeVersion;
+import org.netbeans.modules.php.blade.version.BladeVersion;
 
 /**
  * blade version model

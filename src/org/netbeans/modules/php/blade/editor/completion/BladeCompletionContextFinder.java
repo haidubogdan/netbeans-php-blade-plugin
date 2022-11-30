@@ -130,7 +130,7 @@ public class BladeCompletionContextFinder {
             return CompletionContext.BLADE_ECHO;
         }
         
-        boolean isStringParameter = id == BladeTokenId.BLADE_PHP_STRING;
+        boolean isStringParameter = false;
 
         int tokenIdOffset = ts.token().offset(th);
         result = findOffsetContext(token, (offset - tokenIdOffset), ts); //search for the previous context

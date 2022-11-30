@@ -264,6 +264,23 @@ public final class BladeLexerUtils {
         }
         return ts;
     }
+    
+    public static Token<? extends BladeTokenId> getOffsetToken(Document doc, int caretOffset) {
+        if (caretOffset == 0){
+            return null;
+        }
+        Document document = doc;
+        TokenHierarchy<Document> th = TokenHierarchy.get(document);
+        TokenSequence<BladeTokenId> ts = th.tokenSequence(BladeTokenId.language());
+        if (ts == null) {
+            return null;
+        }
+        ts.move(caretOffset);
+        if (!ts.moveNext() && !ts.movePrevious()) {
+            return null;
+        }
+        return ts.token();
+    }
 
     public static boolean textEquals(CharSequence text1, char... text2) {
         int len = text1.length();

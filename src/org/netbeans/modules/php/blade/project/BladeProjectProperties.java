@@ -46,7 +46,7 @@ import java.util.prefs.Preferences;
 import javax.swing.DefaultListModel;
 import org.netbeans.api.project.Project;
 import org.netbeans.api.project.ProjectUtils;
-import org.netbeans.modules.php.blade.api.BladeVersion;
+import org.netbeans.modules.php.blade.version.BladeVersion;
 import org.openide.util.NbPreferences;
 
 /**

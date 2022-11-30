@@ -443,7 +443,7 @@ OPEN_PHP_ECHO = "<?="
 
 <ST_HTML> {COMMENT_START} {
     pushState(ST_COMMENT);
-    return BladeTokenId.T_BLADE_COMMENT;
+    return BladeTokenId.T_BLADE_OPEN_COMMENT;
 }
 
 <ST_HTML> "{{-" {
@@ -453,7 +453,7 @@ OPEN_PHP_ECHO = "<?="
 
 <ST_COMMENT> {COMMENT_END} {
     popState();
-    return BladeTokenId.T_BLADE_COMMENT;
+    return BladeTokenId.T_BLADE_CLOSE_COMMENT;
 }
 
 <ST_COMMENT>~{COMMENT_END} {
