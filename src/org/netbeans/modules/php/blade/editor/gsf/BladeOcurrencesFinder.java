@@ -50,13 +50,14 @@ import org.netbeans.modules.csl.api.OffsetRange;
 import org.netbeans.modules.parsing.spi.Parser.Result;
 import org.netbeans.modules.parsing.spi.Scheduler;
 import org.netbeans.modules.parsing.spi.SchedulerEvent;
+import org.netbeans.modules.php.blade.editor.parsing.BladeParserResult;
 
 /**
  * TODO use occurence builder
  * 
  * @author bhaidu
  */
-public class BladeOcurrencesFinder extends OccurrencesFinder {
+public class BladeOcurrencesFinder extends OccurrencesFinder<BladeParserResult> {
     private int caretDocumentPosition;
     private Map<OffsetRange, ColoringAttributes> occurrencesMap = Collections.emptyMap();
     private FeatureCancel featureCancel = new FeatureCancel();
@@ -83,7 +84,7 @@ public class BladeOcurrencesFinder extends OccurrencesFinder {
     }
     
     @Override
-    public void run(Result result, SchedulerEvent event) {
+    public void run(BladeParserResult t, SchedulerEvent se) {
         resume();
         
         try {

@@ -136,7 +136,7 @@ public class BladeFormatter implements Formatter {
     }
 
     private static String getMimeTypeAtOffset(Document doc, int offset) {
-        TokenHierarchy th = TokenHierarchy.get(doc);
+        TokenHierarchy<?> th = TokenHierarchy.get(doc);
         List<TokenSequence<?>> tsl = th.embeddedTokenSequences(offset, false);
         if (tsl != null && tsl.size() > 0) {
             TokenSequence<?> tokenSequence = tsl.get(tsl.size() - 1);

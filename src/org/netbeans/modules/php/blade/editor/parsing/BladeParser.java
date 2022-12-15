@@ -85,7 +85,9 @@ public class BladeParser extends Parser {
     @Override
     public void parse(Snapshot snapshot, Task task, SourceModificationEvent event) throws ParseException {
         this.snapshot = snapshot;
-        checkMimeReload(task);
+        if (checkMimeAndReload(task)) {
+            return;
+        }
         try {
             int caretOffset = GsfUtilities.getLastKnownCaretOffset(snapshot, event);
             Context context = new Context(snapshot, caretOffset);
@@ -110,6 +112,7 @@ public class BladeParser extends Parser {
                 BladeProgram program;
                 if (rootSymbol.value instanceof BladeProgram) {
                     program = (BladeProgram) rootSymbol.value; // call the parser itself
+                    System.out.println("End offset parser " + program.getEndOffset());
                     result = new BladeParserResult(context.getSnapshot(), program);
                     result.createPhpIndexQuery(snapshot, fileObject);
                     result.setErrors(errorHandler.displaySyntaxErrors(program));
@@ -138,22 +141,22 @@ public class BladeParser extends Parser {
 
     }
 
-    private void checkMimeReload(Task task) {
+    private boolean checkMimeAndReload(Task task) {
 
         FileObject currentFile = snapshot.getSource().getFileObject();
         if (currentFile == null) {
-            return;
+            return false;
         }
         String fileName = currentFile.getNameExt();
         if (!fileName.endsWith(".blade.php")) {
             //no need to refresh file mime type
-            return;
+            return false;
         }
         if (!task.getClass().getName().startsWith("org.netbeans.modules.parsing.impl.indexing.RepositoryUpdater")) {
-            return;
+            return false;
         }
         if (RepositoryUpdater.getDefault().isCacheFile(currentFile)) {
-            return;
+            return false;
         }
 
         final DataObject od;
@@ -165,7 +168,7 @@ public class BladeParser extends Parser {
             if (doc != null) {
                 String docMimeType = doc.getProperty("mimeType").toString();
                 if (docMimeType.equals(BLADE_MIME_TYPE)) {
-                    return;
+                    return false;
                 }
             }
 
@@ -174,8 +177,9 @@ public class BladeParser extends Parser {
                 //TODO we will need a syncronized task
                 DataObject od2 = DataObject.find(currentFile);
                 DataEditorSupport ed2 = od2.getLookup().lookup(DataEditorSupport.class);
-                if (docIsLoaded){
+                if (docIsLoaded) {
                     ed2.open();
+                    return true;
                 }
             } catch (PropertyVetoException ex) {
                 Exceptions.printStackTrace(ex);
@@ -184,6 +188,7 @@ public class BladeParser extends Parser {
         } catch (DataObjectNotFoundException ex) {
             Exceptions.printStackTrace(ex);
         }
+        return false;
     }
 
     @Override

@@ -142,7 +142,7 @@ public final class CustomDirectives {
                 return;
             }
             List<Expression> parameters = node.getParameters();
-            Iterator iter = parameters.iterator();
+            Iterator<?> iter = parameters.iterator();
             Expression directiveName = (Expression) iter.next();
             if (directiveName != null && directiveName instanceof Scalar) {
                 Scalar name = (Scalar) directiveName;

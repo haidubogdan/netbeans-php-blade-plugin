@@ -119,9 +119,8 @@ public class BladeLanguage extends DefaultLanguageConfig {
         super();
     }
     
-    public static volatile Boolean hasQuote = false;
-    public static final String ACTIONS = "Loaders/" + BladeLanguage.BLADE_MIME_TYPE + "/Actions";
-    public static final String BLADE_MIME_TYPE = "text/x-blade";
+    public static final String ACTIONS = "Loaders/" + BladeLanguage.BLADE_MIME_TYPE + "/Actions"; //NOI18N
+    public static final String BLADE_MIME_TYPE = "text/x-blade"; //NOI18N
 
     @Override
     public Language<BladeTokenId> getLexerLanguage() {
@@ -130,7 +129,7 @@ public class BladeLanguage extends DefaultLanguageConfig {
 
     @Override
     public String getDisplayName() {
-        return "Blade";
+        return "Blade"; //NOI18N
     }
     
     @Override
@@ -204,6 +203,13 @@ public class BladeLanguage extends DefaultLanguageConfig {
         return new BladeOcurrencesFinder();
     }
 
+    /**
+     * flag for detecting if we are in a string context
+     * enables to select the blade view "layout.index" string value on double click 
+     * without interpreting the same thing for javascript objects
+     */
+    public static volatile Boolean hasQuote = false;
+    
     @Override
     public boolean isIdentifierChar(char c) {
         /**
@@ -218,7 +224,6 @@ public class BladeLanguage extends DefaultLanguageConfig {
                 || (c == '-') || (c == '@')
                 || (hasQuote && c == '.') || (c == '_');
     }
-    //TODO semantyc analyser ??
     
 //    @deprecated    
 //    @Override
@@ -231,4 +236,5 @@ public class BladeLanguage extends DefaultLanguageConfig {
         return new BladeTypeSearcher();
     }
 
+//TODO semantyc analyser ??
 }

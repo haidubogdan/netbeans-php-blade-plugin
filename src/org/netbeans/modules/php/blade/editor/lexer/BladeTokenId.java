@@ -45,6 +45,7 @@ import java.util.Collection;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 import org.netbeans.api.html.lexer.HTMLTokenId;
 import org.netbeans.api.lexer.InputAttributes;
 import org.netbeans.api.lexer.Language;
@@ -52,6 +53,8 @@ import org.netbeans.api.lexer.LanguagePath;
 import org.netbeans.api.lexer.Token;
 import org.netbeans.api.lexer.TokenId;
 import org.netbeans.modules.php.blade.editor.BladeLanguage;
+import static org.netbeans.modules.php.blade.editor.lexer.BladeTokenId.TokenType.TAG_CLOSE_DIRECTIVE;
+import static org.netbeans.modules.php.blade.editor.lexer.BladeTokenId.TokenType.TAG_OPEN_DIRECTIVE;
 import org.netbeans.modules.php.editor.lexer.PHPTokenId;
 import org.netbeans.spi.lexer.LanguageEmbedding;
 import org.netbeans.spi.lexer.LanguageHierarchy;
@@ -59,37 +62,44 @@ import org.netbeans.spi.lexer.Lexer;
 import org.netbeans.spi.lexer.LexerRestartInfo;
 
 /**
- * TODO ADD COMMENTS
+ * Blade token Id
+ * 
  * 
  * @author Haidu Bogdan
  */
 public enum BladeTokenId implements TokenId {
-    T_BLADE_CLOSE_ECHO( "}}", "blade_echo"),
-    T_BLADE_OPEN_ECHO( "{{", "blade_echo" , T_BLADE_CLOSE_ECHO),
-    T_BLADE_CLOSE_ECHO_ESCAPED( "!!}", "blade_echo"),
-    T_BLADE_OPEN_ECHO_ESCAPED( "{!!", "blade_echo", T_BLADE_CLOSE_ECHO_ESCAPED ),
-    T_BLADE_CLOSE_COMMENT( "--}}", "blade_comment"),
-    T_BLADE_OPEN_COMMENT( "{{--", "blade_comment", T_BLADE_CLOSE_COMMENT ),
+    T_BLADE_OPEN_ECHO( "{{", "blade_echo" , TAG_OPEN_DIRECTIVE),
+    T_BLADE_CLOSE_ECHO( "}}", "blade_echo", TAG_CLOSE_DIRECTIVE),
+    T_BLADE_OPEN_ECHO_ESCAPED( "{!!", "blade_echo", TAG_OPEN_DIRECTIVE ),
+    T_BLADE_CLOSE_ECHO_ESCAPED( "!!}", "blade_echo", TAG_CLOSE_DIRECTIVE),
+    T_BLADE_OPEN_COMMENT( "{{--", "blade_comment", TAG_OPEN_DIRECTIVE ),
+    T_BLADE_CLOSE_COMMENT( "--}}", "blade_comment", TAG_CLOSE_DIRECTIVE),
+
     //DIRECTIVES
-    T_BLADE_ENDPHP("@endphp", "blade_directive"),
-    T_BLADE_PHP_OPEN("@php", "blade_directive", T_BLADE_ENDPHP),
-    T_BLADE_ENDSECTION("@endsection", "blade_directive"),
-    T_BLADE_SECTION("@section", "blade_directive", T_BLADE_ENDSECTION),
+    T_BLADE_PHP_OPEN("@php", "blade_directive", TAG_OPEN_DIRECTIVE),
+    T_BLADE_ENDPHP("@endphp", "blade_directive", TAG_CLOSE_DIRECTIVE),
+    T_BLADE_SECTION("@section", "blade_directive", TAG_OPEN_DIRECTIVE),
+    T_BLADE_ENDSECTION("@endsection", "blade_directive", TAG_CLOSE_DIRECTIVE),
+    T_BLADE_STOP("@stop", "blade_directive", TAG_CLOSE_DIRECTIVE),//equivalent to endsection
+    T_BLADE_SHOW("@show", "blade_directive", TAG_CLOSE_DIRECTIVE),//use for section
+    T_BLADE_FOREACH("@foreach", "blade_directive", TAG_OPEN_DIRECTIVE),
+    T_BLADE_ENDFOREACH("@endforeach", "blade_directive", TAG_CLOSE_DIRECTIVE),
+    T_BLADE_FOR("@for", "blade_directive", TAG_OPEN_DIRECTIVE),
+    T_BLADE_ENDFOR("@endfor", "blade_directive", TAG_CLOSE_DIRECTIVE),
+        
+    T_BLADE_IF("@if", "blade_directive", TAG_OPEN_DIRECTIVE),
+    T_BLADE_ELSE("@else", "blade_directive"),
+    T_BLADE_ELSEIF("@elseif", "blade_directive"),
+    T_BLADE_HAS_SECTION("@hasSection", "blade_directive", TAG_OPEN_DIRECTIVE),
+    T_BLADE_SECTION_MISSING("@sectionMissing", "blade_directive", TAG_OPEN_DIRECTIVE),
+    T_BLADE_ENDIF("@endif", "blade_directive", TAG_CLOSE_DIRECTIVE),
+
     T_BLADE_YIELD("@yield", "blade_directive"),
     T_BLADE_PARENT("@parent", "blade_directive"),
     T_BLADE_EXTENDS("@extends", "blade_directive"),
     T_BLADE_INCLUDE("@include", "blade_directive"),
     T_BLADE_EACH("@each", "blade_directive"),
-    T_BLADE_FOREACH("@foreach", "blade_directive"),
-    T_BLADE_FOR("@for", "blade_directive"),
-    T_BLADE_IF("@if", "blade_directive"),
-    T_BLADE_ELSE("@else", "blade_directive"),
-    T_BLADE_ELSEIF("@elseif", "blade_directive"),
-    T_BLADE_ENDFOREACH("@endforeach", "blade_directive"),
     
-    T_BLADE_STOP("@stop", "blade_directive"),
-    T_BLADE_ENDFOR("@endfor", "blade_directive"),
-    T_BLADE_ENDIF("@endif", "blade_directive"),
     //DEFAULT SYNTAX ELEMENTS
     T_BLADE_LPAREN("(", "token"),
     T_BLADE_RPAREN(")", "token"),
@@ -116,31 +126,52 @@ public enum BladeTokenId implements TokenId {
     
     private final String fixedText;
     private final String primaryCategory;
-    public BladeTokenId pair;
+    public TokenType tokenType;
     
     /**
-     * ENUM ??
-     * pairing tags for backward searching braces
+     * pairing tags for braces
      */
-    static final Map<BladeTokenId, BladeTokenId> BLADE_OPEN_PAIR = new HashMap<>();
+    static final Map<BladeTokenId, BladeTokenId> BLADE_PAIR_TOKENS = new HashMap<>();
     
     static {
-        BLADE_OPEN_PAIR.put(T_BLADE_CLOSE_ECHO, T_BLADE_OPEN_ECHO);
-        BLADE_OPEN_PAIR.put(T_BLADE_CLOSE_ECHO_ESCAPED, T_BLADE_CLOSE_ECHO_ESCAPED);
-        BLADE_OPEN_PAIR.put(T_BLADE_CLOSE_COMMENT, T_BLADE_OPEN_COMMENT);
-        BLADE_OPEN_PAIR.put(T_BLADE_ENDPHP, T_BLADE_PHP_OPEN);
+        BLADE_PAIR_TOKENS.put(T_BLADE_OPEN_ECHO, T_BLADE_CLOSE_ECHO);
+        BLADE_PAIR_TOKENS.put(T_BLADE_OPEN_ECHO_ESCAPED, T_BLADE_CLOSE_ECHO_ESCAPED);
+        BLADE_PAIR_TOKENS.put(T_BLADE_OPEN_COMMENT, T_BLADE_CLOSE_COMMENT);
+        BLADE_PAIR_TOKENS.put(T_BLADE_PHP_OPEN, T_BLADE_ENDPHP);
+        BLADE_PAIR_TOKENS.put(T_BLADE_SECTION, T_BLADE_ENDSECTION);
+        BLADE_PAIR_TOKENS.put(T_BLADE_FOREACH, T_BLADE_ENDFOREACH);
+        BLADE_PAIR_TOKENS.put(T_BLADE_FOR, T_BLADE_ENDFOR);
+        BLADE_PAIR_TOKENS.put(T_BLADE_IF, T_BLADE_ENDIF);
+    }
+    
+    /*
+    * reversed pairing
+    */
+    static final Map<BladeTokenId, BladeTokenId> REVERSED_BLADE_PAIR_TOKENS = BLADE_PAIR_TOKENS.entrySet()
+       .stream()
+       .collect(Collectors.toMap(Map.Entry::getValue, Map.Entry::getKey));
+
+    //additional closing tag possiblities
+    static {
+        REVERSED_BLADE_PAIR_TOKENS.put(T_BLADE_STOP, T_BLADE_SECTION);
+        REVERSED_BLADE_PAIR_TOKENS.put(T_BLADE_SHOW, T_BLADE_SECTION);
+    }
+    
+    public static enum TokenType{
+        TAG_OPEN_DIRECTIVE,
+        TAG_CLOSE_DIRECTIVE
     }
 
     BladeTokenId( String fixedText, String primaryCategory ) {
         this.fixedText = fixedText;
         this.primaryCategory = primaryCategory;
-        this.pair = null;
+        this.tokenType = null;
     }
 
-    BladeTokenId( String fixedText, String primaryCategory, BladeTokenId pair ) {
+    BladeTokenId( String fixedText, String primaryCategory, TokenType pair ) {
         this.fixedText = fixedText;
         this.primaryCategory = primaryCategory;
-        this.pair = pair;
+        this.tokenType = pair;
     }
     
     public String fixedText() {
@@ -151,9 +182,13 @@ public enum BladeTokenId implements TokenId {
     public String primaryCategory() {
         return primaryCategory;
     }
+        
+    public BladeTokenId getPairStart(BladeTokenId token){
+        return REVERSED_BLADE_PAIR_TOKENS.get(token);
+    }
     
-    public BladeTokenId getOpenPair(BladeTokenId token){
-        return BLADE_OPEN_PAIR.get(token);
+    public BladeTokenId getPairClose(BladeTokenId token){
+        return BLADE_PAIR_TOKENS.get(token);
     }
     
     private static final Language<BladeTokenId> LANGUAGE =

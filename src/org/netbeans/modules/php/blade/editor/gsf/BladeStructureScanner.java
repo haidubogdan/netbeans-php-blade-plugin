@@ -68,6 +68,7 @@ import org.netbeans.modules.php.blade.editor.parsing.astnodes.InLineBladePhp;
 import org.netbeans.modules.php.blade.editor.parsing.astnodes.Statement;
 import org.netbeans.modules.php.blade.editor.parsing.astnodes.StructureModelItem;
 import org.netbeans.modules.php.blade.editor.parsing.astnodes.BladeExtendsStatement;
+import org.netbeans.modules.php.blade.editor.parsing.astnodes.DirectiveWithPath;
 import org.netbeans.modules.php.blade.editor.parsing.astnodes.Expression;
 import org.netbeans.modules.php.blade.editor.parsing.astnodes.InlineDirectiveStatement;
 import org.openide.filesystems.FileObject;
@@ -78,13 +79,14 @@ import org.openide.util.ImageUtilities;
  * @author Haidu Bogdan
  */
 public class BladeStructureScanner implements StructureScanner {
-    private static final String ICON_BASE = "org/netbeans/modules/php/blade/resources/";
-    List<OffsetRange> ranges = new ArrayList<OffsetRange>();
+
+    private static final String ICON_BASE = "org/netbeans/modules/php/blade/resources/"; //NOI18N
+    List<OffsetRange> ranges = new ArrayList<>();
 
     @Override
     public List<? extends StructureItem> scan(ParserResult info) {
         BladeParserResult result = (BladeParserResult) info;
-        List<BaseBladeStructureItem> items = new ArrayList<BaseBladeStructureItem>();
+        List<BaseBladeStructureItem> items = new ArrayList<>();
 
         BladeProgram program = result.getProgram();
 
@@ -92,7 +94,12 @@ public class BladeStructureScanner implements StructureScanner {
             List<Statement> statements = program.getStatements();
             for (Statement statement : statements) {
                 if (statement instanceof StructureModelItem) {
-                    if (statement instanceof InLineBladePhp) {
+                    if (statement instanceof BladeExtendsStatement) {
+                        Expression label = ((BladeExtendsStatement) statement).getLabel();
+                        if (!(label instanceof ASTErrorExpression)) {
+                            items.add(new ExtendsBladeStructureItem(statement, result.getSnapshot()));
+                        }
+                    } else if (statement instanceof InLineBladePhp) {
                         items.add(new BaseBladeStructureItem(statement, result.getSnapshot(), "php"));
                     } else if (statement instanceof DirectiveExpressionBlock) {
                         Block body = ((DirectiveExpressionBlock) statement).getBody();
@@ -102,14 +109,8 @@ public class BladeStructureScanner implements StructureScanner {
                         if (!(label instanceof ASTErrorExpression)) {
                             items.add(new InlineBladeStructureItem(statement, result.getSnapshot()));
                         }
-                    } else if (statement instanceof BladeConstDirectiveStatement){
+                    } else if (statement instanceof BladeConstDirectiveStatement) {
                         items.add(new InlineBladeStructureItem(statement, result.getSnapshot()));
-                    }
-                } else if (statement instanceof BladeExtendsStatement) {
-                    Expression label = ((BladeExtendsStatement) statement).getLabel();
-                    if (!(label instanceof ASTErrorExpression)) {
-                        Block body = ((DirectiveExpressionBlock) statement).getBody();
-                        items.add(new ExtendsBladeStructureItem(statement, result.getSnapshot(), body));
                     }
                 }
             }
@@ -181,7 +182,7 @@ public class BladeStructureScanner implements StructureScanner {
                 for (Statement st : body.getStatements()) {
                     if (st instanceof InLineBladePhp) {
                         items.add(new BaseBladeStructureItem(st, snapshot, "php"));
-                    }  else if (st instanceof DirectiveExpressionBlock) {
+                    } else if (st instanceof DirectiveExpressionBlock) {
                         Block block = ((DirectiveExpressionBlock) st).getBody();
                         items.add(new BaseBladeStructureItem(st, snapshot, block, "bl"));
                     } else if (st instanceof InlineDirectiveStatement) {
@@ -197,6 +198,10 @@ public class BladeStructureScanner implements StructureScanner {
         @Override
         public String getName() {
             return statement.toString();
+        }
+
+        public String getLabel() {
+            return ((DirectiveWithPath) statement).getLabel().toString();
         }
 
         @Override
@@ -284,8 +289,18 @@ public class BladeStructureScanner implements StructureScanner {
         }
 
         @Override
+        public ImageIcon getCustomIcon() {
+            return ImageUtilities.loadImageIcon(ICON_BASE + "icons/layout.png", false);
+        }
+
+        @Override
         public ElementKind getKind() {
             return ElementKind.PACKAGE;
+        }
+
+        @Override
+        public String getHtml(HtmlFormatter hf) {
+            return "- layout <em>" + getLabel() + "</em>";
         }
     }
 

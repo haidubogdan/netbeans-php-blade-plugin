@@ -97,32 +97,32 @@ parser code {:
     }
 :}; 
 
-terminal T_INLINE_HTML, T_INLINE_PHP;
-terminal T_BLADE_COMMENT, T_BLADE_OPEN_ECHO, T_BLADE_CLOSE_ECHO;
-terminal T_BLADE_INLINE_PHP;
-terminal T_BLADE_INCLUDE;
-terminal T_BLADE_INCLUDE_FIRST, T_BLADE_INCLUDE_CONDITIONAL;
-terminal T_PARAMETER_EXPRESSION;
-terminal T_BLADE_SECTION;
-terminal T_BLADE_ENDSECTION, T_BLADE_STOP, T_BLADE_OVERWRITE, T_BLADE_APPEND;
-terminal T_BLADE_SHOW;
-terminal T_BLADE_EXTENDS;
-terminal T_BLADE_YIELD;
-terminal T_BLADE_EACH;
+terminal String T_INLINE_HTML, T_INLINE_PHP, T_BLADE_INLINE_PHP;
+terminal String T_BLADE_COMMENT;
+terminal String T_BLADE_OPEN_ECHO, T_BLADE_CLOSE_ECHO;
+terminal String T_BLADE_INCLUDE;
+terminal String T_BLADE_INCLUDE_FIRST, T_BLADE_INCLUDE_CONDITIONAL;
+terminal String T_PARAMETER_EXPRESSION;
+terminal String T_BLADE_SECTION;
+terminal String T_BLADE_ENDSECTION, T_BLADE_STOP, T_BLADE_OVERWRITE, T_BLADE_APPEND;
+terminal String T_BLADE_SHOW;
+terminal String T_BLADE_EXTENDS;
+terminal String T_BLADE_YIELD;
+terminal String T_BLADE_EACH;
 
-terminal T_BLADE_FOREACH;
-terminal T_BLADE_ENDFOREACH;
-terminal T_BLADE_FOR;
-terminal T_BLADE_ENDFOR;
-terminal T_BLADE_IF, T_BLADE_CONDITION_OPEN_TAG;
-terminal T_BLADE_ELSEIF;
-terminal T_BLADE_ELSEIF_END; //pseudo symbol to mark a else if end
-terminal T_BLADE_ENDIF;
-terminal T_BLADE_SWITCH, T_BLADE_ENDSWITCH;
-terminal T_BLADE_DIRECTIVE;
-terminal T_PHP_LOOP_EXPRESSION, T_BLADE_PHP_ECHO;
-terminal T_PHP_CONDITION_EXPRESSION;
-terminal T_PHP_PARAMETER_EXPRESSION;
+terminal String T_BLADE_FOREACH;
+terminal String T_BLADE_ENDFOREACH;
+terminal String T_BLADE_FOR;
+terminal String T_BLADE_ENDFOR;
+terminal String T_BLADE_IF, T_BLADE_CONDITION_OPEN_TAG;
+terminal String T_BLADE_ELSEIF;
+terminal String T_BLADE_ELSEIF_END; //pseudo symbol to mark a else if end
+terminal String T_BLADE_ENDIF;
+terminal String T_BLADE_SWITCH, T_BLADE_ENDSWITCH;
+terminal String T_BLADE_DIRECTIVE;
+terminal String T_PHP_LOOP_EXPRESSION, T_BLADE_PHP_ECHO;
+terminal String T_PHP_CONDITION_EXPRESSION;
+terminal String T_PHP_PARAMETER_EXPRESSION;
 
 terminal String T_STRING;
 terminal String T_VARIABLE;
@@ -171,7 +171,6 @@ top_statement_list:statementList
 :}
 ;
 
-
 top_statement_list ::=
 top_statement_list:sList top_statement:statement
 {:
@@ -217,17 +216,15 @@ directive_statement:stm {:
 :}
 | T_BLADE_EXTENDS:exts path_expression:path {:
     //for the moment until we find to make use of <<EOL>>
-    Block block = null;
     DirectiveName directive = new DirectiveName(extsleft, extsright, exts.toString());
-    RESULT = new BladeExtendsStatement(extsleft, pathright, directive, path, block, null);
+    RESULT = new BladeExtendsStatement(extsleft, pathright, directive, path);
 :}
 | T_BLADE_EXTENDS:exts T_OPEN_PARENTHESE:po variable:path T_COMMA T_PHP_PARAMETER_EXPRESSION:p T_CLOSE_PARENTHESE:end {:
     //for the moment until we find to make use of <<EOL>>
-    Block block = null;
     PhpExpression parameter = new PhpExpression(pleft, pright, p.toString());
     DirectiveName directive = new DirectiveName(extsleft, extsright, exts.toString());
     ArgumentExpression expr = new ArgumentExpression(path, poleft, endright, parameter);
-    RESULT = new BladeExtendsStatement(extsleft, endright, directive, expr, block, null);
+    RESULT = new BladeExtendsStatement(extsleft, endright, directive, expr);
 :}
 | T_BLADE_YIELD:d T_OPEN_PARENTHESE:po yield_label:s T_CLOSE_PARENTHESE:end {:
     String strPath = "";
@@ -333,16 +330,16 @@ directive_statement:stm {:
 :}
 | T_BLADE_FOREACH:d T_PHP_LOOP_EXPRESSION:s inner_statement_list:statementList T_BLADE_ENDFOREACH:end {:
     Block block = new Block(statementListleft, statementListright, statementList);
-    PhpExpression loopExpr = new PhpExpression(sleft, sright, s.toString());
-    DirectiveName directive = new DirectiveName(dleft, dright, d.toString());
+    PhpExpression loopExpr = new PhpExpression(sleft, sright, s);
+    DirectiveName directive = new DirectiveName(dleft, dright, d);
     ArgumentExpression expr = new ArgumentExpression(loopExpr, sleft, sright);
     DirectiveEndTag endTag = new DirectiveEndTag(endleft, endright, end.toString());
     RESULT = new BladeForeachStatement(dleft, endright, directive, expr, block, endTag);
 :}
 | T_BLADE_FOR:d T_PHP_LOOP_EXPRESSION:s inner_statement_list:statementList T_BLADE_ENDFOR:end {:
     Block block = new Block(statementListleft, statementListright, statementList);
-    PhpExpression loopExpr = new PhpExpression(sleft, sright, s.toString());
-    DirectiveName directive = new DirectiveName(dleft, dright, d.toString());
+    PhpExpression loopExpr = new PhpExpression(sleft, sright, s);
+    DirectiveName directive = new DirectiveName(dleft, dright, d);
     ArgumentExpression expr = new ArgumentExpression(loopExpr, sleft, sright);
     DirectiveEndTag endTag = new DirectiveEndTag(endleft, endright, end.toString());
     RESULT = new BladeForStatement(dleft, endright, directive, expr, block, endTag);
@@ -400,19 +397,19 @@ directive_statement:stm {:
     RESULT = new BladeConstDirectiveStatement(dleft, dright, directive);
 :}
 | T_BLADE_OPEN_ECHO:token T_BLADE_PHP_ECHO:php T_BLADE_CLOSE_ECHO:end {:
-    Expression expr = new PhpExpression(phpleft, phpright, php.toString());
-    RESULT = new BladeEchoStatement(tokenleft, endright, token.toString(), expr);
+    Expression expr = new PhpExpression(phpleft, phpright, php);
+    RESULT = new BladeEchoStatement(tokenleft, endright, token, expr);
 :}
 | T_INLINE_HTML:html {:
-    InLineHtml inLineHtml = new InLineHtml(htmlleft, htmlright, html.toString());
+    InLineHtml inLineHtml = new InLineHtml(htmlleft, htmlright, html);
     RESULT = inLineHtml;
 :}
 | T_INLINE_PHP:php {:
-    InLinePhp inLinePhp = new InLinePhp(phpleft, phpright, php.toString());
+    InLinePhp inLinePhp = new InLinePhp(phpleft, phpright, php);
     RESULT = inLinePhp;
 :}
 | T_BLADE_INLINE_PHP:php {:
-    InLineBladePhp inLinePhp = new InLineBladePhp(phpleft, phpright, php.toString());
+    InLineBladePhp inLinePhp = new InLineBladePhp(phpleft, phpright, php);
     RESULT = inLinePhp;
 :}
 | T_STRING:html {:
@@ -427,7 +424,7 @@ directive_statement:stm {:
 :}
 | T_BLADE_COMMENT:comment {:
     /* comment */
-    BladeComment commentSt = new BladeComment(commentleft, commentright, comment.toString());
+    BladeComment commentSt = new BladeComment(commentleft, commentright, comment);
     RESULT = commentSt;
 :}
 

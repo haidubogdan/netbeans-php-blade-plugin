@@ -42,13 +42,13 @@
 
 package org.netbeans.modules.php.blade.editor.lexer;
 
+import org.netbeans.api.lexer.TokenId;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.netbeans.spi.lexer.LexerInput;
 import org.netbeans.spi.lexer.LexerRestartInfo;
 import org.netbeans.modules.php.blade.editor.common.ByteStack;
 
-@org.netbeans.api.annotations.common.SuppressWarnings({"SF_SWITCH_FALLTHROUGH", "URF_UNREAD_FIELD", "DLS_DEAD_LOCAL_STORE", "DM_DEFAULT_ENCODING", "EI_EXPOSE_REP"})
 %%
 %public
 %class BladeColoringLexer
@@ -68,7 +68,7 @@ import org.netbeans.modules.php.blade.editor.common.ByteStack;
     //[\"][^\:\"]+[\:]{1}[^\:]
     private Pattern freezePhpPattern = Pattern.compile("[^\\:\\\"\\)]+[\\:]{1}[^\\:]", Pattern.CASE_INSENSITIVE);
 
-    public BladeColoringLexer(LexerRestartInfo info) {
+    public BladeColoringLexer(LexerRestartInfo<? extends TokenId> info) {
         this.input = info.input();
         if(info.state() != null) {
             //reset state
@@ -286,12 +286,21 @@ OPEN_PHP_ECHO = "<?="
     "@section" {
        pushState(ST_LOOKING_FOR_PARAMETER_EXPRESSION);
        return BladeTokenId.T_BLADE_SECTION;
-   }
+    }
+    "@hasSection" {
+       pushState(ST_LOOKING_FOR_PARAMETER_EXPRESSION);
+       return BladeTokenId.T_BLADE_HAS_SECTION;
+    }
+    "@sectionMissing" {
+       pushState(ST_LOOKING_FOR_PARAMETER_EXPRESSION);
+       return BladeTokenId.T_BLADE_SECTION_MISSING;
+    }
 }
 
 <ST_HTML>{
     "@parent" { return BladeTokenId.T_BLADE_PARENT;}
     "@stop" { return BladeTokenId.T_BLADE_STOP;}
+    "@show" { return BladeTokenId.T_BLADE_SHOW;}
     "@endsection" { 
         return BladeTokenId.T_BLADE_ENDSECTION;
     }
@@ -346,11 +355,11 @@ OPEN_PHP_ECHO = "<?="
 <ST_HTML>{
     "@if" { 
         pushState(ST_LOOKING_FOR_PARAMETER_EXPRESSION);
-        return BladeTokenId.T_BLADE_FOREACH;
+        return BladeTokenId.T_BLADE_IF;
     }
     "@elseif" { 
         pushState(ST_LOOKING_FOR_PARAMETER_EXPRESSION);
-        return BladeTokenId.T_BLADE_FOR;
+        return BladeTokenId.T_BLADE_ELSEIF;
     }
 }
 

@@ -244,6 +244,7 @@ public class TokenFormatter {
             private int indent = 0;
             
             private int suggestedIndent(int changeOffset) {
+                @SuppressWarnings("unchecked")
                 Map<Integer, Integer> suggestedLineIndents = (Map<Integer, Integer>) doc.getProperty("AbstractIndenter.lineIndents"); // NOI18N
                 try {
                     int lineNumber = LineDocumentUtils.getLineIndex(doc, changeOffset);

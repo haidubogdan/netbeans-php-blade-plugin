@@ -21,7 +21,6 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import org.netbeans.modules.csl.api.OffsetRange;
 import org.netbeans.modules.php.blade.editor.BladeLanguage;
-import org.netbeans.modules.php.blade.editor.model.index.BladeIndexModelSupport;
 import org.netbeans.modules.php.blade.editor.index.BladeIndexer;
 import org.netbeans.modules.parsing.spi.indexing.support.IndexResult;
 import org.netbeans.modules.parsing.spi.indexing.support.QuerySupport;
@@ -101,7 +100,7 @@ public class BladeIndex {
     private static final Map<CacheKey, SoftReference<CacheValue>> CACHE_INDEX_RESULT_SMALL = new LinkedHashMap<CacheKey, SoftReference<CacheValue>>(
             MAX_ENTRIES_CACHE_INDEX_RESULT + 1, 0.75F, true) {
         @Override
-        public boolean removeEldestEntry(Map.Entry eldest) {
+        public boolean removeEldestEntry(Map.Entry<CacheKey,SoftReference<CacheValue>> eldest) {
             return size() > MAX_ENTRIES_CACHE_INDEX_RESULT;
         }
     };
@@ -110,7 +109,7 @@ public class BladeIndex {
     private static final Map<CacheKey, SoftReference<CacheValue>> CACHE_INDEX_RESULT_LARGE = new LinkedHashMap<CacheKey, SoftReference<CacheValue>>(
             (MAX_ENTRIES_CACHE_INDEX_RESULT / 4) + 1, 0.75F, true) {
         @Override
-        public boolean removeEldestEntry(Map.Entry eldest) {
+        public boolean removeEldestEntry(Map.Entry<CacheKey,SoftReference<CacheValue>> eldest) {
             return size() > (MAX_ENTRIES_CACHE_INDEX_RESULT / 4);
         }
     };
@@ -149,67 +148,6 @@ public class BladeIndex {
                 Collections.<String>emptyList(),
                 Collections.<String>emptyList());
         this.querySupport = QuerySupport.forRoots(BladeIndexer.Factory.NAME, BladeIndexer.Factory.VERSION, sourceRoots.toArray(new FileObject[]{}));
-    }
-
-    /**
-     * Creates an instance of {@link BladeIndexModel} for the given file and
-     * factory type.
-     * not used in the current indexing process
-     *
-     * @param <T> the type of requested {@link BladeIndexModel}
-     * @param factoryClass class of the {@link BladeIndexModelFactory}
-     * @param file the file you want to get the model for
-     * @return instance of the model or null if the model cann't be build upon
-     * the requested file index data.
-     * @throws IOException
-     */
-    public <T extends BladeIndexModel> T getIndexModel(Class factoryClass, FileObject file) throws IOException {
-        if (file == null) {
-            throw new NullPointerException("The file argument cannot be null!");
-        }
-        BladeIndexModelFactory<T> factory = BladeIndexModelSupport.getFactory(factoryClass);
-        if (factory == null) {
-            throw new IllegalArgumentException(String.format("No %s class registered as a system service!", factoryClass.getName()));
-        }
-        final Collection<String> fieldsToLoad = factory.getIndexKeys();
-        final Collection<? extends IndexResult> results = querySupport.getQueryFactory().file(file).execute(
-                fieldsToLoad.toArray(new String[fieldsToLoad.size()]));
-        if (!results.isEmpty()) {
-            return factory.loadFromIndex(results.iterator().next());
-        }
-        return null;
-    }
-
-    public <T extends BladeIndexModel> Map<FileObject, T> getIndexModels(Class factoryClass) throws IOException {
-        BladeIndexModelFactory<T> factory = BladeIndexModelSupport.getFactory(factoryClass);
-        if (factory == null) {
-            throw new IllegalArgumentException(String.format("No %s class registered as a system service!", factoryClass.getName()));
-        }
-
-        Collection<? extends IndexResult> results
-                = querySupport.query(BladeIndexer.BLADE_CONTENT_KEY, "", QuerySupport.Kind.PREFIX, factory.getIndexKeys().toArray(new String[0]));
-
-        Map<FileObject, T> file2model = new HashMap<>();
-        for (IndexResult result : results) {
-            file2model.put(result.getFile(), factory.loadFromIndex(result));
-        }
-        return file2model;
-    }
-
-    public <T extends BladeIndexModel> Map<FileObject, T> getIndexModelsByPrefix(Class factoryClass, String prefix) throws IOException {
-        BladeIndexModelFactory<T> factory = BladeIndexModelSupport.getFactory(factoryClass);
-        if (factory == null) {
-            throw new IllegalArgumentException(String.format("No %s class registered as a system service!", factoryClass.getName()));
-        }
-
-        Collection<? extends IndexResult> results
-                = querySupport.query(BladeIndexer.BLADE_CONTENT_KEY, prefix, QuerySupport.Kind.PREFIX, factory.getIndexKeys().toArray(new String[0]));
-
-        Map<FileObject, T> file2model = new HashMap<>();
-        for (IndexResult result : results) {
-            file2model.put(result.getFile(), factory.loadFromIndex(result));
-        }
-        return file2model;
     }
 
     /**

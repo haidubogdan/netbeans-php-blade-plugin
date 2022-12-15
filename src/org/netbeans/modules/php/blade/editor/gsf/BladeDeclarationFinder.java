@@ -1,8 +1,10 @@
 package org.netbeans.modules.php.blade.editor.gsf;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import org.netbeans.modules.php.blade.editor.BladeLanguage;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Set;
 import javax.swing.text.Document;
 import org.netbeans.api.lexer.Token;
@@ -432,7 +434,7 @@ public class BladeDeclarationFinder implements DeclarationFinder {
 
         @Override
         public Set<Modifier> getModifiers() {
-            return Collections.EMPTY_SET;
+            return new HashSet<>();
         }
 
         @Override
@@ -482,7 +484,7 @@ public class BladeDeclarationFinder implements DeclarationFinder {
 
         @Override
         public Set<Modifier> getModifiers() {
-            return Collections.EMPTY_SET;
+            return new HashSet<>();
         }
 
         @Override

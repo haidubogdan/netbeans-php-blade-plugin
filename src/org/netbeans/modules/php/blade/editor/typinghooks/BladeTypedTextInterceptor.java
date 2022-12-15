@@ -139,7 +139,7 @@ public class BladeTypedTextInterceptor implements TypedTextInterceptor {
             return;
         }
 
-        String pairText = id.pair.fixedText();
+        String pairText = id.getPairClose(id).fixedText();
         
         StringBuilder sb = new StringBuilder();
         sb.append("  ");

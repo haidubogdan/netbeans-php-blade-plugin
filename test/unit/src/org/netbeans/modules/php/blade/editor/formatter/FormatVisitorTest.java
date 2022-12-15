@@ -154,7 +154,7 @@ public class FormatVisitorTest extends BladeTestBase {
         performTest("format/if_simple.blade");
     }
 
-    public BaseDocument getDocument(String s, final String mimeType, final Language language) {
+    public BaseDocument getDocument(String s, final String mimeType, final Language<?> language) {
         try {
             BaseDocument doc = new BaseDocument(true, mimeType) {
                 @Override

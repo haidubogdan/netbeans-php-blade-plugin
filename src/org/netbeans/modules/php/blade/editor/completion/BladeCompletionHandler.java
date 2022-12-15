@@ -519,6 +519,7 @@ public class BladeCompletionHandler implements CodeCompletionHandler2 {
     }
 
     @Override
+    @SuppressWarnings("rawtypes")
     public String resolveTemplateVariable(String string, ParserResult pr, int i, String string1, Map map) {
         return null;
     }

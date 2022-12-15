@@ -42,9 +42,6 @@
 package org.netbeans.modules.php.blade.editor;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.EnumMap;
 import javax.swing.text.AbstractDocument;
 import javax.swing.text.BadLocationException;
 import org.netbeans.modules.php.blade.editor.lexer.BladeLexerUtils;
@@ -57,7 +54,7 @@ import org.netbeans.spi.editor.bracesmatching.BracesMatcherFactory;
 import org.netbeans.spi.editor.bracesmatching.MatcherContext;
 
 /**
- * highlight block tags directives TODO maybe use a block scope impl
+ * highlight block tags directives using just the coloring token id
  *
  * @author Haidu Bogdan
  */
@@ -65,164 +62,104 @@ public class BladeBracesMatcher implements BracesMatcher {
 
     private final MatcherContext context;
 
-    private static Collection<BladeTokenId> TOKENS_WITH_ENDTAGS = Arrays.asList(
-            BladeTokenId.T_BLADE_PHP_OPEN,
-            BladeTokenId.T_BLADE_IF,
-            BladeTokenId.T_BLADE_FOR,
-            BladeTokenId.T_BLADE_FOREACH,
-            BladeTokenId.T_BLADE_SECTION //@section with second parameter can be standalone also
-    );
-
-    private static Collection<BladeTokenId> TOKEN_END_TAGS = Arrays.asList(
-            BladeTokenId.T_BLADE_ENDFOREACH,
-            BladeTokenId.T_BLADE_ENDFOR,
-            BladeTokenId.T_BLADE_ENDIF,
-            BladeTokenId.T_BLADE_ENDSECTION,
-            BladeTokenId.T_BLADE_ENDPHP
-    );
-
-    private static Collection<BladeTokenId> TOKEN_OPEN_TAGS = Arrays.asList(
-            BladeTokenId.T_BLADE_OPEN_ECHO,
-            BladeTokenId.T_BLADE_OPEN_ECHO_ESCAPED
-    );
-
-    private static Collection<BladeTokenId> TOKEN_CLOSE_TAGS = Arrays.asList(
-            BladeTokenId.T_BLADE_CLOSE_ECHO,
-            BladeTokenId.T_BLADE_CLOSE_ECHO_ESCAPED
-    );
-
     private BladeBracesMatcher(MatcherContext context) {
         this.context = context;
     }
 
     @Override
     public int[] findOrigin() throws InterruptedException, BadLocationException {
-        int searchOffset = context.getSearchOffset();
         ((AbstractDocument) context.getDocument()).readLock();
         try {
             TokenSequence<BladeTokenId> ts = BladeLexerUtils.getBladeTokenSequence(context.getDocument());
-
-            while (searchOffset != context.getLimitOffset()) {
-                int diff = ts.move(searchOffset);
-                searchOffset = searchOffset + (context.isSearchingBackward() ? -1 : +1);
-
-                if (diff == 0 && context.isSearchingBackward()) {
-                    //we are searching backward and the offset is at the token boundary
-                    if (!ts.movePrevious()) {
-                        continue;
-                    }
-                } else {
-                    if (!ts.moveNext()) {
-                        continue;
-                    }
-                }
-                Token<? extends BladeTokenId> t = ts.token();
-                int toffs = ts.offset();
-                String tText = t.text().toString();
-                BladeTokenId id = t.id();
-                BladeTokenId pairToken = id.pair;
-                BladeTokenId openPair;
-                
-                if (pairToken != null || (openPair = id.getOpenPair(id)) != null) {
-                    return new int[]{toffs, toffs + tText.length()};
-                } else if (TOKENS_WITH_ENDTAGS.contains(id)) {
-                    return new int[]{toffs, toffs + tText.trim().length()};
-                } else if (BladeSyntax.DIRECTIVES_WITH_ENDTAGS.contains(tText.trim())) {
-                    return new int[]{toffs, toffs + tText.trim().length()};
-                } else if (BladeSyntax.CONDITIONAL_DIRECTIVES.contains(tText.trim())) {
-                    return new int[]{toffs, toffs + tText.trim().length()};
-                } else if (id == BladeTokenId.T_BLADE_LPAREN) {
-                    //we will try to get the directive tag
-                    ts.move(searchOffset - 1);
-                    if (!ts.movePrevious()) {
-                        continue;
-                    }
-                    Token<? extends BladeTokenId> dToken = ts.token();
-                    int directiveOffs = ts.offset();
-                    String dText = dToken.text().toString();
-                    if (TOKENS_WITH_ENDTAGS.contains(dToken.id())) {
-                        return new int[]{directiveOffs, directiveOffs + dText.trim().length()};
-                    }
-                } else if (TOKEN_END_TAGS.contains(id)) {
-                    return new int[]{toffs, toffs + tText.length()};
-                } else if (tText.trim().startsWith("@end")) {
-                    String tagOpen = "@" + tText.trim().substring(4);
-                    if (BladeSyntax.DIRECTIVES_WITH_ENDTAGS.contains(tagOpen)) {
-                        return new int[]{toffs, toffs + tText.trim().length()};
-                    }
-                    return null;
-                }
+            ts.move(context.getSearchOffset());
+            if (!ts.moveNext()) {
+                return null;
             }
+            Token<? extends BladeTokenId> currentToken = ts.token();
+            if (currentToken == null) {
+                return null;
+            }
+            int toffs = ts.offset();
+            String tText = currentToken.text().toString();
+            BladeTokenId id = currentToken.id();
+
+            if (id.getPairStart(id) != null || id.getPairClose(id) != null) {
+                //tag with pair tokenId configured
+                return new int[]{toffs, toffs + tText.length()};
+            } else if (BladeSyntax.DIRECTIVES_WITH_ENDTAGS.contains(tText.trim())) {
+                //tag with end tag which is not treated by BladeTokenId
+                return new int[]{toffs, toffs + tText.trim().length()};
+            }
+
             return null;
         } finally {
             ((AbstractDocument) context.getDocument()).readUnlock();
         }
     }
 
+    /**
+     * searching for end tag | open tag
+     *
+     * @return
+     * @throws InterruptedException
+     * @throws BadLocationException
+     */
     @Override
     public int[] findMatches() throws InterruptedException, BadLocationException {
-        int searchOffset = context.getSearchOffset();
         ((AbstractDocument) context.getDocument()).readLock();
         try {
             TokenSequence<BladeTokenId> ts = BladeLexerUtils.getBladeTokenSequence(context.getDocument());
+            ts.move(context.getSearchOffset());
+            if (!ts.moveNext()) {
+                return null;
+            }
+            Token<? extends BladeTokenId> currentToken = ts.token();
+            if (currentToken == null) {
+                return null;
+            }
+            OffsetRange r;
+            String tText = currentToken.text().toString();
+            BladeTokenId id = currentToken.id();
 
-            while (searchOffset != context.getLimitOffset()) {
-                int diff = ts.move(searchOffset);
-                searchOffset = searchOffset + (context.isSearchingBackward() ? -1 : +1);
+            BladeTokenId closeToken = null;
+            BladeTokenId openToken = null;
 
-                if (diff == 0 && context.isSearchingBackward()) {
-                    //we are searching backward and the offset is at the token boundary
-                    if (!ts.movePrevious()) {
-                        continue;
-                    }
-                } else {
-                    if (!ts.moveNext()) {
-                        continue;
-                    }
+            switch (id.tokenType) {
+                case TAG_OPEN_DIRECTIVE:
+                    closeToken = id.getPairClose(id);
+                    break;
+                case TAG_CLOSE_DIRECTIVE:
+                    openToken = id.getPairStart(id);
+                    break;
+            }
+
+            if (closeToken != null) {
+                if (id.equals(BladeTokenId.T_BLADE_SECTION)) {
+                    //we can have multiple brackets for @section
+                    BladeTokenId[] tokenDownIds = {closeToken, BladeTokenId.T_BLADE_SHOW, BladeTokenId.T_BLADE_STOP};
+                    String[] endTagsText = {closeToken.fixedText(), "@show", "@stop"};
+                    r = BladeLexerUtils.findFwd(ts, tokenDownIds, endTagsText);
+                    return new int[]{r.getStart(), r.getEnd()};
                 }
-                OffsetRange r;
-                Token<? extends BladeTokenId> t = ts.token();
-                String tText = t.text().toString();
-                BladeTokenId id = t.id();
-
-                BladeTokenId pairToken = id.pair;
-                BladeTokenId openPair;
-//                BladeTokenId closeToken = 
-                //EnumMap<BracesOpen, String> enumMap = new EnumMap<>(BracesOpen.class);
-                if (pairToken != null) {
-                    r = BladeLexerUtils.findFwd(ts, pairToken, pairToken.fixedText());
+                r = BladeLexerUtils.findFwd(ts, closeToken, closeToken.fixedText());
+                return new int[]{r.getStart(), r.getEnd()};
+            } else if (openToken != null) {
+                r = BladeLexerUtils.findBack(ts, openToken, openToken.fixedText());
+                return new int[]{r.getStart(), r.getEnd()};
+            } else if (BladeSyntax.DIRECTIVES_WITH_ENDTAGS.contains(tText.trim())) {
+                //from @{tag} to @end{tag}
+                String name = tText.trim().substring(1);
+                r = BladeLexerUtils.findFwd(ts, "@end" + name, tText.trim());
+                return new int[]{r.getStart(), r.getEnd()};
+            } else if (tText.trim().startsWith("@end")) {
+                //reverse from @end{tag} to @{tag}
+                String tagOpen = "@" + tText.trim().substring(4);
+                if (BladeSyntax.DIRECTIVES_WITH_ENDTAGS.contains(tagOpen)) {
+                    r = BladeLexerUtils.findBack(ts, tagOpen, tText.trim(), new ArrayList<String>() {
+                    });
                     return new int[]{r.getStart(), r.getEnd()};
-                } else if ((openPair = id.getOpenPair(id)) != null) {
-                    r = BladeLexerUtils.findBack(ts, openPair, openPair.fixedText());
-                    return new int[]{r.getStart(), r.getEnd()};
-                }  else if (TOKENS_WITH_ENDTAGS.contains(t.id()) || BladeSyntax.DIRECTIVES_WITH_ENDTAGS.contains(tText.trim())) {
-                    String name = tText.trim().substring(1);
-                    r = BladeLexerUtils.findFwd(ts, "@end" + name, tText.trim());
-                    return new int[]{r.getStart(), r.getEnd()};
-                } else if (TOKEN_END_TAGS.contains(id)) {
-                    String tokenTest = tText.trim();
-                    String name = "@" + tokenTest.substring(4);
-                    Collection<String> optionalMatches = new ArrayList<String>() {
-                    };
-                    if (tokenTest.equals("@endif")) {
-                        optionalMatches.add("@hasSection");
-                        optionalMatches.add("@missingSection");
-                    }
-                    r = BladeLexerUtils.findBack(ts, name, tText.trim(), optionalMatches);
-                    return new int[]{r.getStart(), r.getEnd()};
-                } else if (BladeSyntax.CONDITIONAL_DIRECTIVES.contains(tText.trim())) {
-                    Collection<String> optionalMatches = Arrays.asList("@hasSection", "@missingSection");
-                    r = BladeLexerUtils.findFwd(ts, "@endif", tText.trim(), optionalMatches);
-                    return new int[]{r.getStart(), r.getEnd()};
-                } else if (tText.trim().startsWith("@end")) {
-                    String tagOpen = "@" + tText.trim().substring(4);
-                    if (BladeSyntax.DIRECTIVES_WITH_ENDTAGS.contains(tagOpen)) {
-                        r = BladeLexerUtils.findBack(ts, tagOpen, tText.trim(), new ArrayList<String>() {
-                        });
-                        return new int[]{r.getStart(), r.getEnd()};
-                    }
-                    return null;
                 }
+                return null;
             }
             return null;
         } finally {
@@ -230,7 +167,9 @@ public class BladeBracesMatcher implements BracesMatcher {
         }
     }
 
-    //factory
+    /**
+     * BracesMatcherFactory
+     */
     public static final class Factory implements BracesMatcherFactory {
 
         @Override
@@ -239,6 +178,5 @@ public class BladeBracesMatcher implements BracesMatcher {
         }
 
     }
-
 
 }

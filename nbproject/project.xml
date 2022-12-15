@@ -143,7 +143,7 @@
                     <compile-dependency/>
                     <run-dependency>
                         <release-version>3</release-version>
-                        <specification-version>3.46.1.22.43</specification-version>
+                        <specification-version>4.24.0.23.3.55</specification-version>
                     </run-dependency>
                 </dependency>
                 <dependency>

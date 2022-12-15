@@ -16,7 +16,7 @@
     </target>
     
     <!-- BLADE section - generating BLADE lexer -->
-    <target name="netbeans-extra" depends="prepare-jflex">
+    <target name="gen-blade-lexer" depends="prepare-jflex">
         <jflex file="tools/BladeColoringLexer.flex" skel="tools/blade_coloring.skeleton" destdir="src" nobak="true"/>
         <!--patching the lexer customisation-->
         <replace file="src/org/netbeans/modules/php/blade/editor/lexer/BladeColoringLexer.java">
@@ -51,6 +51,28 @@
           }]]></replacetoken>
             <replacevalue></replacevalue>
         </replace>
+    </target>
+    <target name="gen-ast-blade-scanner" depends="prepare-jflex">
+        <jflex file="tools/ASTBladeScanner.flex" skel="tools/skeletonBladeParser.netbeans" destdir="src" nobak="true"/>
+    </target>
+    <!-- JCUP handling (download and taskdef) -->
+    <target name="prepare-jcup-11a" depends="gen-ast-blade-scanner">
+        <taskdef name="javacup"
+                 classname="java_cup.anttask.CUPTask"
+                 classpath="${basedir}/external/java-cup-11a.jar" onerror="fail"/>
+    </target>
+    <target name="netbeans-extra" depends="build-init,gen-blade-lexer,gen-ast-blade-scanner,prepare-jcup-11a">
+        <javacup srcfile="${basedir}/tools/ASTBladeParser.cup" symbols="ASTBladeSymbols" parser="ASTBladeParser" interface="on" destdir="${basedir}/src" force="true"/>
+        <replace file="src/org/netbeans/modules/php/blade/editor/parsing/ASTBladeParser.java">
+                <replacetoken>
+<![CDATA[  */
+public class ASTBladeParser extends java_cup.runtime.lr_parser {]]></replacetoken>
+                <replacevalue>
+<![CDATA[  */
+@org.netbeans.api.annotations.common.SuppressWarnings({"EI_EXPOSE_REP", "MS_PKGPROTECT", "BC_BAD_CAST_TO_CONCRETE_COLLECTION"})
+public class ASTBladeParser extends java_cup.runtime.lr_parser {]]></replacevalue>
+        </replace>
+        <echo>Finishing generating AstBladeParser</echo>
     </target>
     <path id="maven-ant-tasks.classpath" path="lib/maven-ant-tasks-2.1.3.jar" />
     <typedef resource="org/apache/maven/artifact/ant/antlib.xml" uri="antlib:org.apache.maven.artifact.ant" classpathref="maven-ant-tasks.classpath" />

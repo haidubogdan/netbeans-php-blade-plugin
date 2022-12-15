@@ -41,6 +41,7 @@
  */
 package org.netbeans.modules.php.blade.editor.lexer;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
@@ -99,8 +100,23 @@ public final class BladeLexerUtils {
             Token<? extends BladeTokenId> token = ts.token();
             BladeTokenId id = token.id();
             String ttext = token.text().toString().trim();
-            if (id == tokenDownId && ttext.equals(down)) {
+            if (id.equals(tokenDownId) && ttext.equals(down)) {
                 return new OffsetRange(ts.offset(), ts.offset() + down.length());
+            }
+        }
+
+        return OffsetRange.NONE;
+    }
+    
+    public static OffsetRange findFwd(TokenSequence<? extends BladeTokenId> ts, BladeTokenId[] tokenDownIds, String[] down) {
+        List<BladeTokenId> tokenListDown = Arrays.asList(tokenDownIds);
+        List<String> stringListDown = Arrays.asList(down);
+        while (ts.moveNext()) {
+            Token<? extends BladeTokenId> token = ts.token();
+            BladeTokenId id = token.id();
+            String ttext = token.text().toString().trim();
+            if (tokenListDown.contains(id) && stringListDown.contains(ttext)) {
+                return new OffsetRange(ts.offset(), ts.offset() + ttext.length());
             }
         }
 
@@ -242,6 +258,7 @@ public final class BladeLexerUtils {
         return OffsetRange.NONE;
     }
 
+    @SuppressWarnings({"unchecked", "rawtypes"})
     public static <T> TokenSequence<? extends T> getTokenSequence(final TokenHierarchy<?> th, final int offset, final Language language) {
         TokenSequence<? extends T> ts = th.tokenSequence(language);
         if (ts == null) {
