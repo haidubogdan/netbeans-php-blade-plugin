@@ -103,6 +103,7 @@ public enum BladeTokenId implements TokenId {
     //DEFAULT SYNTAX ELEMENTS
     T_BLADE_LPAREN("(", "token"),
     T_BLADE_RPAREN(")", "token"),
+    T_EMPTY_EXPRESSION(null, "token"),
     T_OPEN_PHP_SCRIPT("<?php", "html"),
     T_CLOSE_PHP("?>", "html"),
     T_PHP_OPEN_ECHO("<?=", "html"),

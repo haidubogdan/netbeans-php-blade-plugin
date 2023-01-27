@@ -108,6 +108,7 @@ public class BladeBracesMatcher implements BracesMatcher {
     public int[] findMatches() throws InterruptedException, BadLocationException {
         ((AbstractDocument) context.getDocument()).readLock();
         try {
+            //TODO have a context of forward and back 
             TokenSequence<BladeTokenId> ts = BladeLexerUtils.getBladeTokenSequence(context.getDocument());
             ts.move(context.getSearchOffset());
             if (!ts.moveNext()) {
@@ -117,6 +118,7 @@ public class BladeBracesMatcher implements BracesMatcher {
             if (currentToken == null) {
                 return null;
             }
+
             OffsetRange r;
             String tText = currentToken.text().toString();
             BladeTokenId id = currentToken.id();
@@ -135,7 +137,7 @@ public class BladeBracesMatcher implements BracesMatcher {
 
             if (closeToken != null) {
                 if (id.equals(BladeTokenId.T_BLADE_SECTION)) {
-                    //we can have multiple brackets for @section
+                    //we can have multiple end brackets for @section
                     BladeTokenId[] tokenDownIds = {closeToken, BladeTokenId.T_BLADE_SHOW, BladeTokenId.T_BLADE_STOP};
                     String[] endTagsText = {closeToken.fixedText(), "@show", "@stop"};
                     r = BladeLexerUtils.findFwd(ts, tokenDownIds, endTagsText);

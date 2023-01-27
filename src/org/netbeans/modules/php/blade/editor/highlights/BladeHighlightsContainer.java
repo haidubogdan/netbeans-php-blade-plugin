@@ -33,7 +33,7 @@ public class BladeHighlightsContainer extends AbstractHighlightsContainer {
                 scanStart = doc.getParagraphElement(startOffset).getStartOffset();
                 if (offset != scanStart){
                     offset = scanStart;
-                    //reset the hasQuote detection
+                    //reset the hasQuote flag from isIdentifierChar
                     BladeLanguage.hasQuote = false;
                 }
             }

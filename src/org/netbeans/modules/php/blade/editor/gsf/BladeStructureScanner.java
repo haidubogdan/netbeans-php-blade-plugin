@@ -211,7 +211,7 @@ public class BladeStructureScanner implements StructureScanner {
 
         @Override
         public String getHtml(HtmlFormatter hf) {
-            return "- " + getName();
+            return " " + getName();
         }
 
         @Override

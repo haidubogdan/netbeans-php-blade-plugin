@@ -8,10 +8,12 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.netbeans.api.project.Project;
 import org.netbeans.modules.csl.api.OffsetRange;
 import org.netbeans.modules.csl.spi.ParserResult;
-import org.netbeans.modules.php.blade.editor.BladeIndexSupport;
+import org.netbeans.modules.php.blade.editor.index.BladeIndexSupport;
 import org.netbeans.modules.php.blade.editor.BladeLanguage;
+import org.netbeans.modules.php.blade.editor.Utils;
 import org.netbeans.modules.php.blade.editor.index.api.BladeIndex;
 import org.netbeans.modules.php.blade.editor.index.api.IndexedElement;
 import org.netbeans.modules.php.blade.editor.model.api.BladeDirective;
@@ -26,6 +28,7 @@ import org.openide.util.Union2;
  * @author bhaidu
  */
 public class OccurrenceBuilder {
+
     private Collection<DirectiveOccurence> sections = new ArrayList<>();
     private Collection<DirectiveOccurence> includes = new ArrayList<>();
     private Collection<DirectiveOccurence> yields = new ArrayList<>();
@@ -33,7 +36,7 @@ public class OccurrenceBuilder {
     private final Map<String, Map<OffsetRange, Item>> holder;
     private final ParserResult parserResult;
     private final Map<BladeElement.Kind, List<Occurence>> cachedOccurences;
-    
+
     private volatile ElementInfo elementInfo;
 
     OccurrenceBuilder() {
@@ -67,10 +70,13 @@ public class OccurrenceBuilder {
     public void build() {
         cachedOccurences.clear();
         BladeIndex index = null;
+        Project project = null;
+        
         if (parserResult != null) {
             FileObject fileObject = parserResult.getSnapshot().getSource().getFileObject();
             BladeIndexSupport sup = BladeIndexSupport.findFor(fileObject);
             index = sup.getIndex();
+            project = sup.getProject();
         }
 
         if (elementInfo != null) {
@@ -90,23 +96,33 @@ public class OccurrenceBuilder {
                         int debug = 1;
                     }
 
-                    buildDeclaration(elementInfo, BladeElement.Kind.YIELD,  cachedOccurences);
+                    buildDeclaration(elementInfo, BladeElement.Kind.YIELD, cachedOccurences);
                     break;
                 }
                 case INCLUDE:
                 case EXTEND: {
-                   if (index != null) {
-                        //prefix without the quotes
-                        String prefix = elementInfo.getLabel();
-                        Collection<IndexedElement> indexedBladeViews = index.findBladePathsByPrefix(prefix, BladeIndex.MatchType.EXACT);
-                        Set<IndexedElement> bladeViewsSet = new HashSet<>(indexedBladeViews);
+                    if (index != null) {
+                        List<FileObject> viewsRoots = Utils.getViewsPathList(project);
+                        String path = elementInfo.getLabel();
+                        Set<IndexedElement> bladeViewsSet = new HashSet<>();
+                        //TODO don't use IndexedElement anymore
+                        for (FileObject viewRoot : viewsRoots) {
+                            String relativePath = path.replace(".", "/") + ".blade.php";
+                            FileObject relativePathFo = viewRoot.getFileObject(relativePath);
+                            if (relativePathFo != null){
+                                IndexedElement indexedElement = IndexedElement.create(
+                                        relativePathFo, path, BladeElement.Kind.VIEW_PATH, OffsetRange.NONE);
+                                bladeViewsSet.add(indexedElement);
+                            }
+                        }
+                        
                         elementInfo.setDeclarations(bladeViewsSet);
                         int debug = 1;
                     }
 
                     buildDeclaration(elementInfo, BladeElement.Kind.VIEW_PATH, cachedOccurences);
-                    break; 
-                }    
+                    break;
+                }
             }
         }
 
@@ -132,7 +148,7 @@ public class OccurrenceBuilder {
     private Occurence findOccurenceByOffset(BladeElement.Kind kind, final int offset) {
         Occurence retval = null;
         List<Occurence> occurenceList = cachedOccurences.get(kind);
-        if (occurenceList == null){
+        if (occurenceList == null) {
             return retval;
         }
         for (Occurence occ : occurenceList) {
@@ -174,7 +190,7 @@ public class OccurrenceBuilder {
     private void buildDeclaration(ElementInfo nodeCtxInfo, BladeElement.Kind kind, final Map<BladeElement.Kind, List<Occurence>> occurences) {
         String idName = nodeCtxInfo.getLabel();
         List<Occurence> occurenceList = occurences.get(kind);
-        if (occurenceList == null){
+        if (occurenceList == null) {
             occurenceList = new ArrayList<>();
         }
         Set<? extends BladeElement> elements = nodeCtxInfo.getDeclarations();
@@ -186,7 +202,7 @@ public class OccurrenceBuilder {
                 declarations.add(declaration);
             }
         }
-        
+
         occurenceList.add(new OccurenceImpl(declarations, nodeCtxInfo.getRange()));
         occurences.put(kind, occurenceList);
     }
@@ -209,7 +225,7 @@ public class OccurrenceBuilder {
     void prepareYields(DirectiveOccurence statement) {
         yields.add(statement);
     }
-    
+
     void prepareIncludes(DirectiveOccurence statement) {
         includes.add(statement);
     }

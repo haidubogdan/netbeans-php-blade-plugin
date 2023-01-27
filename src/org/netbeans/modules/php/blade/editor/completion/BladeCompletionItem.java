@@ -119,6 +119,62 @@ public class BladeCompletionItem implements CompletionProposal {
         return true;
     }
 
+    public static class BladePathCompletionItem extends BladeCompletionItem {
+
+        private String rootDir;
+        private static final ImageIcon PACKAGE_ICON
+                = ImageUtilities.loadImageIcon("org/openide/loaders/defaultFolder.gif", false); // NOI18N
+
+        public BladePathCompletionItem(ElementHandle element, CompletionRequest request, String previewValue, String rootDir) {
+            super(element, request, previewValue);
+            this.rootDir = rootDir;
+        }
+
+        @Override
+        public ElementKind getKind() {
+            return ElementKind.PACKAGE;
+        }
+
+        @Override
+        public ImageIcon getIcon() {
+            return PACKAGE_ICON;
+        }
+
+        @Override
+        public String getRhsHtml(HtmlFormatter formatter) {
+            FileObject file = null;
+            if (this.getElement() != null) {
+                file = this.getElement().getFileObject();
+            }
+            if (file != null) {
+                formatter.reset();
+                formatter.appendText(" ");
+                formatter.appendText(rootDir + "/" + file.getName());
+            }
+            return formatter.getText();
+        }
+    }
+
+    public static class BladeFilePathCompletionItem extends BladePathCompletionItem {
+
+        private static final ImageIcon PACKAGE_ICON
+                = ImageUtilities.loadImageIcon(ICON_BASE + "icons/icon.png", false); // NOI18N
+
+        public BladeFilePathCompletionItem(ElementHandle element, CompletionRequest request, String previewValue, String rootDir) {
+            super(element, request, previewValue, rootDir);
+        }
+
+        @Override
+        public ElementKind getKind() {
+            return ElementKind.PACKAGE;
+        }
+
+        @Override
+        public ImageIcon getIcon() {
+            return PACKAGE_ICON;
+        }
+    }
+
     public static class KeywordItem extends BladeCompletionItem {
 
         private final String name;
@@ -203,7 +259,7 @@ public class BladeCompletionItem implements CompletionProposal {
                     builder.append("\n@end");
                     builder.append(name.substring(1));
                     break;
-                    
+
             }
             return builder.toString();
         }

@@ -150,25 +150,6 @@ public class BladeIndex {
         this.querySupport = QuerySupport.forRoots(BladeIndexer.Factory.NAME, BladeIndexer.Factory.VERSION, sourceRoots.toArray(new FileObject[]{}));
     }
 
-    /**
-     * get all views path
-     *
-     * @return
-     */
-    public Collection<IndexedElement> findAllBladeViewPaths() {
-        return findAll(BladeIndexer.BLADE_VIEW_PATH, BladeElement.Kind.VIEW_PATH);
-    }
-
-    /**
-     *
-     * @param prefix
-     * @return map of fileobject to collection of ids defined in the file
-     * starting with prefix
-     */
-    public Collection<IndexedElement> findBladePathsByPrefix(String prefix, MatchType matchType) {
-        return findByPrefix(BladeIndexer.BLADE_VIEW_PATH, prefix, BladeElement.Kind.VIEW_PATH, matchType);
-    }
-
     public Collection<IndexedElement> findYieldsByPrefix(String prefix, MatchType matchType) {
         return findByPrefix(BladeIndexer.YIELD_DECLARATION, prefix, BladeElement.Kind.YIELD, matchType);
     }

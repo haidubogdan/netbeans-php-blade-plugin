@@ -228,6 +228,10 @@ OPEN_PHP_ECHO = "<?="
     return BladeTokenId.T_BLADE_PHP_OPEN;
 }
 
+<ST_HTML>"@endphp" {
+    return BladeTokenId.T_BLADE_ENDPHP;
+}
+
 //php state
 
 <ST_PHP>~{CLOSE_PHP} {
@@ -379,7 +383,7 @@ OPEN_PHP_ECHO = "<?="
 <ST_LOOKING_FOR_PARAMETER_EXPRESSION>"()" {
    parenBalanceInDirective = 0;
    popState();
-   return BladeTokenId.T_HTML;
+   return BladeTokenId.T_EMPTY_EXPRESSION;
 }
 
 <ST_LOOKING_FOR_PARAMETER_EXPRESSION>"(" {

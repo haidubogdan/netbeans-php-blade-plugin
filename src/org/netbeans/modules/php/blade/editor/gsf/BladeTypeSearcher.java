@@ -30,11 +30,10 @@ import org.openide.util.Exceptions;
  */
 public class BladeTypeSearcher implements IndexSearcher {
     private static final Logger LOGGER = Logger.getLogger(BladeTypeSearcher.class.getSimpleName());
-    //private static final Logger LOGGER = Logger.getLogger(BladeTypeSearcher.class.getSimpleName());
 
     @Override
     public Set<? extends Descriptor> getTypes(Project project, String textForQuery, Kind searchType, Helper helper) {
-        Set<BladeTypeDescriptor> typeResults = new HashSet<BladeTypeDescriptor>();
+        Set<BladeTypeDescriptor> typeResults = new HashSet<>();
         
         if (project == null) { //blade project is null
             try {
@@ -42,22 +41,11 @@ public class BladeTypeSearcher implements IndexSearcher {
                         null /* all source roots */,
                         Collections.<String>emptyList(),
                         Collections.<String>emptyList());
-                QuerySupport querySupport = QuerySupport.forRoots(BladeIndexer.Factory.NAME, BladeIndexer.Factory.VERSION, sourceRoots.toArray(new FileObject[]{}));
                 //TODO sanitaize text
                 String query = "(.*)" + textForQuery.replace(")", "").replace("(", "") + "(.*)";
                 //search for blade paths
                 //TODO make a BladeInex static function
                 //adapt elements to blade
-                Collection<? extends IndexResult> results = querySupport.query(BladeIndexer.BLADE_VIEW_PATH, query, QuerySupport.Kind.REGEXP, BladeIndexer.BLADE_VIEW_PATH);
-                for (IndexResult result : results) {
-                    String[] elements = result.getValues(BladeIndexer.BLADE_VIEW_PATH);
-                    for (String e : elements) {
-                        String val = e;
-                        BladePathElement element = new BladePathElement(val, result.getFile());
-                        typeResults.add(new BladeTypeDescriptor(helper, element));
-                    }
-
-                }
             } catch (Exception ex) {
                 LOGGER.log(Level.WARNING, null, ex);
                 Exceptions.printStackTrace(ex);
@@ -69,7 +57,7 @@ public class BladeTypeSearcher implements IndexSearcher {
 
     @Override
     public Set<? extends Descriptor> getSymbols(Project project, String textForQuery, Kind originalkind, Helper helper) {
-        Set<BladeTypeDescriptor> result = new HashSet<BladeTypeDescriptor>();
+        Set<BladeTypeDescriptor> result = new HashSet<>();
         return result;
     }
 

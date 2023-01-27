@@ -112,7 +112,6 @@ public class BladeParser extends Parser {
                 BladeProgram program;
                 if (rootSymbol.value instanceof BladeProgram) {
                     program = (BladeProgram) rootSymbol.value; // call the parser itself
-                    System.out.println("End offset parser " + program.getEndOffset());
                     result = new BladeParserResult(context.getSnapshot(), program);
                     result.createPhpIndexQuery(snapshot, fileObject);
                     result.setErrors(errorHandler.displaySyntaxErrors(program));

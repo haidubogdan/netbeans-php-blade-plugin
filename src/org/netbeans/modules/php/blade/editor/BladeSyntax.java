@@ -23,14 +23,14 @@ public class BladeSyntax {
         }
     }
 
-    public static String OPEN_ECHO = "{{";
-    public static String CLOSE_ECHO = "}}";
-    public static String OPEN_ECHO_ESCAPED = "{!!";
-    public static String CLOSE_ECHO_ESCAPED = "!!}";
+    public static String OPEN_ECHO = "{{"; //NOI18N
+    public static String CLOSE_ECHO = "}}"; //NOI18N
+    public static String OPEN_ECHO_ESCAPED = "{!!"; //NOI18N
+    public static String CLOSE_ECHO_ESCAPED = "!!}"; //NOI18N
 
     public final static Collection<String> INLINE_DIRECTIVES = Arrays.asList(
             "@extends", "@include", "@includeIf", "@includeWhen", "@includeUnless", "@includeFirst",
-            "@section", "@empty", "@each" //can be inline
+            "@section", "@empty", "@each"
     );
 
     public final static Collection<String> DIRECTIVES_WITH_VIEW_PATH = Arrays.asList(
@@ -67,7 +67,7 @@ public class BladeSyntax {
 
     public static Collection<String> DIRECTIVES_WITH_EXPRESSION = Arrays.asList(
             "@if",
-            "@for", //not really a expression, but it's not relevant for the moment
+            "@for",
             "@foreach",
             "@while",
             "@error",

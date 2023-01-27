@@ -54,7 +54,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
+import java.util.Enumeration;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 import javax.swing.text.JTextComponent;
@@ -73,36 +76,39 @@ import org.netbeans.modules.csl.api.OffsetRange;
 import org.netbeans.modules.csl.api.ParameterInfo;
 import org.netbeans.modules.csl.spi.DefaultCompletionResult;
 import org.netbeans.modules.csl.spi.ParserResult;
-import org.netbeans.modules.php.blade.editor.BladeIndexSupport;
+import org.netbeans.modules.php.blade.editor.index.BladeIndexSupport;
 import org.netbeans.modules.php.blade.editor.BladeSyntax;
 import org.netbeans.modules.php.blade.editor.completion.BladeCompletionContextFinder.KeywordCompletionType;
 import org.netbeans.modules.php.blade.editor.completion.BladeCompletionContextFinder.CompletionContext;
+import org.netbeans.modules.php.blade.editor.completion.BladeCompletionItem.BladeFilePathCompletionItem;
+import org.netbeans.modules.php.blade.editor.completion.BladeCompletionItem.BladePathCompletionItem;
 import org.netbeans.modules.php.blade.editor.completion.BladeCompletionItem.CompletionRequest;
 import org.netbeans.modules.php.blade.editor.completion.BladeCompletionItem.SectionCompletionItem;
 import org.netbeans.modules.php.blade.editor.index.api.BladeIndex;
 import org.netbeans.modules.php.blade.editor.index.api.IndexedElement;
 import org.netbeans.modules.php.blade.editor.model.api.CustomDirectiveElement;
+import org.netbeans.modules.php.blade.editor.model.api.PathElement;
 import org.netbeans.modules.php.blade.editor.parsing.ParsingUtils;
 import org.netbeans.modules.php.blade.project.CustomDirectives;
 import org.netbeans.modules.php.blade.project.CustomDirectives.DirectiveNames;
 import org.netbeans.modules.php.editor.csl.PHPLanguage;
+import org.netbeans.modules.php.blade.editor.Utils;
 import org.openide.filesystems.FileObject;
 import org.openide.util.NbBundle;
 
 public class BladeCompletionHandler implements CodeCompletionHandler2 {
 
-    private static final Logger LOGGER = Logger.getLogger(BladeCompletionHandler.class.getSimpleName());
     static final Collection<String> BLADE_KEYWORDS = Arrays.asList(
-        "@continue",
-        "@csrf",
-        "@break",
-        "@endfor",
-        "@endif",
-        "@endforeach",
-        "@endsection",
-        "@stop",
-        "@append",
-        "@empty"
+            "@continue",
+            "@csrf",
+            "@break",
+            "@endfor",
+            "@endif",
+            "@endforeach",
+            "@endsection",
+            "@stop",
+            "@append",
+            "@empty"
     );
 
     static final Map<String, KeywordCompletionType> BLADE_DIRECTIVES = new HashMap<>();
@@ -173,6 +179,12 @@ public class BladeCompletionHandler implements CodeCompletionHandler2 {
         //searching the context 
         //it might be space before @section
         String properPrefix = getPrefix(bladeParserResult, caretOffset, true);
+
+        if (request.prefix.length() == 0 && properPrefix.length() == 0) {
+            //todo check if it affects
+            return CodeCompletionResult.NONE;
+        }
+
         if (request.prefix.length() == 0) {
             request.prefix = properPrefix;
         }
@@ -209,7 +221,7 @@ public class BladeCompletionHandler implements CodeCompletionHandler2 {
                 completeCustomDirectives(completionProposals, request);
                 break;
             case PHP:
-            case BLADE_ECHO:    
+            case BLADE_ECHO:
                 if (request.prefix.length() > 0) {
                     completePhp(completionProposals, request);
                 }
@@ -239,27 +251,27 @@ public class BladeCompletionHandler implements CodeCompletionHandler2 {
             }
         }
     }
-    
-    private void completeCustomDirectives(final List<CompletionProposal> completionProposals, final CompletionRequest request){
+
+    private void completeCustomDirectives(final List<CompletionProposal> completionProposals, final CompletionRequest request) {
         Project project = request.project;
-        if (project == null){
+        if (project == null) {
             return;
         }
         Map<FileObject, DirectiveNames> customDirectives = CustomDirectives.getInstance(project).getCustomDirectives();
-        
-        if (customDirectives.isEmpty()){
+
+        if (customDirectives.isEmpty()) {
             return;
         }
-        
-        for (Map.Entry<FileObject, DirectiveNames> entry : customDirectives.entrySet()){
-            if (!entry.getKey().isValid()){
+
+        for (Map.Entry<FileObject, DirectiveNames> entry : customDirectives.entrySet()) {
+            if (!entry.getKey().isValid()) {
                 continue;
             }
             List<String> directiveNames = entry.getValue().getList();
-            if (directiveNames == null){
+            if (directiveNames == null) {
                 continue;
             }
-            for (String directiveName : directiveNames){
+            for (String directiveName : directiveNames) {
                 if (startsWith(directiveName, request.prefix)) {
                     CustomDirectiveElement element = new CustomDirectiveElement(directiveName, entry.getKey());
                     completionProposals.add(new BladeCompletionItem.DirectiveItem(element, request));
@@ -267,7 +279,6 @@ public class BladeCompletionHandler implements CodeCompletionHandler2 {
             }
         }
     }
-    
 
     private void completeKeywords(final List<CompletionProposal> completionProposals, final CompletionRequest request) {
         for (String keyword : BLADE_KEYWORDS) {
@@ -294,30 +305,76 @@ public class BladeCompletionHandler implements CodeCompletionHandler2 {
                 queryText = request.prefix.substring(startInput + 1, request.prefix.length());
             }
         }
-        Collection<IndexedElement> bladeViews;
-        if (queryText.isEmpty()) {
-            bladeViews = request.index.findAllBladeViewPaths();
-        } else {
-            bladeViews = request.index.findBladePathsByPrefix(queryText, BladeIndex.MatchType.PREFIX);
+
+        if (startInput <= 0) {
+            return;
         }
 
-        for (IndexedElement bladeView : bladeViews) {
-            String path = bladeView.getName();
-            FileObject file = bladeView.getFileObject();
-            String textToComplete;
+        Pattern p = Pattern.compile("[a-z][a-z0-9\\_\\-\\.]*");
+        Boolean queryIsPath = p.matcher(queryText).matches();
 
-            if (startInput > 0) {
-                if (queryText.length() > 0 && !path.startsWith(queryText)) {
-                    continue;
+        if (request.project != null && queryIsPath) {
+            List<FileObject> viewsRoots = Utils.getViewsPathList(request.project);
+            for (FileObject viewRoot : viewsRoots) {
+                String rootName = viewRoot.getName();
+                String textToComplete;
+                PathElement element;
+                String relativePathName = null;
+                String lastQueryItem = null;
+                FileObject relativeFo = viewRoot;
+                String[] pathItems = queryText.split("\\.");
+                for (int i = 0; i < pathItems.length; i++) {
+                    String pathItem = pathItems[i];
+                    FileObject pathFo = relativeFo.getFileObject(pathItem);
+                    if (pathFo != null && pathFo.isFolder()) {
+                        relativeFo = pathFo;
+                        relativePathName = pathItem;
+                    } else {
+                        lastQueryItem = pathItem;
+                        break;
+                    }
                 }
-                textToComplete = request.prefix + path.substring(queryText.length());
-            } else {
-                textToComplete = request.prefix + "(\"" + path + "\")";
+
+                FileObject[] files;
+
+                files = relativeFo.getChildren();
+
+                if (queryText.endsWith(".") && relativePathName != null && lastQueryItem == null) {
+                    for (FileObject children : files) {
+                        String fileName = children.getName();
+                        if (children.isFolder()) {
+                            textToComplete = request.prefix + children.getName();
+                            element = new PathElement(textToComplete, children);
+                            completionProposals.add(new BladePathCompletionItem(element, request, children.getName(), rootName));
+                        } else if (fileName.endsWith(".blade")) {
+                            String replace = fileName.replace(".blade", "");
+                            textToComplete = request.prefix + replace;
+                            element = new PathElement(textToComplete, children);
+                            completionProposals.add(new BladeFilePathCompletionItem(element, request, replace, rootName));
+                        }
+                    }
+                } else if (lastQueryItem != null) {
+                    for (FileObject children : files) {
+                        String fileName = children.getName();
+                        if (!fileName.startsWith(lastQueryItem)) {
+                            continue;
+                        }
+                        if (children.isFolder()) {
+                            textToComplete = request.prefix + fileName.substring(lastQueryItem.length());
+                            element = new PathElement(textToComplete, children);
+                            completionProposals.add(new BladePathCompletionItem(element, request, children.getName(), rootName));
+                        } else if (fileName.endsWith(".blade")) {
+                            String replace = fileName.replace(".blade", "");
+                            textToComplete = request.prefix + replace.substring(lastQueryItem.length());
+                            element = new PathElement(textToComplete, children);
+                            completionProposals.add(new BladeFilePathCompletionItem(element, request, replace, rootName));
+                        }
+                    }
+
+                }
             }
-            //TODO adapt completion item to IndexedElement
-            BladePathElement element = new BladePathElement(textToComplete, file);
-            completionProposals.add(new BladeCompletionItem(element, request, path));
         }
+
     }
 
     private void completeYields(final List<CompletionProposal> completionProposals, final CompletionRequest request) {
@@ -376,21 +433,21 @@ public class BladeCompletionHandler implements CodeCompletionHandler2 {
     private void completePhp(final List<CompletionProposal> completionProposals, final CompletionRequest request) {
         CodeCompletionHandler cc = (new PHPLanguage()).getCompletionHandler();
         ParserResult phpParserResult = request.parserResult.getProgram().getPhpParserResult();
-        if (phpParserResult == null){
+        if (phpParserResult == null) {
             return;
         }
         String prefix = cc.getPrefix(phpParserResult, request.carretOffset, true);
-        
-        if (prefix == null){
+
+        if (prefix == null) {
             return;
         }
-        
-        if (prefix.length() == 0){
+
+        if (prefix.length() == 0) {
             prefix = cc.getPrefix(phpParserResult, request.carretOffset - 1, true);
         }
-        
+
         String phpPrefix = prefix;
-        
+
         CodeCompletionContext context = new CodeCompletionContext() {
             @Override
             public int getCaretOffset() {
@@ -428,7 +485,6 @@ public class BladeCompletionHandler implements CodeCompletionHandler2 {
         for (CompletionProposal proposal : proposals) {
             completionProposals.add(proposal);
         }
-
 
     }
 
@@ -537,7 +593,7 @@ public class BladeCompletionHandler implements CodeCompletionHandler2 {
     @Override
     public Documentation documentElement(ParserResult parserResult, ElementHandle elementHandle, Callable<Boolean> cancel) {
         Documentation result = null;
-        
+
         if (elementHandle instanceof GeneratedDirectiveElement) {
             //correspondence with Bundle.properties must be 1 to 1
             try {

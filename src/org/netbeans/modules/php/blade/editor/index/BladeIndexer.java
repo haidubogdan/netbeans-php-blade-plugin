@@ -41,7 +41,6 @@ public class BladeIndexer extends EmbeddingIndexer {
     public static final String YIELD_INDEX_KEY = "index_yields";
     public static final String YIELD_NAME = "yield_name"; //NOI18N
     public static final String YIELD_DECLARATION = "yield"; //NOI18N
-    public static final String BLADE_VIEW_PATH = "blade_view_path"; //NOI18N
     public static final String BLADE_CONTENT_KEY = "bladeContent"; //NOI18N
 
     public static final String VALUE_SEPARATOR = ",";
@@ -61,9 +60,6 @@ public class BladeIndexer extends EmbeddingIndexer {
             return;
         }
 
-        //get the filename as a blade path with "."
-        String bladeFilePath = Utils.convertToBladePath(fileObject);
-
         Model model = parserResult.getModel();
         Collection<BladeModelElement> yields = model.getYields();
 
@@ -74,7 +70,6 @@ public class BladeIndexer extends EmbeddingIndexer {
             IndexDocument document = support.createDocument(indxbl);
 
             document.addPair(BLADE_CONTENT_KEY, Boolean.TRUE.toString(), true, true);
-            document.addPair(BLADE_VIEW_PATH, bladeFilePath, true, true);
 
             storeYieldDeclarations(yields, document);
 

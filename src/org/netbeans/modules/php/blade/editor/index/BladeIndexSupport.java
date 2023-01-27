@@ -1,4 +1,4 @@
-package org.netbeans.modules.php.blade.editor;
+package org.netbeans.modules.php.blade.editor.index;
 
 import java.io.IOException;
 import java.util.WeakHashMap;

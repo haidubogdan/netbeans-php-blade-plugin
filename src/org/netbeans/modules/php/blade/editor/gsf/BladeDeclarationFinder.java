@@ -19,7 +19,7 @@ import org.netbeans.modules.csl.api.HtmlFormatter;
 import org.netbeans.modules.csl.api.Modifier;
 import org.netbeans.modules.csl.api.OffsetRange;
 import org.netbeans.modules.csl.spi.ParserResult;
-import org.netbeans.modules.php.blade.editor.BladeIndexSupport;
+import org.netbeans.modules.php.blade.editor.index.BladeIndexSupport;
 import static org.netbeans.modules.php.blade.editor.BladeSyntax.DIRECTIVES_WITH_VIEW_PATH;
 import org.netbeans.modules.php.blade.editor.index.api.BladeIndex;
 import org.netbeans.modules.php.blade.editor.index.api.IndexedElement;
@@ -300,31 +300,6 @@ public class BladeDeclarationFinder implements DeclarationFinder {
                     alternatives.addAlternative(al);
                 }
                 return alternatives;
-            } else {
-                //TODO check if there is an alternative using occurence here also ?
-                BladeIndexSupport sup = BladeIndexSupport.findFor(info.getSnapshot().getSource().getFileObject());
-                if (sup != null) {
-                    BladeIndex index = sup.getIndex();
-                    Collection<IndexedElement> bladeViews;
-                    bladeViews = index.findBladePathsByPrefix(pathValue, BladeIndex.MatchType.PREFIX);
-                    for (IndexedElement bladeView : bladeViews) {
-                        String bladeName = bladeView.getName();
-                        FileObject file = bladeView.getFileObject();
-                        if (bladeName.endsWith(pathValue) || bladeName.startsWith(pathValue)){
-                            //all good;
-                        } else {
-                            continue;
-                        }
-                        DeclarationLocation declLocation = new DeclarationLocation(
-                                file, 0);
-                        AlternativeLocation al = new BladeAlternativeLocation(elem, declLocation);
-                        if (alternatives == DeclarationLocation.NONE) {
-                            alternatives = al.getLocation();
-                        }
-                        alternatives.addAlternative(al);
-                    }
-                    return alternatives;
-                }
             }
         }
 

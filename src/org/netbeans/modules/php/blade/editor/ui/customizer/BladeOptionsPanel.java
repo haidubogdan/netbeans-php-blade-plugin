@@ -45,18 +45,15 @@ import java.awt.EventQueue;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.io.File;
-import java.util.Enumeration;
 import javax.swing.DefaultListModel;
 import javax.swing.JComboBox;
 import javax.swing.event.ChangeListener;
 import org.netbeans.api.project.Project;
-import org.netbeans.modules.parsing.api.indexing.IndexingManager;
 import org.netbeans.modules.php.blade.version.BladeVersion;
 import org.netbeans.modules.php.blade.project.BladeProjectProperties;
 import org.netbeans.modules.php.blade.editor.ui.model.BladeVersionComboBoxModel;
 import org.netbeans.spi.options.OptionsPanelController;
 import org.openide.filesystems.FileChooserBuilder;
-import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileUtil;
 import org.openide.util.ChangeSupport;
 import org.openide.util.NbBundle;
@@ -130,11 +127,9 @@ public final class BladeOptionsPanel extends javax.swing.JPanel {
         viewsPathList = new javax.swing.JList<>();
         addViewFolderButton = new javax.swing.JButton();
         removeViewFolderButton = new javax.swing.JButton();
-        reindexViewsButton = new javax.swing.JButton();
         jLabel2 = new javax.swing.JLabel();
         jLabel3 = new javax.swing.JLabel();
         jLabel4 = new javax.swing.JLabel();
-        reindexViewFolderButton = new javax.swing.JButton();
         bladeAutoFormattingCheckbox = new javax.swing.JCheckBox();
 
         org.openide.awt.Mnemonics.setLocalizedText(bladeOptionsLabel, org.openide.util.NbBundle.getMessage(BladeOptionsPanel.class, "BladeOptionsPanel.bladeOptionsLabel.text")); // NOI18N
@@ -163,26 +158,11 @@ public final class BladeOptionsPanel extends javax.swing.JPanel {
             }
         });
 
-        org.openide.awt.Mnemonics.setLocalizedText(reindexViewsButton, org.openide.util.NbBundle.getMessage(BladeOptionsPanel.class, "BladeOptionsPanel.reindexViewsButton.text")); // NOI18N
-        reindexViewsButton.setToolTipText(org.openide.util.NbBundle.getMessage(BladeOptionsPanel.class, "BladeOptionsPanel.reindexViewsButton.toolTipText")); // NOI18N
-        reindexViewsButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                reindexViewsButtonActionPerformed(evt);
-            }
-        });
-
         org.openide.awt.Mnemonics.setLocalizedText(jLabel2, org.openide.util.NbBundle.getMessage(BladeOptionsPanel.class, "BladeOptionsPanel.jLabel2.text")); // NOI18N
 
         org.openide.awt.Mnemonics.setLocalizedText(jLabel3, org.openide.util.NbBundle.getMessage(BladeOptionsPanel.class, "BladeOptionsPanel.jLabel3.text")); // NOI18N
 
         org.openide.awt.Mnemonics.setLocalizedText(jLabel4, org.openide.util.NbBundle.getMessage(BladeOptionsPanel.class, "BladeOptionsPanel.jLabel4.text")); // NOI18N
-
-        org.openide.awt.Mnemonics.setLocalizedText(reindexViewFolderButton, org.openide.util.NbBundle.getMessage(BladeOptionsPanel.class, "BladeOptionsPanel.reindexViewFolderButton.text")); // NOI18N
-        reindexViewFolderButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                reindexViewFolderButtonActionPerformed(evt);
-            }
-        });
 
         org.openide.awt.Mnemonics.setLocalizedText(bladeAutoFormattingCheckbox, org.openide.util.NbBundle.getMessage(BladeOptionsPanel.class, "BladeOptionsPanel.bladeAutoFormattingCheckbox.text")); // NOI18N
 
@@ -198,15 +178,13 @@ public final class BladeOptionsPanel extends javax.swing.JPanel {
                         .addComponent(jScrollPane1)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(removeViewFolderButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(addViewFolderButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(reindexViewFolderButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                            .addComponent(removeViewFolderButton, javax.swing.GroupLayout.DEFAULT_SIZE, 123, Short.MAX_VALUE)
+                            .addComponent(addViewFolderButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(bladeAutoFormattingCheckbox)
                             .addComponent(bladeOptionsLabel)
                             .addComponent(jLabel1)
-                            .addComponent(reindexViewsButton)
                             .addGroup(layout.createSequentialGroup()
                                 .addComponent(bladeVersionLabel)
                                 .addGap(18, 18, 18)
@@ -238,13 +216,9 @@ public final class BladeOptionsPanel extends javax.swing.JPanel {
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(addViewFolderButton)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(removeViewFolderButton)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(reindexViewFolderButton))
+                        .addComponent(removeViewFolderButton))
                     .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 125, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(33, 33, 33)
-                .addComponent(reindexViewsButton)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGap(67, 67, 67)
                 .addComponent(bladeAutoFormattingCheckbox)
                 .addContainerGap(70, Short.MAX_VALUE))
         );
@@ -272,67 +246,6 @@ public final class BladeOptionsPanel extends javax.swing.JPanel {
             pathModel.remove(index);
         }
     }//GEN-LAST:event_removeViewFolderButtonActionPerformed
-
-    private void reindexViewsButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_reindexViewsButtonActionPerformed
-        String[] views = BladeProjectProperties.getInstance(project).getViewsPathList();
-        
-        if (views.length > 0){
-            for (String view : views){
-                if (view.length() == 0){
-                    continue;
-                }
-                File viewPath = new File(view);
-                if (viewPath.exists()){
-                    FileObject fileObj = FileUtil.toFileObject(viewPath);
-                    Enumeration<? extends FileObject> children = fileObj.getChildren(true);
-                    while(children.hasMoreElements()){
-                        FileObject file = children.nextElement();
-                        String fileName = file.getName();
-                        if (file.isFolder()){
-                            continue;
-                        }
-                        IndexingManager.getDefault().refreshAllIndices(file);
-                        IndexingManager.getDefault().refreshIndex(file.toURL(), null);
-                    }
-                }
-            }
-        } else {
-            //falback
-            String projectDir = project.getProjectDirectory().getPath().toString();
-            File viewPath = new File(projectDir + "/views");
-            if (viewPath.exists()){
-                FileObject fileObj = FileUtil.toFileObject(viewPath);
-                Enumeration<? extends FileObject> children = fileObj.getChildren(true);
-                while(children.hasMoreElements()){
-                    FileObject file = children.nextElement();
-                    IndexingManager.getDefault().refreshAllIndices(file);
-                    IndexingManager.getDefault().refreshIndex(file.toURL(), null);
-                }
-                //it should be a recursive loop
-                
-            }
-        }
-    }//GEN-LAST:event_reindexViewsButtonActionPerformed
-
-    private void reindexViewFolderButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_reindexViewFolderButtonActionPerformed
-        String path = viewsPathList.getSelectedValue();
-        if (path != null && path.length() > 0) {
-            File viewPath = new File(path);
-            if (viewPath.exists()) {
-                FileObject fileObj = FileUtil.toFileObject(viewPath);
-                Enumeration<? extends FileObject> children = fileObj.getChildren(true);
-                while (children.hasMoreElements()) {
-                    FileObject file = children.nextElement();
-                    String fileName = file.getName();
-                    if (file.isFolder()) {
-                        continue;
-                    }
-                    IndexingManager.getDefault().refreshAllIndices(file);
-                    IndexingManager.getDefault().refreshIndex(file.toURL(), null);
-                }
-            }
-        }
-    }//GEN-LAST:event_reindexViewFolderButtonActionPerformed
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton addViewFolderButton;
@@ -345,8 +258,6 @@ public final class BladeOptionsPanel extends javax.swing.JPanel {
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JButton reindexViewFolderButton;
-    private javax.swing.JButton reindexViewsButton;
     private javax.swing.JButton removeViewFolderButton;
     private javax.swing.ButtonGroup toggleCommentButtonGroup;
     private javax.swing.JList<String> viewsPathList;

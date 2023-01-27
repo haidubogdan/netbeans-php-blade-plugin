@@ -67,7 +67,7 @@ import org.netbeans.spi.editor.typinghooks.TypedTextInterceptor;
 public class BladeTypedTextInterceptor implements TypedTextInterceptor {
 
     private final boolean isBlade;
-
+    String mimePath;
     static final Map<Character, Character> CHAR_PAIR = new HashMap<>();
 
     /**
@@ -87,8 +87,8 @@ public class BladeTypedTextInterceptor implements TypedTextInterceptor {
     };
 
     private BladeTypedTextInterceptor(MimePath mimePath) {
-        String path = mimePath.getPath();
-        isBlade = path.contains(BladeLanguage.BLADE_MIME_TYPE);
+        this.mimePath = mimePath.getPath();
+        isBlade = this.mimePath.contains(BladeLanguage.BLADE_MIME_TYPE);
     }
 
     @Override
@@ -107,7 +107,8 @@ public class BladeTypedTextInterceptor implements TypedTextInterceptor {
         char ch = context.getText().charAt(0);
 
         //simple char completion
-        if (CHAR_PAIR.containsKey(ch)) {
+        //should not affect the html context
+        if (!this.mimePath.endsWith("text/html") && CHAR_PAIR.containsKey(ch)) {
             completePairChar(context, ch, CHAR_PAIR.get(ch));
             return;
         }

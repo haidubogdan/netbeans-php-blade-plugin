@@ -2,19 +2,10 @@ package org.netbeans.modules.php.blade.editor.model;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.netbeans.modules.csl.api.OffsetRange;
-import org.netbeans.modules.parsing.api.ParserManager;
-import org.netbeans.modules.parsing.api.ResultIterator;
 import org.netbeans.modules.parsing.api.Snapshot;
-import org.netbeans.modules.parsing.api.Source;
-import org.netbeans.modules.parsing.api.UserTask;
-import org.netbeans.modules.parsing.spi.ParseException;
-import org.netbeans.modules.php.blade.editor.BladeLanguage;
-import org.netbeans.modules.php.blade.editor.common.WebUtils;
 import org.netbeans.modules.php.blade.editor.index.api.IndexedElement;
 import org.netbeans.modules.php.blade.editor.model.api.BladeElement;
 import org.netbeans.modules.php.blade.editor.parsing.BladeParserResult;
@@ -47,29 +38,10 @@ public class Model {
         return snapshot.getSource().getFileObject();
     }
 
-    public static Model getModel(FileObject file) throws ParseException {
-        final AtomicReference<Model> model_ref = new AtomicReference<>();
-        Source source = Source.create(file);
-        ParserManager.parse(Collections.singleton(source), new UserTask() {
-            @Override
-            public void run(ResultIterator resultIterator) throws Exception {
-                ResultIterator cssRI = WebUtils.getResultIterator(resultIterator, BladeLanguage.BLADE_MIME_TYPE);
-                if (cssRI != null) {
-                    BladeParserResult result = (BladeParserResult) cssRI.getParserResult();
-                    if (result != null) {
-                        model_ref.set(Model.getModel(result));
-                    }
-                }
-            }
-        });
-
-        return model_ref.get();
-    }
-
     private Collection<BladeModelElement> getYields(BladeParserResult result) {
         ModelVisitor visitor = getModelVisitor(result);
         Collection<DirectiveOccurence> foundYields = visitor.getYields();
-        final Collection<BladeModelElement> items = new ArrayList<>();
+        Collection<BladeModelElement> items = new ArrayList<>();
         
         for (DirectiveOccurence yield : foundYields){
             String label = yield.getLabel();

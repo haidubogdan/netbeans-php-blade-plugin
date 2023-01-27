@@ -43,10 +43,9 @@ package org.netbeans.modules.php.blade.editor;
 
 import java.io.File;
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import org.netbeans.api.project.FileOwnerQuery;
+import java.util.List;
 import org.netbeans.api.project.Project;
 import org.netbeans.modules.php.blade.project.BladeProjectProperties;
 import org.openide.filesystems.FileObject;
@@ -57,9 +56,11 @@ import org.openide.filesystems.FileUtil;
  * @author bhaidu
  */
 public class Utils {
-    private static final Logger LOGGER = Logger.getLogger(Utils.class.getSimpleName());
+
+    private static final String LARAVEL_VIEW_PATH = "resources/views";
+
     /**
-     * used for debugin | test to have the constant property name of a
+     * used for debugging | test to have the constant property name of a
      * enumeration class
      *
      * @param fields
@@ -81,58 +82,39 @@ public class Utils {
         return null;
     }
 
-    /**
-     * get the file path in form of a blade path with "."
-     * 
-     * @param fileObject
-     * @return 
-     */
-    public static String convertToBladePath(FileObject fileObject) {
-        Project project = FileOwnerQuery.getOwner(fileObject);
-        FileObject projectRoot = project.getProjectDirectory();
-        String sp = "/";
-        String relativeFilePath = fileObject.getPath().replace(projectRoot.getPath() + sp, "");
-        
+    //TODO move it in a different Utils
+    public static List<FileObject> getViewsPathList(Project project){
+        List<FileObject> list = new ArrayList<>();
         String[] views = BladeProjectProperties.getInstance(project).getViewsPathList();
-        Arrays.sort(views, new java.util.Comparator<String>() {
-            @Override
-            public int compare(String s1, String s2) {
-                if (s1 == null || s2 == null){
-                    return 0;
-                }
-                return s2.length() - s1.length();// comparision
+        views = Arrays.stream(views).filter(s -> !s.isEmpty()).toArray(String[]::new);
+        Arrays.sort(views, (String s1, String s2) -> {
+            //clear empty configs
+            if (s1 == null || s2 == null) {
+                return 0;
             }
+            return s2.length() - s1.length();// comparision
         });
-        if (views.length > 0){
-            String filePath = fileObject.getPath();
-            //should sort by length
-            for (String view : views){
-                if (view.length() == 0){
+        
+        if (views.length > 0) {
+            for (String view : views) {
+                if (view.length() == 0) {
                     continue;
                 }
                 File viewPath = new File(view);
-                if (!viewPath.exists()){
+                if (!viewPath.exists()) {
                     continue;
                 }
-                //TODO find a way to have the same path format
-                FileObject viewFileObj = FileUtil.toFileObject(viewPath);
-                String viewFilePath = viewFileObj.getPath() + sp;
-                if (filePath.startsWith(viewFilePath)){
-                    relativeFilePath = filePath.substring(viewFilePath.length());
-                    break;
-                }
+
+                list.add(FileUtil.toFileObject(viewPath));
             }
         } else {
-            int firstViewFolderIndex = relativeFilePath.indexOf("views" + sp);
-            if (firstViewFolderIndex >= 0) {
-                relativeFilePath = relativeFilePath.substring(firstViewFolderIndex + ("views" + sp).length());
-            } else {
-                LOGGER.log(Level.FINE, "blade file is outside the views direcotry {0}", fileObject.getPath());
+            //fallback to default
+            FileObject defaultLaravelPath = project.getProjectDirectory().getFileObject(LARAVEL_VIEW_PATH);
+            if (defaultLaravelPath != null){
+                list.add(defaultLaravelPath);
             }
         }
-
-        relativeFilePath = relativeFilePath.substring(0, relativeFilePath.length() - (".blade.php".length()));
-        relativeFilePath = relativeFilePath.replace(sp, ".");
-        return relativeFilePath;
+        
+        return list;
     }
 }
