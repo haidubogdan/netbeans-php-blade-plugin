@@ -1,3 +1,3 @@
-@can($x)
+@include($x)
 
 @endcan

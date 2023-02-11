@@ -402,26 +402,29 @@
             </test-dependencies>
             <public-packages>
                 <package>org.netbeans.modules.php.blade.editor</package>
-                <package>org.netbeans.modules.php.blade.editor.codetemplate</package>
                 <package>org.netbeans.modules.php.blade.editor.common</package>
                 <package>org.netbeans.modules.php.blade.editor.completion</package>
                 <package>org.netbeans.modules.php.blade.editor.embeddings</package>
                 <package>org.netbeans.modules.php.blade.editor.formatter</package>
                 <package>org.netbeans.modules.php.blade.editor.gsf</package>
+                <package>org.netbeans.modules.php.blade.editor.highlights</package>
                 <package>org.netbeans.modules.php.blade.editor.index</package>
                 <package>org.netbeans.modules.php.blade.editor.index.api</package>
                 <package>org.netbeans.modules.php.blade.editor.lexer</package>
                 <package>org.netbeans.modules.php.blade.editor.model</package>
                 <package>org.netbeans.modules.php.blade.editor.model.api</package>
-                <package>org.netbeans.modules.php.blade.editor.model.index</package>
                 <package>org.netbeans.modules.php.blade.editor.parsing</package>
                 <package>org.netbeans.modules.php.blade.editor.parsing.astnodes</package>
                 <package>org.netbeans.modules.php.blade.editor.parsing.astnodes.visitors</package>
+                <package>org.netbeans.modules.php.blade.editor.platform</package>
                 <package>org.netbeans.modules.php.blade.editor.types.api</package>
                 <package>org.netbeans.modules.php.blade.editor.typinghooks</package>
-                <package>org.netbeans.modules.php.blade.editor.ui.options</package>
+                <package>org.netbeans.modules.php.blade.editor.ui.customizer</package>
+                <package>org.netbeans.modules.php.blade.editor.ui.model</package>
                 <package>org.netbeans.modules.php.blade.editor.verification</package>
+                <package>org.netbeans.modules.php.blade.project</package>
                 <package>org.netbeans.modules.php.blade.refactoring</package>
+                <package>org.netbeans.modules.php.blade.version</package>
             </public-packages>
         </data>
     </configuration>

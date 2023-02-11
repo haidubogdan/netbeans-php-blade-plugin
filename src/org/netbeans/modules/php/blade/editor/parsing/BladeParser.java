@@ -116,12 +116,12 @@ public class BladeParser extends Parser {
                     result.createPhpIndexQuery(snapshot, fileObject);
                     result.setErrors(errorHandler.displaySyntaxErrors(program));
                 } else {
+                    //fake program
                     int end = snapshot.getText().toString().length();
                     List<Statement> statements = new ArrayList<>();
                     BladeProgram emptyProgram = new BladeProgram(0, end, statements, null);
                     result = new BladeParserResult(context.getSnapshot(), emptyProgram);
-                    //TODO extract the php error syntax
-                    result.setErrors(errorHandler.displaySyntaxErrors(emptyProgram));
+                    LOGGER.log(Level.WARNING, "program null after parsing");
                 }
             } else {
                 int end = snapshot.getText().toString().length();

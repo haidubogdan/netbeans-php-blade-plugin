@@ -115,17 +115,4 @@ public class ModelVisitor extends DefaultPathVisitor {
         return Collections.emptyMap();
     }
 
-    private Document createDocument(String mimeType, String contents) {
-        Document doc = new DefaultStyledDocument();
-        //doc.putProperty(Language.class, PHP.language());
-        doc.putProperty("mimeType", mimeType);
-        doc.putProperty(Document.StreamDescriptionProperty, parserResult.getSnapshot().getSource().getFileObject());
-//        doc.putProperty("")
-        try {
-            doc.insertString(0, contents, null);
-            return doc;
-        } catch (BadLocationException ble) {
-            throw new IllegalStateException(ble);
-        }
-    }
 }

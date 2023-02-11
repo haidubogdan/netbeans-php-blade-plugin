@@ -197,9 +197,9 @@ public class BladeDeclarationFinder implements DeclarationFinder {
                         }
                     }
                 } else if (DIRECTIVES_WITH_VIEW_PATH.contains(ttText)) {
-                    //TODO use maybe BladeSyntax for category
                     return new DeclarationContext(pathValue, DeclarationType.INCLUDE);
                 } else if (ttText.equals("@section")) {
+                    //TODO use token??
                     return new DeclarationContext(pathValue, DeclarationType.SECTION);
                 } else if (BladeTokenId.T_BLADE_DIRECTIVE.equals(tokenId)) {
                     //stop statements
@@ -222,6 +222,9 @@ public class BladeDeclarationFinder implements DeclarationFinder {
             return INSTANCE;
         }
 
+        /*
+        * FOR PHP ??
+        */
         public DeclarationLocation getItems(FileObject sourceFile, String prefix) {
             DeclarationLocation alternatives = DeclarationLocation.NONE;
             //TODO adapt for different usecase using occurence

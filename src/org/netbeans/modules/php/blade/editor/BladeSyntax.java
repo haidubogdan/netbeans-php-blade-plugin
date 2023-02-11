@@ -77,6 +77,19 @@ public class BladeSyntax {
             "@forelse",
             "@unless"
     );
+    
+    public static Collection<String> GENERIC_BLADE_KEYWORDS = Arrays.asList(
+            "@continue",
+            "@csrf",
+            "@break",
+            "@endfor",
+            "@endif",
+            "@endforeach",
+            "@endsection",
+            "@stop",
+            "@append",
+            "@empty"
+    );
 
     public final static Collection<String> CONDITIONAL_DIRECTIVES = Arrays.asList(
             "@hasSection", "@sectionMissing"

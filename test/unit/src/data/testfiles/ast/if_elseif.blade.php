@@ -1,1 +1,1 @@
-@includeFirst(['test1', 'admin'], $var)
+@includeWhen(!empty($x) && $x > 0, 'tt.ddd')

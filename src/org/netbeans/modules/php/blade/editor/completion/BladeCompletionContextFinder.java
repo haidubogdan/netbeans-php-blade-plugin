@@ -61,7 +61,7 @@ public class BladeCompletionContextFinder {
     public static enum CompletionContext {
         BLADE_ECHO,
         DIRECTIVE,
-        PATH, //@extends or @include paths
+        PATH, //@extends, @include, @each paths
         SECTION_LABEL, //@section paths
         SECTION,
         FILTER,
@@ -117,8 +117,9 @@ public class BladeCompletionContextFinder {
         if (SECTION_KEYWORDS_TOKEN.contains(id)) {
             return CompletionContext.SECTION_LABEL;
         }
+        
+        //completion for ending directive
         if (CTX_DELIMITERS.contains(id)) {
-            //TODO have a scope offset range impl to detect if in 
             return CompletionContext.DIRECTIVE; //standard blade directive
         }
 

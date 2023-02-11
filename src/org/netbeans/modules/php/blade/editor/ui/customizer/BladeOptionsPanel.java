@@ -236,7 +236,7 @@ public final class BladeOptionsPanel extends javax.swing.JPanel {
             DefaultListModel pathModel = (DefaultListModel) viewsPathList.getModel();
             //TODO validate the path if it has blade files ?
             pathModel.addElement(FileUtil.normalizeFile(sources).getAbsolutePath());
-        }        // TODO add your handling code here:
+        }
     }//GEN-LAST:event_addViewFolderButtonActionPerformed
 
     private void removeViewFolderButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_removeViewFolderButtonActionPerformed

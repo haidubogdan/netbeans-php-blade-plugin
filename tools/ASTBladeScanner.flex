@@ -248,6 +248,7 @@ COMMENT_END="--}}"
 %state ST_BLADE_ECHO_ESCAPED
 %state ST_BLADE_PARAMETER_EXPRESSION
 %state ST_LOOK_FOR_DIRECTIVE_ARGUMENTS
+%state ST_DIRECTIVE_ARGUMENT
 %state ST_ARGUMENT_EXPRESSION_LIST
 %state ST_ARGUMENT_LIST
 %state ST_HTML_COMMENT
@@ -550,6 +551,7 @@ COMMENT_END="--}}"
     whitespaceCounter = 0;
     fakeWhitespaceText = "";
     pushState(ST_ARGUMENT_LIST);
+    directiveParBalance = 1;
     return createFullSymbol(ASTBladeSymbols.T_OPEN_PARENTHESE);
 }
 
@@ -571,27 +573,34 @@ COMMENT_END="--}}"
 
 <ST_ARGUMENT_LIST>")" {
     directiveParBalance--;
-    if (directiveParBalance <= 0 ){
+    if (directiveParBalance < 0){
         pushState(ST_ARGUMENT_EXPRESSION_LIST);
         yypushback(1);
+        if (phpParameterExpressionText.length() > 0){
+            parameterList.add(phpParameterExpressionText);
+            Symbol expr = createPhpParameterExpression(ASTBladeSymbols.T_PARAMETER_EXPRESSION);
+            phpParameterExpressionText = "";
+            return expr;
+        }
     } else if(directiveParBalance > 0) {
         phpParameterExpressionText += yytext();
-    }
-    if (directiveParBalance <= 0 && phpParameterExpressionText.length() > 0) {
-         parameterList.add(phpParameterExpressionText);
-         Symbol expr = createPhpParameterExpression(ASTBladeSymbols.T_PARAMETER_EXPRESSION);
-         phpParameterExpressionText = "";
-         return expr;
+    } else if (directiveParBalance == 0 && phpParameterExpressionText.length() > 0) {
+        phpParameterExpressionText += yytext();
+        parameterList.add(phpParameterExpressionText);
+        Symbol expr = createPhpParameterExpression(ASTBladeSymbols.T_PARAMETER_EXPRESSION);
+        phpParameterExpressionText = "";
+        return expr;
      }
 }
 
-<ST_ARGUMENT_LIST>[^\,\@] {
+<ST_ARGUMENT_LIST>[^\,\@\(\)] {
+    String tt2 = yytext();
     phpParameterExpressionText += yytext();
 }
 
 <ST_ARGUMENT_LIST>"," {
     if (phpParameterExpressionText.length() > 0) {
-        directiveParBalance = 1;
+        directiveParBalance = 0;
         directiveBracketBalance = 0;
         parameterList.add(phpParameterExpressionText);
         yypushback(1);
@@ -617,6 +626,7 @@ COMMENT_END="--}}"
 }
 
 <ST_ARRAY_ARG>[^\[\]] {
+    String arrayText = yytext();
    phpParameterExpressionText += yytext();
 }
 
@@ -674,6 +684,7 @@ COMMENT_END="--}}"
     }
 
     <ST_BLADE_INCLUDE_ARGS>{ANY_CHAR} {
+        String debugText = yytext();
         phpParameterExpressionText += yytext();
     }
 }
@@ -752,6 +763,7 @@ COMMENT_END="--}}"
     }
 
     {ANY_CHAR} {
+        String ddd = yytext();
     	phpParameterExpressionText += yytext();
     }
 

@@ -78,6 +78,7 @@ import org.netbeans.modules.csl.spi.DefaultCompletionResult;
 import org.netbeans.modules.csl.spi.ParserResult;
 import org.netbeans.modules.php.blade.editor.index.BladeIndexSupport;
 import org.netbeans.modules.php.blade.editor.BladeSyntax;
+import static org.netbeans.modules.php.blade.editor.BladeSyntax.GENERIC_BLADE_KEYWORDS;
 import org.netbeans.modules.php.blade.editor.completion.BladeCompletionContextFinder.KeywordCompletionType;
 import org.netbeans.modules.php.blade.editor.completion.BladeCompletionContextFinder.CompletionContext;
 import org.netbeans.modules.php.blade.editor.completion.BladeCompletionItem.BladeFilePathCompletionItem;
@@ -97,19 +98,6 @@ import org.openide.filesystems.FileObject;
 import org.openide.util.NbBundle;
 
 public class BladeCompletionHandler implements CodeCompletionHandler2 {
-
-    static final Collection<String> BLADE_KEYWORDS = Arrays.asList(
-            "@continue",
-            "@csrf",
-            "@break",
-            "@endfor",
-            "@endif",
-            "@endforeach",
-            "@endsection",
-            "@stop",
-            "@append",
-            "@empty"
-    );
 
     static final Map<String, KeywordCompletionType> BLADE_DIRECTIVES = new HashMap<>();
 
@@ -281,7 +269,7 @@ public class BladeCompletionHandler implements CodeCompletionHandler2 {
     }
 
     private void completeKeywords(final List<CompletionProposal> completionProposals, final CompletionRequest request) {
-        for (String keyword : BLADE_KEYWORDS) {
+        for (String keyword : GENERIC_BLADE_KEYWORDS) {
             if (startsWith(keyword, request.prefix)) {
                 completionProposals.add(new BladeCompletionItem.KeywordItem(keyword, request));
             }
@@ -562,7 +550,7 @@ public class BladeCompletionHandler implements CodeCompletionHandler2 {
 
     @Override
     public String getPrefix(ParserResult info, int offset, boolean upToOffset) {
-        return PrefixResolver.create(info, offset, upToOffset).resolve();
+        return PrefixResolver.create(info, offset).resolve();
     }
 
     @Override
@@ -629,20 +617,18 @@ public class BladeCompletionHandler implements CodeCompletionHandler2 {
     private static final class PrefixResolver {
 
         //if info will not be implemented we can remove at the end
-        private final ParserResult info;
+        private final BladeParserResult info;
         private final int offset;
-        private final boolean upToOffset;
         private BaseDocument doc;
         private String result = "";
 
-        static PrefixResolver create(ParserResult info, int offset, boolean upToOffset) {
-            return new PrefixResolver(info, offset, upToOffset);
+        static PrefixResolver create(ParserResult info, int offset) {
+            return new PrefixResolver(info, offset);
         }
 
-        private PrefixResolver(ParserResult info, int offset, boolean upToOffset) {
-            this.info = info;
+        private PrefixResolver(ParserResult info, int offset) {
+            this.info = (BladeParserResult) info;
             this.offset = offset;
-            this.upToOffset = upToOffset;
             this.doc = (BaseDocument) info.getSnapshot().getSource().getDocument(false);
         }
 
