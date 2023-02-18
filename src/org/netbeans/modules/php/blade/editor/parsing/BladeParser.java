@@ -113,7 +113,6 @@ public class BladeParser extends Parser {
                 if (rootSymbol.value instanceof BladeProgram) {
                     program = (BladeProgram) rootSymbol.value; // call the parser itself
                     result = new BladeParserResult(context.getSnapshot(), program);
-                    result.createPhpIndexQuery(snapshot, fileObject);
                     result.setErrors(errorHandler.displaySyntaxErrors(program));
                 } else {
                     //fake program

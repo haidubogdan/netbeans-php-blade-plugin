@@ -1,1 +1,1 @@
-@includeWhen(!empty($x) && $x > 0, 'tt.ddd')
+@includeWhen($boolean && ($x > 1), 'test1', (array) $var)

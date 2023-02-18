@@ -1,9 +1,11 @@
 package org.netbeans.modules.php.blade.editor.gsf;
 
+import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.WeakHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.Icon;
@@ -16,8 +18,12 @@ import org.netbeans.modules.csl.spi.GsfUtilities;
 import org.netbeans.modules.parsing.spi.indexing.support.IndexResult;
 import org.netbeans.modules.parsing.spi.indexing.support.QuerySupport;
 import org.netbeans.modules.parsing.spi.indexing.support.QuerySupport.Kind;
+import org.netbeans.modules.php.blade.editor.index.BladeIndexSupport;
 import org.netbeans.modules.php.blade.editor.model.api.BladePathElement;
 import org.netbeans.modules.php.blade.editor.index.BladeIndexer;
+import org.netbeans.modules.php.blade.editor.index.api.BladeIndex;
+import org.netbeans.modules.php.blade.editor.index.api.IndexedElement;
+import org.netbeans.modules.php.blade.project.BladeProjectProperties;
 import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileUtil;
 import org.netbeans.spi.project.ui.support.ProjectConvertors;
@@ -34,25 +40,20 @@ public class BladeTypeSearcher implements IndexSearcher {
     @Override
     public Set<? extends Descriptor> getTypes(Project project, String textForQuery, Kind searchType, Helper helper) {
         Set<BladeTypeDescriptor> typeResults = new HashSet<>();
-        
-        if (project == null) { //blade project is null
+        if (project == null){
+            project = BladeProjectProperties.getProject();
+        }
+        if (project != null){
             try {
-                Collection<FileObject> sourceRoots = QuerySupport.findRoots(project,
-                        null /* all source roots */,
-                        Collections.<String>emptyList(),
-                        Collections.<String>emptyList());
-                //TODO sanitaize text
-                String query = "(.*)" + textForQuery.replace(")", "").replace("(", "") + "(.*)";
-                //search for blade paths
-                //TODO make a BladeInex static function
-                //adapt elements to blade
-            } catch (Exception ex) {
-                LOGGER.log(Level.WARNING, null, ex);
+                BladeIndex index = BladeIndex.create(project);
+                Collection<IndexedElement> yields = index.findAllYields();
+                Collection<FileObject> files = index.getAllIndexedFiles();
+                int y = 1;
+            } catch (IOException ex) {
                 Exceptions.printStackTrace(ex);
             }
-            return typeResults;
         }
-        return null;
+        return typeResults;
     }
 
     @Override

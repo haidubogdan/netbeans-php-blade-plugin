@@ -127,8 +127,6 @@ import org.openide.filesystems.FileObject;
     }
 
     protected void addBladePhpInline() {
-        //TODO may think of an include with php
-        //we will have to think of the offset
         int start = getTokenStartPosition();
         if (start > 1) {
             int offsetEmbed;
@@ -143,7 +141,9 @@ import org.openide.filesystems.FileObject;
             }
             fakePhpEmbeddingText += emptyText + yytext().replace("@php", "<?php ").replace("@endphp", "    ?>");
         } else {
-            String phpText = yytext().replace("@php", "<?  ").replace("@endphp", "////\n?>");
+            String phpText = yytext().replace("@php", "<?php ").replace("@endphp", "    ?>");
+            int phpTextL = phpText.length();
+            int yyTextL = yytext().length();
             if (phpText.length() == yytext().length()) {
                 fakePhpEmbeddingText += phpText;
             }
@@ -268,6 +268,9 @@ COMMENT_END="--}}"
     return createFullSymbol(ASTBladeSymbols.T_BLADE_COMMENT);
 }
 
+<YYINITIAL> "@{{" {
+    return createFullSymbol(ASTBladeSymbols.T_INLINE_HTML);
+}
 
 <YYINITIAL> {OPEN_ECHO} {
     String yytext = yytext();
@@ -290,6 +293,7 @@ COMMENT_END="--}}"
 <ST_BLADE_ECHO>~{CLOSE_ECHO} {
     String yytext = yytext();
     yypushback(2);
+    addEchoStatement();
     return createFullSymbol(ASTBladeSymbols.T_BLADE_PHP_ECHO);
 }
 
@@ -302,6 +306,7 @@ COMMENT_END="--}}"
 <ST_BLADE_ECHO_ESCAPED>~{CLOSE_ECHO_ESCAPED} {
     String yytext = yytext();
     yypushback(3);
+    addEchoStatement();
     return createFullSymbol(ASTBladeSymbols.T_BLADE_PHP_ECHO);
 }
 
@@ -585,10 +590,11 @@ COMMENT_END="--}}"
     } else if(directiveParBalance > 0) {
         phpParameterExpressionText += yytext();
     } else if (directiveParBalance == 0 && phpParameterExpressionText.length() > 0) {
-        phpParameterExpressionText += yytext();
         parameterList.add(phpParameterExpressionText);
         Symbol expr = createPhpParameterExpression(ASTBladeSymbols.T_PARAMETER_EXPRESSION);
         phpParameterExpressionText = "";
+        pushState(ST_ARGUMENT_EXPRESSION_LIST);
+        yypushback(1);
         return expr;
      }
 }
@@ -600,7 +606,7 @@ COMMENT_END="--}}"
 
 <ST_ARGUMENT_LIST>"," {
     if (phpParameterExpressionText.length() > 0) {
-        directiveParBalance = 0;
+        directiveParBalance = 1;
         directiveBracketBalance = 0;
         parameterList.add(phpParameterExpressionText);
         yypushback(1);

@@ -41,6 +41,7 @@
  */
 package org.netbeans.modules.php.blade.editor.lexer;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.EnumSet;
 import java.util.HashMap;
@@ -144,6 +145,11 @@ public enum BladeTokenId implements TokenId {
         BLADE_PAIR_TOKENS.put(T_BLADE_FOR, T_BLADE_ENDFOR);
         BLADE_PAIR_TOKENS.put(T_BLADE_IF, T_BLADE_ENDIF);
     }
+    
+    public static Collection<BladeTokenId> BLADE_PHP_EMBEDDED_TOKEN = Arrays.asList(
+        BladeTokenId.T_BLADE_PHP_EXPRESSION,
+        BladeTokenId.T_BLADE_PHP_ECHO
+    );
     
     /*
     * reversed pairing

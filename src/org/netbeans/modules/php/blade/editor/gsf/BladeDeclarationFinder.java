@@ -5,12 +5,15 @@ import java.util.Collection;
 import org.netbeans.modules.php.blade.editor.BladeLanguage;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 import javax.swing.text.Document;
 import org.netbeans.api.lexer.Token;
 import org.netbeans.api.lexer.TokenHierarchy;
 import org.netbeans.api.lexer.TokenId;
 import org.netbeans.api.lexer.TokenSequence;
+import org.netbeans.api.project.Project;
 import org.netbeans.editor.BaseDocument;
 import org.netbeans.modules.csl.api.DeclarationFinder;
 import org.netbeans.modules.csl.api.ElementHandle;
@@ -19,6 +22,7 @@ import org.netbeans.modules.csl.api.HtmlFormatter;
 import org.netbeans.modules.csl.api.Modifier;
 import org.netbeans.modules.csl.api.OffsetRange;
 import org.netbeans.modules.csl.spi.ParserResult;
+import org.netbeans.modules.parsing.spi.indexing.support.QuerySupport;
 import org.netbeans.modules.php.blade.editor.index.BladeIndexSupport;
 import static org.netbeans.modules.php.blade.editor.BladeSyntax.DIRECTIVES_WITH_VIEW_PATH;
 import org.netbeans.modules.php.blade.editor.index.api.BladeIndex;
@@ -28,6 +32,8 @@ import org.netbeans.modules.php.blade.editor.lexer.BladeTokenId;
 import org.netbeans.modules.php.blade.editor.model.Model;
 import org.netbeans.modules.php.blade.editor.model.api.BladeElement;
 import org.netbeans.modules.php.blade.editor.parsing.BladeParserResult;
+import org.netbeans.modules.php.blade.editor.parsing.ParsingUtils;
+import org.netbeans.modules.php.blade.project.BladeProjectProperties;
 import org.netbeans.modules.php.editor.CodeUtils;
 import org.netbeans.modules.php.editor.api.ElementQuery;
 import org.netbeans.modules.php.editor.api.ElementQueryFactory;
@@ -35,9 +41,23 @@ import org.netbeans.modules.php.editor.api.NameKind;
 import org.netbeans.modules.php.editor.api.QuerySupportFactory;
 import org.netbeans.modules.php.editor.api.elements.ClassElement;
 import org.netbeans.modules.php.editor.api.elements.ElementFilter;
+import org.netbeans.modules.php.editor.api.elements.FunctionElement;
+import org.netbeans.modules.php.editor.api.elements.MethodElement;
+import org.netbeans.modules.php.editor.api.elements.PhpElement;
 import org.netbeans.modules.php.editor.lexer.PHPTokenId;
+import org.netbeans.modules.php.editor.parser.PHPParseResult;
 import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileUtil;
+import org.netbeans.modules.php.editor.csl.DeclarationFinderImpl;
+import org.netbeans.modules.php.editor.model.Occurence;
+import org.netbeans.modules.php.editor.model.OccurencesSupport;
+import org.netbeans.modules.php.editor.parser.astnodes.ClassName;
+import org.netbeans.modules.php.editor.parser.astnodes.Expression;
+import org.netbeans.modules.php.editor.parser.astnodes.FunctionInvocation;
+import org.netbeans.modules.php.editor.parser.astnodes.Identifier;
+import org.netbeans.modules.php.editor.parser.astnodes.MethodInvocation;
+import org.netbeans.modules.php.editor.parser.astnodes.Scalar;
+import org.netbeans.modules.php.editor.parser.astnodes.Statement;
 
 /**
  *
@@ -91,7 +111,7 @@ public class BladeDeclarationFinder implements DeclarationFinder {
     private OffsetRange getReferenceSpan(TokenSequence<?> ts,
             TokenHierarchy<Document> th, int lexOffset) {
         Token<?> token = ts.token();
-        TokenId id = token.id();
+        BladeTokenId id = (BladeTokenId) token.id();
         String text = token.text().toString().trim();
         int tokeLength = ts.offset() + token.length();
 
@@ -104,12 +124,15 @@ public class BladeDeclarationFinder implements DeclarationFinder {
                     return new OffsetRange(tsPhp.offset(), tsPhp.offset() + tokenPhp.length());
                 }
             }
-        } else if (id.equals(BladeTokenId.T_BLADE_PHP_EXPRESSION)){
+        } else if (BladeTokenId.BLADE_PHP_EMBEDDED_TOKEN.contains(id)) {
             TokenSequence<? extends PHPTokenId> tsPhp = BladeLexerUtils.getPhpTokenSequence(th, lexOffset);
-            Token<?> tokenPhp = tsPhp.token();
+            Token<? extends PHPTokenId> tokenPhp = tsPhp.token();
             if (tokenPhp != null) {
-                if (tokenPhp.id().equals(PHPTokenId.PHP_CONSTANT_ENCAPSED_STRING)) {
-                    return new OffsetRange(tsPhp.offset(), tsPhp.offset() + tokenPhp.length());
+                PHPTokenId tokenPhpId = tokenPhp.id();
+                switch (tokenPhpId) {
+                    case PHP_CONSTANT_ENCAPSED_STRING:
+                    case PHP_STRING:
+                        return new OffsetRange(tsPhp.offset(), tsPhp.offset() + tokenPhp.length());
                 }
             }
         }
@@ -145,7 +168,7 @@ public class BladeDeclarationFinder implements DeclarationFinder {
                 }
                 case PHP: {
                     FileObject fo = parseResult.getSnapshot().getSource().getFileObject();
-                    locations = PhpTypeCompletionProvider.getInstance().getItems(fo, context.getPathValue());
+                    locations = PhpTypeCompletionProvider.getInstance().getItems(fo, context.getPathValue(), parseResult, carretOffset);
                     break;
                 }
             }
@@ -169,20 +192,28 @@ public class BladeDeclarationFinder implements DeclarationFinder {
                 ts.movePrevious();
             }
             do {
-                Token<? extends TokenId> token = ts.token();
+                Token<? extends BladeTokenId> token = ts.token();
                 if (token == null) {
                     break;
                 }
                 TokenId tokenId = token.id();
                 String ttText = token.text().toString().trim();
-                if (BladeTokenId.T_BLADE_PHP_EXPRESSION.equals(tokenId)) {
+                if (BladeTokenId.BLADE_PHP_EMBEDDED_TOKEN.contains(tokenId)) {
                     TokenHierarchy<Document> th = TokenHierarchy.get(doc);
                     TokenSequence<? extends PHPTokenId> tsPhp = BladeLexerUtils.getPhpTokenSequence(th, carretOffset);
                     Token<?> tokenPhp = tsPhp.token();
                     if (tokenPhp != null) {
-                        if (tokenPhp.id().equals(PHPTokenId.PHP_CONSTANT_ENCAPSED_STRING)) {
-                            pathValue = tokenPhp.text().toString();
-                            pathValue = pathValue.substring(1, pathValue.length() - 1);
+                        PHPTokenId tokenPhpId = (PHPTokenId) tokenPhp.id();
+                        switch (tokenPhpId) {
+                            case PHP_CONSTANT_ENCAPSED_STRING:
+                                pathValue = tokenPhp.text().toString();
+                                pathValue = pathValue.substring(1, pathValue.length() - 1);
+                                break;
+                            case PHP_STRING:
+                                pathValue = tokenPhp.text().toString();
+                        }
+                        if (tokenId.equals(BladeTokenId.T_BLADE_PHP_ECHO)) {
+                            return new DeclarationContext(pathValue, DeclarationType.PHP);
                         }
                     }
                 } else if (BladeTokenId.T_PHP == tokenId || BladeTokenId.T_BLADE_PHP == tokenId) {
@@ -224,23 +255,100 @@ public class BladeDeclarationFinder implements DeclarationFinder {
 
         /*
         * FOR PHP ??
-        */
-        public DeclarationLocation getItems(FileObject sourceFile, String prefix) {
+         */
+        public DeclarationLocation getItems(FileObject sourceFile, String prefix, BladeParserResult info, int carretOffset) {
             DeclarationLocation alternatives = DeclarationLocation.NONE;
-            //TODO adapt for different usecase using occurence
-            for (ClassElement classElement : ElementFilter.forName(NameKind.prefix(prefix)).filter(getElements(sourceFile))) {
-                if (!CodeUtils.isSyntheticTypeName(classElement.getName())) {
-                    FileObject fo = classElement.getFileObject();
-                    DeclarationLocation declLocation = new DeclarationLocation(
-                            fo, classElement.getOffset());
+            PHPParseResult phpResult = (info.getProgram() != null) ? info.getProgram().getPhpParserResult() : null;
+            if (phpResult == null) {
+                return DeclarationLocation.NONE;
+            }
+            String phpText = phpResult.getSnapshot().getText().toString();
+            //phpResult.get
+            final org.netbeans.modules.php.editor.model.Model model = phpResult.getModel(org.netbeans.modules.php.editor.model.Model.Type.COMMON);
+            OccurencesSupport occurencesSupport = model.getOccurencesSupport(carretOffset);
+            Occurence underCaret = occurencesSupport.getOccurence();
+            if (underCaret != null) {
+                Collection<? extends PhpElement> gotoDeclarations = underCaret.gotoDeclarations();
+                if (gotoDeclarations == null || gotoDeclarations.isEmpty()) {
+                    return DeclarationLocation.NONE;
+                }
+                PhpElement declaration = gotoDeclarations.iterator().next();
+                FileObject declarationFo = declaration.getFileObject();
+                if (declarationFo == null) {
+                    return DeclarationLocation.NONE;
+                }
+                return new DeclarationLocation(declarationFo, declaration.getOffset(), declaration);
+            } else {
+                //todo add a visitor ?
+                PhpElementsVisitor visitor = new PhpElementsVisitor(carretOffset, prefix);
+                phpResult.getProgram().accept(visitor);
+                org.netbeans.modules.php.editor.parser.astnodes.ASTNode nodeFound = visitor.getNodeFound();
+                if (nodeFound == null) {
+                    return DeclarationLocation.NONE;
+                }
 
-                    AlternativeLocation al = new BladeAlternativeLocation(classElement, declLocation);
-                    if (alternatives == DeclarationLocation.NONE) {
-                        alternatives = al.getLocation();
+                Project project = BladeProjectProperties.getProject();
+                FileObject files[] = project.getProjectDirectory().getChildren();
+                for (FileObject file : files) {
+                    if (file.isFolder()) {
+                        continue;
                     }
-                    alternatives.addAlternative(al);
+                    if (file.getExt().equals("php")) {
+                        ParsingUtils parsingUtils = new ParsingUtils();
+                        parsingUtils.parseFileObject(file);
+                        ElementQuery.Index phpIndexQuery = ElementQueryFactory.createIndexQuery(QuerySupportFactory.get(parsingUtils.getParserResult()));
+
+                        if (nodeFound instanceof Identifier) {
+                            Set<ClassElement> classes = phpIndexQuery.getClasses(NameKind.create(prefix, QuerySupport.Kind.PREFIX));
+                            for (ClassElement classElement : classes) {
+                                if (!CodeUtils.isSyntheticTypeName(classElement.getName())) {
+                                    FileObject fo = classElement.getFileObject();
+                                    DeclarationLocation declLocation = new DeclarationLocation(
+                                            fo, classElement.getOffset());
+
+                                    AlternativeLocation al = new BladeAlternativeLocation(classElement, declLocation);
+                                    if (alternatives == DeclarationLocation.NONE) {
+                                        alternatives = al.getLocation();
+                                    }
+                                    alternatives.addAlternative(al);
+                                }
+                            }
+                        } else if (nodeFound instanceof MethodInvocation) {
+                            Set<MethodElement> functions = phpIndexQuery.getMethods(NameKind.create(prefix, QuerySupport.Kind.PREFIX));
+                            for (MethodElement functionElement : functions) {
+                                if (!CodeUtils.isSyntheticTypeName(functionElement.getName())) {
+                                    FileObject fo = functionElement.getFileObject();
+                                    DeclarationLocation declLocation = new DeclarationLocation(
+                                            fo, functionElement.getOffset());
+
+                                    AlternativeLocation al = new BladeAlternativeLocation(functionElement, declLocation);
+                                    if (alternatives == DeclarationLocation.NONE) {
+                                        alternatives = al.getLocation();
+                                    }
+                                    alternatives.addAlternative(al);
+                                }
+                            }
+                        } else if (nodeFound instanceof FunctionInvocation) {
+                            Set<FunctionElement> functions = phpIndexQuery.getFunctions(NameKind.create(prefix, QuerySupport.Kind.PREFIX));
+                            for (FunctionElement functionElement : functions) {
+                                if (!CodeUtils.isSyntheticTypeName(functionElement.getName())) {
+                                    FileObject fo = functionElement.getFileObject();
+                                    DeclarationLocation declLocation = new DeclarationLocation(
+                                            fo, functionElement.getOffset());
+
+                                    AlternativeLocation al = new BladeAlternativeLocation(functionElement, declLocation);
+                                    if (alternatives == DeclarationLocation.NONE) {
+                                        alternatives = al.getLocation();
+                                    }
+                                    alternatives.addAlternative(al);
+                                }
+                            }
+                        }
+                        break;
+                    }
                 }
             }
+
             return alternatives;
         }
 
@@ -492,6 +600,64 @@ public class BladeDeclarationFinder implements DeclarationFinder {
 
         public DeclarationType getDeclarationType() {
             return declarationType;
+        }
+    }
+
+    /**
+     * declaration php visitor
+     */
+    public static class PhpElementsVisitor extends org.netbeans.modules.php.editor.parser.astnodes.visitors.DefaultVisitor {
+
+        private int offset;
+        private String prefix;
+        private org.netbeans.modules.php.editor.parser.astnodes.ASTNode nodeFound;
+
+        public PhpElementsVisitor(int offset, String prefix) {
+            this.offset = offset;
+            this.prefix = prefix;
+        }
+
+        @Override
+        public void scan(org.netbeans.modules.php.editor.parser.astnodes.ASTNode node) {
+            if (node != null && nodeFound == null) {
+                super.scan(node);
+            }
+        }
+
+        @Override
+        public void visit(Identifier node) {
+            if (matches(node, node.getName())) {
+                nodeFound = node;
+            }
+        }
+
+        @Override
+        public void visit(ClassName node) {
+            if (matches(node, node.getName().toString())) {
+                nodeFound = node;
+            }
+        }
+
+        @Override
+        public void visit(MethodInvocation node) {
+            if (matches(node, node.getMethod().toString())) {
+                nodeFound = node;
+            }
+        }
+
+        @Override
+        public void visit(FunctionInvocation node) {
+            if (matches(node, node.getFunctionName().getName().toString())) {
+                nodeFound = node;
+            }
+        }
+
+        private boolean matches(org.netbeans.modules.php.editor.parser.astnodes.ASTNode node, String name) {
+            return node.getStartOffset() <= offset && node.getEndOffset() >= offset && name.replace("\\", "").equals(prefix);
+        }
+
+        public org.netbeans.modules.php.editor.parser.astnodes.ASTNode getNodeFound() {
+            return nodeFound;
         }
     }
 }

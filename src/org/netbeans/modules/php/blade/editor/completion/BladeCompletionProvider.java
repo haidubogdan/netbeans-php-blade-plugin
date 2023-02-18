@@ -7,6 +7,7 @@ import org.netbeans.api.editor.mimelookup.MimeRegistration;
 import org.netbeans.api.lexer.Token;
 import org.netbeans.api.lexer.TokenSequence;
 import static org.netbeans.modules.php.blade.editor.BladeLanguage.BLADE_MIME_TYPE;
+import org.netbeans.modules.php.blade.editor.BladeSyntax;
 import org.netbeans.modules.php.blade.editor.lexer.BladeLexerUtils;
 import org.netbeans.modules.php.blade.editor.lexer.BladeTokenId;
 import org.netbeans.spi.editor.completion.CompletionProvider;
@@ -64,7 +65,14 @@ public class BladeCompletionProvider implements CompletionProvider {
                     return 0;
                 }
                 prevToken = ts.token();
-                if (prevToken.id().equals(BladeTokenId.T_BLADE_INCLUDE)){
+                if (prevToken == null){
+                    return 0;
+                }
+                String prevTokentext = prevToken.text().toString();
+                if (BladeSyntax.DIRECTIVES_WITH_VIEW_PATH.contains(prevTokentext) ||
+                        prevToken.id().equals(BladeTokenId.T_BLADE_SECTION) ||
+                        prevToken.id().equals(BladeTokenId.T_BLADE_HAS_SECTION) ||
+                        prevToken.id().equals(BladeTokenId.T_BLADE_SECTION_MISSING)){
                     return COMPLETION_QUERY_TYPE;
                 }
                 return 0;

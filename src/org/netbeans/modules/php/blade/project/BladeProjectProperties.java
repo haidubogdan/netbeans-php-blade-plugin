@@ -76,6 +76,17 @@ public final class BladeProjectProperties {
     public static BladeProjectProperties getInstance() {
         return INSTANCE;
     }
+    
+    public  Project _getProject(){
+        return project;
+    }
+    
+    public static Project getProject(){
+        if (INSTANCE != null){
+            return INSTANCE._getProject();
+        }
+        return null;
+    }
 
     private Preferences getPreferences() {
         if (project != null){

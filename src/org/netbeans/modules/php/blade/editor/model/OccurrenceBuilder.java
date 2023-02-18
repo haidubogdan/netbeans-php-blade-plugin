@@ -75,6 +75,9 @@ public class OccurrenceBuilder {
         if (parserResult != null) {
             FileObject fileObject = parserResult.getSnapshot().getSource().getFileObject();
             BladeIndexSupport sup = BladeIndexSupport.findFor(fileObject);
+            if (sup == null){
+                return;
+            }
             index = sup.getIndex();
             project = sup.getProject();
         }

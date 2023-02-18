@@ -126,13 +126,15 @@ public class BladeBracesMatcher implements BracesMatcher {
             BladeTokenId closeToken = null;
             BladeTokenId openToken = null;
 
-            switch (id.tokenType) {
-                case TAG_OPEN_DIRECTIVE:
-                    closeToken = id.getPairClose(id);
-                    break;
-                case TAG_CLOSE_DIRECTIVE:
-                    openToken = id.getPairStart(id);
-                    break;
+            if (id.tokenType != null){
+                switch (id.tokenType) {
+                    case TAG_OPEN_DIRECTIVE:
+                        closeToken = id.getPairClose(id);
+                        break;
+                    case TAG_CLOSE_DIRECTIVE:
+                        openToken = id.getPairStart(id);
+                        break;
+                }
             }
 
             if (closeToken != null) {
@@ -162,6 +164,8 @@ public class BladeBracesMatcher implements BracesMatcher {
                     return new int[]{r.getStart(), r.getEnd()};
                 }
                 return null;
+            } else {
+                int y = 1;
             }
             return null;
         } finally {

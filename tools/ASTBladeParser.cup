@@ -385,8 +385,6 @@ directive_statement:stm {:
     RESULT = new BladeSwitchStatement(dleft, endright, directive, argexpr, block, endTag);
 :}
 |  T_BLADE_DIRECTIVE:d T_OPEN_PARENTHESE T_PHP_PARAMETER_EXPRESSION:expr T_CLOSE_PARENTHESE {:
-	//TODO store expression expression
-    //directive statement with arguments
     DirectiveName directive = new DirectiveName(dleft, dright, d.toString());
     PhpExpression phpExpression = new PhpExpression(exprleft, exprright, expr.toString());
     ArgumentExpression argexpr = new ArgumentExpression(phpExpression, exprleft, exprright);

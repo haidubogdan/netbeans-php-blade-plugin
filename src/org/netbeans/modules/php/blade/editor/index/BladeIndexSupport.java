@@ -97,5 +97,16 @@ public class BladeIndexSupport {
 
         return p;
     }
+    
+    public static BladeIndexSupport getSupportFromProject(Project project) {
+        if (INSTANCIES.containsKey(project)) {
+            return INSTANCIES.get(project);
+        }
+        return null;
+    }
+    
+    public static WeakHashMap<Project, BladeIndexSupport> getInstances() {
+        return INSTANCIES;
+    }
 
 }

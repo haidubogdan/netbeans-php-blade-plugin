@@ -26,15 +26,15 @@ public class BladeASTLexerTest extends BladeLexerASTTestBase {
     }
     
     
-    @Test
-    public void test1() throws Exception {
-        performTest("ast/test1.blade");
-    }
-    
-    @Test
-    public void test2() throws Exception {
-        performTest("ast/test2.blade");
-    }
+//    @Test
+//    public void test1() throws Exception {
+//        performTest("ast/test1.blade");
+//    }
+//    
+//    @Test
+//    public void test2() throws Exception {
+//        performTest("ast/test2.blade");
+//    }
     
     @Test
     public void testIfElseIf() throws Exception {

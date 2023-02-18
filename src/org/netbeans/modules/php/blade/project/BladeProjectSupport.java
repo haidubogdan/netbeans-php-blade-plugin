@@ -18,6 +18,10 @@ public class BladeProjectSupport extends ProjectOpenedHook implements Preference
         assert project != null;
         this.project = project;
     }
+    
+    public Project getProject(){
+        return project;
+    }
 
     private static BladeProjectSupport create(Project project) {
         BladeProjectSupport support = new BladeProjectSupport(project);

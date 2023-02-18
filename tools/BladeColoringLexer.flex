@@ -481,6 +481,11 @@ OPEN_PHP_ECHO = "<?="
   }
 }
 
+<ST_HTML> "@{{" {
+    //escape expression
+    return BladeTokenId.T_HTML;
+}
+
 <ST_HTML> {OPEN_BLADE_ECHO} {
     String yytext = yytext();
     pushState(ST_BLADE_ECHO);

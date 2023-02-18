@@ -76,7 +76,6 @@ public class BladeParserResult extends ParserResult {
     private Model model;
     private final BladeProgram root;
     private List<Error> errors;
-    private ElementQuery.Index phpIndexQuery;
     private org.netbeans.modules.php.editor.model.Model phpModel;
     
     BladeParserResult(Snapshot snapshot) {
@@ -115,14 +114,6 @@ public class BladeParserResult extends ParserResult {
     public List<? extends org.netbeans.modules.csl.api.Error> getDiagnostics() {
         return errors;
     }
-
-    public void setPhpIndexQuery(ElementQuery.Index indexQuery) {
-        phpIndexQuery = indexQuery;
-    }
-
-    public ElementQuery.Index getPhpIndexQuery() {
-        return phpIndexQuery;
-    }
     
     public org.netbeans.modules.php.editor.model.Model getPhpModel() {
         return phpModel;
@@ -139,7 +130,6 @@ public class BladeParserResult extends ParserResult {
         //TO DO extract embedding and create a fake snapshot
         PHPParseResult result = new PHPParseResult(snapshot, emptyProgram);
 
-        phpIndexQuery = ElementQueryFactory.createIndexQuery(QuerySupportFactory.get(result));
         phpModel = result.getModel(org.netbeans.modules.php.editor.model.Model.Type.COMMON);
         /*
         //could be an ideea to make use of the ModuleUtils filescope yet we need a existing php file
