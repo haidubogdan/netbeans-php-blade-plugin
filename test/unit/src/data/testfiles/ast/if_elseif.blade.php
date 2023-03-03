@@ -1,1 +1,2 @@
-@includeWhen($boolean && ($x > 1), 'test1', (array) $var)
+@includeWhen($boolean, 'view.name', ['status' => 'complete'])
+@includeUnless($boolean, 'view.name', ['status' => 'complete'])

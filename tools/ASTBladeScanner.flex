@@ -582,15 +582,9 @@ COMMENT_END="--}}"
 
 <ST_ARGUMENT_LIST>")" {
     directiveParBalance--;
-    if (directiveParBalance < 0){
+    if (directiveParBalance == 0 && phpParameterExpressionText.length() == 0){
         pushState(ST_ARGUMENT_EXPRESSION_LIST);
         yypushback(1);
-        if (phpParameterExpressionText.length() > 0){
-            parameterList.add(phpParameterExpressionText);
-            Symbol expr = createPhpParameterExpression(ASTBladeSymbols.T_PARAMETER_EXPRESSION);
-            phpParameterExpressionText = "";
-            return expr;
-        }
     } else if(directiveParBalance > 0) {
         phpParameterExpressionText += yytext();
     } else if (directiveParBalance == 0 && phpParameterExpressionText.length() > 0) {
