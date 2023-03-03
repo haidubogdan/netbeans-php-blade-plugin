@@ -52,6 +52,7 @@ import org.netbeans.api.editor.mimelookup.MimeRegistrations;
 import org.netbeans.api.lexer.Token;
 import org.netbeans.editor.BaseDocument;
 import org.netbeans.modules.php.blade.editor.lexer.BladeLexerUtils;
+import org.netbeans.modules.php.blade.editor.lexer.TokenSequenceSnapshot;
 import org.netbeans.spi.editor.typinghooks.TypedTextInterceptor;
 
 /**
@@ -80,7 +81,7 @@ public class BladeTypedTextInterceptor implements TypedTextInterceptor {
         CHAR_PAIR.put('"', '"');
     }
     
-    static BladeTokenId validTokenList[] = {
+    private static final BladeTokenId tokensToAutocomplete[] = {
         BladeTokenId.T_BLADE_OPEN_ECHO,
         BladeTokenId.T_BLADE_OPEN_ECHO_ESCAPED,
         BladeTokenId.T_BLADE_OPEN_COMMENT
@@ -109,45 +110,66 @@ public class BladeTypedTextInterceptor implements TypedTextInterceptor {
         //simple char completion
         //should not affect the html context
         if (!this.mimePath.endsWith("text/html") && CHAR_PAIR.containsKey(ch)) {
+            
             completePairChar(context, ch, CHAR_PAIR.get(ch));
             return;
         }
 
-        if (ch != ' ') {
+        //the trigger will be only the space char or $ dollar sign
+        if (ch != ' ' && ch != '$') {
             return;
         }
 
+        
         Document document = context.getDocument();
-
-        //we are offseting the carret to -1
-        Token<? extends BladeTokenId> token = BladeLexerUtils.getOffsetToken(document, caretOffset - 1);
-
+        TokenSequenceSnapshot tss = TokenSequenceSnapshot.loadDocument(document);
+        Token<? extends BladeTokenId> token = tss.move(caretOffset).previous();
+        
         if (token == null) {
             return;
         }
-
-        BladeTokenId id = token.id();
-        //String tokenText = token.text().toString();
-        //BaseDocument doc = (BaseDocument) document;
         
+        BladeTokenId id = token.id();
         /**
-         * blade bracket completer only for echo {{ }} echo
-         * escaped {!! !!} comment {{-- --}}
+         * blade bracket completer only for echo {{ }} echo escaped {!! !!}
+         * comment {{-- --}}
          *
          */
 
-        if (!Arrays.asList(validTokenList).contains(id)) {
+        if (!Arrays.asList(tokensToAutocomplete).contains(id)) {
             return;
         }
 
+        //we are offseting the carret to -1
         String pairText = id.getPairClose(id).fixedText();
         
+        token = tss.next();
+        
+        if (token != null){
+            id = token.id();
+            switch(id){
+                case T_BLADE_PHP_ECHO:
+                    //no break
+                case T_BLADE_CLOSE_ECHO:
+                    //no break
+                case T_BLADE_CLOSE_ECHO_ESCAPED:
+                    //don't continue
+                    return;
+            }
+        }
+
         StringBuilder sb = new StringBuilder();
-        sb.append("  ");
+        int carretPos = 1;
+        if (ch == '$') {
+            sb.append(" $ ");
+            carretPos = 2;
+        } else {
+            sb.append("  ");
+        }
         String completeBracket = pairText;
         sb.append(completeBracket);
 
-        context.setText(sb.toString(), 1);
+        context.setText(sb.toString(), carretPos);
     }
 
     @Override

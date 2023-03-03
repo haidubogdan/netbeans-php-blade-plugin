@@ -31,7 +31,6 @@ import org.netbeans.spi.lexer.MutableTextInput;
 public class TokenFormatter {
 
     protected static final String TEMPLATE_HANDLER_PROPERTY = "code-template-insert-handler";
-    private static final String EMPTY_STRING = "";
     private static final Logger LOGGER = Logger.getLogger(TokenFormatter.class.getName());
     // it's for testing
     private static int unitTestCarretPosition = -1;

@@ -94,6 +94,7 @@ import org.netbeans.modules.php.blade.project.CustomDirectives;
 import org.netbeans.modules.php.blade.project.CustomDirectives.DirectiveNames;
 import org.netbeans.modules.php.editor.csl.PHPLanguage;
 import org.netbeans.modules.php.blade.editor.Utils;
+import org.netbeans.modules.php.blade.project.ProjectUtils;
 import org.openide.filesystems.FileObject;
 import org.openide.util.NbBundle;
 
@@ -302,7 +303,7 @@ public class BladeCompletionHandler implements CodeCompletionHandler2 {
         Boolean queryIsPath = p.matcher(queryText).matches();
 
         if (request.project != null && queryIsPath) {
-            List<FileObject> viewsRoots = Utils.getViewsPathList(request.project);
+            List<FileObject> viewsRoots = ProjectUtils.getCustomViewsRoots(request.project);
             for (FileObject viewRoot : viewsRoots) {
                 String rootName = viewRoot.getName();
                 String textToComplete;
@@ -412,8 +413,6 @@ public class BladeCompletionHandler implements CodeCompletionHandler2 {
 
     /**
      * simulating a php completion in php blade context to fix the issue that
-     * the php embedding is not working if we don't have PHP_OPEN tags TODO fix
-     * issue with exception
      *
      * @param completionProposals
      * @param request
@@ -475,6 +474,8 @@ public class BladeCompletionHandler implements CodeCompletionHandler2 {
         }
 
     }
+    
+    //TODO see if necessary
 
     private void completePhpVariables(final List<CompletionProposal> completionProposals, final CompletionRequest request) {
         //ElementQuery.Index index = request.parserResult.getPhpIndexQuery();

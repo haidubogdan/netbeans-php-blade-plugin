@@ -324,6 +324,10 @@ COMMENT_END="--}}"
     return createFullSymbol(ASTBladeSymbols.T_INLINE_HTML);
 }
 
+<YYINITIAL>"@media" | "@layer" | "@tailwind" | "@apply" | "@-webkit-keyframes" | "@keyframes" {
+    return createFullSymbol(ASTBladeSymbols.T_INLINE_HTML);
+}
+
 <YYINITIAL>"@"[ ]*[\d\(\#\.\{\'\"]+ {
     return createFullSymbol(ASTBladeSymbols.T_INLINE_HTML);
 }

@@ -17,7 +17,6 @@ import org.netbeans.modules.php.blade.editor.parsing.astnodes.visitors.DefaultVi
 
 
 /**
- * TODO treate else if bug : if last element is a endif and next is directive tag
  *
  * @author bhaidu
  */

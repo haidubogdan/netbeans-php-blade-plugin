@@ -442,6 +442,11 @@ OPEN_PHP_ECHO = "<?="
     return BladeTokenId.T_HTML;
 }
 
+<ST_HTML>"@media" | "@layer" | "@tailwind" | "@apply" | "@-webkit-keyframes" | "@keyframes" {
+    //css directives
+    return BladeTokenId.T_HTML;
+}
+
 <ST_HTML>{EMAIL} {
     //email format
     return BladeTokenId.T_HTML;

@@ -13,13 +13,13 @@ import org.netbeans.modules.csl.api.OffsetRange;
 import org.netbeans.modules.csl.spi.ParserResult;
 import org.netbeans.modules.php.blade.editor.index.BladeIndexSupport;
 import org.netbeans.modules.php.blade.editor.BladeLanguage;
-import org.netbeans.modules.php.blade.editor.Utils;
 import org.netbeans.modules.php.blade.editor.index.api.BladeIndex;
 import org.netbeans.modules.php.blade.editor.index.api.IndexedElement;
 import org.netbeans.modules.php.blade.editor.model.api.BladeDirective;
 import org.netbeans.modules.php.blade.editor.model.api.BladeElement;
 import org.netbeans.modules.php.blade.editor.model.api.Occurence;
 import org.netbeans.modules.php.blade.editor.types.api.DeclarationScope;
+import org.netbeans.modules.php.blade.project.ProjectUtils;
 import org.openide.filesystems.FileObject;
 import org.openide.util.Union2;
 
@@ -105,7 +105,7 @@ public class OccurrenceBuilder {
                 case INCLUDE:
                 case EXTEND: {
                     if (index != null) {
-                        List<FileObject> viewsRoots = Utils.getViewsPathList(project);
+                        List<FileObject> viewsRoots = ProjectUtils.getCustomViewsRoots(project);
                         String path = elementInfo.getLabel();
                         Set<IndexedElement> bladeViewsSet = new HashSet<>();
                         //TODO don't use IndexedElement anymore

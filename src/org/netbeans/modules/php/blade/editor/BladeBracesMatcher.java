@@ -108,7 +108,6 @@ public class BladeBracesMatcher implements BracesMatcher {
     public int[] findMatches() throws InterruptedException, BadLocationException {
         ((AbstractDocument) context.getDocument()).readLock();
         try {
-            //TODO have a context of forward and back 
             TokenSequence<BladeTokenId> ts = BladeLexerUtils.getBladeTokenSequence(context.getDocument());
             ts.move(context.getSearchOffset());
             if (!ts.moveNext()) {
@@ -164,8 +163,6 @@ public class BladeBracesMatcher implements BracesMatcher {
                     return new int[]{r.getStart(), r.getEnd()};
                 }
                 return null;
-            } else {
-                int y = 1;
             }
             return null;
         } finally {
