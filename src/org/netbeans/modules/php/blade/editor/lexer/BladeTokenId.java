@@ -119,6 +119,7 @@ public enum BladeTokenId implements TokenId {
     T_BLADE_PHP_ECHO(null, "blade_php_echo"),
     T_BLADE_PHP_LOOP_PARAM(null, "php"),
     T_BLADE_PHP_COND(null, "php"),
+    T_PHP_STRING(null, "php_string"),
     T_HTML( null, "html" ),
     T_XML( null, "html" ),
     NEWLINE("\n", "whitespace"),

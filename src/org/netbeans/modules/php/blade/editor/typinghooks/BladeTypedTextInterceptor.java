@@ -136,6 +136,10 @@ public class BladeTypedTextInterceptor implements TypedTextInterceptor {
          *
          */
 
+        if (id.equals(BladeTokenId.T_BLADE_COMMENT)){
+            return;
+        }
+
         if (!Arrays.asList(tokensToAutocomplete).contains(id)) {
             return;
         }
@@ -153,6 +157,10 @@ public class BladeTypedTextInterceptor implements TypedTextInterceptor {
                 case T_BLADE_CLOSE_ECHO:
                     //no break
                 case T_BLADE_CLOSE_ECHO_ESCAPED:
+                    //no break
+                case  T_BLADE_COMMENT:
+                    //no break
+                case T_PHP_STRING:
                     //don't continue
                     return;
             }

@@ -51,6 +51,7 @@ Contributor(s): Sebastian Hörl
     <fontcolor name="blade_echo" foreColor="ff966738">
         <font style="bold" />
     </fontcolor>
+    <fontcolor name="php_string" default="string" />
     <fontcolor name="blade_directive" foreColor="ff966738">
         <font style="bold" />
     </fontcolor>

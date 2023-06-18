@@ -66,7 +66,7 @@ import org.netbeans.modules.php.blade.editor.common.ByteStack;
     private int parameterExpressionLength = 0;
     private int pushBackCount = 0;
     //[\"][^\:\"]+[\:]{1}[^\:]
-    private Pattern freezePhpPattern = Pattern.compile("[^\\:\\\"\\)]+[\\:]{1}[^\\:]", Pattern.CASE_INSENSITIVE);
+    private Pattern freezePhpPattern = Pattern.compile("[^\\:\\\"\\)\\? ]+([\\:]{1}|[\\:]{3,})[^\\:]", Pattern.CASE_INSENSITIVE);
 
     public BladeColoringLexer(LexerRestartInfo<? extends TokenId> info) {
         this.input = info.input();
@@ -410,7 +410,7 @@ OPEN_PHP_ECHO = "<?="
    parenBalanceInDirective++;
 }
 
-<ST_BLADE_PARAMETER_EXPRESSION>"{"? + ([^\:\"\)]+ ":") [^\:]  {
+<ST_BLADE_PARAMETER_EXPRESSION>[^\:\"\)\? ]+([\:]{1}|[\:]{3,10})[^\:]  {
     //php lexer embedding freeze issue when you type / delete a double colon at the start of the script
     if (parameterExpressionLength == 0) {
         popState();
@@ -519,6 +519,9 @@ OPEN_PHP_ECHO = "<?="
 
     Matcher matcher = freezePhpPattern.matcher(yytext);
     if(matcher.find()) {
+        if(yytext.trim().startsWith("'") || yytext.trim().startsWith("\"")){
+            return BladeTokenId.T_PHP_STRING;
+        }
         return BladeTokenId.T_HTML;
     }
     return BladeTokenId.T_BLADE_PHP_ECHO;
@@ -539,6 +542,9 @@ OPEN_PHP_ECHO = "<?="
     yypushback(3);
     Matcher matcher = freezePhpPattern.matcher(yytext);
     if(matcher.find()) {
+        if(yytext.trim().startsWith("'") || yytext.trim().startsWith("\"")){
+            return BladeTokenId.T_PHP_STRING;
+        }
         return BladeTokenId.T_HTML;
     }
     return BladeTokenId.T_BLADE_PHP_ECHO;
