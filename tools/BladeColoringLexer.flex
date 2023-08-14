@@ -410,14 +410,19 @@ OPEN_PHP_ECHO = "<?="
    parenBalanceInDirective++;
 }
 
-<ST_BLADE_PARAMETER_EXPRESSION>[^\:\"\)\? ]+([\:]{1}|[\:]{3,10})[^\:]  {
+<ST_BLADE_PARAMETER_EXPRESSION>\'[^ \'\n\r\{]+\' | \"[^ \"\n\r\{]+\" {
+    String text = yytext();
+    parameterExpressionLength+= yylength();
+}
+
+<ST_BLADE_PARAMETER_EXPRESSION>[^\:\"\)\? ]+([\:]{1}|[\:]{3,10})[^\:] | "["[\"][^\"\:\)\?]+[\"][\:]+ { 
     //php lexer embedding freeze issue when you type / delete a double colon at the start of the script
-    if (parameterExpressionLength == 0) {
+    //if (parameterExpressionLength == 0) {
         popState();
         popState();
         parameterExpressionLength = 0;
-        return  BladeTokenId.T_HTML;
-    }
+        return  BladeTokenId.T_BLADE_ERROR;
+    //}
 }
 
 <ST_BLADE_PARAMETER_EXPRESSION>")" {
@@ -498,13 +503,13 @@ OPEN_PHP_ECHO = "<?="
 }
 
 <ST_HTML> {OPEN_ECHO_ESCAPED} {
-    String yytext = yytext();
+    //String yytext = yytext();
     pushState(ST_BLADE_ECHO_ESCAPED);
     return BladeTokenId.T_BLADE_OPEN_ECHO_ESCAPED;
 }
 
 <ST_BLADE_ECHO> {CLOSE_BLADE_ECHO} {
-    String yytext = yytext();
+    //String yytext = yytext();
     popState();
     return BladeTokenId.T_BLADE_CLOSE_ECHO;
 }
@@ -522,7 +527,7 @@ OPEN_PHP_ECHO = "<?="
         if(yytext.trim().startsWith("'") || yytext.trim().startsWith("\"")){
             return BladeTokenId.T_PHP_STRING;
         }
-        return BladeTokenId.T_HTML;
+        return BladeTokenId.T_BLADE_ERROR;
     }
     return BladeTokenId.T_BLADE_PHP_ECHO;
 }
@@ -545,7 +550,7 @@ OPEN_PHP_ECHO = "<?="
         if(yytext.trim().startsWith("'") || yytext.trim().startsWith("\"")){
             return BladeTokenId.T_PHP_STRING;
         }
-        return BladeTokenId.T_HTML;
+        return BladeTokenId.T_BLADE_ERROR;
     }
     return BladeTokenId.T_BLADE_PHP_ECHO;
 }

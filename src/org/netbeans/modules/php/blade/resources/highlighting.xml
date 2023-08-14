@@ -55,5 +55,5 @@ Contributor(s): Sebastian Hörl
     <fontcolor name="blade_directive" foreColor="ff966738">
         <font style="bold" />
     </fontcolor>
-    <fontcolor name="blade_other" default="error" />
+    <fontcolor name="error" default="error" />
 </fontscolors>

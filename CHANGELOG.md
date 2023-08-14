@@ -1,5 +1,10 @@
 # Change Log
 
+## [1.0.0.51]
+
+Php Lexer update. Detect simple string (without php embedding) before the freeze pattern.
+Autocomplete for styling and html directives "@class, @style, @required ..." 
+
 ## [1.0.0.50]
 
 Lexer update (fix). If a string pattern which freezes netbeans embeddings (class:::value) is detected and it starts with quote symbol, it will be displayed as a string. 
