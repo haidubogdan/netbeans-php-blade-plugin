@@ -135,6 +135,7 @@ public class BladeCompletionHandler implements CodeCompletionHandler2 {
         BLADE_DIRECTIVES.put("@guest", KeywordCompletionType.WITH_ARG_AND_ENDTAG); //NOI18N
         BLADE_DIRECTIVES.put("@switch", KeywordCompletionType.WITH_ARG_AND_ENDTAG); //NOI18N
         BLADE_DIRECTIVES.put("@section", KeywordCompletionType.WITH_ARG_AND_ENDTAG); //NOI18N
+        BLADE_DIRECTIVES.put("@session", KeywordCompletionType.WITH_ARG); //NOI18N
         BLADE_DIRECTIVES.put("@can", KeywordCompletionType.WITH_ARG_AND_ENDTAG); //NOI18N
         BLADE_DIRECTIVES.put("@canany", KeywordCompletionType.WITH_ARG_AND_ENDTAG); //NOI18N
         BLADE_DIRECTIVES.put("@cannot", KeywordCompletionType.WITH_ARG_AND_ENDTAG); //NOI18N
