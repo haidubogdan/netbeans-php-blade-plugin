@@ -135,7 +135,6 @@ public class BladeCompletionHandler implements CodeCompletionHandler2 {
         BLADE_DIRECTIVES.put("@guest", KeywordCompletionType.WITH_ARG_AND_ENDTAG); //NOI18N
         BLADE_DIRECTIVES.put("@switch", KeywordCompletionType.WITH_ARG_AND_ENDTAG); //NOI18N
         BLADE_DIRECTIVES.put("@section", KeywordCompletionType.WITH_ARG_AND_ENDTAG); //NOI18N
-        BLADE_DIRECTIVES.put("@session", KeywordCompletionType.WITH_ARG); //NOI18N
         BLADE_DIRECTIVES.put("@can", KeywordCompletionType.WITH_ARG_AND_ENDTAG); //NOI18N
         BLADE_DIRECTIVES.put("@canany", KeywordCompletionType.WITH_ARG_AND_ENDTAG); //NOI18N
         BLADE_DIRECTIVES.put("@cannot", KeywordCompletionType.WITH_ARG_AND_ENDTAG); //NOI18N
@@ -146,6 +145,9 @@ public class BladeCompletionHandler implements CodeCompletionHandler2 {
         BLADE_DIRECTIVES.put("@checked", KeywordCompletionType.WITH_ARG); //NOI18N
         BLADE_DIRECTIVES.put("@disabled", KeywordCompletionType.WITH_ARG); //NOI18N
         BLADE_DIRECTIVES.put("@required", KeywordCompletionType.WITH_ARG); //NOI18N
+        //laravel 10.x
+        BLADE_DIRECTIVES.put("@session", KeywordCompletionType.WITH_ARG); //NOI18N
+        BLADE_DIRECTIVES.put("@use", KeywordCompletionType.WITH_ARG); //NOI18N
     }
 
     @Override
