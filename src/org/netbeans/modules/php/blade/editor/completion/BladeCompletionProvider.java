@@ -148,9 +148,6 @@ public class BladeCompletionProvider implements CompletionProvider {
                     return;
                 }
 
-                int start = currentToken.getStartIndex();
-                int end = currentToken.getStopIndex();
-
                 if (currentToken.getText().trim().length() == 0){
                     return;
                 }
