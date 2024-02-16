@@ -1,66 +1,39 @@
 /*
- * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
- *
- * Copyright 2016 Oracle and/or its affiliates. All rights reserved.
- *
- * Oracle and Java are registered trademarks of Oracle and/or its affiliates.
- * Other names may be trademarks of their respective owners.
- *
- * The contents of this file are subject to the terms of either the GNU
- * General Public License Version 2 only ("GPL") or the Common
- * Development and Distribution License("CDDL") (collectively, the
- * "License"). You may not use this file except in compliance with the
- * License. You can obtain a copy of the License at
- * http://www.netbeans.org/cddl-gplv2.html
- * or nbbuild/licenses/CDDL-GPL-2-CP. See the License for the
- * specific language governing permissions and limitations under the
- * License.  When distributing the software, include this License Header
- * Notice in each file and include the License file at
- * nbbuild/licenses/CDDL-GPL-2-CP.  Oracle designates this
- * particular file as subject to the "Classpath" exception as provided
- * by Oracle in the GPL Version 2 section of the License file that
- * accompanied this code. If applicable, add the following below the
- * License Header, with the fields enclosed by brackets [] replaced by
- * your own identifying information:
- * "Portions Copyrighted [year] [name of copyright owner]"
- *
- * If you wish your version of this file to be governed by only the CDDL
- * or only the GPL Version 2, indicate your decision by adding
- * "[Contributor] elects to include this software in this distribution
- * under the [CDDL or GPL Version 2] license." If you do not indicate a
- * single choice of license, a recipient has the option to distribute
- * your version of this file under either the CDDL, the GPL Version 2 or
- * to extend the choice of license to its licensees as provided above.
- * However, if you add GPL Version 2 code and therefore, elected the GPL
- * Version 2 license, then the option applies only if the new code is
- * made subject to such option by the copyright holder.
- *
- * Contributor(s):
- *
- * Portions Copyrighted 2016 Sun Microsystems, Inc.
+Licensed to the Apache Software Foundation (ASF)
  */
 package org.netbeans.modules.php.blade.editor;
 
 import java.util.ArrayList;
-import javax.swing.text.AbstractDocument;
+import java.util.Arrays;
+import java.util.List;
 import javax.swing.text.BadLocationException;
-import org.netbeans.modules.php.blade.editor.lexer.BladeLexerUtils;
-import org.netbeans.modules.php.blade.editor.lexer.BladeTokenId;
-import org.netbeans.api.lexer.Token;
-import org.netbeans.api.lexer.TokenSequence;
-import org.netbeans.modules.csl.api.OffsetRange;
+import org.antlr.v4.runtime.Token;
+import org.netbeans.api.annotations.common.NonNull;
+import org.netbeans.api.editor.mimelookup.MimeRegistration;
+import org.netbeans.editor.BaseDocument;
+import org.netbeans.modules.php.blade.syntax.BladeDirectivesUtils;
+import org.netbeans.modules.php.blade.syntax.BladeTagsUtils;
+import static org.netbeans.modules.php.blade.syntax.antlr4.v10.BladeAntlrLexer.*;
+import org.netbeans.modules.php.blade.syntax.antlr4.v10.BladeAntlrUtils;
 import org.netbeans.spi.editor.bracesmatching.BracesMatcher;
 import org.netbeans.spi.editor.bracesmatching.BracesMatcherFactory;
 import org.netbeans.spi.editor.bracesmatching.MatcherContext;
 
 /**
- * highlight block tags directives using just the coloring token id
- *
- * @author Haidu Bogdan
+ * brace matcher
+ * - block directives : @if @endif ..
+ * - output echo statements {{ }} {!! !!}
+ * 
+ * @author bogdan
  */
 public class BladeBracesMatcher implements BracesMatcher {
 
+    public enum BraceDirectionType {
+        END_TO_START, START_TO_END, CURLY_END_TO_START, CURLY_START_TO_END, STOP
+    }
     private final MatcherContext context;
+    private Token originToken;
+    private BraceDirectionType currentDirection;
 
     private BladeBracesMatcher(MatcherContext context) {
         this.context = context;
@@ -68,111 +41,195 @@ public class BladeBracesMatcher implements BracesMatcher {
 
     @Override
     public int[] findOrigin() throws InterruptedException, BadLocationException {
-        ((AbstractDocument) context.getDocument()).readLock();
+        int[] result = null;
+        originToken = null;
+        BaseDocument document = (BaseDocument) context.getDocument();
+        document.readLock();
         try {
-            TokenSequence<BladeTokenId> ts = BladeLexerUtils.getBladeTokenSequence(context.getDocument());
-            ts.move(context.getSearchOffset());
-            if (!ts.moveNext()) {
-                return null;
-            }
-            Token<? extends BladeTokenId> currentToken = ts.token();
+            Token currentToken = BladeAntlrUtils.getToken(context.getDocument(), context.getSearchOffset());
             if (currentToken == null) {
-                return null;
-            }
-            int toffs = ts.offset();
-            String tText = currentToken.text().toString();
-            BladeTokenId id = currentToken.id();
-
-            if (id.getPairStart(id) != null || id.getPairClose(id) != null) {
-                //tag with pair tokenId configured
-                return new int[]{toffs, toffs + tText.length()};
-            } else if (BladeSyntax.DIRECTIVES_WITH_ENDTAGS.contains(tText.trim())) {
-                //tag with end tag which is not treated by BladeTokenId
-                return new int[]{toffs, toffs + tText.trim().length()};
+                return result;
             }
 
-            return null;
+            if (!shouldLookForBraceMatch(currentToken)) {
+                return result;
+            }
+
+            originToken = currentToken;
+            int start = currentToken.getStartIndex();
+            int end = currentToken.getStopIndex();
+
+            String tokenText = originToken.getText();
+
+            if (!tokenText.startsWith("@")
+                    && !tokenText.startsWith("{")
+                    && !tokenText.endsWith("}")) {
+                return result;
+            }
+
+            currentDirection = findBraceDirectionType(tokenText);
+
+            if (currentDirection.equals(BraceDirectionType.STOP)) {
+                return result;
+            }
+
+            result = new int[]{start, end + 1};
         } finally {
-            ((AbstractDocument) context.getDocument()).readUnlock();
+            document.readUnlock();
         }
+        return result;
     }
 
-    /**
-     * searching for end tag | open tag
-     *
-     * @return
-     * @throws InterruptedException
-     * @throws BadLocationException
-     */
     @Override
     public int[] findMatches() throws InterruptedException, BadLocationException {
-        ((AbstractDocument) context.getDocument()).readLock();
-        try {
-            TokenSequence<BladeTokenId> ts = BladeLexerUtils.getBladeTokenSequence(context.getDocument());
-            ts.move(context.getSearchOffset());
-            if (!ts.moveNext()) {
-                return null;
-            }
-            Token<? extends BladeTokenId> currentToken = ts.token();
-            if (currentToken == null) {
-                return null;
-            }
-
-            OffsetRange r;
-            String tText = currentToken.text().toString();
-            BladeTokenId id = currentToken.id();
-
-            BladeTokenId closeToken = null;
-            BladeTokenId openToken = null;
-
-            if (id.tokenType != null){
-                switch (id.tokenType) {
-                    case TAG_OPEN_DIRECTIVE:
-                        closeToken = id.getPairClose(id);
-                        break;
-                    case TAG_CLOSE_DIRECTIVE:
-                        openToken = id.getPairStart(id);
-                        break;
-                }
-            }
-
-            if (closeToken != null) {
-                if (id.equals(BladeTokenId.T_BLADE_SECTION)) {
-                    //we can have multiple end brackets for @section
-                    BladeTokenId[] tokenDownIds = {closeToken, BladeTokenId.T_BLADE_SHOW, BladeTokenId.T_BLADE_STOP};
-                    String[] endTagsText = {closeToken.fixedText(), "@show", "@stop"};
-                    r = BladeLexerUtils.findFwd(ts, tokenDownIds, endTagsText);
-                    return new int[]{r.getStart(), r.getEnd()};
-                }
-                r = BladeLexerUtils.findFwd(ts, closeToken, closeToken.fixedText());
-                return new int[]{r.getStart(), r.getEnd()};
-            } else if (openToken != null) {
-                r = BladeLexerUtils.findBack(ts, openToken, openToken.fixedText());
-                return new int[]{r.getStart(), r.getEnd()};
-            } else if (BladeSyntax.DIRECTIVES_WITH_ENDTAGS.contains(tText.trim())) {
-                //from @{tag} to @end{tag}
-                String name = tText.trim().substring(1);
-                r = BladeLexerUtils.findFwd(ts, "@end" + name, tText.trim());
-                return new int[]{r.getStart(), r.getEnd()};
-            } else if (tText.trim().startsWith("@end")) {
-                //reverse from @end{tag} to @{tag}
-                String tagOpen = "@" + tText.trim().substring(4);
-                if (BladeSyntax.DIRECTIVES_WITH_ENDTAGS.contains(tagOpen)) {
-                    r = BladeLexerUtils.findBack(ts, tagOpen, tText.trim(), new ArrayList<String>() {
-                    });
-                    return new int[]{r.getStart(), r.getEnd()};
-                }
-                return null;
-            }
-            return null;
-        } finally {
-            ((AbstractDocument) context.getDocument()).readUnlock();
+        int[] result = null;
+        if (originToken == null) {
+            return result;
         }
+        String tokenText = originToken.getText();
+
+        switch (currentDirection) {
+            case CURLY_START_TO_END:
+                return findCloseTag();
+            case CURLY_END_TO_START:
+                return findOpenTag();
+            case START_TO_END:
+                return findDirectiveEnd(tokenText);
+            case END_TO_START:
+                return findOriginForDirectiveEnd(tokenText);
+        }
+
+        return result;
     }
 
-    /**
-     * BracesMatcherFactory
-     */
+    private static boolean shouldLookForBraceMatch(@NonNull Token currentToken) {
+        switch (currentToken.getType()) {
+            case HTML:
+            case PHP_EXPRESSION:
+            case AT:
+            case BLADE_COMMENT:
+            case ERROR:
+                return false;
+        }
+
+        return true;
+    }
+
+    public BraceDirectionType findBraceDirectionType(String tokenText) {
+        boolean isCloseTag = Arrays.asList(BladeTagsUtils.outputCloseTags()).indexOf(tokenText) >= 0;
+
+        if (isCloseTag) {
+            return BraceDirectionType.CURLY_END_TO_START;
+        }
+
+        if (tokenText.startsWith("@end") || tokenText.equals("@show")) {
+            return BraceDirectionType.END_TO_START;
+        }
+
+        boolean isStartTag = Arrays.asList(BladeTagsUtils.outputStartTags()).indexOf(tokenText) >= 0;
+
+        if (isStartTag) {
+            return BraceDirectionType.CURLY_START_TO_END;
+        }
+
+        if (BladeDirectivesUtils.directiveStart2EndPair(tokenText) != null) {
+            return BraceDirectionType.START_TO_END;
+        }
+
+        return BraceDirectionType.STOP;
+    }
+
+    public int[] findOpenTag() {
+        int matchTokenType = BladeAntlrUtils.getTagPairTokenType(originToken.getType());
+        List<Integer> skipableTokenTypes = new ArrayList<>();
+        skipableTokenTypes.add(HTML);
+        Token startToken = BladeAntlrUtils.findBackwardWithStop(context.getDocument(),
+                originToken,
+                matchTokenType,
+                skipableTokenTypes);
+
+        if (startToken != null) {
+            int start = startToken.getStartIndex();
+            int end = startToken.getStopIndex();
+            return new int[]{start, end + 1};
+        }
+
+        return null;
+    }
+
+    public int[] findCloseTag() {
+        int matchTokenType = BladeAntlrUtils.getTagPairTokenType(originToken.getType());
+        List<Integer> skipableTokenTypes = new ArrayList<>();
+        skipableTokenTypes.add(HTML);
+        Token endToken = BladeAntlrUtils.findForwardWithStop(context.getDocument(),
+                originToken,
+                matchTokenType,
+                skipableTokenTypes);
+
+        if (endToken != null) {
+            int start = endToken.getStartIndex();
+            int end = endToken.getStopIndex();
+            return new int[]{start, end + 1};
+        }
+
+        return null;
+    }
+
+    public int[] findDirectiveEnd(String directive) {
+        String[] pair = BladeDirectivesUtils.directiveStart2EndPair(directive);
+        List<String> startDirectiveForBalance = new ArrayList<>();
+        List<String> stopDirectives = Arrays.asList(pair);
+
+        for (String endDirective : pair) {
+            String[] startDirectives = BladeDirectivesUtils.directiveEnd2StartPair(endDirective);
+
+            if (startDirectives != null) {
+                startDirectiveForBalance.addAll( Arrays.asList(startDirectives));
+            }
+        }
+
+        Token endToken = BladeAntlrUtils.findForward(context.getDocument(),
+                originToken,
+                stopDirectives,
+                startDirectiveForBalance);
+
+        if (endToken != null) {
+            int start = endToken.getStartIndex();
+            int end = endToken.getStopIndex();
+            return new int[]{start, end + 1};
+        }
+
+        return null;
+    }
+
+    public int[] findOriginForDirectiveEnd(String directive) {
+        String[] pair = BladeDirectivesUtils.directiveEnd2StartPair(directive);
+        List<String> endDirectivesForBalance = new ArrayList<>();
+        List<String> openDirectives = Arrays.asList(pair);
+
+        for (String startDirective : pair) {
+            String[] endDirectives = BladeDirectivesUtils.directiveStart2EndPair(startDirective);
+
+            if (endDirectives != null) {
+                endDirectivesForBalance.addAll(Arrays.asList(endDirectives));
+            }
+        }
+
+        Token startToken = BladeAntlrUtils.findBackward(context.getDocument(),
+                originToken,
+                openDirectives,
+                endDirectivesForBalance);
+
+        if (startToken != null) {
+            int start = startToken.getStartIndex();
+            int end = startToken.getStopIndex();
+            return new int[]{start, end + 1};
+        }
+
+        return null;
+    }
+
+    @MimeRegistration(service = BracesMatcherFactory.class, mimeType = BladeLanguage.MIME_TYPE, position=110)
     public static final class Factory implements BracesMatcherFactory {
 
         @Override
@@ -181,5 +238,4 @@ public class BladeBracesMatcher implements BracesMatcher {
         }
 
     }
-
 }

@@ -41,233 +41,97 @@
  */
 package org.netbeans.modules.php.blade.editor.lexer;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.EnumSet;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.stream.Collectors;
-import org.netbeans.api.html.lexer.HTMLTokenId;
+import java.util.WeakHashMap;
 import org.netbeans.api.lexer.InputAttributes;
 import org.netbeans.api.lexer.Language;
 import org.netbeans.api.lexer.LanguagePath;
 import org.netbeans.api.lexer.Token;
 import org.netbeans.api.lexer.TokenId;
-import org.netbeans.modules.php.blade.editor.BladeLanguage;
-import static org.netbeans.modules.php.blade.editor.lexer.BladeTokenId.TokenType.TAG_CLOSE_DIRECTIVE;
-import static org.netbeans.modules.php.blade.editor.lexer.BladeTokenId.TokenType.TAG_OPEN_DIRECTIVE;
-import org.netbeans.modules.php.editor.lexer.PHPTokenId;
 import org.netbeans.spi.lexer.LanguageEmbedding;
 import org.netbeans.spi.lexer.LanguageHierarchy;
-import org.netbeans.spi.lexer.Lexer;
-import org.netbeans.spi.lexer.LexerRestartInfo;
+import org.netbeans.spi.lexer.LanguageProvider;
+import org.netbeans.modules.php.editor.lexer.PHPTokenId;
+import org.openide.util.Lookup;
 
 /**
- * Blade token Id
- * 
- * 
- * @author Haidu Bogdan
+ *
+ * @author bogdan
  */
 public enum BladeTokenId implements TokenId {
-    T_BLADE_OPEN_ECHO( "{{", "blade_echo" , TAG_OPEN_DIRECTIVE),
-    T_BLADE_CLOSE_ECHO( "}}", "blade_echo", TAG_CLOSE_DIRECTIVE),
-    T_BLADE_OPEN_ECHO_ESCAPED( "{!!", "blade_echo", TAG_OPEN_DIRECTIVE ),
-    T_BLADE_CLOSE_ECHO_ESCAPED( "!!}", "blade_echo", TAG_CLOSE_DIRECTIVE),
-    T_BLADE_OPEN_COMMENT( "{{--", "blade_comment", TAG_OPEN_DIRECTIVE ),
-    T_BLADE_CLOSE_COMMENT( "--}}", "blade_comment", TAG_CLOSE_DIRECTIVE),
+    BLADE_COMMENT_START("blade_comment"),
+    BLADE_COMMENT("blade_comment"),
+    BLADE_COMMENT_END("blade_comment"),
+    BLADE_DIRECTIVE("blade_directive"),
+    BLADE_ECHO_DELIMITOR("blade_echo_delimiters"),
+    HTML("html"),
+    WS_D("html"),
+    PHP_BLADE_EXPRESSION("blade_php"),
+    PHP_BLADE_ECHO_EXPR("blade_php"),
+    PHP_BLADE_INLINE_CODE("blade_php"),
+    PHP_INLINE("php"),
+    OTHER("error");
+    private final String category;
 
-    //DIRECTIVES
-    T_BLADE_PHP_OPEN("@php", "blade_directive", TAG_OPEN_DIRECTIVE),
-    T_BLADE_ENDPHP("@endphp", "blade_directive", TAG_CLOSE_DIRECTIVE),
-    T_BLADE_SECTION("@section", "blade_directive", TAG_OPEN_DIRECTIVE),
-    T_BLADE_ENDSECTION("@endsection", "blade_directive", TAG_CLOSE_DIRECTIVE),
-    T_BLADE_STOP("@stop", "blade_directive", TAG_CLOSE_DIRECTIVE),//equivalent to endsection
-    T_BLADE_SHOW("@show", "blade_directive", TAG_CLOSE_DIRECTIVE),//use for section
-    T_BLADE_FOREACH("@foreach", "blade_directive", TAG_OPEN_DIRECTIVE),
-    T_BLADE_ENDFOREACH("@endforeach", "blade_directive", TAG_CLOSE_DIRECTIVE),
-    T_BLADE_FOR("@for", "blade_directive", TAG_OPEN_DIRECTIVE),
-    T_BLADE_ENDFOR("@endfor", "blade_directive", TAG_CLOSE_DIRECTIVE),
-        
-    T_BLADE_IF("@if", "blade_directive", TAG_OPEN_DIRECTIVE),
-    T_BLADE_ELSE("@else", "blade_directive"),
-    T_BLADE_ELSEIF("@elseif", "blade_directive"),
-    T_BLADE_HAS_SECTION("@hasSection", "blade_directive", TAG_OPEN_DIRECTIVE),
-    T_BLADE_SECTION_MISSING("@sectionMissing", "blade_directive", TAG_OPEN_DIRECTIVE),
-    T_BLADE_ENDIF("@endif", "blade_directive", TAG_CLOSE_DIRECTIVE),
-
-    T_BLADE_YIELD("@yield", "blade_directive"),
-    T_BLADE_PARENT("@parent", "blade_directive"),
-    T_BLADE_EXTENDS("@extends", "blade_directive"),
-    T_BLADE_INCLUDE("@include", "blade_directive"),
-    T_BLADE_EACH("@each", "blade_directive"),
-    
-    //DEFAULT SYNTAX ELEMENTS
-    T_BLADE_LPAREN("(", "token"),
-    T_BLADE_RPAREN(")", "token"),
-    T_EMPTY_EXPRESSION(null, "token"),
-    T_OPEN_PHP_SCRIPT("<?php", "html"),
-    T_CLOSE_PHP("?>", "html"),
-    T_PHP_OPEN_ECHO("<?=", "html"),
-    
-    T_BLADE_COMMENT( null, "blade_comment" ),
-    T_BLADE_DIRECTIVE(null, "blade_directive"),
-    //embeded texts token
-    T_PHP(null, "php"),
-    T_BLADE_PHP_EXPRESSION(null, "blade_php_var"), //TODO rename with expression
-    T_PHP_ECHO(null, "php"),
-    T_BLADE_PHP(null, "php"),
-    T_BLADE_PHP_ECHO(null, "blade_php_echo"),
-    T_BLADE_PHP_LOOP_PARAM(null, "php"),
-    T_BLADE_PHP_COND(null, "php"),
-    T_BLADE_ERROR(null, "error"),
-    T_PHP_STRING(null, "php_string"),
-    T_HTML( null, "html" ),
-    T_XML( null, "html" ),
-    NEWLINE("\n", "whitespace"),
-    WHITESPACE(null, "whitespace"), 
-    UNKNOWN_TOKEN(null, "other")
-    ;
-    
-    private final String fixedText;
-    private final String primaryCategory;
-    public TokenType tokenType;
-    
-    /**
-     * pairing tags for braces
-     */
-    static final Map<BladeTokenId, BladeTokenId> BLADE_PAIR_TOKENS = new HashMap<>();
-    
-    static {
-        BLADE_PAIR_TOKENS.put(T_BLADE_OPEN_ECHO, T_BLADE_CLOSE_ECHO);
-        BLADE_PAIR_TOKENS.put(T_BLADE_OPEN_ECHO_ESCAPED, T_BLADE_CLOSE_ECHO_ESCAPED);
-        BLADE_PAIR_TOKENS.put(T_BLADE_OPEN_COMMENT, T_BLADE_CLOSE_COMMENT);
-        BLADE_PAIR_TOKENS.put(T_BLADE_PHP_OPEN, T_BLADE_ENDPHP);
-        BLADE_PAIR_TOKENS.put(T_BLADE_SECTION, T_BLADE_ENDSECTION);
-        BLADE_PAIR_TOKENS.put(T_BLADE_FOREACH, T_BLADE_ENDFOREACH);
-        BLADE_PAIR_TOKENS.put(T_BLADE_FOR, T_BLADE_ENDFOR);
-        BLADE_PAIR_TOKENS.put(T_BLADE_IF, T_BLADE_ENDIF);
-    }
-    
-    public static Collection<BladeTokenId> BLADE_PHP_EMBEDDED_TOKEN = Arrays.asList(
-        BladeTokenId.T_BLADE_PHP_EXPRESSION,
-        BladeTokenId.T_BLADE_PHP_ECHO
-    );
-    
-    /*
-    * reversed pairing
-    */
-    static final Map<BladeTokenId, BladeTokenId> REVERSED_BLADE_PAIR_TOKENS = BLADE_PAIR_TOKENS.entrySet()
-       .stream()
-       .collect(Collectors.toMap(Map.Entry::getValue, Map.Entry::getKey));
-
-    //additional closing tag possiblities
-    static {
-        REVERSED_BLADE_PAIR_TOKENS.put(T_BLADE_STOP, T_BLADE_SECTION);
-        REVERSED_BLADE_PAIR_TOKENS.put(T_BLADE_SHOW, T_BLADE_SECTION);
-    }
-    
-    public static enum TokenType{
-        TAG_OPEN_DIRECTIVE,
-        TAG_CLOSE_DIRECTIVE
-    }
-
-    BladeTokenId( String fixedText, String primaryCategory ) {
-        this.fixedText = fixedText;
-        this.primaryCategory = primaryCategory;
-        this.tokenType = null;
-    }
-
-    BladeTokenId( String fixedText, String primaryCategory, TokenType pair ) {
-        this.fixedText = fixedText;
-        this.primaryCategory = primaryCategory;
-        this.tokenType = pair;
-    }
-    
-    public String fixedText() {
-        return fixedText;
+    BladeTokenId(String category) {
+        this.category = category;
     }
 
     @Override
     public String primaryCategory() {
-        return primaryCategory;
+        return category;
     }
-        
-    public BladeTokenId getPairStart(BladeTokenId token){
-        return REVERSED_BLADE_PAIR_TOKENS.get(token);
-    }
-    
-    public BladeTokenId getPairClose(BladeTokenId token){
-        return BLADE_PAIR_TOKENS.get(token);
-    }
-    
-    private static final Language<BladeTokenId> LANGUAGE =
-            new LanguageHierarchy<BladeTokenId>() {
-                @Override
-                protected Collection<BladeTokenId> createTokenIds() {
-                    return EnumSet.allOf(BladeTokenId.class);
-                }
 
-                @Override
-                protected Map<String, Collection<BladeTokenId>> createTokenCategories() {
-                    Map<String, Collection<BladeTokenId>> cats = new HashMap<String, Collection<BladeTokenId>>();
-                    return cats;
-                }
+    public static abstract class BladeLanguageHierarchy extends LanguageHierarchy<BladeTokenId> {
 
-                @Override
-                protected Lexer<BladeTokenId> createLexer(LexerRestartInfo<BladeTokenId> info) {
-                   // return BladeLexer.create(info);
-                    return new BladeLexer(info);
-                }
+        private final WeakHashMap<BladeTokenId, LanguageEmbedding<?>> tokenLangCache
+                = new WeakHashMap<>();
 
-                @Override
-                protected String mimeType() {
-                    return BladeLanguage.BLADE_MIME_TYPE;
-                }
+        @Override
+        protected Collection<BladeTokenId> createTokenIds() {
+            return EnumSet.allOf(BladeTokenId.class);
+        }
 
-                @Override
-                protected LanguageEmbedding<?> embedding(Token<BladeTokenId> token,
-                        LanguagePath languagePath, InputAttributes inputAttributes) {
-                    Language<?> lang = null;
-                    boolean join_sections = false;
-                    BladeTokenId id = token.id();
+        @Override
+        protected LanguageEmbedding<? extends TokenId> embedding(Token<BladeTokenId> token,
+                LanguagePath languagePath, InputAttributes inputAttributes) {
+            boolean joinHtml = true;
+            switch (token.id()) {
+                case PHP_INLINE:
+                    Language<? extends TokenId> phpLanguageCode = PHPTokenId.language();
+                    return phpLanguageCode != null ? LanguageEmbedding.create(phpLanguageCode, 0, 0, false) : null;
+                case PHP_BLADE_EXPRESSION:
+                case PHP_BLADE_ECHO_EXPR:
+                case PHP_BLADE_INLINE_CODE:
+                    Language<? extends TokenId> phpLanguage = PHPTokenId.languageInPHP();
+                    return phpLanguage != null ? LanguageEmbedding.create(phpLanguage, 0, 0, false) : null;
+                case HTML:
+                    LanguageEmbedding<?> lang;
 
-                    switch (id){
-                        case T_HTML:
-                        case NEWLINE:
-                        case WHITESPACE:    
-                           //html embedding not working well
-                           lang = HTMLTokenId.language();
-                           join_sections = true;
-                           break;
-                        case T_PHP:
-                            lang = PHPTokenId.languageInPHP();
-                            join_sections = true;
-                            break;
-                        case T_BLADE_PHP:  
-                            lang = PHPTokenId.languageInPHP();
-                            join_sections = true;
-                            break;
-                        case T_PHP_ECHO:
-                            //no break    
-                        case T_BLADE_PHP_EXPRESSION:
-                            //no break
-                        case T_BLADE_PHP_ECHO:
-                            //affects inline tokens ? maybe use top lexer ?
-                            lang = PHPTokenId.languageInPHP();
-                            join_sections = true;
-                            break;
+                    if (tokenLangCache.containsKey(token.id())) {
+                        lang = tokenLangCache.get(token.id());
+                    } else {
+                        Language<? extends TokenId> htmlLanguage = null;
+
+                        @SuppressWarnings("unchecked")
+                        Collection<LanguageProvider> providers = (Collection<LanguageProvider>) Lookup.getDefault().lookupAll(LanguageProvider.class);
+                        for (LanguageProvider provider : providers) {
+                            htmlLanguage = (Language<? extends TokenId>) provider.findLanguage("text/html"); //NOI18N
+                            if (htmlLanguage != null) {
+                                break;
+                            }
+                        }
+
+                        lang = htmlLanguage != null ? LanguageEmbedding.create(htmlLanguage, 0, 0, joinHtml) : null;
+                        tokenLangCache.put(token.id(), lang);
                     }
-                    
-                    if (lang != null){
-                        return LanguageEmbedding.create( lang, 0, 0, join_sections );
-                    }
- 
+
+                    return lang;
+                default:
                     return null;
-
-                }
-            }.language();
-
-    public static Language<BladeTokenId> language() {
-        return LANGUAGE;
+            }
+        }
     }
+
 }

@@ -1,25 +1,27 @@
-# netbeans-blade-plugin
-Blade syntax highlighting for Netbeans.
-Experimental version.
+# Netbeans Php blade editor
+
+Netbeans Php blade editor using Antlr Lexer and Parser.
+
+> [!NOTE]
+> This is an extract of a new netbeans modules suite : [https://github.com/haidubogdan/nb-18-php-blade-plugin](https://github.com/haidubogdan/nb-18-php-blade-plugin) still in development.
 
 Installation
 ============
 
-Required Netbeans version **12.0**, **>12.2**
-
+## Requirements
+[![](https://img.shields.io/badge/Version-2.0+-green)]() [![](https://img.shields.io/badge/Netbeans-18+-green)]()
 
 Installing from package
 ----------------------
 
 The plugin is not uploaded on netbeans site as it is still in experimental version.
-There are two export nbm files available in the folder **nbm** 
+
+//add release link
 
 1. In Netbeans open Tools -> Plugins, select Downloaded tab.
-2. Click "Add plugins" and select the file from the nbm folder coresponding to the netbeans version (12.0, 122-126).
-   * we need a specific nbm as some friendly depenencies related with php version
+2. Click "Add plugins" and select the file from the nbm folder.
 3. Select the checkbox next to the "Blade for Netbeans" plugin and click Install.
 4. Restart the IDE when demanded and enjoy your new plugin.
-
 
 Installing from source
 ----------------------
@@ -32,18 +34,63 @@ Installing from source
 
 For more information refer yourself to: http://platform.netbeans.org/tutorials/nbm-google.html
 
-Syntax Highlighting
-===================
+## Usage
 
-Document scanner
-----------------
+### Features
 
-To generate Lexer Scanner jflex 1.61 was used.
-The flex files are in tools folder.
-Still, after using the existing jflex software and the skeleton to generate the java lexer files it will require some final touches for it to work.
+- Blade syntax coloring
 
-> jflex 1.61 can be found on https://sourceforge.net/projects/jflex/
+![syntax coloring](resources/syntax_coloring.png)
 
+- Declaration finder for 
+    - php elements
+    - included paths
+    - yield ids (section)
+    - stack elements
+- Php code completion inside expressions, and echo tags
 
-Additional plugins
+![completion](resources/completion.png)
 
+- Brace matcher and folding
+
+![folding](resources/folding.png)
+
+- Find template usage (only in the blade files context)
+
+![template usage](resources/template_usage.png)
+
+**Custom directives**
+
+Project -> Properties -> Laravel Blade -> Custom Directives
+
+Just add the php file where you added the custom directive implementation as in [https://laravel.com/docs/10.x/blade#extending-blade](https://laravel.com/docs/10.x/blade#extending-blade).
+
+**VIews folder**
+
+If you use **blade templates** outside of the generic laravel framework or have custom templates folders you can configure them for a project.
+
+This will help the yielid and view path completion
+
+---
+
+### Known issues
+
+> [!WARNING]
+> .
+
+- The duplicate file process can create a "blade_1.php" file because by default the extension of a file is the last ".*" element. So for "blade.php" the extension found is ".php"
+- HTML join embedding breaks indentation especially in `<script>` and `<style>` context
+
+### Why Netbeans 18+ requirement ?
+
+The plugin is implemented using **ANTLR** lexer and parser. I migrated from **Jflex** and **jcup** tools due to scalability reason.
+Antlr plugin was introduced with Netbeans 18.
+
+### Still missing
+
+Some features are not implemented in this plugin version : 
+
+- variable completion from controller
+- no code reformat action
+- components completion and declaration finder
+- error diagnostics for inline php code

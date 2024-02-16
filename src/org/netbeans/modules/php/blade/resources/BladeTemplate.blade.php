@@ -1,1 +1,0 @@
-{{-- blade template content --}}

@@ -14,12 +14,12 @@ import org.openide.util.NbBundle;
  */
 public class BladeDirectivesCustomizerProvider implements ProjectCustomizer.CompositeCategoryProvider {
 
-    public static final String CUSTOMIZER_IDENT = "Blade Directives"; // NOI18N
+    public static final String BLADE_DIRECTIVES = "Custom Directives"; // NOI18N
 
-    @NbBundle.Messages("BladeCompilerCustomizerProvider.name=Blade")
+    @NbBundle.Messages("BladeCompilerCustomizerProvider.name=Blade Directives")
     @Override
     public ProjectCustomizer.Category createCategory(Lookup lkp) {
-        return ProjectCustomizer.Category.create(CUSTOMIZER_IDENT, "Blade Directives", null);
+        return ProjectCustomizer.Category.create(BLADE_DIRECTIVES, BLADE_DIRECTIVES, null);
     }
 
     @Override
@@ -30,20 +30,6 @@ public class BladeDirectivesCustomizerProvider implements ProjectCustomizer.Comp
         BladeDirectives panel =  new BladeDirectives(project);
         category.setOkButtonListener(new BladeDirectivesCustomizerProvider.Listener(panel));
         return panel;
-    }
-
-    @ProjectCustomizer.CompositeCategoryProvider.Registration(
-            projectType = "org.netbeans.modules.web.clientproject", // NOI18N
-            position = 367)
-    public static BladeDirectivesCustomizerProvider forHtml5Project() {
-        return new BladeDirectivesCustomizerProvider();
-    }
-
-    @ProjectCustomizer.CompositeCategoryProvider.Registration(
-            projectType = "org-netbeans-modules-php-project", // NOI18N
-            position = 402)
-    public static ProjectCustomizer.CompositeCategoryProvider forPhpProject() {
-        return new BladeDirectivesCustomizerProvider();
     }
 
     private class Listener implements ActionListener {

@@ -1,3 +1,0 @@
-@section('CSS')
-
-@endsection

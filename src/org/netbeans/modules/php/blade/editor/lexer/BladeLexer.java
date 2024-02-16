@@ -41,57 +41,81 @@
  */
 package org.netbeans.modules.php.blade.editor.lexer;
 
-import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.netbeans.api.lexer.Token;
-import org.netbeans.spi.lexer.Lexer;
-import org.netbeans.spi.lexer.LexerInput;
+import static org.netbeans.modules.php.blade.editor.lexer.BladeTokenId.*;
+import org.netbeans.modules.php.blade.syntax.antlr4.v10.BladeAntlrColoringLexer;
 import org.netbeans.spi.lexer.LexerRestartInfo;
-import org.netbeans.spi.lexer.TokenFactory;
+import org.netbeans.spi.lexer.antlr4.AbstractAntlrLexerBridge;
 
 /**
- * @author Haidu Bogdan
+ *
+ * @author bogdan
  */
+public class BladeLexer extends AbstractAntlrLexerBridge<BladeAntlrColoringLexer, BladeTokenId> {
 
-public class BladeLexer implements Lexer<BladeTokenId> {
-    protected final TokenFactory<BladeTokenId> tokenFactory;
-    private final BladeColoringLexer scanner;
-    protected final LexerInput input;
-    
-    BladeLexer( LexerRestartInfo<BladeTokenId> info ) {
-        scanner = new BladeColoringLexer(info);
-        tokenFactory = info.tokenFactory();
-        input = info.input();
+    public BladeLexer(LexerRestartInfo<BladeTokenId> info) {
+        super(info, BladeAntlrColoringLexer::new);
     }
-    
-    public static synchronized BladeLexer create( LexerRestartInfo<BladeTokenId> info ) {
-        return new BladeLexer( info );
-    }    
-    
-    @Override
-    public Token<BladeTokenId> nextToken() {
-        try {
-            BladeTokenId tokenId = scanner.findNextToken();
-            Token<BladeTokenId> token = null;
-            if (tokenId != null) {
-                token = tokenFactory.createToken(tokenId);
-            }
-            return token;
-        } catch (IOException ex) {
-            Logger.getLogger(BladeLexer.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        return null;
-    }
-    
+
     @Override
     public Object state() {
-        return scanner.getState();
+        return new State(lexer);
     }
 
     @Override
-    public void release() {
+    protected Token<BladeTokenId> mapToken(org.antlr.v4.runtime.Token antlrToken) {
+        //debug text
+        //String text = antlrToken.getText();
+        int type = antlrToken.getType();
+        //System.out.println(text + " " + type);
+        switch (type) {
+            case BladeAntlrColoringLexer.BLADE_COMMENT_START:
+                return token(BLADE_COMMENT_START);
+            case BladeAntlrColoringLexer.BLADE_COMMENT:
+                return token(BLADE_COMMENT);
+            case BladeAntlrColoringLexer.BLADE_COMMENT_END:
+                return token(BLADE_COMMENT_END);
+            case BladeAntlrColoringLexer.HTML:
+                return token(HTML);
+            case BladeAntlrColoringLexer.PHP_INLINE:
+                return token(PHP_INLINE);
+            case BladeAntlrColoringLexer.PHP_EXPRESSION:
+                return token(PHP_BLADE_EXPRESSION);
+            case BladeAntlrColoringLexer.BLADE_PHP_INLINE:
+                return token(PHP_BLADE_INLINE_CODE);
+            case BladeAntlrColoringLexer.DIRECTIVE:
+            case BladeAntlrColoringLexer.D_PHP:
+            case BladeAntlrColoringLexer.D_ENDPHP:
+            case BladeAntlrColoringLexer.D_CUSTOM:
+                return token(BLADE_DIRECTIVE);
+            case BladeAntlrColoringLexer.RAW_TAG:
+            case BladeAntlrColoringLexer.CONTENT_TAG:
+                return token(BLADE_ECHO_DELIMITOR);
+             case BladeAntlrColoringLexer.BLADE_PHP_ECHO_EXPR:
+                return token(PHP_BLADE_ECHO_EXPR);
+            case BladeAntlrColoringLexer.ERROR:
+            case BladeAntlrColoringLexer.WS_EXPR:
+                return token(WS_D);
+            default:
+                return token(OTHER);
+        }
     }
-    
-    
+
+    private static class State extends AbstractAntlrLexerBridge.LexerState<BladeAntlrColoringLexer> {
+
+        final int currentRuleType;
+
+        public State(BladeAntlrColoringLexer lexer) {
+            super(lexer);
+            this.currentRuleType = lexer.getCurrentRuleType();
+        }
+
+        @Override
+        public void restore(BladeAntlrColoringLexer lexer) {
+            super.restore(lexer);
+            lexer.setCurrentRuleType(currentRuleType);
+        }
+
+    }
+
 }

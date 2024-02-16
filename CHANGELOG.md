@@ -1,5 +1,13 @@
 # Change Log
 
+## [2.0.0]
+
+Full refactor.
+
+Using **antlr** instead of **jflex** for lexer and parser code.
+
+More info about what was added or removed can be found in README.md 
+
 ## [1.0.0.51]
 
 Php Lexer update. Detect simple string (without php embedding) before the freeze pattern.

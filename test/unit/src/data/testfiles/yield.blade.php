@@ -1,3 +1,0 @@
-@yield("test")
-@yield('squote')
-    

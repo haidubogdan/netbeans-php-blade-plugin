@@ -4,101 +4,39 @@
     <folder name="Editors">
         <folder name="text">
             <folder name="x-blade">
-                <attr name="SystemFileSystem.localizingBundle" stringvalue="org.netbeans.modules.php.blade.resources.Bundle"/>
+                <attr name="displayName" stringvalue="Blade"/>
                 <folder name="FontsColors">
+                    <folder name="FlatLafDark">
+                        <folder name="NetBeans">
+                            <folder name="Defaults">
+                                <file name="FontAndColors.xml" url="FlatLafDark-FontAndColors.xml">
+                                    <attr name="SystemFileSystem.localizingBundle" stringvalue="org.netbeans.modules.php.blade.resources.Bundle"/>
+                                </file>
+                            </folder>
+                        </folder>
+                    </folder>
                     <folder name="NetBeans">
                         <folder name="Defaults">
-                            <file name="highlighting.xml" url="highlighting.xml">
+                            <file name="FontAndColors.xml" url="FontAndColors.xml">
                                 <attr name="SystemFileSystem.localizingBundle" stringvalue="org.netbeans.modules.php.blade.resources.Bundle"/>
                             </file>
                         </folder>
                     </folder>
                 </folder>
-                <file name="language.instance">
-                    <attr name="instanceCreate" methodvalue="org.netbeans.modules.php.blade.editor.lexer.BladeTokenId.language"/>
-                    <attr name="instanceOf" stringvalue="org.netbeans.api.lexer.Language"/>
-                </file>
-                <file name="org-netbeans-modules-php-blade-editor-index-BladeIndexer$Factory.instance">
-                    <attr name="instanceOf" stringvalue="org.netbeans.modules.parsing.spi.indexing.EmbeddingIndexerFactory"/>
-                </file>
-                <folder name="FoldManager">
-                    <file name="org-netbeans-modules-csl-editor-fold-GsfFoldManagerFactory.instance"/>
-                </folder>
-                <file name="org-netbeans-modules-csl-core-EmbeddingIndexerFactoryImpl.instance">
-                    <attr methodvalue="org.netbeans.modules.csl.core.EmbeddingIndexerFactoryImpl.create" name="instanceCreate"/>
-                    <attr name="instanceOf" stringvalue="org.netbeans.modules.parsing.spi.indexing.EmbeddingIndexerFactory"/>
-                </file>
-                <folder name="RefactoringActions">
-                    <file name="org-netbeans-modules-html-editor-refactoring-actions-ExtractInlinedStyleAction.shadow">
-                        <attr name="originalFile" stringvalue="Actions/Refactoring/org-netbeans-modules-html-editor-refactoring-actions-ExtractInlinedStyleAction.instance"/>
-                        <attr name="position" intvalue="430"/>
-                    </file>
-                </folder>
-                <folder name="CompletionProviders">
-                    <file name="org-netbeans-modules-html-editor-completion-HtmlCompletionProvider.instance"/>
-                    <file name="org-netbeans-modules-csl-editor-completion-GsfCompletionProvider.instance"/>
-                </folder>
-                <file name="org-netbeans-modules-html-editor-coloring-EmbeddingHighlightsLayerFactory.instance">
-                    <attr name="instanceOf" stringvalue="org.netbeans.spi.editor.highlighting.HighlightsLayerFactory"/>
-                </file>
-                <file name="org-netbeans-modules-csl-core-GsfParserFactory.instance">
-                    <attr name="instanceOf" stringvalue="org.netbeans.modules.parsing.spi.ParserFactory"/>
-                    <attr name="instanceCreate" methodvalue="org.netbeans.modules.csl.core.GsfParserFactory.create"/>
-                </file>
-                <file name="org-netbeans-modules-javascript-editing-embedding-JsEmbeddingProvider$Factory.instance">
-                    <attr name="instanceOf" stringvalue="org.netbeans.modules.parsing.spi.TaskFactory"/>
-                </file>
-                <file name="org-netbeans-modules-html-editor-gsf-embedding-CssEmbeddingProvider$Factory.instance">
-                    <attr name="instanceOf" stringvalue="org.netbeans.modules.parsing.spi.TaskFactory"/>
-                </file>
-                
-                <file name="org-netbeans-modules-html-editor-HtmlCaretAwareSourceTask$Factory.instance">
-                    <attr name="instanceOf" stringvalue="org.netbeans.modules.parsing.spi.TaskFactory"/>
-                </file>
-                <folder name="UpToDateStatusProvider">
-                    <file name="org-netbeans-modules-csl-hints-GsfUpToDateStateProviderFactory.instance"/>
-                </folder>
-                <folder name="BracesMatchers">
-                    <file name="org-netbeans-modules-php-blade-editor-BladeBracesMatcher$Factory.instance">
-                        <attr name="position" intvalue="46"/>
-                    </file>
-                </folder>
-                <folder name="HyperlinkProviders">
-                    <file name="GsfHyperlinkProvider.instance">
-                        <attr name="instanceClass" stringvalue="org.netbeans.modules.csl.editor.hyperlink.GsfHyperlinkProvider"/>
-                        <attr name="instanceOf" stringvalue="org.netbeans.lib.editor.hyperlink.spi.HyperlinkProviderExt"/>
-                        <attr name="position" intvalue="1001"/>
-                    </file>
-                </folder>
-                <file name="org-netbeans-modules-csl-editor-semantic-HighlightsLayerFactoryImpl.instance"/>
             </folder>
         </folder>
     </folder>
     <folder name="Loaders">
         <folder name="text">
             <folder name="x-blade">
-                <!-- keep for language annotation-->
                 <attr name="iconBase" stringvalue="org/netbeans/modules/php/blade/resources/icon.png"/>
-               
             </folder>
         </folder>
     </folder>
     <folder name="OptionsDialog">
         <folder name="PreviewExamples">
             <folder name="text">
-                <file name="x-blade" url="BladeHighlights.blade.php"/>
-            </folder>
-        </folder>
-        <folder name="Editor">
-            <folder name="CodeCompletion">
-                <folder name="text">
-                    <folder name="x-blade">
-                        <file name="BladeCodeCompletion.instance">
-                            <attr name="instanceOf" stringvalue="org.netbeans.modules.options.editor.spi.PreferencesCustomizer$Factory"/>
-                            <attr name="position" intvalue="100"/>
-                        </file>
-                    </folder>
-                </folder>
+                <file name="x-blade" url="highlightBlade.blade.php"/>
             </folder>
         </folder>
     </folder>

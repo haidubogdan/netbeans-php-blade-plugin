@@ -41,39 +41,36 @@
  */
 package org.netbeans.modules.php.blade.editor;
 
-import org.netbeans.modules.php.blade.editor.completion.BladeCompletionHandler;
-import org.netbeans.modules.php.blade.editor.formatter.BladeFormatter;
-import org.netbeans.modules.php.blade.editor.parsing.BladeParser;
 import org.netbeans.api.lexer.Language;
-import org.netbeans.core.spi.multiview.MultiViewElement;
-import org.netbeans.core.spi.multiview.text.MultiViewEditorElement;
-import org.netbeans.modules.csl.api.CodeCompletionHandler;
-import org.netbeans.modules.csl.api.DeclarationFinder;
-import org.netbeans.modules.csl.api.Formatter;
-import org.netbeans.modules.csl.api.HintsProvider;
-import org.netbeans.modules.csl.api.IndexSearcher;
-import org.netbeans.modules.csl.api.OccurrencesFinder;
-import org.netbeans.modules.csl.api.StructureScanner;
-import org.netbeans.modules.csl.spi.CommentHandler;
+import org.netbeans.modules.parsing.spi.Parser;
 import org.netbeans.modules.csl.spi.DefaultLanguageConfig;
 import org.netbeans.modules.csl.spi.LanguageRegistration;
-import org.netbeans.modules.parsing.spi.Parser;
-import static org.netbeans.modules.php.blade.editor.BladeLanguage.ACTIONS;
-import org.netbeans.modules.php.blade.editor.gsf.BladeCommentHandler;
-import org.netbeans.modules.php.blade.editor.gsf.BladeDeclarationFinder;
-import org.netbeans.modules.php.blade.editor.gsf.BladeOcurrencesFinder;
-import org.netbeans.modules.php.blade.editor.gsf.BladeStructureScanner;
-import org.netbeans.modules.php.blade.editor.gsf.BladeTypeSearcher;
-import org.netbeans.modules.php.blade.editor.lexer.BladeTokenId;
-import org.netbeans.modules.php.blade.editor.verification.BladeHintsProvider;
+import org.netbeans.spi.lexer.Lexer;
+import org.openide.util.NbBundle;
+import org.netbeans.spi.lexer.LexerRestartInfo;
 import org.openide.awt.ActionID;
 import org.openide.awt.ActionReference;
 import org.openide.awt.ActionReferences;
 import org.openide.filesystems.MIMEResolver;
 import org.openide.util.Lookup;
-import org.openide.util.NbBundle;
-import org.openide.util.NbBundle.Messages;
 import org.openide.windows.TopComponent;
+import org.netbeans.core.spi.multiview.MultiViewElement;
+import org.netbeans.core.spi.multiview.text.MultiViewEditorElement;
+import org.netbeans.modules.csl.api.CodeCompletionHandler;
+import org.netbeans.modules.csl.api.DeclarationFinder;
+import org.netbeans.modules.csl.api.HintsProvider;
+import org.netbeans.modules.csl.api.IndexSearcher;
+import org.netbeans.modules.csl.api.SemanticAnalyzer;
+import org.netbeans.modules.csl.api.StructureScanner;
+import org.netbeans.modules.csl.spi.CommentHandler;
+import static org.netbeans.modules.php.blade.editor.BladeLanguage.ACTIONS;
+import org.netbeans.modules.php.blade.editor.completion.BladeCompletionHandler;
+import org.netbeans.modules.php.blade.editor.lexer.BladeLexer;
+import org.netbeans.modules.php.blade.editor.lexer.BladeTokenId;
+import org.netbeans.modules.php.blade.editor.lexer.BladeTokenId.BladeLanguageHierarchy;
+import org.netbeans.modules.php.blade.editor.navigator.BladeStructureScanner;
+import org.netbeans.modules.php.blade.editor.parser.BladeParser;
+import org.netbeans.modules.php.blade.editor.parser.BladeParserResult;
 
 /**
  *
@@ -100,46 +97,38 @@ import org.openide.windows.TopComponent;
     @ActionReference(id = @ActionID(category = "System", id = "org.openide.actions.SaveAsTemplateAction"), path = ACTIONS, position = 1100, separatorAfter = 1200),
     @ActionReference(id = @ActionID(category = "System", id = "org.openide.actions.FileSystemAction"), path = ACTIONS, position = 1300, separatorAfter = 1400),
     @ActionReference(id = @ActionID(category = "System", id = "org.openide.actions.ToolsAction"), path = ACTIONS, position = 1500),
-    @ActionReference(id = @ActionID(category = "System", id = "org.openide.actions.PropertiesAction"), path = ACTIONS, position = 1600)
-})
+    @ActionReference(id = @ActionID(category = "System", id = "org.openide.actions.PropertiesAction"), path = ACTIONS, position = 1600),
+    @ActionReference(id = @ActionID(category = "TemplateActions", id = "org.netbeans.modules.php.blade.editor.actions.FindUsage"),
+            path = ACTIONS, separatorBefore = 1600, position = 1800),
+//    @ActionReference(
+//        path = "Editors/" + BladeLanguage.MIME_TYPE+ "/Popup",
+//        id = @ActionID(category = "Refactoring", id = "org.netbeans.modules.refactoring.api.ui.WhereUsedAction"),
+//        position = 1600
+//    ),
+}
+)
 public class BladeLanguage extends DefaultLanguageConfig {
-    @Messages("CTL_SourceTabCaption=&Source")
-    @MultiViewElement.Registration(
-            displayName = "#CTL_SourceTabCaption",
-            iconBase = "org/netbeans/modules/php/blade/resources/icon.png",
-            mimeType = BladeLanguage.BLADE_MIME_TYPE,
-            persistenceType = TopComponent.PERSISTENCE_ONLY_OPENED,
-            preferredID = "Blade",
-            position = 1
-    )
-    public static MultiViewEditorElement createEditor(Lookup lkp) {
-        return new MultiViewEditorElement(lkp);
-    }
+
     public BladeLanguage() {
         super();
     }
-    
-    public static final String ACTIONS = "Loaders/" + BladeLanguage.BLADE_MIME_TYPE + "/Actions"; //NOI18N
-    public static final String BLADE_MIME_TYPE = "text/x-blade"; //NOI18N
+
+    public static final String ACTIONS = "Loaders/" + BladeLanguage.MIME_TYPE + "/Actions"; //NOI18N
+    public static final String MIME_TYPE = "text/x-blade"; //NOI18N
 
     @Override
     public Language<BladeTokenId> getLexerLanguage() {
-        return BladeTokenId.language();
+        return language;
     }
 
     @Override
     public String getDisplayName() {
         return "Blade"; //NOI18N
     }
-    
+
     @Override
     public String getPreferredExtension() {
         return "blade.php"; // NOI18N
-    }
-
-    @Override
-    public boolean isUsingCustomEditorKit() {
-        return false;
     }
 
     @Override
@@ -148,13 +137,13 @@ public class BladeLanguage extends DefaultLanguageConfig {
     }
 
     @Override
-    public boolean hasStructureScanner() {
-        return true;
+    public StructureScanner getStructureScanner() {
+        return new BladeStructureScanner();
     }
 
     @Override
-    public StructureScanner getStructureScanner() {
-        return new BladeStructureScanner();
+    public CodeCompletionHandler getCompletionHandler() {
+        return new BladeCompletionHandler();
     }
 
     @Override
@@ -166,50 +155,46 @@ public class BladeLanguage extends DefaultLanguageConfig {
     public boolean hasHintsProvider() {
         return true;
     }
-    
+
     @Override
     public HintsProvider getHintsProvider() {
         return new BladeHintsProvider();
     }
-    
-    @Override
-    public CodeCompletionHandler getCompletionHandler() {
-        return new BladeCompletionHandler();
-    }
-
-    @Override
-    public boolean hasFormatter() {
-        return true;
-    }
-
-    @Override
-    public Formatter getFormatter() {
-        return new BladeFormatter();
-    }
+//
+//    @Override
+//    public boolean hasFormatter() {
+//        return true;
+//    }
+//
+//    @Override
+//    public Formatter getFormatter() {
+//        return new BladeFormatter();
+//    }
+//
 
     @Override
     public DeclarationFinder getDeclarationFinder() {
         return new BladeDeclarationFinder();
     }
-
-    @Override
-    public boolean hasOccurrencesFinder() {
-        return true;
-    }
-
-    @Override
-    public OccurrencesFinder<?> getOccurrencesFinder() {
-        //practical just for php context
-        return new BladeOcurrencesFinder();
-    }
+//
+//    @Override
+//    public boolean hasOccurrencesFinder() {
+//        return true;
+//    }
+//
+//    @Override
+//    public OccurrencesFinder<?> getOccurrencesFinder() {
+//        //practical just for php context
+//        return new BladeOcurrencesFinder();
+//    }
 
     /**
-     * flag for detecting if we are in a string context
-     * enables to select the blade view "layout.index" string value on double click 
-     * without interpreting the same thing for javascript objects
+     * flag for detecting if we are in a string context enables to select the
+     * blade view "layout.index" string value on double click without
+     * interpreting the same thing for javascript objects
      */
     public static volatile Boolean hasQuote = false;
-    
+
     @Override
     public boolean isIdentifierChar(char c) {
         /**
@@ -217,24 +202,54 @@ public class BladeLanguage extends DefaultLanguageConfig {
          * the editor
          */
         //also used for completion items filtering!
-        if (c == '"' || c == '\''){
+        if (c == '"' || c == '\'') {
             hasQuote = true;
         }
         return Character.isJavaIdentifierPart(c)
-                || (c == '-') || (c == '@')
+                || (c == '@')
                 || (hasQuote && c == '.') || (c == '_');
     }
-    
+
 //    @deprecated    
 //    @Override
 //    public KeystrokeHandler getKeystrokeHandler() {
 //        return new BladeBracketCompleter();
 //    }
-    
     @Override
     public IndexSearcher getIndexSearcher() {
         return new BladeTypeSearcher();
     }
 
-//TODO semantyc analyser ??
+    private static final Language<BladeTokenId> language
+            = new BladeLanguageHierarchy() {
+
+                @Override
+                protected String mimeType() {
+                    return BladeLanguage.MIME_TYPE;
+                }
+
+                @Override
+                protected Lexer<BladeTokenId> createLexer(LexerRestartInfo<BladeTokenId> info) {
+                    return new BladeLexer(info);
+                }
+
+            }.language();
+
+    @NbBundle.Messages("Source=&Source Blade")
+    @MultiViewElement.Registration(
+            displayName = "#Source",
+            persistenceType = TopComponent.PERSISTENCE_ONLY_OPENED,
+            mimeType = BladeLanguage.MIME_TYPE,
+            preferredID = "blade.source",
+            position = 100
+    )
+    public static MultiViewEditorElement createMultiViewEditorElement(Lookup context) {
+        return new MultiViewEditorElement(context);
+    }
+
+    @Override
+    @SuppressWarnings("rawtypes")
+    public SemanticAnalyzer<BladeParserResult> getSemanticAnalyzer() {
+        return new BladeSemanticAnalyzer();
+    }
 }
