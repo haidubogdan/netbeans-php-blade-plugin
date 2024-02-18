@@ -1,6 +1,7 @@
 package org.netbeans.modules.php.blade.syntax;
 
 /**
+ * TODO use the DirectiveCompletionList to compile pairing
  *
  * @author bhaidu
  */
@@ -13,6 +14,14 @@ public class BladeDirectivesUtils {
                 return new String[]{"@endif"};
             case "@section":
                 return new String[]{"@endsection", "@show"};
+            case "@push":
+                return new String[]{"@endpush"};
+            case "@pushIf":
+                return new String[]{"@endPushIf"};
+            case "@prepend":
+                return new String[]{"@endprepend"};
+            case "@fragment":
+                return new String[]{"@endfragment"};
             case "@once":
                 return new String[]{"@endonce"};
             case "@foreach":
@@ -52,6 +61,12 @@ public class BladeDirectivesUtils {
                 return new String[]{"@if", "@hasSection"};
             case "@endsection":
                 return new String[]{"@section"};
+            case "@endpush":
+                return new String[]{"@push"};
+            case "@endPushIf":
+                return new String[]{"@pushIf"};
+            case "@endprepend":
+                return new String[]{"@prepend"};
             case "@show":
                 return new String[]{"@section"};
             case "@endonce":

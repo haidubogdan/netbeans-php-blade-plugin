@@ -127,7 +127,31 @@ public class BladeIndex {
         return references;
     }
 
-    public List<IndexedReference> getStacksIndexedReferences(String prefix) {
+    public List<IndexedReferenceId> getStacksIndexedReferences(String prefix) {
+        List<IndexedReferenceId> references = new ArrayList<>();
+        try {
+            Collection<? extends IndexResult> result = querySupport.query(BladeIndexer.STACK_ID, prefix, QuerySupport.Kind.PREFIX, BladeIndexer.STACK_ID);
+
+            if (result == null || result.isEmpty()) {
+                return references;
+            }
+
+            for (IndexResult indexResult : result) {
+                String[] values = indexResult.getValues(BladeIndexer.STACK_ID);
+                for (String value : values) {
+                    if (value.startsWith(prefix)) {
+                        references.add(new IndexedReferenceId(value, indexResult.getFile()));
+                    }
+                }
+            }
+        } catch (IOException ex) {
+            Exceptions.printStackTrace(ex);
+        }
+
+        return references;
+    }
+
+    public List<IndexedReference> getExactStacksIndexedReferences(String prefix) {
         List<IndexedReference> references = new ArrayList<>();
         try {
             Collection<? extends IndexResult> result = querySupport.query(BladeIndexer.STACK_REFERENCE, prefix, QuerySupport.Kind.PREFIX, BladeIndexer.STACK_REFERENCE);
@@ -140,7 +164,7 @@ public class BladeIndex {
                 String[] values = indexResult.getValues(BladeIndexer.STACK_REFERENCE);
                 for (String value : values) {
                     if (value.startsWith(prefix)) {
-                        references.add(new IndexedReference(BladeIndexer.extractYieldDataFromIndex(value), indexResult.getFile()));
+                        references.add(new IndexedReference(BladeIndexer.extractStackDataFromIndex(value), indexResult.getFile()));
                     }
                 }
             }
@@ -150,7 +174,7 @@ public class BladeIndex {
 
         return references;
     }
-
+    
     public List<IndexedReferenceId> getYieldIds(String prefix) {
         List<IndexedReferenceId> indexedReferences = new ArrayList<>();
         try {

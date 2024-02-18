@@ -52,7 +52,6 @@ public class BladePhpCompletionProvider implements CompletionProvider {
         char lastChar = typedText.charAt(typedText.length() - 1);
         switch (lastChar) {
             case ')':
-            case '\\':    
             case '\n':
             case '<':
             case '>':

@@ -2,6 +2,7 @@ package org.netbeans.modules.php.blade.editor.directives;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -132,7 +133,7 @@ public final class CustomDirectives {
      * directive name
      */
     private class FunctionInvocationVisitor extends org.netbeans.modules.php.editor.parser.astnodes.visitors.DefaultVisitor {
-
+        private final String[] validFunctions = new String[]{"directive", "if"};
         private final List<String> directiveNames;
 
         public FunctionInvocationVisitor() {
@@ -149,7 +150,7 @@ public final class CustomDirectives {
         @Override
         public void visit(FunctionInvocation node) {
             String functionName = node.getFunctionName().toString();
-            if (!functionName.equals("directive")) {
+            if (!Arrays.stream(validFunctions).anyMatch(functionName::equals)) {
                 return;
             }
             List<Expression> parameters = node.getParameters();
@@ -157,7 +158,14 @@ public final class CustomDirectives {
             Expression directiveName = (Expression) iter.next();
             if (directiveName != null && directiveName instanceof Scalar) {
                 Scalar name = (Scalar) directiveName;
-                directiveNames.add("@" + name.getStringValue().replaceAll("^[\"|\']|[\"|[\']]$", ""));
+                String escapedDirectiveName = name.getStringValue().replaceAll("^[\"|\']|[\"|[\']]$", "");
+                directiveNames.add("@" + escapedDirectiveName);
+                //Custom If Statements
+                if (functionName.equals("if")){
+                    directiveNames.add("@unless" + escapedDirectiveName);
+                    directiveNames.add("@else" + escapedDirectiveName);
+                    directiveNames.add("@end" + escapedDirectiveName);
+                }
             }
         }
 

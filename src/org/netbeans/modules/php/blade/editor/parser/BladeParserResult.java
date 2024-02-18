@@ -73,8 +73,9 @@ public class BladeParserResult extends ParserResult {
     volatile boolean indexLoaded = false;
 
     public enum ReferenceType {
-        YIELD, STACK, SECTION, PUSH, INCLUDE, INCLUDE_IF, EXTENDS, EACH, HAS_SECTION,
-        SECTION_MISSING, USE, CUSTOM_DIRECTIVE,
+        YIELD, STACK, SECTION, PUSH, PUSH_IF, PREPEND, INCLUDE, INCLUDE_IF,
+        INCLUDE_COND, EXTENDS, EACH, HAS_SECTION,
+        SECTION_MISSING, USE, INJECT, CUSTOM_DIRECTIVE,
         PHP_FUNCTION, PHP_CLASS, PHP_METHOD, PHP_CONSTANT, PHP_NAMESPACE, PHP_NAMESPACE_PATH,
         STATIC_FIELD_ACCESS,
         TEMPLATE_PATH,
@@ -84,15 +85,19 @@ public class BladeParserResult extends ParserResult {
         EXTENDS(BladeAntlrParser.ExtendsContext.class.getSimpleName()),
         INCLUDE(BladeAntlrParser.IncludeContext.class.getSimpleName()),
         INCLUDE_IF(BladeAntlrParser.IncludeIfContext.class.getSimpleName()),
+        INCLUDE_COND(BladeAntlrParser.IncludeCondContext.class.getSimpleName()),
         YIELD(BladeAntlrParser.YieldDContext.class.getSimpleName()),
         STACK(BladeAntlrParser.StackContext.class.getSimpleName()),
         SECTION(BladeAntlrParser.SectionContext.class.getSimpleName()),
         SECTION_INLINE(BladeAntlrParser.Section_inlineContext.class.getSimpleName()),
         PUSH(BladeAntlrParser.PushContext.class.getSimpleName()),
+        PUSH_IF(BladeAntlrParser.PushIfContext.class.getSimpleName()),
+        PREPEND(BladeAntlrParser.PrependContext.class.getSimpleName()),
         HAS_SECTION(BladeAntlrParser.HasSectionContext.class.getSimpleName()),
         SECTION_MISSING(BladeAntlrParser.SectionMissingContext.class.getSimpleName()),
         EACH(BladeAntlrParser.EachContext.class.getSimpleName()),
-        USE(BladeAntlrParser.UseDContext.class.getSimpleName());
+        USE(BladeAntlrParser.UseDContext.class.getSimpleName()),
+        INJECT(BladeAntlrParser.InjectContext.class.getSimpleName());
 
         String className;
 
@@ -203,8 +208,20 @@ public class BladeParserResult extends ParserResult {
                 Token paramString = ctx.BL_PARAM_STRING().getSymbol();
                 String bladeParamText = paramString.getText();
                 bladeParamText = bladeParamText.substring(1, bladeParamText.length() - 1);
-                OffsetRange range = new OffsetRange(paramString.getStartIndex(), paramString.getStopIndex());
-                Reference ref = new Reference(type, bladeParamText, range);
+                OffsetRange range;
+                Reference ref;
+                if (type.equals(ReferenceType.USE) || type.equals(ReferenceType.INJECT)) {
+                    int lastSlashPos = bladeParamText.lastIndexOf("\\");
+                    if (lastSlashPos < 0 || lastSlashPos >= bladeParamText.length() - 1) {
+                        return;
+                    }
+                    range = new OffsetRange(paramString.getStartIndex(), paramString.getStopIndex());
+                    //extracting the namespace and classname
+                    ref = new Reference(type, bladeParamText.substring(lastSlashPos + 1), range, null, bladeParamText.substring(0, lastSlashPos - 1));
+                } else {
+                    range = new OffsetRange(paramString.getStartIndex(), paramString.getStopIndex());
+                    ref = new Reference(type, bladeParamText, range);
+                }
 
                 //to add include path ??
                 occurancesForDeclaration.put(range, ref);
@@ -219,6 +236,7 @@ public class BladeParserResult extends ParserResult {
                         break;
                     case INCLUDE:
                     case INCLUDE_IF:
+                    case INCLUDE_COND:
                     case EACH:
                         markIncludeBladeOccurrence(bladeParamText, range);
                         break;
@@ -565,12 +583,18 @@ public class BladeParserResult extends ParserResult {
                 return ReferenceType.SECTION;
             case PUSH:
                 return ReferenceType.PUSH;
+            case PUSH_IF:
+                return ReferenceType.PUSH_IF;
+            case PREPEND:
+                return ReferenceType.PREPEND;
             case HAS_SECTION:
                 return ReferenceType.HAS_SECTION;
             case SECTION_MISSING:
                 return ReferenceType.SECTION_MISSING;
             case USE:
                 return ReferenceType.USE;
+            case INJECT:
+                return ReferenceType.INJECT;
             default:
                 return null;
         }

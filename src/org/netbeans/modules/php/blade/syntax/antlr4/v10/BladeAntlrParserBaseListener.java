@@ -159,6 +159,30 @@ public class BladeAntlrParserBaseListener implements BladeAntlrParserListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterPushIf(BladeAntlrParser.PushIfContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitPushIf(BladeAntlrParser.PushIfContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterPrepend(BladeAntlrParser.PrependContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitPrepend(BladeAntlrParser.PrependContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterIf(BladeAntlrParser.IfContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -322,6 +346,18 @@ public class BladeAntlrParserBaseListener implements BladeAntlrParserListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitUseD(BladeAntlrParser.UseDContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterInject(BladeAntlrParser.InjectContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitInject(BladeAntlrParser.InjectContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -682,6 +718,18 @@ public class BladeAntlrParserBaseListener implements BladeAntlrParserListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitDoubleArgWrapper(BladeAntlrParser.DoubleArgWrapperContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterDoubleIfArgWrapper(BladeAntlrParser.DoubleIfArgWrapperContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitDoubleIfArgWrapper(BladeAntlrParser.DoubleIfArgWrapperContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *

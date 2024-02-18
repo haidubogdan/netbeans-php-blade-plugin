@@ -128,6 +128,26 @@ public interface BladeAntlrParserListener extends ParseTreeListener {
 	 */
 	void exitPushOnce(BladeAntlrParser.PushOnceContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link BladeAntlrParser#pushIf}.
+	 * @param ctx the parse tree
+	 */
+	void enterPushIf(BladeAntlrParser.PushIfContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link BladeAntlrParser#pushIf}.
+	 * @param ctx the parse tree
+	 */
+	void exitPushIf(BladeAntlrParser.PushIfContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link BladeAntlrParser#prepend}.
+	 * @param ctx the parse tree
+	 */
+	void enterPrepend(BladeAntlrParser.PrependContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link BladeAntlrParser#prepend}.
+	 * @param ctx the parse tree
+	 */
+	void exitPrepend(BladeAntlrParser.PrependContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link BladeAntlrParser#if}.
 	 * @param ctx the parse tree
 	 */
@@ -267,6 +287,16 @@ public interface BladeAntlrParserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitUseD(BladeAntlrParser.UseDContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link BladeAntlrParser#inject}.
+	 * @param ctx the parse tree
+	 */
+	void enterInject(BladeAntlrParser.InjectContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link BladeAntlrParser#inject}.
+	 * @param ctx the parse tree
+	 */
+	void exitInject(BladeAntlrParser.InjectContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link BladeAntlrParser#include}.
 	 * @param ctx the parse tree
@@ -567,6 +597,16 @@ public interface BladeAntlrParserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitDoubleArgWrapper(BladeAntlrParser.DoubleArgWrapperContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link BladeAntlrParser#doubleIfArgWrapper}.
+	 * @param ctx the parse tree
+	 */
+	void enterDoubleIfArgWrapper(BladeAntlrParser.DoubleIfArgWrapperContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link BladeAntlrParser#doubleIfArgWrapper}.
+	 * @param ctx the parse tree
+	 */
+	void exitDoubleIfArgWrapper(BladeAntlrParser.DoubleIfArgWrapperContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link BladeAntlrParser#multiArgWrapper}.
 	 * @param ctx the parse tree

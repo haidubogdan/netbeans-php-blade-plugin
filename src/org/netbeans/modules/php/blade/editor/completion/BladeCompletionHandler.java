@@ -128,13 +128,17 @@ public class BladeCompletionHandler implements CodeCompletionHandler2 {
                 completeNamespace(prefix, offset, completionProposals, parserResult);
 
                 //we are after '\'
-                if (elementReference.namespace != null){
+                if (elementReference.namespace != null) {
                     String classQuery = prefix;
                     String namespace = elementReference.namespace;
                     namespace = namespace.substring(0, namespace.length() - 1);
                     //completion offset : subtract prefix length + last slash
-                    int offsetNamespace = offset -(prefix.length() + 1);
+                    int offsetNamespace = offset - (prefix.length() + 1);
                     completeNamespacedPhpClasses(classQuery, namespace, offsetNamespace, completionProposals, parserResult);
+                } else if (prefix.endsWith("\\")) {
+                    String namespace = elementReference.name;
+                    int offsetNamespace = offset - (prefix.length() + 1);
+                    completeNamespacedPhpClasses("", namespace, offset, completionProposals, parserResult);
                 }
                 break;
         }
@@ -162,7 +166,7 @@ public class BladeCompletionHandler implements CodeCompletionHandler2 {
             int offset, final List<CompletionProposal> completionProposals,
             BladeParserResult parserResult) {
         Collection<PhpIndexResult> indexClassResults = PhpIndexUtils.queryNamespaceClasses(
-               prefix, namespace,  parserResult.getSnapshot().getSource().getFileObject());
+                prefix, namespace, parserResult.getSnapshot().getSource().getFileObject());
         CompletionRequest request = new CompletionRequest();
         request.anchorOffset = offset - namespace.length();
         request.carretOffset = offset;

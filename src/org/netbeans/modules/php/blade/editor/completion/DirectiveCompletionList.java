@@ -35,9 +35,17 @@ import org.netbeans.modules.php.blade.syntax.annotation.DirectiveRegister;
     @Directive(name = "@includeWhen", params = true),
     @Directive(name = "@includeUnless", params = true),
     @Directive(name = "@each", params = true),
+    //stack
     @Directive(name = "@stack", params = true),
     @Directive(name = "@push", params = true, endtag = "@endpush"),
     @Directive(name = "@endpush", params = true),
+    @Directive(name = "@prepend", params = true, endtag = "@endprepend"),
+    @Directive(name = "@endprepend", params = true),
+    @Directive(name = "@pushIf", params = true, endtag = "@endPushIf"),
+    @Directive(name = "@endPushIf", params = true),
+    //
+    @Directive(name = "@fragment", params = true, endtag = "@endfragment"),
+    @Directive(name = "@endfragment", params = true),
     //form
     @Directive(name = "@csrf"),
     @Directive(name = "@method"),

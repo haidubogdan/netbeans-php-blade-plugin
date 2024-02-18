@@ -29,7 +29,7 @@ public class QueryUtils {
         if (bladeIndex == null) {
             return null;
         }
-        return bladeIndex.getStacksIndexedReferences(prefix);
+        return bladeIndex.getExactStacksIndexedReferences(prefix);
     }
     
     public static List<BladeIndex.IndexedOffsetReference> getIncludePathReferences(String prefix, FileObject fo) {

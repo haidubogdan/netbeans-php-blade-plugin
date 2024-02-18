@@ -153,6 +153,26 @@ public class BladeIndexer extends EmbeddingIndexer {
         return new Reference(ReferenceType.YIELD, name, new OffsetRange(start, end));
     }
     
+    public static Reference extractStackDataFromIndex(String index) {
+        String[] mainElements = index.split("#");
+
+        if (mainElements.length == 0) {
+            return null;
+        }
+
+        String name = mainElements[0];
+        String offsets[] = mainElements[1].split(";");
+        int start = 0;
+        int end = 1;
+
+        if (offsets.length > 0) {
+            start = Integer.parseInt(offsets[0]);
+            end = Integer.parseInt(offsets[1]);
+        }
+
+        return new Reference(ReferenceType.STACK, name, new OffsetRange(start, end));
+    }
+    
     public static Reference extractTemplatePathDataFromIndex(String indexInfo) {
         String[] mainElements = indexInfo.split("#");
 

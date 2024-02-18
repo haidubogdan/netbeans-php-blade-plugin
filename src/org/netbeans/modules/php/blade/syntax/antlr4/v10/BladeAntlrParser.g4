@@ -44,7 +44,7 @@ inline_directive:
     | D_PROPS composed_php_expression
     | D_CSRF
     | useD
-    | D_INJECT doubleArgWrapper
+    | inject
     | D_HTML_ATTR_EXPR composed_php_expression
     //using basic inline case statement to not add complexity to parser
     | D_CASE composed_php_expression
@@ -59,7 +59,10 @@ block_statement:
     | hasSection
     | sectionMissing
     | push
+    | pushIf
     | D_ONCE general_statement+ D_ENDONCE
+    | prepend
+    | D_FRAGMENT composed_php_expression general_statement+ D_ENDFRAGMENT
     | if
     | elseif
     | else
@@ -89,6 +92,8 @@ section_inline: D_SECTION doubleArgWrapper;
 section : D_SECTION singleArgWrapper (general_statement | D_PARENT)* (D_SHOW | D_STOP | D_OVERWRITE | D_ENDSECTION);
 push : D_PUSH singleArgWrapper general_statement+ D_ENDPUSH;
 pushOnce : D_PUSH_ONCE singleArgWrapper general_statement+ D_ENDPUSH_ONCE;
+pushIf : D_PUSH_IF doubleIfArgWrapper general_statement+ D_ENDPUSH_IF;
+prepend : D_PREPEND singleArgWrapper general_statement+ D_ENDPREPEND;
 
 if : D_IF main_php_expression general_statement+ endif?;
 elseif : D_ELSEIF main_php_expression general_statement+ endif?;
@@ -111,7 +116,8 @@ forelse : D_FORELSE FOREACH_LOOP_LPAREN loop_expression FOREACH_LOOP_RPAREN (gen
 //layout
 yieldD : D_YIELD singleArgAndDefaultWrapper;
 stack : D_STACK singleArgWrapper;
-useD : D_USE singleArgWrapper;
+useD : D_USE singleArgAndDefaultWrapper;
+inject : D_INJECT BLADE_PARAM_LPAREN composedArgument BL_COMMA (identifiableArgument | composedArgument) BLADE_PARAM_RPAREN;
 
 include : D_INCLUDE singleArgAndDefaultWrapper;
 includeIf : D_INCLUDE_IF singleArgAndDefaultWrapper;
@@ -185,6 +191,7 @@ simple_foreach_expr: loop_array=PHP_VARIABLE FOREACH_AS key=PHP_VARIABLE (FOREAC
 singleArgWrapper:  BLADE_PARAM_LPAREN (identifiableArgument | composedArgument) BLADE_PARAM_RPAREN;
 singleArgAndDefaultWrapper:  BLADE_PARAM_LPAREN (identifiableArgument | composedArgument) (BL_COMMA composedArgument)? (BL_COMMA BL_PARAM_WS*)? BLADE_PARAM_RPAREN;
 doubleArgWrapper:  BLADE_PARAM_LPAREN (identifiableArgument | composedArgument) BL_COMMA composedArgument BLADE_PARAM_RPAREN;
+doubleIfArgWrapper:  BLADE_PARAM_LPAREN composedArgument BL_COMMA (identifiableArgument | composedArgument) BLADE_PARAM_RPAREN;
 multiArgWrapper :  BLADE_PARAM_LPAREN (identifiableArgument | composedArgument) (BL_COMMA composedArgument)* BLADE_PARAM_RPAREN;
 
 identifiableArgument : BL_PARAM_WS* BL_PARAM_STRING BL_PARAM_WS*;

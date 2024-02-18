@@ -84,7 +84,6 @@ public class BladeCompletionProvider implements CompletionProvider {
         char lastChar = typedText.charAt(typedText.length() - 1);
         switch (lastChar) {
             case ')':
-            case '\\':
             case '\n':
             case '<':
             case '>':
@@ -178,7 +177,7 @@ public class BladeCompletionProvider implements CompletionProvider {
                         List<Integer> tokensMatch = Arrays.asList(new Integer[]{
                             D_EXTENDS, D_INCLUDE, D_SECTION, D_HAS_SECTION,
                             D_INCLUDE_IF, D_INCLUDE_WHEN, D_INCLUDE_UNLESS, D_INCLUDE_FIRST,
-                            D_EACH, D_PUSH
+                            D_EACH, D_PUSH, D_PUSH_IF, D_PREPEND
                         });     //todo 
                         //we should have the stop tokens depending on context
                         List<Integer> tokensStop = Arrays.asList(new Integer[]{HTML, BL_COMMA, BL_PARAM_CONCAT_OPERATOR});
@@ -220,6 +219,12 @@ public class BladeCompletionProvider implements CompletionProvider {
                             case D_SECTION:
                             case D_HAS_SECTION:
                                 completeYieldIdFromIndex(pathName, fo, caretOffset, resultSet);
+                                return;
+                            case D_PUSH:
+                            case D_PUSH_IF:
+                            case D_PREPEND:
+                                completeStackIdFromIndex(pathName, fo, caretOffset, resultSet);
+                                return;
                         }
                         break;
                     }
@@ -346,6 +351,23 @@ public class BladeCompletionProvider implements CompletionProvider {
         try {
             bladeIndex = BladeIndex.get(project);
             List<IndexedReferenceId> indexedReferences = bladeIndex.getYieldIds(prefixIdentifier);
+            for (IndexedReferenceId indexReference : indexedReferences) {
+                addYieldIdCompletionItem(indexReference.getIdenfiier(), indexReference.getOriginFile(),
+                        insertOffset, resultSet);
+            }
+        } catch (IOException ex) {
+            Exceptions.printStackTrace(ex);
+        }
+    }
+    
+    private void completeStackIdFromIndex(String prefixIdentifier, FileObject fo,
+            int caretOffset, CompletionResultSet resultSet) {
+        BladeIndex bladeIndex;
+        Project project = ProjectUtils.getMainOwner(fo);
+        int insertOffset = caretOffset - prefixIdentifier.length();
+        try {
+            bladeIndex = BladeIndex.get(project);
+            List<IndexedReferenceId> indexedReferences = bladeIndex.getStacksIndexedReferences(prefixIdentifier);
             for (IndexedReferenceId indexReference : indexedReferences) {
                 addYieldIdCompletionItem(indexReference.getIdenfiier(), indexReference.getOriginFile(),
                         insertOffset, resultSet);
