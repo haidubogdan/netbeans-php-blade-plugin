@@ -118,15 +118,15 @@ D_AUTH_END : ('@endauth' | '@endguest');
 //styles, attributes
 D_CLASS : '@class'->pushMode(LOOK_FOR_PHP_EXPRESSION);
 D_STYLE : '@style'->pushMode(LOOK_FOR_PHP_EXPRESSION);
-D_HTML_ATTR_EXPR : ('@checked' | '@disabled' | '@readonly' | '@required' | '@selected')->pushMode(LOOK_FOR_PHP_EXPRESSION);
+D_HTML_ATTR_EXPR : ('@checked' | '@disabled' | '@readonly' | '@required' | '@selected')->pushMode(LOOK_FOR_PHP_COMPOSED_EXPRESSION);
 D_AWARE : '@aware'->pushMode(LOOK_FOR_PHP_EXPRESSION);
 
 D_JSON  : '@json'->pushMode(LOOK_FOR_PHP_EXPRESSION);
 D_DD : '@dd'->pushMode(LOOK_FOR_PHP_EXPRESSION);
 
 //php injection
-D_USE : '@use'->pushMode(LOOK_FOR_BLADE_PARAMETERS);
-D_INJECT : '@inject'->pushMode(LOOK_FOR_PHP_EXPRESSION);
+D_USE : '@use'->pushMode(LOOK_FOR_PHP_COMPOSED_EXPRESSION);
+D_INJECT : '@inject'->pushMode(LOOK_FOR_PHP_COMPOSED_EXPRESSION);
 D_PHP_SHORT : '@php' (' ')? {this._input.LA(1) == '('}? ->type(D_PHP),pushMode(LOOK_FOR_PHP_COMPOSED_EXPRESSION);
 D_PHP : '@php' {this._input.LA(1) == ' ' || this._input.LA(1) == '\n'}?->pushMode(BLADE_INLINE_PHP);
 

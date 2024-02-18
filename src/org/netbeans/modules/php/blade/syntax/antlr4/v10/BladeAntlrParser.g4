@@ -39,15 +39,15 @@ inline_directive:
     | includeCond
     | includeFirst
     | each
-    | (D_CLASS | D_STYLE) php_expression
-    | (D_METHOD) php_expression
-    | D_PROPS php_expression
+    | (D_CLASS | D_STYLE) composed_php_expression
+    | (D_METHOD) composed_php_expression
+    | D_PROPS composed_php_expression
     | D_CSRF
     | useD
     | D_INJECT doubleArgWrapper
-    | D_HTML_ATTR_EXPR php_expression
+    | D_HTML_ATTR_EXPR composed_php_expression
     //using basic inline case statement to not add complexity to parser
-    | D_CASE php_expression
+    | D_CASE composed_php_expression
     | D_DEFAULT
     | loop_action
     | D_LANG singleArgAndDefaultWrapper

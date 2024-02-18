@@ -93,6 +93,33 @@ public class PathUtils {
         return list;
     }
 
+    public static FileObject findFileObjectForBladePath(FileObject contextFile, String bladePath) {
+        FileObject res = null;
+        Project project = ProjectConvertors.getNonConvertorOwner(contextFile);
+
+        if (project == null) {
+            return res;
+        }
+
+        List<FileObject> viewRoots = getCustomViewsRoots(project, contextFile);
+
+        if (viewRoots == null || viewRoots.isEmpty()) {
+            return res;
+        }
+
+        String sanitizedBladePath = bladePath.replace(".", "/") + ".blade.php"; //NOI18N
+
+        for (FileObject viewRoot : viewRoots) {
+            FileObject includedFile = viewRoot.getFileObject(sanitizedBladePath, true);
+
+            if (includedFile != null && includedFile.isValid()) {
+                return includedFile;
+            }
+        }
+
+        return res;
+    }
+
     /**
      *
      *
@@ -105,7 +132,7 @@ public class PathUtils {
         List<FileObject> list = new ArrayList<>();
         //this should be a fallback
         Project project = ProjectConvertors.getNonConvertorOwner(contextFile);
-        
+
         if (project == null) {
             return list;
         }
@@ -216,7 +243,7 @@ public class PathUtils {
         if (project == null) {
             return path;
         }
-        
+
         String filePath = file.getPath();
         FileObject defaultLaravelPath = project.getProjectDirectory().getFileObject(LARAVEL_VIEW_PATH);
 
@@ -224,9 +251,9 @@ public class PathUtils {
             //belongs to the default folder
             String viewFolderPath = defaultLaravelPath.getPath();
             if (filePath.startsWith(viewFolderPath)) {
-                String bladePath =  filePath.replace(viewFolderPath, "").replace(".blade.php", "").replace("/", ".");
+                String bladePath = filePath.replace(viewFolderPath, "").replace(".blade.php", "").replace("/", ".");
                 //starting slash
-                if (bladePath.startsWith(".")){
+                if (bladePath.startsWith(".")) {
                     bladePath = bladePath.substring(1, bladePath.length());
                 }
                 return bladePath;
@@ -249,7 +276,7 @@ public class PathUtils {
             String viewFileAbsPath = viewFile.getPath();
             if (filePath.startsWith(viewFileAbsPath)) {
                 String relativePath = filePath.replace(viewFileAbsPath, "");
-                if (!relativePath.startsWith("/")){
+                if (!relativePath.startsWith("/")) {
                     //it doesn't belong to the folder
                     continue;
                 }
@@ -258,5 +285,22 @@ public class PathUtils {
         }
 
         return path;
+    }
+    
+    public static String getRelativeProjectPath(FileObject currentFile){
+        Project projectOwner = ProjectConvertors.getNonConvertorOwner(currentFile);
+        if (projectOwner == null){
+            return "";
+        }
+        
+        String dirPath = projectOwner.getProjectDirectory().getPath();
+        String relativePath = currentFile.getPath().replace(dirPath, "");
+
+        //only if we found the relative project path
+        if (currentFile.getPath().length() > relativePath.length()){
+            return relativePath;
+        }
+        
+        return "";
     }
 }

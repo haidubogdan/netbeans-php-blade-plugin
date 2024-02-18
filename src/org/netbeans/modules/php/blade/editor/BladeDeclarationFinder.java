@@ -27,8 +27,6 @@ import org.netbeans.modules.php.blade.editor.indexing.QueryUtils;
 import org.netbeans.modules.php.blade.editor.parser.BladeParserResult;
 import org.netbeans.modules.php.blade.editor.parser.BladeParserResult.FieldAccessReference;
 import org.netbeans.modules.php.blade.editor.parser.BladeParserResult.Reference;
-import static org.netbeans.modules.php.blade.editor.parser.BladeParserResult.ReferenceType.PHP_CONSTANT;
-import static org.netbeans.modules.php.blade.editor.parser.BladeParserResult.ReferenceType.PHP_FUNCTION;
 import org.netbeans.modules.php.blade.editor.path.PathUtils;
 import org.netbeans.modules.php.blade.syntax.antlr4.v10.BladeAntlrLexer;
 import org.netbeans.spi.lexer.antlr4.AntlrTokenSequence;
@@ -88,7 +86,7 @@ public class BladeDeclarationFinder implements DeclarationFinder {
 
             if (nt.getType() == BL_PARAM_STRING) {
                 List<Integer> tokensMatch = Arrays.asList(new Integer[]{
-                    D_EXTENDS, D_INCLUDE, D_EACH, D_SECTION, D_HAS_SECTION, D_SECTION_MISSING, D_PUSH, D_USE
+                    D_EXTENDS, D_INCLUDE, D_INCLUDE_IF, D_EACH, D_SECTION, D_HAS_SECTION, D_SECTION_MISSING, D_PUSH, D_USE
                 });
                 List<Integer> tokensStop = Arrays.asList(new Integer[]{HTML});
                 org.antlr.v4.runtime.Token matchedToken = BladeAntlrUtils.findBackward(tokens, tokensMatch, tokensStop);
@@ -148,6 +146,8 @@ public class BladeDeclarationFinder implements DeclarationFinder {
         switch (reference.type) {
             case EXTENDS:
             case INCLUDE:
+            case INCLUDE_IF:   
+            case EACH:
                 String bladePath = reference.name;
                 List<FileObject> includedFiles = PathUtils.findFileObjectsForBladePath(currentFile, bladePath);
 

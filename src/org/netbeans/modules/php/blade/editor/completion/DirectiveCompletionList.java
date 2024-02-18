@@ -30,6 +30,7 @@ import org.netbeans.modules.php.blade.syntax.annotation.DirectiveRegister;
     @Directive(name = "@yield", params = true),
     @Directive(name = "@hasSection", params = true, endtag = "@endif"),
     @Directive(name = "@include", params = true),
+    @Directive(name = "@includeFirst", params = true),
     @Directive(name = "@includeIf", params = true),
     @Directive(name = "@includeWhen", params = true),
     @Directive(name = "@includeUnless", params = true),

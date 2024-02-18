@@ -28,4 +28,7 @@
     </fontcolor>
     <fontcolor name="blade_echo_delimiters" foreColor="ff966738">
     </fontcolor>
+    <!--"semantic" highlighting:-->
+    <fontcolor name="mod-undefined" waveUnderlined="999999"/>
+    <fontcolor name="mod-method" waveUnderlined="999999"/>
 </fontscolors>

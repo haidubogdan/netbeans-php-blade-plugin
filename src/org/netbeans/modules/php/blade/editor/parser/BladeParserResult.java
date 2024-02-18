@@ -73,7 +73,7 @@ public class BladeParserResult extends ParserResult {
     volatile boolean indexLoaded = false;
 
     public enum ReferenceType {
-        YIELD, STACK, SECTION, PUSH, INCLUDE, EXTENDS, EACH, HAS_SECTION,
+        YIELD, STACK, SECTION, PUSH, INCLUDE, INCLUDE_IF, EXTENDS, EACH, HAS_SECTION,
         SECTION_MISSING, USE, CUSTOM_DIRECTIVE,
         PHP_FUNCTION, PHP_CLASS, PHP_METHOD, PHP_CONSTANT, PHP_NAMESPACE, PHP_NAMESPACE_PATH,
         STATIC_FIELD_ACCESS,
@@ -83,6 +83,7 @@ public class BladeParserResult extends ParserResult {
     public enum ParserContext {
         EXTENDS(BladeAntlrParser.ExtendsContext.class.getSimpleName()),
         INCLUDE(BladeAntlrParser.IncludeContext.class.getSimpleName()),
+        INCLUDE_IF(BladeAntlrParser.IncludeIfContext.class.getSimpleName()),
         YIELD(BladeAntlrParser.YieldDContext.class.getSimpleName()),
         STACK(BladeAntlrParser.StackContext.class.getSimpleName()),
         SECTION(BladeAntlrParser.SectionContext.class.getSimpleName()),
@@ -217,6 +218,8 @@ public class BladeParserResult extends ParserResult {
                         addStackReference(ReferenceType.STACK, bladeParamText, range);
                         break;
                     case INCLUDE:
+                    case INCLUDE_IF:
+                    case EACH:
                         markIncludeBladeOccurrence(bladeParamText, range);
                         break;
                 }
@@ -450,6 +453,21 @@ public class BladeParserResult extends ParserResult {
 
             final List<BladeStructureItem> lexerStructure = new ArrayList<>();
             int blockBalance = 0;
+            String identifier;
+
+            @Override
+            public void enterInline_directive(BladeAntlrParser.Inline_directiveContext ctx) {
+                identifier = null;
+            }
+
+            @Override
+            public void exitIdentifiableArgument(BladeAntlrParser.IdentifiableArgumentContext ctx) {
+                identifier = null;
+                if (ctx.BL_PARAM_STRING() == null) {
+                    return;
+                }
+                identifier = ctx.BL_PARAM_STRING().getText();
+            }
 
             @Override
             public void exitInline_directive(BladeAntlrParser.Inline_directiveContext ctx) {
@@ -461,9 +479,16 @@ public class BladeParserResult extends ParserResult {
                         if (directiveToken == null) {
                             return;
                         }
+                        DirectiveInlineStructureItem inlineElement;
                         String directiveName = directiveToken.getText();
-                        DirectiveInlineStructureItem inlineElement = new DirectiveInlineStructureItem(directiveName,
-                                getFileObject(), directiveToken.getStartIndex(), directiveToken.getStopIndex() + 1);
+
+                        if (identifier != null) {
+                            inlineElement = new DirectiveInlineStructureItem(directiveName, identifier,
+                                    getFileObject(), directiveToken.getStartIndex(), directiveToken.getStopIndex() + 1);
+                        } else {
+                            inlineElement = new DirectiveInlineStructureItem(directiveName,
+                                    getFileObject(), directiveToken.getStartIndex(), directiveToken.getStopIndex() + 1);
+                        }
 
                         if (blockBalance > 0) {
                             lexerStructure.add(inlineElement);
@@ -506,8 +531,8 @@ public class BladeParserResult extends ParserResult {
                         //folds
                         int start = ctx.getStart().getStartIndex() + 1 + directiveName.length();
                         int end = ctx.getStop().getStartIndex();//the start of the close directive
-                        
-                        if (start > end){
+
+                        if (start > end) {
                             return;
                         }
                         OffsetRange range = new OffsetRange(start, end);
@@ -529,6 +554,8 @@ public class BladeParserResult extends ParserResult {
                 return ReferenceType.EXTENDS;
             case INCLUDE:
                 return ReferenceType.INCLUDE;
+            case INCLUDE_IF:
+                return ReferenceType.INCLUDE_IF;
             case YIELD:
                 return ReferenceType.YIELD;
             case STACK:
@@ -660,7 +687,8 @@ public class BladeParserResult extends ParserResult {
         includeBladeOccurences.computeIfAbsent(refName, s -> new ArrayList<>()).add(or);
     }
 
-    public Collection<? extends OffsetRange> getOccurrences(String refName) {
+    //not used so far
+    public Collection<? extends OffsetRange> findIncludeOccurrence(String refName) {
         ArrayList<OffsetRange> ret = new ArrayList<>();
         if (includeBladeOccurences.containsKey(refName)) {
             ret.addAll(includeBladeOccurences.get(refName));

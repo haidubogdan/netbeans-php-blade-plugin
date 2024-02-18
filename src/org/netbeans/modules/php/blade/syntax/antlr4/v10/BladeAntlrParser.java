@@ -485,8 +485,8 @@ public class BladeAntlrParser extends Parser {
 		public EachContext each() {
 			return getRuleContext(EachContext.class,0);
 		}
-		public Php_expressionContext php_expression() {
-			return getRuleContext(Php_expressionContext.class,0);
+		public Composed_php_expressionContext composed_php_expression() {
+			return getRuleContext(Composed_php_expressionContext.class,0);
 		}
 		public TerminalNode D_CLASS() { return getToken(BladeAntlrParser.D_CLASS, 0); }
 		public TerminalNode D_STYLE() { return getToken(BladeAntlrParser.D_STYLE, 0); }
@@ -614,7 +614,7 @@ public class BladeAntlrParser extends Parser {
 					consume();
 				}
 				setState(167);
-				php_expression();
+				composed_php_expression();
 				}
 				break;
 			case D_METHOD:
@@ -625,7 +625,7 @@ public class BladeAntlrParser extends Parser {
 				match(D_METHOD);
 				}
 				setState(169);
-				php_expression();
+				composed_php_expression();
 				}
 				break;
 			case D_PROPS:
@@ -634,7 +634,7 @@ public class BladeAntlrParser extends Parser {
 				setState(170);
 				match(D_PROPS);
 				setState(171);
-				php_expression();
+				composed_php_expression();
 				}
 				break;
 			case D_CSRF:
@@ -666,7 +666,7 @@ public class BladeAntlrParser extends Parser {
 				setState(176);
 				match(D_HTML_ATTR_EXPR);
 				setState(177);
-				php_expression();
+				composed_php_expression();
 				}
 				break;
 			case D_CASE:
@@ -675,7 +675,7 @@ public class BladeAntlrParser extends Parser {
 				setState(178);
 				match(D_CASE);
 				setState(179);
-				php_expression();
+				composed_php_expression();
 				}
 				break;
 			case D_DEFAULT:
@@ -5524,12 +5524,12 @@ public class BladeAntlrParser extends Parser {
 		"\u0007\u0000\u009f\u00ba\u0003,\u0016\u0000\u00a0\u00ba\u0003.\u0017\u0000"+
 		"\u00a1\u00ba\u00032\u0019\u0000\u00a2\u00ba\u00034\u001a\u0000\u00a3\u00ba"+
 		"\u00036\u001b\u0000\u00a4\u00ba\u00038\u001c\u0000\u00a5\u00ba\u0003:"+
-		"\u001d\u0000\u00a6\u00a7\u0007\u0000\u0000\u0000\u00a7\u00ba\u0003^/\u0000"+
-		"\u00a8\u00a9\u0005K\u0000\u0000\u00a9\u00ba\u0003^/\u0000\u00aa\u00ab"+
-		"\u0005H\u0000\u0000\u00ab\u00ba\u0003^/\u0000\u00ac\u00ba\u0005J\u0000"+
+		"\u001d\u0000\u00a6\u00a7\u0007\u0000\u0000\u0000\u00a7\u00ba\u0003d2\u0000"+
+		"\u00a8\u00a9\u0005K\u0000\u0000\u00a9\u00ba\u0003d2\u0000\u00aa\u00ab"+
+		"\u0005H\u0000\u0000\u00ab\u00ba\u0003d2\u0000\u00ac\u00ba\u0005J\u0000"+
 		"\u0000\u00ad\u00ba\u00030\u0018\u0000\u00ae\u00af\u0005[\u0000\u0000\u00af"+
 		"\u00ba\u0003l6\u0000\u00b0\u00b1\u0005V\u0000\u0000\u00b1\u00ba\u0003"+
-		"^/\u0000\u00b2\u00b3\u0005\u001f\u0000\u0000\u00b3\u00ba\u0003^/\u0000"+
+		"d2\u0000\u00b2\u00b3\u0005\u001f\u0000\u0000\u00b3\u00ba\u0003d2\u0000"+
 		"\u00b4\u00ba\u0005 \u0000\u0000\u00b5\u00ba\u0003~?\u0000\u00b6\u00b7"+
 		"\u0005I\u0000\u0000\u00b7\u00ba\u0003j5\u0000\u00b8\u00ba\u0003@ \u0000"+
 		"\u00b9\u009d\u0001\u0000\u0000\u0000\u00b9\u009e\u0001\u0000\u0000\u0000"+

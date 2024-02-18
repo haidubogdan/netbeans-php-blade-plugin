@@ -37,6 +37,8 @@ public class BladeDirectivesUtils {
                 return new String[]{"@endauth"};
             case "@guest":
                 return new String[]{"@endguest"};
+            case "@production":
+                return new String[]{"@endproduction"};
             case "@error":
                 return new String[]{"@enderror"};
 
@@ -74,6 +76,8 @@ public class BladeDirectivesUtils {
                 return new String[]{"@auth"};
             case "@endguest":
                 return new String[]{"@guest"};
+            case "@endproduction":
+                return new String[]{"@production"};
             case "@enderror":
                 return new String[]{"@error"};
         }

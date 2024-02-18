@@ -128,15 +128,36 @@ public abstract class BladeStructureItem implements ElementHandle, StructureItem
         }
     }
 
-    public static final class DirectiveInlineStructureItem extends BladeStructureItem {
+    public static class DirectiveInlineStructureItem extends BladeStructureItem {
+
+        private String identifier;
 
         public DirectiveInlineStructureItem(String name, FileObject source, int startOffset, int stopOffset) {
             super(name, source, startOffset, stopOffset);
         }
 
+        public DirectiveInlineStructureItem(String name, String identifier, FileObject source, int startOffset, int stopOffset) {
+            super(name, source, startOffset, stopOffset);
+            this.identifier = identifier;
+        }
+
         @Override
         public boolean isLeaf() {
             return true;
+        }
+
+        @Override
+        public String getHtml(HtmlFormatter formatter) {
+            formatter.appendText(name);
+            if (identifier != null){
+                formatter.appendText(" ");
+                formatter.appendHtml("<em>");
+                formatter.appendHtml("<font color='5b5b5b'>");
+                formatter.appendText(identifier);
+                formatter.appendHtml("</font>");
+                formatter.appendHtml("</em>");
+            }
+            return formatter.getText();
         }
 
         @Override
@@ -154,4 +175,5 @@ public abstract class BladeStructureItem implements ElementHandle, StructureItem
             return ResourceUtilities.loadResourceIcon("icons/layout.png");
         }
     }
+
 }

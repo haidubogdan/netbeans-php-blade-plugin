@@ -15,7 +15,9 @@ import org.netbeans.modules.csl.api.Rule.ErrorRule;
 import org.netbeans.modules.csl.api.RuleContext;
 import org.netbeans.modules.csl.api.HintsProvider;
 import org.netbeans.modules.php.blade.editor.directives.CustomDirectives;
+import static org.netbeans.modules.php.blade.editor.indexing.BladeIndexer.INCLUDE_PATH;
 import org.netbeans.modules.php.blade.editor.parser.BladeParserResult;
+import org.netbeans.modules.php.blade.editor.path.PathUtils;
 import org.netbeans.modules.php.blade.project.ProjectUtils;
 import org.openide.filesystems.FileObject;
 
@@ -28,26 +30,49 @@ public class BladeHintsProvider implements HintsProvider {
     /**
      * Compute hints applicable to the given compilation info and add to the
      * given result list.
+     * @param manager
+     * @param context
+     * @param hints
      */
     @Override
     public void computeHints(HintsManager manager, RuleContext context, List<Hint> hints) {
-        BladeParserResult parserResult = (BladeParserResult) context.parserResult;
-        FileObject fo = EditorDocumentUtils.getFileObject(context.doc);
-        Project project = ProjectUtils.getMainOwner(fo);
-        CustomDirectives ct = CustomDirectives.getInstance(project);
-        for (Object setentry : parserResult.customDirectivesReferences.entrySet()) {
-            Map.Entry<OffsetRange, BladeParserResult.Reference> entry = (Map.Entry<OffsetRange, BladeParserResult.Reference>) setentry;
-            if (ct.customDirectiveNames.contains(entry.getValue().name )){
-                continue;
+        if (context.parserResult instanceof BladeParserResult) {
+            BladeParserResult parserResult = (BladeParserResult) context.parserResult;
+            FileObject fo = EditorDocumentUtils.getFileObject(context.doc);
+            Project project = ProjectUtils.getMainOwner(fo);
+            CustomDirectives ct = CustomDirectives.getInstance(project);
+            for (Object setentry : parserResult.customDirectivesReferences.entrySet()) {
+                Map.Entry<OffsetRange, BladeParserResult.Reference> entry = (Map.Entry<OffsetRange, BladeParserResult.Reference>) setentry;
+                if (ct.customDirectiveNames.contains(entry.getValue().name)) {
+                    continue;
+                }
+                hints.add(new Hint(new BladeRule(HintSeverity.WARNING),
+                        "unknown directive",
+                        context.parserResult.getSnapshot().getSource().getFileObject(),
+                        entry.getKey(),
+                        Collections.emptyList(),
+                        10));
             }
-            hints.add(new Hint(new BladeRule(HintSeverity.WARNING),
-                    //                        getMessageKey(e.getKey(), true), //NOI18N
-                    "unknown directive",
-                    context.parserResult.getSnapshot().getSource().getFileObject(),
-                    entry.getKey(),
-                    Collections.emptyList(),
-                    10));
+
+            //validate path config
+            for (Map.Entry<String, List<OffsetRange>> entry : parserResult.includeBladeOccurences.entrySet()) {
+                FileObject realFile = PathUtils.findFileObjectForBladePath(parserResult.getFileObject(),
+                        entry.getKey());
+                if (realFile != null) {
+                    continue;
+                }
+                for (OffsetRange range : entry.getValue()) {
+                    OffsetRange hintRange = new OffsetRange(range.getStart(), range.getEnd() + 1);
+                    hints.add(new Hint(new BladeRule(HintSeverity.WARNING),
+                            "Blade path not found.\nFor custom blade context you can try to set the root folder using:\nProject -> Properties -> Laravel Blade -> Views Folder",
+                            context.parserResult.getSnapshot().getSource().getFileObject(),
+                            hintRange,
+                            Collections.emptyList(),
+                            10));
+                }
+            }
         }
+
     }
 
     /**
@@ -122,7 +147,6 @@ public class BladeHintsProvider implements HintsProvider {
     public RuleContext createRuleContext() {
         return new RuleContext();
     }
-
 
     private static final class BladeRule implements ErrorRule {
 
