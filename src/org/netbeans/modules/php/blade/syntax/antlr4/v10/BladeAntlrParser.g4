@@ -12,6 +12,8 @@ parser grammar BladeAntlrParser;
   package org.netbeans.modules.php.blade.syntax.antlr4.v10;
 }
 
+@parser::members {public static int bladeVersion = 10;}
+
 options { tokenVocab = BladeAntlrLexer; }
 
 file : general_statement* EOF;
@@ -62,7 +64,7 @@ block_statement:
     | pushIf
     | D_ONCE general_statement+ D_ENDONCE
     | prepend
-    | D_FRAGMENT composed_php_expression general_statement+ D_ENDFRAGMENT
+    | fragmentD
     | if
     | elseif
     | else
@@ -94,6 +96,7 @@ push : D_PUSH singleArgWrapper general_statement+ D_ENDPUSH;
 pushOnce : D_PUSH_ONCE singleArgWrapper general_statement+ D_ENDPUSH_ONCE;
 pushIf : D_PUSH_IF doubleIfArgWrapper general_statement+ D_ENDPUSH_IF;
 prepend : D_PREPEND singleArgWrapper general_statement+ D_ENDPREPEND;
+fragmentD locals [String version = "10"] : D_FRAGMENT composed_php_expression general_statement+ D_ENDFRAGMENT;
 
 if : D_IF main_php_expression general_statement+ endif?;
 elseif : D_ELSEIF main_php_expression general_statement+ endif?;

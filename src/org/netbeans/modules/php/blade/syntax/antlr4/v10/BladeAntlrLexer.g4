@@ -311,6 +311,9 @@ BL_PARAM_EXIT_EOF : EOF->type(ERROR),popMode;
 //@php @endphp
 mode BLADE_INLINE_PHP;
 
+PHP_D_BLADE_COMMENT : ('//' ~[\n\r]+)->skip;
+PHP_D_BLADE_ML_COMMENT : ('/*' .*? '*/')->skip;
+
 D_ENDPHP : '@endphp'->popMode;
 PHP_D_UNKNOWN : '@'->type(HTML),popMode;
 
@@ -344,10 +347,13 @@ PHP_D_PHP_COMPOSED_EXPRESSION : . ->type(PHP_EXPRESSION);
 PHP_D_EXIT_COMPOSED_EXPRESSION_EOF : EOF->type(ERROR),popMode;
 
 //php inline <?php ?>
+//might think to skip tokens which are not used ??
 mode INSIDE_PHP_INLINE;
 
 PHP_EXIT : '?>'->popMode;
 
+PHP_INLINE_COMMENT : ('//' ~[\n\r]+)->skip;
+PHP_INLINE_ML_COMMENT : ('/*' .*? '*/')->skip;
 //hack to merge all php inputs into one token
 PHP_EXPR_SQ_LPAREN : '[' ->type(PHP_EXPRESSION);
 PHP_EXPR_SQ_RPAREN : ']' ->type(PHP_EXPRESSION);

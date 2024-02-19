@@ -86,7 +86,7 @@ public class BladeDeclarationFinder implements DeclarationFinder {
 
             if (nt.getType() == BL_PARAM_STRING) {
                 List<Integer> tokensMatch = Arrays.asList(new Integer[]{
-                    D_EXTENDS, D_INCLUDE, D_INCLUDE_IF, D_EACH, D_SECTION, D_HAS_SECTION, D_SECTION_MISSING,
+                    D_EXTENDS, D_INCLUDE, D_INCLUDE_IF, D_INCLUDE_WHEN, D_INCLUDE_UNLESS, D_EACH, D_SECTION, D_HAS_SECTION, D_SECTION_MISSING,
                     D_PUSH, D_PUSH_IF, D_PREPEND, D_USE, D_INJECT
                 });
                 List<Integer> tokensStop = Arrays.asList(new Integer[]{HTML});
@@ -149,6 +149,7 @@ public class BladeDeclarationFinder implements DeclarationFinder {
             case INCLUDE:
             case INCLUDE_IF:
             case EACH:
+            case INCLUDE_COND:
                 String bladePath = reference.name;
                 List<FileObject> includedFiles = PathUtils.findFileObjectsForBladePath(currentFile, bladePath);
 

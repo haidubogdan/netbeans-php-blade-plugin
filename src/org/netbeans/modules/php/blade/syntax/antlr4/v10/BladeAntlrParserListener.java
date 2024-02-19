@@ -148,6 +148,16 @@ public interface BladeAntlrParserListener extends ParseTreeListener {
 	 */
 	void exitPrepend(BladeAntlrParser.PrependContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link BladeAntlrParser#fragmentD}.
+	 * @param ctx the parse tree
+	 */
+	void enterFragmentD(BladeAntlrParser.FragmentDContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link BladeAntlrParser#fragmentD}.
+	 * @param ctx the parse tree
+	 */
+	void exitFragmentD(BladeAntlrParser.FragmentDContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link BladeAntlrParser#if}.
 	 * @param ctx the parse tree
 	 */
