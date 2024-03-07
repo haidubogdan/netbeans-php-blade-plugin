@@ -1,5 +1,20 @@
 # Change Log
 
+## [2.0.4]
+
+**parser**
+
+- fix parser error for `@json`, `@dd`, `@aware`
+
+**completion**
+
+- include in completion `@json`
+- remove param from some endtags directives
+
+**NB IDE framework**
+
+- use deprecated method `hasStructureScanner` to avoid parser error
+
 ## [2.0.0]
 
 Full refactor.
