@@ -44,12 +44,16 @@ inline_directive:
     | (D_CLASS | D_STYLE) composed_php_expression
     | (D_METHOD) composed_php_expression
     | D_PROPS composed_php_expression
+    | D_DD composed_php_expression
+    | D_JS composed_php_expression
+    | D_AWARE composed_php_expression
     | D_CSRF
     | useD
     | inject
     | D_HTML_ATTR_EXPR composed_php_expression
     //using basic inline case statement to not add complexity to parser
     | D_CASE composed_php_expression
+    | D_JSON composed_php_expression
     | D_DEFAULT
     | loop_action
     | D_LANG singleArgAndDefaultWrapper

@@ -38,17 +38,17 @@ import org.netbeans.modules.php.blade.syntax.annotation.DirectiveRegister;
     //stack
     @Directive(name = "@stack", params = true),
     @Directive(name = "@push", params = true, endtag = "@endpush"),
-    @Directive(name = "@endpush", params = true),
+    @Directive(name = "@endpush"),
     @Directive(name = "@prepend", params = true, endtag = "@endprepend"),
-    @Directive(name = "@endprepend", params = true),
+    @Directive(name = "@endprepend"),
     @Directive(name = "@pushIf", params = true, endtag = "@endPushIf"),
-    @Directive(name = "@endPushIf", params = true),
+    @Directive(name = "@endPushIf"),
     //
     @Directive(name = "@fragment", params = true, endtag = "@endfragment"),
-    @Directive(name = "@endfragment", params = true),
+    @Directive(name = "@endfragment"),
     //form
     @Directive(name = "@csrf"),
-    @Directive(name = "@method"),
+    @Directive(name = "@method", params = true),
     @Directive(name = "@error", params = true, endtag = "@enderror"),
     //env
     @Directive(name = "@env", params = true, endtag = "@endenv"),
@@ -59,7 +59,9 @@ import org.netbeans.modules.php.blade.syntax.annotation.DirectiveRegister;
     @Directive(name = "@use", params = true),
     @Directive(name = "@inject", params = true),
     //utils
-    @Directive(name = "@dd", params = true),})
+    @Directive(name = "@dd", params = true),
+    @Directive(name = "@json", params = true),
+})
 public class DirectiveCompletionList {
 
     public Directive[] getDirectives() {

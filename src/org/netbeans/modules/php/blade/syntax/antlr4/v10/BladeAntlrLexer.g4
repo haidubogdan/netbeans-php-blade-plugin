@@ -79,7 +79,7 @@ D_EACH : '@each'->pushMode(LOOK_FOR_BLADE_PARAMETERS);
 
 //layout
 D_EXTENDS : '@extends'->pushMode(LOOK_FOR_BLADE_PARAMETERS);
-D_JS : '@js'->pushMode(LOOK_FOR_BLADE_PARAMETERS);
+D_JS : '@js'->pushMode(LOOK_FOR_PHP_COMPOSED_EXPRESSION);
 D_SECTION : '@section'->pushMode(LOOK_FOR_BLADE_PARAMETERS);
 D_HAS_SECTION : '@hasSection'->pushMode(LOOK_FOR_BLADE_PARAMETERS);
 D_SECTION_MISSING : '@sectionMissing'->pushMode(LOOK_FOR_BLADE_PARAMETERS);
@@ -125,11 +125,11 @@ D_AUTH_END : ('@endauth' | '@endguest');
 D_CLASS : '@class'->pushMode(LOOK_FOR_PHP_EXPRESSION);
 D_STYLE : '@style'->pushMode(LOOK_FOR_PHP_EXPRESSION);
 D_HTML_ATTR_EXPR : ('@checked' | '@disabled' | '@readonly' | '@required' | '@selected')->pushMode(LOOK_FOR_PHP_COMPOSED_EXPRESSION);
-D_AWARE : '@aware'->pushMode(LOOK_FOR_PHP_EXPRESSION);
+D_AWARE : '@aware'->pushMode(LOOK_FOR_PHP_COMPOSED_EXPRESSION);
 
 //misc
-D_JSON  : '@json'->pushMode(LOOK_FOR_PHP_EXPRESSION);
-D_DD : '@dd'->pushMode(LOOK_FOR_PHP_EXPRESSION);
+D_JSON  : '@json'->pushMode(LOOK_FOR_PHP_COMPOSED_EXPRESSION);
+D_DD : '@dd'->pushMode(LOOK_FOR_PHP_COMPOSED_EXPRESSION);
 D_LANG : '@lang'->pushMode(LOOK_FOR_BLADE_PARAMETERS);
 
 //php injection

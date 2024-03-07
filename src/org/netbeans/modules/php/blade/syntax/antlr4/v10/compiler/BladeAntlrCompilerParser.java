@@ -1,4 +1,4 @@
-// Generated from BladeAntlrCompilerParser.g4 by ANTLR 4.13.0
+// Generated from java-escape by ANTLR 4.11.1
 
   /**
    * Parser generated for netbeans blade editor
@@ -21,7 +21,7 @@ import java.util.ArrayList;
 
 @SuppressWarnings({"all", "warnings", "unchecked", "unused", "cast", "CheckReturnValue"})
 public class BladeAntlrCompilerParser extends Parser {
-	static { RuntimeMetaData.checkVersion("4.13.0", RuntimeMetaData.VERSION); }
+	static { RuntimeMetaData.checkVersion("4.11.1", RuntimeMetaData.VERSION); }
 
 	protected static final DFA[] _decisionToDFA;
 	protected static final PredictionContextCache _sharedContextCache =
@@ -85,7 +85,7 @@ public class BladeAntlrCompilerParser extends Parser {
 	}
 
 	@Override
-	public String getGrammarFileName() { return "BladeAntlrCompilerParser.g4"; }
+	public String getGrammarFileName() { return "java-escape"; }
 
 	@Override
 	public String[] getRuleNames() { return ruleNames; }
@@ -134,7 +134,7 @@ public class BladeAntlrCompilerParser extends Parser {
 			setState(15);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
-			while ((((_la) & ~0x3f) == 0 && ((1L << _la) & 56L) != 0)) {
+			while (((_la) & ~0x3f) == 0 && ((1L << _la) & 56L) != 0) {
 				{
 				{
 				setState(12);

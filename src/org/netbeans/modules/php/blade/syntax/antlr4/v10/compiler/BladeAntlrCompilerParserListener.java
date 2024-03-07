@@ -1,4 +1,4 @@
-// Generated from BladeAntlrCompilerParser.g4 by ANTLR 4.13.0
+// Generated from java-escape by ANTLR 4.11.1
 
   /**
    * Parser generated for netbeans blade editor

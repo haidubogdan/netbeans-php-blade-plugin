@@ -136,6 +136,13 @@ public class BladeLanguage extends DefaultLanguageConfig {
         return new BladeParser();
     }
 
+    //we need this to avoid lang assertion error
+    @Deprecated
+    @Override
+    public boolean hasStructureScanner() {
+        return true;
+    }
+    
     @Override
     public StructureScanner getStructureScanner() {
         return new BladeStructureScanner();
