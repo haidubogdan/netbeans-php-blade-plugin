@@ -1,5 +1,19 @@
 # Change Log
 
+## [2.0.5]
+
+**parser**
+
+- fix parser error for `@can`, `@canany`, `@append`
+
+**completion**
+
+- include in completion `@can`
+
+**brace match**
+
+- add brace match for `@section` ... `@append`, `@can` ... `@endcan`
+
 ## [2.0.4]
 
 **parser**

@@ -89,6 +89,7 @@ D_PARENT : '@parent';
 D_SHOW : '@show';
 D_OVERWRITE : '@overwrite';
 D_STOP : '@stop';
+D_APPEND : '@append';
 D_ONCE : '@once';
 D_ENDONCE : '@endonce';
 D_STACK : '@stack'->pushMode(LOOK_FOR_BLADE_PARAMETERS);
@@ -120,6 +121,11 @@ D_ENDENV : '@endenv';
 //auth and roles
 D_AUTH_START : ('@auth' | '@guest')->pushMode(LOOK_FOR_BLADE_PARAMETERS);
 D_AUTH_END : ('@endauth' | '@endguest');
+
+//lazy parser
+D_PERMISSION_START : '@can' ('not' | 'any')?->pushMode(LOOK_FOR_PHP_COMPOSED_EXPRESSION);
+D_PERMISSION_ELSE : '@elsecan' ('not' | 'any')?->pushMode(LOOK_FOR_PHP_COMPOSED_EXPRESSION);
+D_PERMISSION_END : '@endcan' ('not' |'any')?;
 
 //styles, attributes
 D_CLASS : '@class'->pushMode(LOOK_FOR_PHP_EXPRESSION);

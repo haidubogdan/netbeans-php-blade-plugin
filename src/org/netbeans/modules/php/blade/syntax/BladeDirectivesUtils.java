@@ -13,7 +13,7 @@ public class BladeDirectivesUtils {
             case "@hasSection":
                 return new String[]{"@endif"};
             case "@section":
-                return new String[]{"@endsection", "@show"};
+                return new String[]{"@endsection", "@show", "@stop", "@append"};
             case "@push":
                 return new String[]{"@endpush"};
             case "@pushIf":
@@ -44,6 +44,8 @@ public class BladeDirectivesUtils {
                 return new String[]{"@endverbatim"};
             case "@auth":
                 return new String[]{"@endauth"};
+            case "@can":
+                return new String[]{"@endcan"};
             case "@guest":
                 return new String[]{"@endguest"};
             case "@production":
@@ -60,6 +62,9 @@ public class BladeDirectivesUtils {
             case "@endif":
                 return new String[]{"@if", "@hasSection"};
             case "@endsection":
+            case "@stop":
+            case "@append":
+            case "@show":
                 return new String[]{"@section"};
             case "@endpush":
                 return new String[]{"@push"};
@@ -67,8 +72,6 @@ public class BladeDirectivesUtils {
                 return new String[]{"@pushIf"};
             case "@endprepend":
                 return new String[]{"@prepend"};
-            case "@show":
-                return new String[]{"@section"};
             case "@endonce":
                 return new String[]{"@once"};
             case "@endforeach":

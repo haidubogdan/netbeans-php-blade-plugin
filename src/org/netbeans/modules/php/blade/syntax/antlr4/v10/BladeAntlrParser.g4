@@ -55,6 +55,7 @@ inline_directive:
     | D_CASE composed_php_expression
     | D_JSON composed_php_expression
     | D_DEFAULT
+    | D_PERMISSION_ELSE composed_php_expression
     | loop_action
     | D_LANG singleArgAndDefaultWrapper
     | custom_directive
@@ -80,6 +81,8 @@ block_statement:
     //we can consider the statements not being empty
     | conditional_block
     | auth_block
+    //lazy parser for can
+    | D_PERMISSION_START composed_php_expression general_statement+ D_PERMISSION_END
     | while
     | for
     | foreach
@@ -95,7 +98,7 @@ non_blade_statement:
 
 extends : D_EXTENDS singleArgAndDefaultWrapper;
 section_inline: D_SECTION doubleArgWrapper;
-section : D_SECTION singleArgWrapper (general_statement | D_PARENT)* (D_SHOW | D_STOP | D_OVERWRITE | D_ENDSECTION);
+section : D_SECTION singleArgWrapper (general_statement | D_PARENT)* (D_SHOW | D_STOP | D_OVERWRITE | D_ENDSECTION | D_APPEND);
 push : D_PUSH singleArgWrapper general_statement+ D_ENDPUSH;
 pushOnce : D_PUSH_ONCE singleArgWrapper general_statement+ D_ENDPUSH_ONCE;
 pushIf : D_PUSH_IF doubleIfArgWrapper general_statement+ D_ENDPUSH_IF;

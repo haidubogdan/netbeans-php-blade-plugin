@@ -24,6 +24,7 @@ import org.netbeans.modules.php.blade.syntax.annotation.DirectiveRegister;
     @Directive(name = "@section", params = true, endtag = "@endsection"),
     @Directive(name = "@endsection"),
     @Directive(name = "@stop"),
+    @Directive(name = "@append"),
     @Directive(name = "@once"),
     @Directive(name = "@endonce"),
     @Directive(name = "@overwrite"),
@@ -53,7 +54,9 @@ import org.netbeans.modules.php.blade.syntax.annotation.DirectiveRegister;
     //env
     @Directive(name = "@env", params = true, endtag = "@endenv"),
     //auth
-    @Directive(name = "@auth", params = true),
+    @Directive(name = "@auth", params = true, endtag = "@endauth"),
+    @Directive(name = "@guest", params = true, endtag = "@endguest"),
+    @Directive(name = "@can", params = true, endtag = "@endcan"),
     //php
     @Directive(name = "@php", endtag = "@endphp"),
     @Directive(name = "@use", params = true),

@@ -98,6 +98,7 @@ D_AWARE : '@aware'->pushMode(LOOK_FOR_PHP_EXPRESSION),type(DIRECTIVE);
 D_EMPTY : '@empty'->pushMode(LOOK_FOR_PHP_EXPRESSION),type(DIRECTIVE);
 D_ENDEMPTY : '@endempty'->type(DIRECTIVE);
 D_AUTH : '@auth'->pushMode(LOOK_FOR_PHP_EXPRESSION),type(DIRECTIVE);
+D_PERMISSION : ('@can' | '@cannot' | '@canany')->pushMode(LOOK_FOR_PHP_EXPRESSION),type(DIRECTIVE);
 D_JSON  : '@json'->pushMode(LOOK_FOR_PHP_EXPRESSION),type(DIRECTIVE);
 D_INJECT : '@inject'->pushMode(LOOK_FOR_PHP_EXPRESSION),type(DIRECTIVE);
 D_DD : '@dd'->pushMode(LOOK_FOR_PHP_EXPRESSION),type(DIRECTIVE);
@@ -112,7 +113,8 @@ D_ENDVERBATIM : '@endverbatim'->type(DIRECTIVE);
 //lazy end match
 D_WITH_EXPR : ('@break' | '@continue' | '@selected' | '@disabled' | '@readonly' |
                '@required')->pushMode(LOOK_FOR_PHP_EXPRESSION),type(DIRECTIVE);
-D_SIMPLE : ('@stop' | '@csrf' | '@default')->type(DIRECTIVE);
+
+D_SIMPLE : ('@stop' | '@csrf' | '@default' | '@append')->type(DIRECTIVE);
 D_END : ('@end' NameString) ->type(DIRECTIVE);
 
 //we will decide that a custom directive has expression to avoid email matching
