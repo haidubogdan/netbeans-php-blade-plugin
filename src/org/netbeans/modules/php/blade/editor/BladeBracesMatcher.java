@@ -13,6 +13,7 @@ import org.netbeans.api.editor.mimelookup.MimeRegistration;
 import org.netbeans.editor.BaseDocument;
 import org.netbeans.modules.php.blade.syntax.BladeDirectivesUtils;
 import org.netbeans.modules.php.blade.syntax.BladeTagsUtils;
+import org.netbeans.modules.php.blade.syntax.antlr4.v10.BladeAntlrLexer;
 import static org.netbeans.modules.php.blade.syntax.antlr4.v10.BladeAntlrLexer.*;
 import org.netbeans.modules.php.blade.syntax.antlr4.v10.BladeAntlrUtils;
 import org.netbeans.spi.editor.bracesmatching.BracesMatcher;
@@ -29,7 +30,7 @@ import org.netbeans.spi.editor.bracesmatching.MatcherContext;
 public class BladeBracesMatcher implements BracesMatcher {
 
     public enum BraceDirectionType {
-        END_TO_START, START_TO_END, CURLY_END_TO_START, CURLY_START_TO_END, STOP
+        END_TO_START, START_TO_END, CUSTOM_START_TO_END, CURLY_END_TO_START, CURLY_START_TO_END, STOP
     }
     private final MatcherContext context;
     private Token originToken;
@@ -67,7 +68,7 @@ public class BladeBracesMatcher implements BracesMatcher {
                 return result;
             }
 
-            currentDirection = findBraceDirectionType(tokenText);
+            currentDirection = findBraceDirectionType(tokenText, currentToken);
 
             if (currentDirection.equals(BraceDirectionType.STOP)) {
                 return result;
@@ -95,6 +96,8 @@ public class BladeBracesMatcher implements BracesMatcher {
                 return findOpenTag();
             case START_TO_END:
                 return findDirectiveEnd(tokenText);
+            case CUSTOM_START_TO_END:
+                return findCustomDirectiveEnd(tokenText);    
             case END_TO_START:
                 return findOriginForDirectiveEnd(tokenText);
         }
@@ -115,7 +118,7 @@ public class BladeBracesMatcher implements BracesMatcher {
         return true;
     }
 
-    public BraceDirectionType findBraceDirectionType(String tokenText) {
+    public BraceDirectionType findBraceDirectionType(String tokenText, Token token) {
         boolean isCloseTag = Arrays.asList(BladeTagsUtils.outputCloseTags()).indexOf(tokenText) >= 0;
 
         if (isCloseTag) {
@@ -134,6 +137,10 @@ public class BladeBracesMatcher implements BracesMatcher {
 
         if (BladeDirectivesUtils.directiveStart2EndPair(tokenText) != null) {
             return BraceDirectionType.START_TO_END;
+        }
+        
+        if (token.getType() == BladeAntlrLexer.D_CUSTOM){
+            return BraceDirectionType.CUSTOM_START_TO_END;
         }
 
         return BraceDirectionType.STOP;
@@ -187,6 +194,25 @@ public class BladeBracesMatcher implements BracesMatcher {
                 startDirectiveForBalance.addAll( Arrays.asList(startDirectives));
             }
         }
+
+        Token endToken = BladeAntlrUtils.findForward(context.getDocument(),
+                originToken,
+                stopDirectives,
+                startDirectiveForBalance);
+
+        if (endToken != null) {
+            int start = endToken.getStartIndex();
+            int end = endToken.getStopIndex();
+            return new int[]{start, end + 1};
+        }
+
+        return null;
+    }
+    
+    public int[] findCustomDirectiveEnd(String directive) {
+        String[] pair = new String[]{"@end" + directive.substring(1)};
+        List<String> stopDirectives = Arrays.asList(pair);
+        List<String> startDirectiveForBalance = Arrays.asList(new String[]{directive});
 
         Token endToken = BladeAntlrUtils.findForward(context.getDocument(),
                 originToken,

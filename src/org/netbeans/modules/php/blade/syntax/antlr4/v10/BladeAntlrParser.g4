@@ -58,6 +58,7 @@ inline_directive:
     | D_PERMISSION_ELSE composed_php_expression
     | loop_action
     | D_LANG singleArgAndDefaultWrapper
+    | D_LOOP_ACTION | D_BREAK
     | custom_directive
     ;
 
@@ -112,7 +113,7 @@ endif: D_ENDIF;
 
 //the consistency for these blocks need to be checked inside the parser
 conditional_block : D_COND_BLOCK_START main_php_expression general_statement+ D_COND_BLOCK_END;
-auth_block : D_AUTH_START singleArgWrapper* general_statement+ D_AUTH_END;
+auth_block : D_AUTH_START singleArgWrapperNovar* general_statement+ D_AUTH_END;
 
 //no need to add complexity to parser
 switch: D_SWITCH php_expression (general_statement | D_BREAK)+ D_ENDSWITCH;
@@ -158,7 +159,7 @@ custom_directive : D_CUSTOM (multiArgWrapper
     
 php_blade : D_PHP composed_php_expression+ D_ENDPHP | D_PHP main_php_expression;
 
-phpInline : PHP_INLINE_START composed_php_expression+ PHP_EXIT;
+phpInline : PHP_INLINE_START composed_php_expression+ (PHP_EXIT | EOF);
 //echo
 
 regular_echo : CONTENT_TAG_OPEN echo_expr* CONTENT_TAG_CLOSE;
@@ -199,6 +200,7 @@ composed_php_expression : class_expr_usage | function_call | namespacePath | PHP
 simple_foreach_expr: loop_array=PHP_VARIABLE FOREACH_AS key=PHP_VARIABLE (FOREACH_PARAM_ASSIGN item=PHP_VARIABLE)?;
 
 singleArgWrapper:  BLADE_PARAM_LPAREN (identifiableArgument | composedArgument) BLADE_PARAM_RPAREN;
+singleArgWrapperNovar:  BLADE_PARAM_LPAREN (identifiableArgument | composedArgument)* BLADE_PARAM_RPAREN;
 singleArgAndDefaultWrapper:  BLADE_PARAM_LPAREN (identifiableArgument | composedArgument) (BL_COMMA composedArgument)? (BL_COMMA BL_PARAM_WS*)? BLADE_PARAM_RPAREN;
 doubleArgWrapper:  BLADE_PARAM_LPAREN (identifiableArgument | composedArgument) BL_COMMA composedArgument BLADE_PARAM_RPAREN;
 doubleIfArgWrapper:  BLADE_PARAM_LPAREN composedArgument BL_COMMA (identifiableArgument | composedArgument) BLADE_PARAM_RPAREN;

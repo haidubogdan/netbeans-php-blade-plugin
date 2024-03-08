@@ -1,5 +1,25 @@
 # Change Log
 
+## [2.0.6]
+
+**parser**
+
+- fix parser error for `@auth` with no param
+- fix parser error for inline `@if` with directive which can work with or without arguments (ex: `@continue`)
+- fix inline php parser error with EOF
+
+**completion**
+
+- include in completion `@foreach`, `@endforeach`
+
+**brace match**
+
+- add brace dynamic match for custom directives blocks
+
+**lexer**
+
+- fix lexer highlight for custom directives which starts with `@end` and have arguments
+
 ## [2.0.5]
 
 **parser**

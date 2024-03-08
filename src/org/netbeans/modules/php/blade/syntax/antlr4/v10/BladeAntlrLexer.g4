@@ -203,9 +203,11 @@ EXIT_RAW_ECHO_EOF : EOF->type(ERROR),popMode;
 
 mode LOOK_FOR_PHP_EXPRESSION;
 
+WS_EXPR_ESCAPE : [ ]+ {this._input.LA(1) == '@'}?->skip, popMode;
 WS_EXPR : [ ]+->skip;
 OPEN_EXPR_PAREN_MORE : '(' ->more,pushMode(INSIDE_PHP_EXPRESSION);
 
+L_OHTER_ESCAPE : . {this._input.LA(1) == '@'}?->type(HTML), popMode;
 L_OTHER : . ->type(HTML), popMode;
 
 //{{}}, @if, @foreach

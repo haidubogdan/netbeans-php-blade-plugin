@@ -588,6 +588,16 @@ public interface BladeAntlrParserListener extends ParseTreeListener {
 	 */
 	void exitSingleArgWrapper(BladeAntlrParser.SingleArgWrapperContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link BladeAntlrParser#singleArgWrapperNovar}.
+	 * @param ctx the parse tree
+	 */
+	void enterSingleArgWrapperNovar(BladeAntlrParser.SingleArgWrapperNovarContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link BladeAntlrParser#singleArgWrapperNovar}.
+	 * @param ctx the parse tree
+	 */
+	void exitSingleArgWrapperNovar(BladeAntlrParser.SingleArgWrapperNovarContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link BladeAntlrParser#singleArgAndDefaultWrapper}.
 	 * @param ctx the parse tree
 	 */

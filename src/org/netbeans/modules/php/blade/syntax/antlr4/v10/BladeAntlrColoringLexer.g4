@@ -115,7 +115,7 @@ D_WITH_EXPR : ('@break' | '@continue' | '@selected' | '@disabled' | '@readonly' 
                '@required')->pushMode(LOOK_FOR_PHP_EXPRESSION),type(DIRECTIVE);
 
 D_SIMPLE : ('@stop' | '@csrf' | '@default' | '@append')->type(DIRECTIVE);
-D_END : ('@end' NameString) ->type(DIRECTIVE);
+D_END : ('@end' NameString)->pushMode(LOOK_FOR_PHP_EXPRESSION),type(DIRECTIVE);
 
 //we will decide that a custom directive has expression to avoid email matching
 D_CUSTOM : ('@' NameString {this._input.LA(1) == '(' || 
