@@ -6,7 +6,9 @@ package org.netbeans.modules.php.blade.editor.path;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.netbeans.api.project.Project;
 import org.netbeans.modules.php.blade.project.BladeProjectProperties;
@@ -150,18 +152,21 @@ public class PathUtils {
         if (canonicalPath.endsWith("/")) {
             lastSlash = canonicalPath.length();
         } else {
-            lastSlash = prefixPath.lastIndexOf("/");
+            lastSlash = canonicalPath.lastIndexOf("/");
         }
 
         int nSlashes = StringUtils.countMatches(canonicalPath, "/");
 
         List<FileObject> filteredViewRoots = new ArrayList<>();
-        if (lastSlash > 0 && nSlashes > 0) {
+        
+        Map<String, FileObject> relativeFilePathMap = new HashMap<>();
+        
+        if (lastSlash > 0) {
             for (FileObject rootFolder : viewRoots) {
                 FileObject relativeViewRoot = rootFolder.getFileObject(canonicalPath.substring(0, lastSlash));
 
                 if (relativeViewRoot != null && relativeViewRoot.isValid()) {
-                    filteredViewRoots.add(relativeViewRoot);
+                    relativeFilePathMap.put(canonicalPath, relativeViewRoot);
                 }
             }
             //empty list
@@ -182,10 +187,26 @@ public class PathUtils {
             for (FileObject rootFolder : filteredViewRoots) {
                 list.addAll(Arrays.asList(rootFolder.getChildren()));
             }
+            for (Map.Entry<String, FileObject> entry : relativeFilePathMap.entrySet()){
+                list.addAll(Arrays.asList(entry.getValue().getChildren()));
+            }
         } else {
             for (FileObject rootFolder : filteredViewRoots) {
                 for (FileObject file : rootFolder.getChildren()) {
-                    if (file.getName().startsWith(prefixToCompare)) {
+                    String filePath = file.getPath().replace(rootFolder.getPath(), "");
+                    if (filePath.startsWith(prefixToCompare)) {
+                        list.add(file);
+                    }
+                }
+            }
+            
+            if (prefixToCompare.startsWith("/")){
+                prefixToCompare = prefixToCompare.substring(1, prefixToCompare.length());
+            }
+            
+            for (Map.Entry<String, FileObject> entry : relativeFilePathMap.entrySet()){
+                for (FileObject file : entry.getValue().getChildren()) {
+                    if (file.getName().startsWith(prefixToCompare)){
                         list.add(file);
                     }
                 }

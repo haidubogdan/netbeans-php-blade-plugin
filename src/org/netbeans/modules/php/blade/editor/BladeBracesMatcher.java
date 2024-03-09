@@ -21,10 +21,9 @@ import org.netbeans.spi.editor.bracesmatching.BracesMatcherFactory;
 import org.netbeans.spi.editor.bracesmatching.MatcherContext;
 
 /**
- * brace matcher
- * - block directives : @if @endif ..
- * - output echo statements {{ }} {!! !!}
- * 
+ * brace matcher - block directives : @if @endif .. - output echo statements {{
+ * }} {!! !!}
+ *
  * @author bogdan
  */
 public class BladeBracesMatcher implements BracesMatcher {
@@ -97,7 +96,7 @@ public class BladeBracesMatcher implements BracesMatcher {
             case START_TO_END:
                 return findDirectiveEnd(tokenText);
             case CUSTOM_START_TO_END:
-                return findCustomDirectiveEnd(tokenText);    
+                return findCustomDirectiveEnd(tokenText);
             case END_TO_START:
                 return findOriginForDirectiveEnd(tokenText);
         }
@@ -138,8 +137,9 @@ public class BladeBracesMatcher implements BracesMatcher {
         if (BladeDirectivesUtils.directiveStart2EndPair(tokenText) != null) {
             return BraceDirectionType.START_TO_END;
         }
-        
-        if (token.getType() == BladeAntlrLexer.D_CUSTOM){
+
+        if (token.getType() == BladeAntlrLexer.D_CUSTOM
+                || token.getType() == BladeAntlrLexer.D_UNKNOWN) {
             return BraceDirectionType.CUSTOM_START_TO_END;
         }
 
@@ -191,7 +191,7 @@ public class BladeBracesMatcher implements BracesMatcher {
             String[] startDirectives = BladeDirectivesUtils.directiveEnd2StartPair(endDirective);
 
             if (startDirectives != null) {
-                startDirectiveForBalance.addAll( Arrays.asList(startDirectives));
+                startDirectiveForBalance.addAll(Arrays.asList(startDirectives));
             }
         }
 
@@ -208,7 +208,7 @@ public class BladeBracesMatcher implements BracesMatcher {
 
         return null;
     }
-    
+
     public int[] findCustomDirectiveEnd(String directive) {
         String[] pair = new String[]{"@end" + directive.substring(1)};
         List<String> stopDirectives = Arrays.asList(pair);
@@ -255,7 +255,7 @@ public class BladeBracesMatcher implements BracesMatcher {
         return null;
     }
 
-    @MimeRegistration(service = BracesMatcherFactory.class, mimeType = BladeLanguage.MIME_TYPE, position=110)
+    @MimeRegistration(service = BracesMatcherFactory.class, mimeType = BladeLanguage.MIME_TYPE, position = 110)
     public static final class Factory implements BracesMatcherFactory {
 
         @Override

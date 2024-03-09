@@ -25,6 +25,7 @@ general_statement: inline_statement
 
 inline_statement: 
     inline_directive
+    | possibleDirective
     | regular_echo
     | raw_echo
     | phpInline
@@ -155,7 +156,10 @@ hasSection : D_HAS_SECTION singleArgWrapper general_statement* D_ENDIF;
 sectionMissing : D_SECTION_MISSING singleArgWrapper general_statement* D_ENDIF;
 
 custom_directive : D_CUSTOM (multiArgWrapper 
-| (BLADE_PARAM_LPAREN BLADE_PARAM_RPAREN));
+| (BLADE_PARAM_LPAREN BLADE_PARAM_RPAREN))
+;
+
+possibleDirective : D_UNKNOWN;
     
 php_blade : D_PHP composed_php_expression+ D_ENDPHP | D_PHP main_php_expression;
 

@@ -75,7 +75,7 @@ public class BladeParserResult extends ParserResult {
     public enum ReferenceType {
         YIELD, STACK, SECTION, PUSH, PUSH_IF, PREPEND, INCLUDE, INCLUDE_IF,
         INCLUDE_COND, EXTENDS, EACH, HAS_SECTION,
-        SECTION_MISSING, USE, INJECT, CUSTOM_DIRECTIVE,
+        SECTION_MISSING, USE, INJECT, CUSTOM_DIRECTIVE, POSSIBLE_DIRECTIVE,
         PHP_FUNCTION, PHP_CLASS, PHP_METHOD, PHP_CONSTANT, PHP_NAMESPACE, PHP_NAMESPACE_PATH,
         STATIC_FIELD_ACCESS,
         TEMPLATE_PATH,
@@ -786,8 +786,15 @@ public class BladeParserResult extends ParserResult {
             @Override
             public void exitCustom_directive(BladeAntlrParser.Custom_directiveContext ctx) {
                 String directiveName = ctx.getStart().getText();
-                OffsetRange range = new OffsetRange(ctx.getStart().getStartIndex(), ctx.getStop().getStopIndex() + 1);
+                OffsetRange range = new OffsetRange(ctx.getStart().getStartIndex(), ctx.getStart().getStartIndex() + directiveName.length());
                 customDirectivesReferences.put(range, new Reference(ReferenceType.CUSTOM_DIRECTIVE, directiveName, range));
+            }
+            
+            @Override
+            public void exitPossibleDirective(BladeAntlrParser.PossibleDirectiveContext ctx) {
+                String directiveName = ctx.getStart().getText();
+                OffsetRange range = new OffsetRange(ctx.getStart().getStartIndex(), ctx.getStart().getStartIndex() + directiveName.length());
+                customDirectivesReferences.put(range, new Reference(ReferenceType.POSSIBLE_DIRECTIVE, directiveName, range));
             }
 
             @Override

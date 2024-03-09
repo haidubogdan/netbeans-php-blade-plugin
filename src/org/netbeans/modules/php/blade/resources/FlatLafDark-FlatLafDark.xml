@@ -30,5 +30,5 @@
     </fontcolor>
         <!--"semantic" highlighting:-->
     <fontcolor name="mod-undefined" waveUnderlined="999999"/>
-    <fontcolor name="mod-method" waveUnderlined="999999"/>
+    <fontcolor name="mod-declaration" default="blade_directive"/>
 </fontscolors>

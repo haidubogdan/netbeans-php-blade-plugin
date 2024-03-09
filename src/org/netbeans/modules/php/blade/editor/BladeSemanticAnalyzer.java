@@ -4,14 +4,19 @@ import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import org.netbeans.api.editor.document.EditorDocumentUtils;
+import org.netbeans.api.project.Project;
 import org.netbeans.modules.csl.api.ColoringAttributes;
 import org.netbeans.modules.csl.api.OffsetRange;
 import org.netbeans.modules.csl.api.SemanticAnalyzer;
 import org.netbeans.modules.parsing.spi.Parser.Result;
 import org.netbeans.modules.parsing.spi.Scheduler;
 import org.netbeans.modules.parsing.spi.SchedulerEvent;
+import org.netbeans.modules.php.blade.editor.directives.CustomDirectives;
 import org.netbeans.modules.php.blade.editor.parser.BladeParserResult;
 import org.netbeans.modules.php.blade.editor.parser.BladeParserResult.Reference;
+import org.netbeans.modules.php.blade.project.ProjectUtils;
+import org.openide.filesystems.FileObject;
 
 /**
  * coloring configured in fonts and colors
@@ -21,7 +26,8 @@ import org.netbeans.modules.php.blade.editor.parser.BladeParserResult.Reference;
 public class BladeSemanticAnalyzer extends SemanticAnalyzer<BladeParserResult> {
 
     private boolean cancelled;
-    public static final EnumSet<ColoringAttributes> UNDEFINED_FIELD_SET = EnumSet.of(ColoringAttributes.UNDEFINED, ColoringAttributes.METHOD);
+    public static final EnumSet<ColoringAttributes> UNDEFINED_FIELD_SET = EnumSet.of(ColoringAttributes.UNDEFINED);
+    public static final EnumSet<ColoringAttributes> CUSTOM_DIRECTIVE_SET = EnumSet.of(ColoringAttributes.DECLARATION);
     private Map<OffsetRange, Set<ColoringAttributes>> semanticHighlights;
 
     @Override
@@ -62,9 +68,15 @@ public class BladeSemanticAnalyzer extends SemanticAnalyzer<BladeParserResult> {
 
         Map<OffsetRange, Set<ColoringAttributes>> highlights
                 = new HashMap<OffsetRange, Set<ColoringAttributes>>(100);
-
+        FileObject fo = parserResult.getFileObject();
+        Project project = ProjectUtils.getMainOwner(fo);
+        CustomDirectives ct = CustomDirectives.getInstance(project);
         for (Object setentry : parserResult.customDirectivesReferences.entrySet()) {
             Map.Entry<OffsetRange, Reference> entry = (Map.Entry<OffsetRange, Reference>) setentry;
+            if (entry.getValue().type == BladeParserResult.ReferenceType.POSSIBLE_DIRECTIVE && ct.customDirectiveNames.contains(entry.getValue().name)) {
+                highlights.put(entry.getKey(), CUSTOM_DIRECTIVE_SET);
+                continue;
+            }
             highlights.put(entry.getKey(), UNDEFINED_FIELD_SET);
         }
 

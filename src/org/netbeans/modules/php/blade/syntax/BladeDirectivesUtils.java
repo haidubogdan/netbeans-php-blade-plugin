@@ -46,6 +46,10 @@ public class BladeDirectivesUtils {
                 return new String[]{"@endauth"};
             case "@can":
                 return new String[]{"@endcan"};
+            case "@canany":
+                return new String[]{"@endcanany"};
+            case "@cannot":
+                return new String[]{"@endcannot"};
             case "@guest":
                 return new String[]{"@endguest"};
             case "@production":

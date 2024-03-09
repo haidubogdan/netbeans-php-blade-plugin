@@ -165,6 +165,7 @@ public class BladeCompletionProvider implements CompletionProvider {
                         completeBladeTags(currentToken.getText(), currentToken, tokens, doc, caretOffset, resultSet);
                         break;
                     case HTML:
+                    case D_UNKNOWN:
                         String nText = currentToken.getText();
                         if (nText.startsWith("@")) {
                             completeDirectives(nText, doc, caretOffset, resultSet);
@@ -201,9 +202,10 @@ public class BladeCompletionProvider implements CompletionProvider {
                                     lastDotPos = pathName.lastIndexOf(".");
                                 }
                                 int pathOffset;
-
+                                
                                 if (lastDotPos > 0) {
-                                    pathOffset = caretOffset - pathName.length() + lastDotPos;
+                                    int dotFix = pathName.endsWith(".") ? 0 : 1;
+                                    pathOffset = caretOffset - pathName.length() + lastDotPos + dotFix;
                                 } else {
                                     pathOffset = caretOffset - pathName.length();
                                 }

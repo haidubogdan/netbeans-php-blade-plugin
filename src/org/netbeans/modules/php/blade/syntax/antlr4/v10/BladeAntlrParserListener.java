@@ -388,6 +388,16 @@ public interface BladeAntlrParserListener extends ParseTreeListener {
 	 */
 	void exitCustom_directive(BladeAntlrParser.Custom_directiveContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link BladeAntlrParser#possibleDirective}.
+	 * @param ctx the parse tree
+	 */
+	void enterPossibleDirective(BladeAntlrParser.PossibleDirectiveContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link BladeAntlrParser#possibleDirective}.
+	 * @param ctx the parse tree
+	 */
+	void exitPossibleDirective(BladeAntlrParser.PossibleDirectiveContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link BladeAntlrParser#php_blade}.
 	 * @param ctx the parse tree
 	 */

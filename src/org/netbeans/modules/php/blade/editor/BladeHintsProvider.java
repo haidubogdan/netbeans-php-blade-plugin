@@ -41,13 +41,15 @@ public class BladeHintsProvider implements HintsProvider {
             FileObject fo = EditorDocumentUtils.getFileObject(context.doc);
             Project project = ProjectUtils.getMainOwner(fo);
             CustomDirectives ct = CustomDirectives.getInstance(project);
-            for (Object setentry : parserResult.customDirectivesReferences.entrySet()) {
-                Map.Entry<OffsetRange, BladeParserResult.Reference> entry = (Map.Entry<OffsetRange, BladeParserResult.Reference>) setentry;
+            for (Map.Entry<OffsetRange, BladeParserResult.Reference> entry : parserResult.customDirectivesReferences.entrySet()) {
+                if (entry.getValue().type == BladeParserResult.ReferenceType.POSSIBLE_DIRECTIVE){
+                    continue;
+                }
                 if (ct.customDirectiveNames.contains(entry.getValue().name)) {
                     continue;
                 }
                 hints.add(new Hint(new BladeRule(HintSeverity.WARNING),
-                        "unknown directive",
+                        "Unknown directive. Try adding the provider class file using Project -> Properties -> Custom Directives",
                         context.parserResult.getSnapshot().getSource().getFileObject(),
                         entry.getKey(),
                         Collections.emptyList(),

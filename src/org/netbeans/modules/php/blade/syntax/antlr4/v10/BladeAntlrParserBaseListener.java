@@ -471,6 +471,18 @@ public class BladeAntlrParserBaseListener implements BladeAntlrParserListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterPossibleDirective(BladeAntlrParser.PossibleDirectiveContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitPossibleDirective(BladeAntlrParser.PossibleDirectiveContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterPhp_blade(BladeAntlrParser.Php_bladeContext ctx) { }
 	/**
 	 * {@inheritDoc}

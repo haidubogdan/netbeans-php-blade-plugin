@@ -151,7 +151,7 @@ D_ENDVERBATIM : '@endverbatim';
 D_CUSTOM : ('@' NameString {this._input.LA(1) == '(' || 
         (this._input.LA(1) == ' ' && this._input.LA(2) == '(')}? ) ->pushMode(LOOK_FOR_BLADE_PARAMETERS);
 
-D_UNKNOWN : '@' NameString->type(HTML);
+D_UNKNOWN : '@' NameString;
 //display
 CONTENT_TAG_OPEN : '{{' ->pushMode(INSIDE_REGULAR_ECHO);
 RAW_TAG_OPEN : '{!!' ->pushMode(INSIDE_RAW_ECHO);
