@@ -41,6 +41,7 @@
  */
 package org.netbeans.modules.php.blade.editor;
 
+import org.netbeans.modules.php.blade.editor.hints.BladeHintsProvider;
 import org.netbeans.api.lexer.Language;
 import org.netbeans.modules.parsing.spi.Parser;
 import org.netbeans.modules.csl.spi.DefaultLanguageConfig;

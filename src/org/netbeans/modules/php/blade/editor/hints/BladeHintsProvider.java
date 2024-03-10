@@ -1,9 +1,10 @@
-package org.netbeans.modules.php.blade.editor;
+package org.netbeans.modules.php.blade.editor.hints;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import javax.swing.text.BadLocationException;
 import org.netbeans.api.editor.document.EditorDocumentUtils;
 import org.netbeans.api.project.Project;
 import org.netbeans.modules.csl.api.Error;
@@ -30,48 +31,63 @@ public class BladeHintsProvider implements HintsProvider {
     /**
      * Compute hints applicable to the given compilation info and add to the
      * given result list.
+     *
      * @param manager
      * @param context
      * @param hints
      */
     @Override
     public void computeHints(HintsManager manager, RuleContext context, List<Hint> hints) {
-        if (context.parserResult instanceof BladeParserResult) {
-            BladeParserResult parserResult = (BladeParserResult) context.parserResult;
-            FileObject fo = EditorDocumentUtils.getFileObject(context.doc);
-            Project project = ProjectUtils.getMainOwner(fo);
-            CustomDirectives ct = CustomDirectives.getInstance(project);
-            for (Map.Entry<OffsetRange, BladeParserResult.Reference> entry : parserResult.customDirectivesReferences.entrySet()) {
-                if (entry.getValue().type == BladeParserResult.ReferenceType.POSSIBLE_DIRECTIVE){
+        if (!(context.parserResult instanceof BladeParserResult)) {
+            return;
+        }
+        Map<?, List<? extends Rule.AstRule>> allHints = manager.getHints(false, context);
+        List<? extends Rule.AstRule> directiveHints = allHints.get("blade.option.directive.hints");
+
+        BladeParserResult parserResult = (BladeParserResult) context.parserResult;
+        FileObject fo = EditorDocumentUtils.getFileObject(context.doc);
+        Project project = ProjectUtils.getMainOwner(fo);
+        CustomDirectives ct = CustomDirectives.getInstance(project);
+
+        if (directiveHints != null) {
+            for (Rule.AstRule astRule : directiveHints) {
+                if (!manager.isEnabled(astRule)) {
                     continue;
                 }
-                if (ct.customDirectiveNames.contains(entry.getValue().name)) {
-                    continue;
+                if (astRule instanceof UnknownDirective) {
+                    for (Map.Entry<OffsetRange, BladeParserResult.Reference> entry : parserResult.customDirectivesReferences.entrySet()) {
+                        if (entry.getValue().type == BladeParserResult.ReferenceType.POSSIBLE_DIRECTIVE) {
+                            continue;
+                        }
+                        if (ct.customDirectiveNames.contains(entry.getValue().name)) {
+                            continue;
+                        }
+                        hints.add(new Hint(astRule,
+                                "Unknown directive. Try adding the provider class file using Project -> Properties -> Custom Directives",
+                                context.parserResult.getSnapshot().getSource().getFileObject(),
+                                entry.getKey(),
+                                Collections.emptyList(),
+                                10));
+                    }
                 }
+            }
+        }
+
+        //validate path config
+        for (Map.Entry<String, List<OffsetRange>> entry : parserResult.includeBladeOccurences.entrySet()) {
+            FileObject realFile = PathUtils.findFileObjectForBladePath(parserResult.getFileObject(),
+                    entry.getKey());
+            if (realFile != null) {
+                continue;
+            }
+            for (OffsetRange range : entry.getValue()) {
+                OffsetRange hintRange = new OffsetRange(range.getStart(), range.getEnd() + 1);
                 hints.add(new Hint(new BladeRule(HintSeverity.WARNING),
-                        "Unknown directive. Try adding the provider class file using Project -> Properties -> Custom Directives",
+                        "Blade path not found.\nFor custom blade context you can try to set the root folder using:\nProject -> Properties -> Laravel Blade -> Views Folder",
                         context.parserResult.getSnapshot().getSource().getFileObject(),
-                        entry.getKey(),
+                        hintRange,
                         Collections.emptyList(),
                         10));
-            }
-
-            //validate path config
-            for (Map.Entry<String, List<OffsetRange>> entry : parserResult.includeBladeOccurences.entrySet()) {
-                FileObject realFile = PathUtils.findFileObjectForBladePath(parserResult.getFileObject(),
-                        entry.getKey());
-                if (realFile != null) {
-                    continue;
-                }
-                for (OffsetRange range : entry.getValue()) {
-                    OffsetRange hintRange = new OffsetRange(range.getStart(), range.getEnd() + 1);
-                    hints.add(new Hint(new BladeRule(HintSeverity.WARNING),
-                            "Blade path not found.\nFor custom blade context you can try to set the root folder using:\nProject -> Properties -> Laravel Blade -> Views Folder",
-                            context.parserResult.getSnapshot().getSource().getFileObject(),
-                            hintRange,
-                            Collections.emptyList(),
-                            10));
-                }
             }
         }
 
@@ -147,7 +163,7 @@ public class BladeHintsProvider implements HintsProvider {
      */
     @Override
     public RuleContext createRuleContext() {
-        return new RuleContext();
+        return new BladeRuleContext();
     }
 
     private static final class BladeRule implements ErrorRule {
@@ -184,4 +200,20 @@ public class BladeHintsProvider implements HintsProvider {
         }
     }
 
+    public class BladeRuleContext extends RuleContext {
+
+        private BladeParserResult bladeParserResult = null;
+
+        public BladeParserResult getJsParserResult() {
+            if (bladeParserResult == null) {
+                bladeParserResult = (BladeParserResult) parserResult;
+            }
+            return bladeParserResult;
+        }
+
+        public boolean isCancelled() {
+            return false;
+        }
+
+    }
 }

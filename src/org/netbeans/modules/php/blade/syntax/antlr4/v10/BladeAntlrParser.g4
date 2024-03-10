@@ -181,7 +181,7 @@ static_direct_class_access : class_identifier PHP_STATIC_ACCESS method_call
     | class_identifier PHP_STATIC_ACCESS static_property=PHP_IDENTIFIER
     ;
 
-class_instance : PHP_NEW PHP_WS+ class_identifier BLADE_EXPR_LPAREN composed_php_expression* BLADE_EXPR_RPAREN;
+class_instance : PHP_NEW PHP_WS+ (class_identifier | namespacePath) BLADE_EXPR_LPAREN composed_php_expression* BLADE_EXPR_RPAREN;
 class_name_reference : class_identifier PHP_STATIC_ACCESS PHP_CLASS_KEYWORD;
 
 class_identifier : namespace=PHP_NAMESPACE_PATH? class_name=PHP_IDENTIFIER;

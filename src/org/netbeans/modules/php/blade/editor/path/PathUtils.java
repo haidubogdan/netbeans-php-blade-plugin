@@ -193,7 +193,7 @@ public class PathUtils {
         } else {
             for (FileObject rootFolder : filteredViewRoots) {
                 for (FileObject file : rootFolder.getChildren()) {
-                    String filePath = file.getPath().replace(rootFolder.getPath(), "");
+                    String filePath = file.getPath().replace(rootFolder.getPath() + "/", "");
                     if (filePath.startsWith(prefixToCompare)) {
                         list.add(file);
                     }
