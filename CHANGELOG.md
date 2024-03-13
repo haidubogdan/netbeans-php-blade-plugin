@@ -1,5 +1,37 @@
 # Change Log
 
+## [2.0.8]
+
+**package**
+
+- increase netbeans libraries package to start from netbeans 18
+
+**hints**
+
+- added blade language option in hints config (might require check and uncheck in the Options -> Editor -> Hints)
+
+**parser**
+
+- fix parser error display for 
+
+```blade
+@php
+  $x = \new Date();
+@endphp
+```
+
+## [2.0.7]
+
+**lexer**
+
+pre-release
+
+- display custom lexer without arguments (#34 )
+
+**completion**
+
+- recognize path after folder for include path autocomplete (#41 )
+
 ## [2.0.6]
 
 **parser**
