@@ -1,5 +1,26 @@
 # Change Log
 
+## [2.1.1]
+
+**general**
+
+Trying some performance updates
+
+- clean unused imports
+- change scope of ParserResult variable
+- remove ParserResult blade Index
+- remove Blade Properties Instance when project closed
+
+**completion**
+
+- adding `$loop` variable, refactor scopedLoopVariable
+
+## [2.0.9]
+
+**indexing**
+
+- revert to the previous index nr
+
 ## [2.0.8]
 
 **package**

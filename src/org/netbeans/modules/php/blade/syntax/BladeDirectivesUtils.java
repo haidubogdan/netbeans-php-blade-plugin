@@ -11,6 +11,7 @@ public class BladeDirectivesUtils {
         switch (directive) {
             case "@if":
             case "@hasSection":
+            case "@else":
                 return new String[]{"@endif", "@endIf"};
             case "@section":
                 return new String[]{"@endsection", "@show", "@stop", "@append"};

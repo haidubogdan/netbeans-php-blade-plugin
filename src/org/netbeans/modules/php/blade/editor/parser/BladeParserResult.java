@@ -1,6 +1,5 @@
 package org.netbeans.modules.php.blade.editor.parser;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -27,20 +26,16 @@ import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeListener;
 import org.antlr.v4.runtime.tree.TerminalNode;
-import org.netbeans.api.project.Project;
 import org.netbeans.modules.csl.api.Severity;
 import org.netbeans.modules.php.blade.editor.compiler.BladePhpCompiler;
-import org.netbeans.modules.php.blade.editor.indexing.BladeIndex;
 import org.netbeans.modules.php.blade.editor.navigator.BladeStructureItem;
 import org.netbeans.modules.php.blade.editor.navigator.BladeStructureItem.DirectiveBlockStructureItem;
 import org.netbeans.modules.php.blade.editor.navigator.BladeStructureItem.DirectiveInlineStructureItem;
-import org.netbeans.modules.php.blade.project.ProjectUtils;
 import org.netbeans.modules.php.blade.syntax.antlr4.v10.BladeAntlrLexer;
 import org.netbeans.modules.php.blade.syntax.antlr4.v10.BladeAntlrParser;
 import org.netbeans.modules.php.blade.syntax.antlr4.v10.BladeAntlrParserBaseListener;
 import org.netbeans.modules.php.editor.parser.PHPParseResult;
 import org.openide.filesystems.FileObject;
-import org.openide.util.Exceptions;
 
 /**
  *
@@ -49,7 +44,6 @@ import org.openide.util.Exceptions;
 public class BladeParserResult extends ParserResult {
 
     public final List<Error> errors = new ArrayList<>();
-    public final Map<String, Reference> references = new TreeMap<>();
     private final Map<String, Reference> yieldReferences = new TreeMap<>();
     private final Map<String, Reference> stackReferences = new TreeMap<>();
     public final Map<String, List<OffsetRange>> includeBladeOccurences = new HashMap<>();
@@ -61,16 +55,10 @@ public class BladeParserResult extends ParserResult {
     public final Map<OffsetRange, String> phpNamespacePathOccurences = new TreeMap<>();
     public final Map<OffsetRange, Reference> customDirectivesReferences = new TreeMap<>();
     public final Map<OffsetRange, FieldAccessReference> fieldCallType = new TreeMap<>();
-    public final Map<OffsetRange, Set<String>> scopedVariables = new TreeMap<>();
+    public final Map<OffsetRange, Set<String>> loopScopedVariables = new TreeMap<>();
     public final List<BladeStructureItem> structure = new ArrayList<>();
     public final List<OffsetRange> folds = new ArrayList<>();
-
-    protected PHPParseResult phpParserResult;
-
-    protected BladeIndex bladeIndex = null;
-
     volatile boolean finished = false;
-    volatile boolean indexLoaded = false;
 
     public enum ReferenceType {
         YIELD, STACK, SECTION, PUSH, PUSH_IF, PREPEND, INCLUDE, INCLUDE_IF,
@@ -134,16 +122,17 @@ public class BladeParserResult extends ParserResult {
         if (!finished) {
             BladeAntlrParser parser = createParser(getSnapshot());
             parser.addErrorListener(createErrorListener());
-//            parser.addParseListener(createFoldListener());
             parser.addParseListener(createDeclarationReferencesListener());
             parser.addParseListener(createPhpElementsOccurencesListener());
             parser.addParseListener(createVariableListener());
-            parser.addParseListener(createLayoutTreeListener());
+            
+            //not implemented yet
+            //parser.addParseListener(createLayoutTreeListener());
             parser.addParseListener(createStructureListener());
             parser.addParseListener(createSemanticsListener());
             evaluateParser(parser);
             BladePhpCompiler phpCompiler = new BladePhpCompiler();
-            phpParserResult = phpCompiler.extractPhpContent(
+            PHPParseResult phpParserResult = phpCompiler.extractPhpContent(
                     this.getSnapshot()).getPhpParserResult();
 
             if (phpParserResult != null) {
@@ -284,7 +273,7 @@ public class BladeParserResult extends ParserResult {
 
                     }
                     OffsetRange range = new OffsetRange(ctx.getStart().getStartIndex(), ctx.getStop().getStopIndex() + 1);
-                    scopedVariables.put(range, varList);
+                    loopScopedVariables.put(range, varList);
                 }
 
                 foreachBalance--;
@@ -308,7 +297,7 @@ public class BladeParserResult extends ParserResult {
 
                     }
                     OffsetRange range = new OffsetRange(ctx.getStart().getStartIndex(), ctx.getStop().getStopIndex() + 1);
-                    scopedVariables.put(range, varList);
+                    loopScopedVariables.put(range, varList);
                 }
 
                 //reset
@@ -722,11 +711,11 @@ public class BladeParserResult extends ParserResult {
         return ret;
     }
 
-    public Set<String> findVariablesForScope(int offset) {
+    public Set<String> findLoopVariablesForScope(int offset) {
 
         Set<String> variableList = new LinkedHashSet<>();
 
-        for (Map.Entry<OffsetRange, Set<String>> entry : scopedVariables.entrySet()) {
+        for (Map.Entry<OffsetRange, Set<String>> entry : loopScopedVariables.entrySet()) {
             OffsetRange range = entry.getKey();
 
             if (offset < range.getStart()) {
@@ -828,21 +817,6 @@ public class BladeParserResult extends ParserResult {
         stackReferences.put(ref.name, ref);
     }
 
-    protected BladeIndex getIndex() {
-        if (this.indexLoaded) {
-            return bladeIndex;
-        }
-        Project project = ProjectUtils.getMainOwner(this.getFileObject());
-
-        try {
-            bladeIndex = BladeIndex.get(project);
-        } catch (IOException ex) {
-            Exceptions.printStackTrace(ex);
-        }
-        this.indexLoaded = true;
-        return bladeIndex;
-    }
-
     @Override
     protected boolean processingFinished() {
         return finished;
@@ -855,7 +829,16 @@ public class BladeParserResult extends ParserResult {
 
     @Override
     protected void invalidate() {
-        //references.clear();
+//        occurancesForDeclaration.clear();
+//        structure.clear();
+//        folds.clear();
+//        customDirectivesReferences.clear();
+//        includeBladeOccurences.clear();
+//        phpClassOccurences.clear();
+//        phpConstantOccurences.clear();
+//        phpMethodOccurences.clear();
+        loopScopedVariables.clear();
+//        phpFunctionOccurences.clear();
     }
 
     public Map<String, Reference> getYieldReferences() {
@@ -864,10 +847,6 @@ public class BladeParserResult extends ParserResult {
 
     public Map<String, Reference> getStackReferences() {
         return stackReferences;
-    }
-
-    public PHPParseResult getPhpParserResult() {
-        return phpParserResult;
     }
 
     protected ANTLRErrorListener createErrorListener() {

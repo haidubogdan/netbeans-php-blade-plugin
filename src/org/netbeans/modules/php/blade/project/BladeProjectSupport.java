@@ -53,7 +53,7 @@ public class BladeProjectSupport extends ProjectOpenedHook implements Preference
 
     @Override
     protected void projectClosed() {
-        
+        BladeProjectProperties.closeProject(project);
     }
     
 }

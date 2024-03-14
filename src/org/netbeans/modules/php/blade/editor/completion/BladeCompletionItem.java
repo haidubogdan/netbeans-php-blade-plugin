@@ -213,6 +213,23 @@ public class BladeCompletionItem implements CompletionProposal {
 
     }
 
+    public static class BladeVariableItem extends BladeCompletionItem {
+
+        public BladeVariableItem(ElementHandle element, CompletionRequest request, String previewValue) {
+            super(element, request, previewValue);
+        }
+
+        @Override
+        public ElementKind getKind() {
+            return ElementKind.VARIABLE;
+        }
+
+        @Override
+        public String getRhsHtml(HtmlFormatter formatter) {
+            return "blade";
+        }
+    }
+
     public static class CompletionRequest {
 
         public int anchorOffset;

@@ -210,7 +210,7 @@ public class BladeIndexer extends EmbeddingIndexer {
     @MimeRegistration(mimeType = BladeLanguage.MIME_TYPE, service = EmbeddingIndexerFactory.class) //NOI18N
     public static class Factory extends EmbeddingIndexerFactory {
 
-        public static final String NAME = "blade_php"; //NOI18N
+        public static final String NAME = "blade"; //NOI18N
         public static final int VERSION = 2;
 
         @Override

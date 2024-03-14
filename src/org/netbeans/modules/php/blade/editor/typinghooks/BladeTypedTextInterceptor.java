@@ -41,6 +41,7 @@ package org.netbeans.modules.php.blade.editor.typinghooks;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.WeakHashMap;
 import javax.swing.text.BadLocationException;
 import org.netbeans.modules.php.blade.editor.BladeLanguage;
 import org.netbeans.api.editor.mimelookup.MimePath;
@@ -55,7 +56,7 @@ import org.netbeans.spi.editor.typinghooks.TypedTextInterceptor;
  */
 public class BladeTypedTextInterceptor implements TypedTextInterceptor {
 
-    static final Map<Character, Character> CHAR_PAIR = new HashMap<>();
+    static final Map<Character, Character> CHAR_PAIR = new WeakHashMap<>();
 
     /**
      * auto complete char pair

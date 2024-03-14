@@ -1,15 +1,7 @@
 package org.netbeans.modules.php.blade.editor.refactoring;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.TreeSet;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import javax.swing.text.BadLocationException;
@@ -17,15 +9,9 @@ import javax.swing.text.Position;
 import javax.swing.text.StyledDocument;
 import org.netbeans.api.editor.document.LineDocument;
 import org.netbeans.api.editor.document.LineDocumentUtils;
-import org.netbeans.modules.csl.api.OffsetRange;
 import org.netbeans.modules.php.blade.editor.BladeLanguage;
-import org.netbeans.modules.php.blade.editor.indexing.BladeIndex;
 import org.netbeans.modules.php.blade.editor.indexing.BladeIndex.IndexedOffsetReference;
 import org.netbeans.modules.php.blade.editor.indexing.QueryUtils;
-import org.netbeans.modules.php.blade.editor.parser.BladeParser;
-import org.netbeans.modules.php.blade.editor.parser.BladeParserResult;
-import org.netbeans.modules.php.blade.editor.parser.BladeParserResult.Reference;
-import org.netbeans.modules.php.blade.editor.path.PathUtils;
 
 import org.netbeans.modules.refactoring.api.AbstractRefactoring;
 import org.netbeans.modules.refactoring.api.Problem;
@@ -40,7 +26,6 @@ import org.openide.text.CloneableEditorSupport;
 import org.openide.text.PositionBounds;
 import org.openide.util.Exceptions;
 import org.openide.util.Lookup;
-import org.openide.util.NbBundle;
 import org.openide.util.lookup.ServiceProvider;
 
 /**
@@ -90,14 +75,12 @@ public class BladePathUsage {
                 }
 
                 List<IndexedOffsetReference> references = QueryUtils.getIncludePathReferences(this.bladeFileReference.getBladePath(), sourceFO);
-                Map<FileObject, Set<FileObject>> includes = new HashMap<>();
+
                 for (IndexedOffsetReference reference : references) {
                     if (cancel.get()) {
                         throw new CancellationException();
                     }
-                    FileObject root = PathUtils.extractRootPath(sourceFO);
-//                    includes.computeIfAbsent(root, cd2 -> new HashSet<>())
-//                            .add(reference.getOriginFile());
+
                     PositionBounds bounds;
                     FileObject fo = reference.getOriginFile();
                     int start = reference.getStart();

@@ -85,6 +85,12 @@ public final class BladeProjectProperties {
         INSTANCES.put(project, instance);
         return instance;
     }
+    
+    public static void closeProject(Project project){
+        if (INSTANCES.containsKey(project)) {
+            INSTANCES.remove(project);
+        }
+    }
 
     private Preferences getPreferences() {
         if (project != null) {

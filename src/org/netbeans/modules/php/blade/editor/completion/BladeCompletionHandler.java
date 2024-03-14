@@ -301,16 +301,21 @@ public class BladeCompletionHandler implements CodeCompletionHandler2 {
     private void completeScopedVariables(final List<CompletionProposal> completionProposals,
             CodeCompletionContext completionContext, BladeParserResult parserResult, Token currentToken) {
         String variablePrefix = currentToken.getText();
-        Set<String> scopedVariables = parserResult.findVariablesForScope(completionContext.getCaretOffset());
+        Set<String> scopedVariables = parserResult.findLoopVariablesForScope(completionContext.getCaretOffset());
         FileObject fo = completionContext.getParserResult().getSnapshot().getSource().getFileObject();
-        if (scopedVariables != null) {
+        if (scopedVariables != null && !scopedVariables.isEmpty()) {
+            CompletionRequest request = new CompletionRequest();
+            request.anchorOffset = completionContext.getCaretOffset() - variablePrefix.length();
+            request.carretOffset = completionContext.getCaretOffset();
+            request.prefix = variablePrefix;
+            if ("$loop".startsWith(variablePrefix)) {
+                String variableName = "$loop";
+                NamedElement variableElement = new NamedElement(variableName, fo, ElementType.VARIABLE);
+                completionProposals.add(new BladeCompletionItem.BladeVariableItem(variableElement, request, variableName));
+            }
             for (String variableName : scopedVariables) {
                 if (variableName.startsWith(variablePrefix)) {
                     NamedElement variableElement = new NamedElement(variableName, fo, ElementType.VARIABLE);
-                    CompletionRequest request = new CompletionRequest();
-                    request.anchorOffset = completionContext.getCaretOffset() - variablePrefix.length();
-                    request.carretOffset = completionContext.getCaretOffset();
-                    request.prefix = variablePrefix;
                     completionProposals.add(new BladeCompletionItem.VariableItem(variableElement, request, variableName));
                 }
             }
