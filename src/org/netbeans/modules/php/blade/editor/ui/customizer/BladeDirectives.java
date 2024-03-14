@@ -22,7 +22,6 @@ import org.openide.util.Exceptions;
  */
 public class BladeDirectives extends javax.swing.JPanel {
 
-    private final ChangeSupport changeSupport = new ChangeSupport(this);
     private final Project project;
     BladeProjectProperties bladeProperties;
 
@@ -46,10 +45,6 @@ public class BladeDirectives extends javax.swing.JPanel {
     public void storeData() {
         bladeProperties.storeDirectiveCustomizerPaths();
         CustomDirectives.resetInstance(project);
-    }
-
-    public void addChangeListener(ChangeListener listener) {
-        changeSupport.addChangeListener(listener);
     }
 
     /**

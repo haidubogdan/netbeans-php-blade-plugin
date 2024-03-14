@@ -66,7 +66,7 @@ public final class BladeProjectProperties {
     private static final String BLADE_VERSION = "blade.version"; // NOI18N
     private static final String DIRECTIVE_CUSTOMIZER_PATH_LIST = "directive_customizer.path.list";
     private static final String VIEW_PATH_LIST = "views.path.list";
-    private static final String AUTO_FORMATTING = "auto.formatting";
+    private static final String FORMATTING = "formatting";
     public Project project;
 
     DefaultListModel<String> directiveCustomizerPathList = new DefaultListModel();
@@ -130,8 +130,8 @@ public final class BladeProjectProperties {
         viewsPathList.remove(index);
     }
 
-    public void setEnableAutoFormatting(boolean status) {
-        getPreferences().putBoolean(AUTO_FORMATTING, status);
+    public void updateFormattingStatus(boolean status) {
+        getPreferences().putBoolean(FORMATTING, status);
     }
 
     public void setViewsPathList(DefaultListModel<String> list) {
@@ -194,8 +194,8 @@ public final class BladeProjectProperties {
         return paths;
     }
 
-    public boolean isAutoFormattingEnabled() {
-        return getPreferences().getBoolean(AUTO_FORMATTING, false);
+    public boolean isFormattingEnabled() {
+        return getPreferences().getBoolean(FORMATTING, false);
     }
 
     public void addPreferenceChangeListener(PreferenceChangeListener preferenceChangeListener) {

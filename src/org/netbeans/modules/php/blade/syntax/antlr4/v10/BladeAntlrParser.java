@@ -4543,12 +4543,12 @@ public class BladeAntlrParser extends Parser {
 		public Function_callContext function_call() {
 			return getRuleContext(Function_callContext.class,0);
 		}
+		public TerminalNode PHP_IDENTIFIER() { return getToken(BladeAntlrParser.PHP_IDENTIFIER, 0); }
 		public NamespacePathContext namespacePath() {
 			return getRuleContext(NamespacePathContext.class,0);
 		}
 		public TerminalNode PHP_VARIABLE() { return getToken(BladeAntlrParser.PHP_VARIABLE, 0); }
 		public TerminalNode PHP_NAMESPACE_PATH() { return getToken(BladeAntlrParser.PHP_NAMESPACE_PATH, 0); }
-		public TerminalNode PHP_IDENTIFIER() { return getToken(BladeAntlrParser.PHP_IDENTIFIER, 0); }
 		public TerminalNode EXPR_STRING() { return getToken(BladeAntlrParser.EXPR_STRING, 0); }
 		public TerminalNode PHP_KEYWORD() { return getToken(BladeAntlrParser.PHP_KEYWORD, 0); }
 		public List<TerminalNode> PHP_EXPRESSION() { return getTokens(BladeAntlrParser.PHP_EXPRESSION); }
@@ -4609,28 +4609,28 @@ public class BladeAntlrParser extends Parser {
 				enterOuterAlt(_localctx, 3);
 				{
 				setState(679);
-				namespacePath();
+				match(PHP_IDENTIFIER);
 				}
 				break;
 			case 4:
 				enterOuterAlt(_localctx, 4);
 				{
 				setState(680);
-				match(PHP_VARIABLE);
+				namespacePath();
 				}
 				break;
 			case 5:
 				enterOuterAlt(_localctx, 5);
 				{
 				setState(681);
-				match(PHP_NAMESPACE_PATH);
+				match(PHP_VARIABLE);
 				}
 				break;
 			case 6:
 				enterOuterAlt(_localctx, 6);
 				{
 				setState(682);
-				match(PHP_IDENTIFIER);
+				match(PHP_NAMESPACE_PATH);
 				}
 				break;
 			case 7:
@@ -6479,8 +6479,8 @@ public class BladeAntlrParser extends Parser {
 		"\u0000\u0000\u02a1\u02a2\u0001\u0000\u0000\u0000\u02a2\u02a3\u0001\u0000"+
 		"\u0000\u0000\u02a3\u02a4\u0005\u000f\u0000\u0000\u02a4m\u0001\u0000\u0000"+
 		"\u0000\u02a5\u02c0\u0003V+\u0000\u02a6\u02c0\u0003f3\u0000\u02a7\u02c0"+
-		"\u0003b1\u0000\u02a8\u02c0\u0005\u0002\u0000\u0000\u02a9\u02c0\u0005\u0007"+
-		"\u0000\u0000\u02aa\u02c0\u0005\u0006\u0000\u0000\u02ab\u02c0\u0005t\u0000"+
+		"\u0005\u0006\u0000\u0000\u02a8\u02c0\u0003b1\u0000\u02a9\u02c0\u0005\u0002"+
+		"\u0000\u0000\u02aa\u02c0\u0005\u0007\u0000\u0000\u02ab\u02c0\u0005t\u0000"+
 		"\u0000\u02ac\u02c0\u0005\u0003\u0000\u0000\u02ad\u02af\u0005\u0001\u0000"+
 		"\u0000\u02ae\u02ad\u0001\u0000\u0000\u0000\u02af\u02b0\u0001\u0000\u0000"+
 		"\u0000\u02b0\u02ae\u0001\u0000\u0000\u0000\u02b0\u02b1\u0001\u0000\u0000"+

@@ -59,6 +59,7 @@ import org.netbeans.core.spi.multiview.MultiViewElement;
 import org.netbeans.core.spi.multiview.text.MultiViewEditorElement;
 import org.netbeans.modules.csl.api.CodeCompletionHandler;
 import org.netbeans.modules.csl.api.DeclarationFinder;
+import org.netbeans.modules.csl.api.Formatter;
 import org.netbeans.modules.csl.api.HintsProvider;
 import org.netbeans.modules.csl.api.IndexSearcher;
 import org.netbeans.modules.csl.api.SemanticAnalyzer;
@@ -66,6 +67,7 @@ import org.netbeans.modules.csl.api.StructureScanner;
 import org.netbeans.modules.csl.spi.CommentHandler;
 import static org.netbeans.modules.php.blade.editor.BladeLanguage.ACTIONS;
 import org.netbeans.modules.php.blade.editor.completion.BladeCompletionHandler;
+import org.netbeans.modules.php.blade.editor.format.BladeFormatter;
 import org.netbeans.modules.php.blade.editor.lexer.BladeLexer;
 import org.netbeans.modules.php.blade.editor.lexer.BladeTokenId;
 import org.netbeans.modules.php.blade.editor.lexer.BladeTokenId.BladeLanguageHierarchy;
@@ -100,7 +102,8 @@ import org.netbeans.modules.php.blade.editor.parser.BladeParserResult;
     @ActionReference(id = @ActionID(category = "System", id = "org.openide.actions.ToolsAction"), path = ACTIONS, position = 1500),
     @ActionReference(id = @ActionID(category = "System", id = "org.openide.actions.PropertiesAction"), path = ACTIONS, position = 1600),
     @ActionReference(id = @ActionID(category = "TemplateActions", id = "org.netbeans.modules.php.blade.editor.actions.FindUsage"),
-            path = ACTIONS, separatorBefore = 1600, position = 1800),
+            path = ACTIONS, separatorBefore = 1700, position = 1800),
+    @ActionReference(id = @ActionID(category = "System", id = "org.netbeans.modules.php.blade.editor.actions.AntlrDebug"), path = ACTIONS, position = 1900), //    @ActionReference(id = @ActionID(category = "DebugAntlrActions", id = "org.netbeans.modules.php.blade.editor.actions.ViewAntlrLexerTokens"), path = ACTIONS, position = 2000),
 //    @ActionReference(
 //        path = "Editors/" + BladeLanguage.MIME_TYPE+ "/Popup",
 //        id = @ActionID(category = "Refactoring", id = "org.netbeans.modules.refactoring.api.ui.WhereUsedAction"),
@@ -143,7 +146,7 @@ public class BladeLanguage extends DefaultLanguageConfig {
     public boolean hasStructureScanner() {
         return true;
     }
-    
+
     @Override
     public StructureScanner getStructureScanner() {
         return new BladeStructureScanner();
@@ -168,21 +171,31 @@ public class BladeLanguage extends DefaultLanguageConfig {
     public HintsProvider getHintsProvider() {
         return new BladeHintsProvider();
     }
-//
-//    @Override
-//    public boolean hasFormatter() {
-//        return true;
-//    }
-//
-//    @Override
-//    public Formatter getFormatter() {
-//        return new BladeFormatter();
-//    }
-//
+
+    @Override
+    public boolean hasFormatter() {
+        return true;
+    }
+
+    @Override
+    public Formatter getFormatter() {
+        return new BladeFormatter();
+    }
+
+    @Override
+    public IndexSearcher getIndexSearcher() {
+        return new BladeTypeSearcher();
+    }
 
     @Override
     public DeclarationFinder getDeclarationFinder() {
         return new BladeDeclarationFinder();
+    }
+
+    @Override
+    @SuppressWarnings("rawtypes")
+    public SemanticAnalyzer<BladeParserResult> getSemanticAnalyzer() {
+        return new BladeSemanticAnalyzer();
     }
 //
 //    @Override
@@ -223,11 +236,6 @@ public class BladeLanguage extends DefaultLanguageConfig {
 //    public KeystrokeHandler getKeystrokeHandler() {
 //        return new BladeBracketCompleter();
 //    }
-    @Override
-    public IndexSearcher getIndexSearcher() {
-        return new BladeTypeSearcher();
-    }
-
     private static final Language<BladeTokenId> language
             = new BladeLanguageHierarchy() {
 
@@ -255,9 +263,4 @@ public class BladeLanguage extends DefaultLanguageConfig {
         return new MultiViewEditorElement(context);
     }
 
-    @Override
-    @SuppressWarnings("rawtypes")
-    public SemanticAnalyzer<BladeParserResult> getSemanticAnalyzer() {
-        return new BladeSemanticAnalyzer();
-    }
 }

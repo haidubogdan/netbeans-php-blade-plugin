@@ -68,7 +68,7 @@ import org.netbeans.modules.php.blade.syntax.annotation.DirectiveRegister;
     @Directive(name = "@dd", params = true),
     @Directive(name = "@json", params = true),
 })
-public class DirectiveCompletionList {
+public final class DirectiveCompletionList {
 
     public Directive[] getDirectives() {
         DirectiveRegister directiveRegister = this.getClass().getAnnotation(DirectiveRegister.class);

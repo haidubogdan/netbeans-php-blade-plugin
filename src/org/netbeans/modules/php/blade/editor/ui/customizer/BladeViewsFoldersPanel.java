@@ -64,13 +64,13 @@ import org.openide.util.NbBundle;
     tabTitle = "#BladePanel.options.keywords.tabTitle"
 )
 
-public final class BladeOptionsPanel extends javax.swing.JPanel {
+public final class BladeViewsFoldersPanel extends javax.swing.JPanel {
 
     private final ChangeSupport changeSupport = new ChangeSupport(this);
     private final Project project;
     BladeProjectProperties bladeProperties;
 
-    BladeOptionsPanel(Project project) {
+    BladeViewsFoldersPanel(Project project) {
         assert project != null;
         this.project = project;
         bladeProperties = BladeProjectProperties.getInstance(project);
@@ -113,38 +113,38 @@ public final class BladeOptionsPanel extends javax.swing.JPanel {
         jLabel4 = new javax.swing.JLabel();
         reindexViewFolderButton = new javax.swing.JButton();
 
-        org.openide.awt.Mnemonics.setLocalizedText(jLabel1, org.openide.util.NbBundle.getMessage(BladeOptionsPanel.class, "BladeOptionsPanel.jLabel1.text")); // NOI18N
-        jLabel1.setToolTipText(org.openide.util.NbBundle.getMessage(BladeOptionsPanel.class, "BladeOptionsPanel.jLabel1.toolTipText")); // NOI18N
+        org.openide.awt.Mnemonics.setLocalizedText(jLabel1, org.openide.util.NbBundle.getMessage(BladeViewsFoldersPanel.class, "BladeViewsFoldersPanel.jLabel1.text")); // NOI18N
+        jLabel1.setToolTipText(org.openide.util.NbBundle.getMessage(BladeViewsFoldersPanel.class, "BladeViewsFoldersPanel.jLabel1.toolTipText")); // NOI18N
 
         jScrollPane1.setViewportView(viewsPathList);
 
-        org.openide.awt.Mnemonics.setLocalizedText(addViewFolderButton, org.openide.util.NbBundle.getMessage(BladeOptionsPanel.class, "BladeOptionsPanel.addViewFolderButton.text")); // NOI18N
+        org.openide.awt.Mnemonics.setLocalizedText(addViewFolderButton, org.openide.util.NbBundle.getMessage(BladeViewsFoldersPanel.class, "BladeViewsFoldersPanel.addViewFolderButton.text")); // NOI18N
         addViewFolderButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 addViewFolderButtonActionPerformed(evt);
             }
         });
 
-        org.openide.awt.Mnemonics.setLocalizedText(removeViewFolderButton, org.openide.util.NbBundle.getMessage(BladeOptionsPanel.class, "BladeOptionsPanel.removeViewFolderButton.text")); // NOI18N
+        org.openide.awt.Mnemonics.setLocalizedText(removeViewFolderButton, org.openide.util.NbBundle.getMessage(BladeViewsFoldersPanel.class, "BladeViewsFoldersPanel.removeViewFolderButton.text")); // NOI18N
         removeViewFolderButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 removeViewFolderButtonActionPerformed(evt);
             }
         });
 
-        org.openide.awt.Mnemonics.setLocalizedText(reindexViewsButton, org.openide.util.NbBundle.getMessage(BladeOptionsPanel.class, "BladeOptionsPanel.reindexViewsButton.text")); // NOI18N
-        reindexViewsButton.setToolTipText(org.openide.util.NbBundle.getMessage(BladeOptionsPanel.class, "BladeOptionsPanel.reindexViewsButton.toolTipText")); // NOI18N
+        org.openide.awt.Mnemonics.setLocalizedText(reindexViewsButton, org.openide.util.NbBundle.getMessage(BladeViewsFoldersPanel.class, "BladeViewsFoldersPanel.reindexViewsButton.text")); // NOI18N
+        reindexViewsButton.setToolTipText(org.openide.util.NbBundle.getMessage(BladeViewsFoldersPanel.class, "BladeViewsFoldersPanel.reindexViewsButton.toolTipText")); // NOI18N
         reindexViewsButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 reindexViewsButtonActionPerformed(evt);
             }
         });
 
-        org.openide.awt.Mnemonics.setLocalizedText(jLabel3, org.openide.util.NbBundle.getMessage(BladeOptionsPanel.class, "BladeOptionsPanel.jLabel3.text")); // NOI18N
+        org.openide.awt.Mnemonics.setLocalizedText(jLabel3, org.openide.util.NbBundle.getMessage(BladeViewsFoldersPanel.class, "BladeViewsFoldersPanel.jLabel3.text")); // NOI18N
 
-        org.openide.awt.Mnemonics.setLocalizedText(jLabel4, org.openide.util.NbBundle.getMessage(BladeOptionsPanel.class, "BladeOptionsPanel.jLabel4.text")); // NOI18N
+        org.openide.awt.Mnemonics.setLocalizedText(jLabel4, org.openide.util.NbBundle.getMessage(BladeViewsFoldersPanel.class, "BladeViewsFoldersPanel.jLabel4.text")); // NOI18N
 
-        org.openide.awt.Mnemonics.setLocalizedText(reindexViewFolderButton, org.openide.util.NbBundle.getMessage(BladeOptionsPanel.class, "BladeOptionsPanel.reindexViewFolderButton.text")); // NOI18N
+        org.openide.awt.Mnemonics.setLocalizedText(reindexViewFolderButton, org.openide.util.NbBundle.getMessage(BladeViewsFoldersPanel.class, "BladeViewsFoldersPanel.reindexViewFolderButton.text")); // NOI18N
         reindexViewFolderButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 reindexViewFolderButtonActionPerformed(evt);

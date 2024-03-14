@@ -1,16 +1,19 @@
 package org.netbeans.modules.php.blade.editor.ui.customizer;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
+import org.netbeans.api.project.Project;
 import org.netbeans.spi.project.ui.support.ProjectCustomizer;
 import org.openide.util.Lookup;
 import org.openide.util.NbBundle;
 
 /**
  * Blade settings node
- * 
+ *
  * @author bhaidu
  */
 public class BladeSettingsCustomizerProvider implements ProjectCustomizer.CompositeCategoryProvider {
@@ -41,7 +44,31 @@ public class BladeSettingsCustomizerProvider implements ProjectCustomizer.Compos
                 return directivesProvider.createComponent(category, context);
         }
 
-        return new JPanel();
+        return createGeneralSettingsComponent(category, context);
+    }
+
+    public JComponent createGeneralSettingsComponent(ProjectCustomizer.Category category, Lookup context) {
+        Project project = context.lookup(Project.class);
+        assert project != null;
+
+        BladeGeneralSettings panel = new BladeGeneralSettings(project);
+        category.setOkButtonListener(new Listener(panel));
+        return panel;
+    }
+
+    private class Listener implements ActionListener {
+
+        private final BladeGeneralSettings panel;
+
+        public Listener(BladeGeneralSettings panel) {
+            this.panel = panel;
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            this.panel.storeData();
+        }
+
     }
 
     @ProjectCustomizer.CompositeCategoryProvider.Registration(

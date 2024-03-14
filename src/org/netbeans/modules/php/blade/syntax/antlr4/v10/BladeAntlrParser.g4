@@ -196,8 +196,8 @@ loop_expression : simple_foreach_expr
 
 main_php_expression : BLADE_EXPR_LPAREN composed_php_expression+ BLADE_EXPR_RPAREN;
 
-composed_php_expression : class_expr_usage | function_call | namespacePath | PHP_VARIABLE 
-| PHP_NAMESPACE_PATH | PHP_IDENTIFIER | EXPR_STRING |
+composed_php_expression : class_expr_usage | function_call | PHP_IDENTIFIER | namespacePath | PHP_VARIABLE 
+| PHP_NAMESPACE_PATH | EXPR_STRING |
  PHP_KEYWORD | PHP_EXPRESSION+ | PHP_WS | PHP_STATIC_ACCESS | PHP_CLASS_KEYWORD
 | PHP_INSTANCE_ACCESS | BLADE_EXPR_LPAREN composed_php_expression* BLADE_EXPR_RPAREN | PHP_EXPR_STRING;
 

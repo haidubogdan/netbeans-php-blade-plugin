@@ -28,14 +28,14 @@ public class BladeOptionsCustomizerProvider implements ProjectCustomizer.Composi
         Project project = context.lookup(Project.class);
         assert project != null;
         
-        BladeOptionsPanel panel =  new BladeOptionsPanel(project);
+        BladeViewsFoldersPanel panel =  new BladeViewsFoldersPanel(project);
         category.setOkButtonListener(new Listener(panel));
         return panel;
     }
 
     private class Listener implements ActionListener {
-        private final BladeOptionsPanel panel;
-        public Listener(BladeOptionsPanel panel){
+        private final BladeViewsFoldersPanel panel;
+        public Listener(BladeViewsFoldersPanel panel){
            this.panel = panel; 
         }
         @Override
