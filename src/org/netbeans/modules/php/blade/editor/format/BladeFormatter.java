@@ -33,7 +33,7 @@ import org.openide.filesystems.FileObject;
  * @author bhaidu
  */
 public class BladeFormatter implements Formatter {
-
+    public static String ENABLE_BLADE_INDENTATION = "enable-blade-indent";
     private static final Logger LOGGER = Logger.getLogger(BladeFormatter.class.getName());
 
     public BladeFormatter() {
@@ -41,8 +41,12 @@ public class BladeFormatter implements Formatter {
 
     @Override
     public void reformat(Context context, ParserResult compilationInfo) {
+ 
         LineDocument doc = LineDocumentUtils.as(context.document(), LineDocument.class);
         if (doc == null) {
+            return;
+        }
+        if (context.isIndent() && !isBladeIndentEnabled(doc)){
             return;
         }
         FileObject file = NbEditorUtilities.getFileObject(doc);
@@ -50,10 +54,7 @@ public class BladeFormatter implements Formatter {
         if (projectOwner == null){
             return;
         }
-        BladeProjectProperties prop = BladeProjectProperties.getInstance(projectOwner);
-        if (!prop.isFormattingEnabled()){
-            return;
-        }
+
         int indentSize = getIndentSize(context.document());
 
         long start = System.currentTimeMillis();
@@ -113,6 +114,11 @@ public class BladeFormatter implements Formatter {
     static int getIndentSize(Document doc) {
         Preferences prefs = CodeStylePreferences.get(doc).getPreferences();
         return prefs.getInt(SimpleValueNames.INDENT_SHIFT_WIDTH, 4);
+    }
+    
+    static boolean isBladeIndentEnabled(Document doc) {
+        Preferences prefs = CodeStylePreferences.get(doc).getPreferences();
+        return prefs.getBoolean(ENABLE_BLADE_INDENTATION, false);
     }
 
 }

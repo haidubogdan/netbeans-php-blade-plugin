@@ -1,28 +1,25 @@
 package org.netbeans.modules.php.blade.editor.ui.customizer;
 
 import org.netbeans.api.project.Project;
-import org.netbeans.modules.php.blade.project.BladeProjectProperties;
-import org.openide.util.ChangeSupport;
-
+import org.netbeans.modules.php.blade.project.ModulePreferences;
+import org.netbeans.modules.php.blade.project.OptionsUtils;
 /**
  *
  * @author bhaidu
  */
 public class BladeGeneralSettings extends javax.swing.JPanel {
 
-    BladeProjectProperties bladeProperties;
-
     /**
      * Creates new form BladeGeneral
      */
     public BladeGeneralSettings(Project project) {
-        bladeProperties = BladeProjectProperties.getInstance(project);
         initComponents();
         init();
     }
 
     private void init() {
-        this.formatting_enabled.setSelected(bladeProperties.isFormattingEnabled());
+        this.formatting_enabled.setSelected(OptionsUtils.isFormattingEnabled());
+        this.indentation_enabled.setSelected(OptionsUtils.isIndentationEnabled());
     }
     /**
      * This method is called from within the constructor to initialize the form.
@@ -35,10 +32,13 @@ public class BladeGeneralSettings extends javax.swing.JPanel {
 
         jLabel1 = new javax.swing.JLabel();
         formatting_enabled = new javax.swing.JCheckBox();
+        indentation_enabled = new javax.swing.JCheckBox();
 
         org.openide.awt.Mnemonics.setLocalizedText(jLabel1, org.openide.util.NbBundle.getMessage(BladeGeneralSettings.class, "BladeGeneralSettings.jLabel1.text")); // NOI18N
 
         org.openide.awt.Mnemonics.setLocalizedText(formatting_enabled, org.openide.util.NbBundle.getMessage(BladeGeneralSettings.class, "BladeGeneralSettings.formatting_enabled.text")); // NOI18N
+
+        org.openide.awt.Mnemonics.setLocalizedText(indentation_enabled, org.openide.util.NbBundle.getMessage(BladeGeneralSettings.class, "BladeGeneralSettings.indentation_enabled.text")); // NOI18N
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
@@ -48,8 +48,9 @@ public class BladeGeneralSettings extends javax.swing.JPanel {
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(formatting_enabled)
-                    .addComponent(jLabel1))
-                .addContainerGap(185, Short.MAX_VALUE))
+                    .addComponent(jLabel1)
+                    .addComponent(indentation_enabled))
+                .addContainerGap(183, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -57,18 +58,22 @@ public class BladeGeneralSettings extends javax.swing.JPanel {
                 .addComponent(jLabel1)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(formatting_enabled)
-                .addGap(0, 250, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(indentation_enabled)
+                .addGap(0, 224, Short.MAX_VALUE))
         );
     }// </editor-fold>//GEN-END:initComponents
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JCheckBox formatting_enabled;
+    private javax.swing.JCheckBox indentation_enabled;
     private javax.swing.JLabel jLabel1;
     // End of variables declaration//GEN-END:variables
 
     public void storeData() {
-        bladeProperties.updateFormattingStatus(formatting_enabled.isSelected());
+        ModulePreferences.setPrefBoolean(OptionsUtils.ENABLE_FORMATTING, this.formatting_enabled.isSelected());
+        ModulePreferences.setPrefBoolean(OptionsUtils.ENABLE_INDENTATION, this.indentation_enabled.isSelected());
     }
 
 }
