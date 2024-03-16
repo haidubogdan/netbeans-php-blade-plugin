@@ -16,19 +16,32 @@ statement:
     | nl_with_space_before
     | (SG_QUOTE | DB_QUOTE)
     | GT_SYMBOL
-    | HTML_CLOSE_TAG
+    | html_close_tag
     | (NL | WS)
     ;
 
-indetable_element:
-   block_start (statement)+ nl_with_space? block_end
- ;
+inline_tag_statement : 
+    IDENTIFIER EQ IDENTIFIER
+    | IDENTIFIER EQ STRING
+    | IDENTIFIER
+    | WS
+    | NL
+    ;
 
-html_indent : GT_SYMBOL NL WS*;
+html_close_tag : HTML_CLOSE_TAG;
+    
+indetable_element:
+    block_start (statement)+ nl_with_space? block_end
+    ;
+
+html_indent : HTML_START_BLOCK_TAG inline_tag_statement* GT_SYMBOL NL WS*;
 block_start : ws_before=nl_with_space_before? block_directive_name  D_ARG_LPAREN D_ARG_RPAREN;
-block_directive_name : (D_IF | D_FOREACH);
-block_end : D_ENDIF | D_ENDFOREACH;
-inline_identable_element : D_INLINE_DIRECTIVE | NON_PARAM_DIRECTIVE;
+block_directive_name : D_BLOCK_DIRECTIVE_START;
+block_end : D_BLOCK_DIRECTIVE_END;
+inline_identable_element : D_INLINE_DIRECTIVE | NON_PARAM_DIRECTIVE 
+    | (CONTENT_TAG_OPEN CONTENT_TAG_CLOSE)
+    | (RAW_TAG_OPEN RAW_TAG_CLOSE)
+    ;
 
 nl_with_space_before : NL WS*;
 nl_with_space : NL WS*;

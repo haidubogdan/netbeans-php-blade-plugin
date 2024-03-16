@@ -15,10 +15,24 @@ tokens {HTML, PHP_CODE}
 channels { COMMENT }
 
 fragment DirectiveLabel 
-    : [a-z\u0080-\ufffe][a-z0-9_.\u0080-\ufffe]*;
+    : [a-z\u0080-\ufffe][a-z0-9_\u0080-\ufffe]*;
+
+fragment Identifier
+    : [a-z\u0080-\ufffe][a-z0-9_\u0080-\ufffe]*;
 
 fragment DirectiveArgLookup
     : (' ')* {this._input.LA(1) == '('}?;
+
+fragment DOUBLE_QUOTED_STRING_FRAGMENT 
+    : '"' ([\\"] | . )*? '"';
+
+fragment SINGLE_QUOTED_STRING_FRAGMENT 
+    : '\'' (~('\'' | '\\') | '\\' . )* '\'';
+
+fragment BlockDirectiveName 
+    : 'auth' | 'if' | 'can' ('any' | 'not')? | 'for' ('each' | 'else')? 
+   | 'while' | 'section' | 'hasSection' | 'fragment' | 'verbatim'
+   | 'push' ('if' | 'once')? | 'prepend';
 
 PHP_INLINE : '<?=' .*? '?>' | '<?php' .*? '?>';
 //
@@ -42,21 +56,25 @@ D_ESCAPES
     | '@keyframes'
     )->type(HTML);
 
-D_IF : ('@if' DirectiveArgLookup)->pushMode(DIRECTIVE_ARG);
-D_ENDIF : '@endif';
-
-
-D_FOREACH : ('@foreach' DirectiveArgLookup)->pushMode(DIRECTIVE_ARG);
-D_ENDFOREACH : '@endforeach';
+D_BLOCK_DIRECTIVE_START : ('@' BlockDirectiveName DirectiveArgLookup)->pushMode(DIRECTIVE_ARG);
+D_BLOCK_DIRECTIVE_END : '@end' BlockDirectiveName | '@show' | '@append' | '@stop';
 
 NON_PARAM_DIRECTIVE : '@continue' | '@break';
 
-D_INLINE_DIRECTIVE : '@' DirectiveLabel DirectiveArgLookup;
+D_INLINE_DIRECTIVE : '@' DirectiveLabel DirectiveArgLookup | '@csrf';
+
+STRING : DOUBLE_QUOTED_STRING_FRAGMENT | SINGLE_QUOTED_STRING_FRAGMENT;
+
+CONTENT_TAG_OPEN : '{{' ->pushMode(INSIDE_REGULAR_ECHO);
+RAW_TAG_OPEN : '{!!' ->pushMode(INSIDE_RAW_ECHO);
 
 SG_QUOTE : '\'';
 DB_QUOTE : '"';
 
 HTML_CLOSE_TAG : '<' (' ')* '/' (' ')*  [a-z\u0080-\ufffe][a-z0-9_.\u0080-\ufffe]* (' ')* '>';
+HTML_START_BLOCK_TAG : '<' ('div');
+EQ : '=';
+IDENTIFIER : Identifier; 
 GT_SYMBOL : '>';
 
 D_PHP : '@php' {this._input.LA(1) == ' ' || this._input.LA(1) == '\n'}?->pushMode(BLADE_INLINE_PHP);
@@ -88,3 +106,17 @@ D_ENDPHP : '@endphp'->popMode;
 PHP_CODE_GREEDY : ~[@]+->type(PHP_CODE);
 
 PHP_CODE_COMPLETION : . ->type(PHP_CODE);
+
+// {{  }}
+mode INSIDE_REGULAR_ECHO;
+
+CONTENT_TAG_CLOSE : ('}}')->popMode;
+CONTENT_OTHER : . ->skip;
+EXIT_REGULAR_ECHO_EOF : EOF->popMode;
+
+// {!!  !!}
+mode INSIDE_RAW_ECHO;
+
+RAW_TAG_CLOSE : ('!!}')->popMode;
+RAW_CONTENT_OTHER : . ->skip;
+EXIT_RAW_ECHO_EOF : EOF->popMode;

@@ -30,6 +30,26 @@ public interface BladeAntlrFormatterParserListener extends ParseTreeListener {
 	 */
 	void exitStatement(BladeAntlrFormatterParser.StatementContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link BladeAntlrFormatterParser#inline_tag_statement}.
+	 * @param ctx the parse tree
+	 */
+	void enterInline_tag_statement(BladeAntlrFormatterParser.Inline_tag_statementContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link BladeAntlrFormatterParser#inline_tag_statement}.
+	 * @param ctx the parse tree
+	 */
+	void exitInline_tag_statement(BladeAntlrFormatterParser.Inline_tag_statementContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link BladeAntlrFormatterParser#html_close_tag}.
+	 * @param ctx the parse tree
+	 */
+	void enterHtml_close_tag(BladeAntlrFormatterParser.Html_close_tagContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link BladeAntlrFormatterParser#html_close_tag}.
+	 * @param ctx the parse tree
+	 */
+	void exitHtml_close_tag(BladeAntlrFormatterParser.Html_close_tagContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link BladeAntlrFormatterParser#indetable_element}.
 	 * @param ctx the parse tree
 	 */

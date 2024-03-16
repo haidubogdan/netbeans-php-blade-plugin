@@ -43,6 +43,30 @@ public class BladeAntlrFormatterParserBaseListener implements BladeAntlrFormatte
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterInline_tag_statement(BladeAntlrFormatterParser.Inline_tag_statementContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitInline_tag_statement(BladeAntlrFormatterParser.Inline_tag_statementContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterHtml_close_tag(BladeAntlrFormatterParser.Html_close_tagContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitHtml_close_tag(BladeAntlrFormatterParser.Html_close_tagContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterIndetable_element(BladeAntlrFormatterParser.Indetable_elementContext ctx) { }
 	/**
 	 * {@inheritDoc}

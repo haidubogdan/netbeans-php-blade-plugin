@@ -68,9 +68,7 @@ public class BladeIndentationService {
                     System.out.println("token : " + entry.getValue());
                     int lineStart_i = context.lineStartOffset(tstart - textDelta);
                     int originalIndent_i = context.lineIndent(lineStart_i);
-//                            if (indentContext) {
-//                                indent = 2;
-//                            }
+
                     int wsIndent = (indent + htmlIndent) * indentSize;
 
                     context.modifyIndent(lineStart_i, wsIndent);

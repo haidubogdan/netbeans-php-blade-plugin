@@ -8,6 +8,7 @@ import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.ConsoleErrorListener;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ParseTreeListener;
+import org.antlr.v4.runtime.tree.TerminalNode;
 import org.netbeans.modules.editor.indent.spi.Context;
 import org.netbeans.modules.php.blade.syntax.antlr4.formatter.BladeAntlrFormatterLexer;
 import org.netbeans.modules.php.blade.syntax.antlr4.formatter.BladeAntlrFormatterParser;
@@ -20,6 +21,7 @@ import org.openide.util.Exceptions;
  */
 public class BladeFormatterService {
 
+    public final Map<Integer, FormatToken> wsTokenAfterArgStm = new TreeMap<>();
     public final Map<Integer, FormatToken> formattedLineIndentList = new TreeMap<>();
 
     public void format(Context context, String text, int indentSize) {
@@ -38,6 +40,7 @@ public class BladeFormatterService {
         for (Map.Entry<Integer, FormatToken> entry : formattedLineIndentList.entrySet()) {
             int tstart = entry.getValue().tokenStart;
             int indent = entry.getValue().indent;
+            int htmlIndent = entry.getValue().htmlIndent;
             int existingLineIndent = 0;
             try {
                 existingLineIndent = context.lineIndent(tstart);
@@ -63,13 +66,13 @@ public class BladeFormatterService {
                     System.out.println("token : " + entry.getValue());
                     int lineStart_i = context.lineStartOffset(tstart - textDelta);
                     int originalIndent_i = context.lineIndent(lineStart_i);
-//                            if (indentContext) {
-//                                indent = 2;
-//                            }
-                    int wsIndent = indent * indentSize;
 
+                    int wsIndent = (indent + htmlIndent) * indentSize;
+                    System.out.println("indent : " + indent);
+                    System.out.println("htmlindent : " + htmlIndent);
                     context.modifyIndent(lineStart_i, wsIndent);
                     System.out.println("delta : " + (originalIndent_i - wsIndent));
+                    System.out.println("====================================");
                     textDelta += (originalIndent_i - wsIndent);
                 } catch (BadLocationException ex) {
                     Exceptions.printStackTrace(ex);
@@ -88,21 +91,17 @@ public class BladeFormatterService {
         return new BladeAntlrFormatterParserBaseListener() {
             int indent = 0;
             int blockBalance = 0;
+            int htmlBlockBalance = 0;
 
             @Override
             public void exitBlock_start(BladeAntlrFormatterParser.Block_startContext ctx) {
 
                 Token start = ctx.block_directive_name().getStart();
-                if (!formattedLineIndentList.containsKey(start.getLine())) {
-                    formattedLineIndentList.put(start.getLine(), new FormatToken(start.getStartIndex(), indent, start.getText()));
-                    indent++;
-                } else {
-                    formattedLineIndentList.remove(start.getLine());
-                }
                 blockBalance++;
-                if (ctx.getStop() != null) {
+                if (ctx.getStop() != null && !formattedLineIndentList.containsKey(start.getLine())) {
                     Token rArgParent = ctx.getStop();
-                    //wsTokenAfterArgStm.put(rArgParent.getLine(), new BladeFormatter.FormatToken(rArgParent.getStopIndex() + 1, indent, rArgParent.getText()));
+                    formattedLineIndentList.put(rArgParent.getLine(), new FormatToken(rArgParent.getStopIndex() + 1, indent, htmlBlockBalance, rArgParent.getText()));
+                    indent++;
                 }
             }
 
@@ -112,7 +111,7 @@ public class BladeFormatterService {
                 int line = start.getLine();
                 if (!formattedLineIndentList.containsKey(line)) {
                     indent--;
-                    formattedLineIndentList.put(line, new FormatToken(start.getStartIndex(), indent, start.getText()));
+                    formattedLineIndentList.put(line, new FormatToken(start.getStartIndex(), indent, htmlBlockBalance, start.getText()));
                 } else {
                     formattedLineIndentList.remove(line);
                 }
@@ -129,7 +128,17 @@ public class BladeFormatterService {
                 int line = start.getLine();
                 if (!formattedLineIndentList.containsKey(line)) {
                     int blockIndent = blockBalance > 0 ? 1 : 0;
-                    formattedLineIndentList.put(line, new FormatToken(start.getStartIndex(), indent, start.getText()));
+                    formattedLineIndentList.put(line, new FormatToken(start.getStartIndex(), indent, htmlBlockBalance, start.getText()));
+                }
+            }
+
+            @Override
+            public void exitNl_with_space_before(BladeAntlrFormatterParser.Nl_with_space_beforeContext ctx) {
+                if (ctx != null && ctx.WS(0) != null) {
+                    int blockIndent = blockBalance > 0 ? 1 : 0;
+                    //TODO include the whitespace after tab
+                    Token ws = ctx.WS(0).getSymbol();
+                    wsTokenAfterArgStm.put(ws.getLine(), new FormatToken(ws.getStopIndex(), indent, htmlBlockBalance, ws.getText()));
                 }
             }
 
@@ -145,6 +154,23 @@ public class BladeFormatterService {
                     int blockIndent = blockBalance > 0 ? 1 : 0;
                     formattedLineIndentList.put(line, new FormatToken(start.getStartIndex(), indent, "ws"));
                 }
+            }
+            
+            @Override public void exitHtml_close_tag(BladeAntlrFormatterParser.Html_close_tagContext ctx) {
+                if (htmlBlockBalance > 0){
+                    htmlBlockBalance--;
+                } else {
+                    htmlBlockBalance = 0;
+                }
+            }
+
+            @Override
+            public void exitHtml_indent(BladeAntlrFormatterParser.Html_indentContext ctx) {
+                if (ctx.WS() == null || ctx.WS().isEmpty()) {
+                    return;
+                }
+
+                htmlBlockBalance++;
             }
         };
     }
