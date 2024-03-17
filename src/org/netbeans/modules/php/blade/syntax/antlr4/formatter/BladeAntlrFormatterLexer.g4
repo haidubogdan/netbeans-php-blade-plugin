@@ -30,9 +30,11 @@ fragment SINGLE_QUOTED_STRING_FRAGMENT
     : '\'' (~('\'' | '\\') | '\\' . )* '\'';
 
 fragment BlockDirectiveName 
-    : 'auth' | 'if' | 'can' ('any' | 'not')? | 'for' ('each' | 'else')? 
-   | 'while' | 'section' | 'hasSection' | 'fragment' | 'verbatim'
-   | 'push' ('if' | 'once')? | 'prepend';
+    : 'auth' | 'guest'
+   | 'if' | 'can' ('any' | 'not')? | 'for' ('each' | 'else')? 
+   | 'while' | 'hasSection' | 'fragment' | 'verbatim'
+   | 'env' | 'once' | 'error'
+   | 'push' ('if' | 'once')? | 'prepend' | 'switch';
 
 PHP_INLINE : '<?=' .*? '?>' | '<?php' .*? '?>';
 //
@@ -57,8 +59,11 @@ D_ESCAPES
     )->type(HTML);
 
 D_BLOCK_DIRECTIVE_START : ('@' BlockDirectiveName DirectiveArgLookup)->pushMode(DIRECTIVE_ARG);
-D_BLOCK_DIRECTIVE_END : '@end' BlockDirectiveName | '@show' | '@append' | '@stop';
+D_BLOCK_DIRECTIVE_END : '@end' BlockDirectiveName ;
 
+D_SECTION : ('@section' DirectiveArgLookup)->pushMode(DIRECTIVE_ARG);
+D_ENDSECTION : '@endsection' | '@show' | '@append' | '@stop';
+D_BLOCK_ALIGNED_DIRECTIVE : '@else' | '@elseif';
 NON_PARAM_DIRECTIVE : '@continue' | '@break';
 
 D_INLINE_DIRECTIVE : '@' DirectiveLabel DirectiveArgLookup | '@csrf';
@@ -72,7 +77,11 @@ SG_QUOTE : '\'';
 DB_QUOTE : '"';
 
 HTML_CLOSE_TAG : '<' (' ')* '/' (' ')*  [a-z\u0080-\ufffe][a-z0-9_.\u0080-\ufffe]* (' ')* '>';
-HTML_START_BLOCK_TAG : '<' ('div');
+HTML_COMMENT: '<!--' .*? '-->';
+HTML_START_BLOCK_TAG : '<' ('div'
+   | 'section'
+   | 'script' | 'select' | 'h' [1-9] 
+   | ('p' | 'a') {this._input.LA(1) == '@' || this._input.LA(1) == ' ' || this._input.LA(1) == '\n'}?);
 EQ : '=';
 IDENTIFIER : Identifier; 
 GT_SYMBOL : '>';

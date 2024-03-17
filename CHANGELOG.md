@@ -1,5 +1,23 @@
 # Change Log
 
+## [2.1.2]
+
+**formatting**
+
+- blade formatting and indenting flow (needs to be enabled from Project Properties -> Laravel Blade)
+
+**completion, brace matching**
+
+- added `@switch` directive + `@can` and `@default`
+
+**declaration finder**
+
+- fix issue with constnant declaration finder
+
+**utils**
+
+- added token view action for debugging purpose
+
 ## [2.1.1]
 
 **general**

@@ -57,6 +57,8 @@ public class BladeDirectivesUtils {
                 return new String[]{"@endproduction"};
             case "@error":
                 return new String[]{"@enderror"};
+            case "@switch":
+                return new String[]{"@endswitch"};
 
         }
         return null;
@@ -103,6 +105,8 @@ public class BladeDirectivesUtils {
                 return new String[]{"@production"};
             case "@enderror":
                 return new String[]{"@error"};
+            case "@endswitch":
+                return new String[]{"@switch"};
         }
         return null;
     }

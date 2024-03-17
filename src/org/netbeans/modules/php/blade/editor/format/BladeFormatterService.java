@@ -127,18 +127,9 @@ public class BladeFormatterService {
                 Token start = ctx.getStart();
                 int line = start.getLine();
                 if (!formattedLineIndentList.containsKey(line)) {
-                    int blockIndent = blockBalance > 0 ? 1 : 0;
-                    formattedLineIndentList.put(line, new FormatToken(start.getStartIndex(), indent, htmlBlockBalance, start.getText()));
-                }
-            }
-
-            @Override
-            public void exitNl_with_space_before(BladeAntlrFormatterParser.Nl_with_space_beforeContext ctx) {
-                if (ctx != null && ctx.WS(0) != null) {
-                    int blockIndent = blockBalance > 0 ? 1 : 0;
-                    //TODO include the whitespace after tab
-                    Token ws = ctx.WS(0).getSymbol();
-                    wsTokenAfterArgStm.put(ws.getLine(), new FormatToken(ws.getStopIndex(), indent, htmlBlockBalance, ws.getText()));
+                    if ((htmlBlockBalance > 0 || blockBalance > 0)) {
+                        formattedLineIndentList.put(line, new FormatToken(start.getStartIndex(), indent, htmlBlockBalance, start.getText()));
+                    }
                 }
             }
 
@@ -151,16 +142,21 @@ public class BladeFormatterService {
                 Token start = ctx.WS(0).getSymbol();
                 int line = start.getLine();
                 if (!formattedLineIndentList.containsKey(line)) {
-                    int blockIndent = blockBalance > 0 ? 1 : 0;
                     formattedLineIndentList.put(line, new FormatToken(start.getStartIndex(), indent, "ws"));
                 }
             }
-            
-            @Override public void exitHtml_close_tag(BladeAntlrFormatterParser.Html_close_tagContext ctx) {
-                if (htmlBlockBalance > 0){
+
+            @Override
+            public void exitHtml_close_tag(BladeAntlrFormatterParser.Html_close_tagContext ctx) {
+                if (htmlBlockBalance > 0) {
                     htmlBlockBalance--;
                 } else {
                     htmlBlockBalance = 0;
+                }
+                Token start = ctx.getStart();
+                int line = start.getLine();
+                if (blockBalance > 0 && !formattedLineIndentList.containsKey(line)) {
+                    formattedLineIndentList.put(line, new FormatToken(start.getStartIndex(), indent, htmlBlockBalance, start.getText()));
                 }
             }
 
@@ -169,8 +165,23 @@ public class BladeFormatterService {
                 if (ctx.WS() == null || ctx.WS().isEmpty()) {
                     return;
                 }
-
+                Token start = ctx.getStart();
+                int line = start.getLine();
+                if (blockBalance > 0 && !formattedLineIndentList.containsKey(line)) {
+                    formattedLineIndentList.put(line, new FormatToken(start.getStartIndex(), indent, htmlBlockBalance, start.getText()));
+                }
                 htmlBlockBalance++;
+            }
+
+            @Override
+            public void exitBlock_aligned_directive(BladeAntlrFormatterParser.Block_aligned_directiveContext ctx) {
+                Token start = ctx.getStart();
+                int line = start.getLine();
+                if (!formattedLineIndentList.containsKey(line)) {
+                    if ((htmlBlockBalance > 0 || blockBalance > 0)) {
+                        formattedLineIndentList.put(line, new FormatToken(start.getStartIndex(), indent - 1, htmlBlockBalance, start.getText()));
+                    }
+                }
             }
         };
     }

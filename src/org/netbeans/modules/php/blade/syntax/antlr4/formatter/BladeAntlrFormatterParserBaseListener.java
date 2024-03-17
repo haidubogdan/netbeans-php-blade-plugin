@@ -127,6 +127,18 @@ public class BladeAntlrFormatterParserBaseListener implements BladeAntlrFormatte
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterBlock_aligned_directive(BladeAntlrFormatterParser.Block_aligned_directiveContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitBlock_aligned_directive(BladeAntlrFormatterParser.Block_aligned_directiveContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterInline_identable_element(BladeAntlrFormatterParser.Inline_identable_elementContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -134,6 +146,30 @@ public class BladeAntlrFormatterParserBaseListener implements BladeAntlrFormatte
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitInline_identable_element(BladeAntlrFormatterParser.Inline_identable_elementContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterSection_block(BladeAntlrFormatterParser.Section_blockContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitSection_block(BladeAntlrFormatterParser.Section_blockContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterSection_block_start(BladeAntlrFormatterParser.Section_block_startContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitSection_block_start(BladeAntlrFormatterParser.Section_block_startContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -170,6 +206,18 @@ public class BladeAntlrFormatterParserBaseListener implements BladeAntlrFormatte
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitStatic_element(BladeAntlrFormatterParser.Static_elementContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterBlade_echo(BladeAntlrFormatterParser.Blade_echoContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitBlade_echo(BladeAntlrFormatterParser.Blade_echoContext ctx) { }
 
 	/**
 	 * {@inheritDoc}

@@ -36,7 +36,7 @@ public class BladeIndentationService {
         final int cstart = context.startOffset();
         final int cend = context.endOffset();
         int textDelta = 0;
-        System.out.println("Startng formatting :\n");
+        System.out.println("Startng indentation formatting :\n");
 
         for (Map.Entry<Integer, FormatToken> entry : wsTokenAfterArgStm.entrySet()) {
             //add the new line char
@@ -66,13 +66,16 @@ public class BladeIndentationService {
 
                     System.out.println("line : " + entry.getKey());
                     System.out.println("token : " + entry.getValue());
+
                     int lineStart_i = context.lineStartOffset(tstart - textDelta);
                     int originalIndent_i = context.lineIndent(lineStart_i);
 
                     int wsIndent = (indent + htmlIndent) * indentSize;
-
+                    System.out.println("indent : " + indent);
+                    System.out.println("htmlindent : " + htmlIndent);
                     context.modifyIndent(lineStart_i, wsIndent);
                     System.out.println("delta : " + (originalIndent_i - wsIndent));
+                    System.out.println("====================================");
                     textDelta += (originalIndent_i - wsIndent);
                 } catch (BadLocationException ex) {
                     Exceptions.printStackTrace(ex);
@@ -92,6 +95,7 @@ public class BladeIndentationService {
             int indent = 0;
             int blockBalance = 0;
             int htmlIndent = 0;
+            int htmlBlockBalance = 0;
 
             @Override
             public void exitBlock_start(BladeAntlrFormatterParser.Block_startContext ctx) {
@@ -101,7 +105,7 @@ public class BladeIndentationService {
                 }
                 Token start = ctx.block_directive_name().getStart();
                 if (!formattedLineIndentList.containsKey(start.getLine())) {
-                    formattedLineIndentList.put(start.getLine(), new FormatToken(start.getStartIndex(), indent, htmlIndent, start.getText()));
+                    formattedLineIndentList.put(start.getLine(), new FormatToken(start.getStartIndex(), indent, htmlBlockBalance, start.getText()));
                     indent++;
                 } else {
                     formattedLineIndentList.remove(start.getLine());
@@ -109,9 +113,8 @@ public class BladeIndentationService {
                 blockBalance++;
                 if (ctx.getStop() != null) {
                     Token rArgParent = ctx.getStop();
-                    int blockIndent = blockBalance > 0 ? 1 : 0;
                     //TODO include the whitespace after tab
-                    wsTokenAfterArgStm.put(rArgParent.getLine(), new FormatToken(rArgParent.getStopIndex() + 1, indent, htmlIndent, rArgParent.getText()));
+                    wsTokenAfterArgStm.put(rArgParent.getLine(), new FormatToken(rArgParent.getStopIndex() + 1, indent, htmlBlockBalance, rArgParent.getText()));
                 }
             }
 
@@ -120,7 +123,7 @@ public class BladeIndentationService {
                 Token start = ctx.getStart();
                 int line = start.getLine();
                 if (!formattedLineIndentList.containsKey(line)) {
-                    formattedLineIndentList.put(line, new FormatToken(start.getStartIndex(), indent, htmlIndent, start.getText()));
+                    formattedLineIndentList.put(line, new FormatToken(start.getStartIndex(), indent, htmlBlockBalance, start.getText()));
                     indent--;
                 } else {
                     formattedLineIndentList.remove(line);
@@ -137,18 +140,17 @@ public class BladeIndentationService {
                 Token start = ctx.getStart();
                 int line = start.getLine();
                 if (!formattedLineIndentList.containsKey(line)) {
-                    int blockIndent = blockBalance > 0 ? 1 : 0;
-                    formattedLineIndentList.put(line, new FormatToken(start.getStartIndex(), indent, htmlIndent, start.getText()));
+                    if ((htmlBlockBalance > 0 || blockBalance > 0)) {
+                        formattedLineIndentList.put(line, new FormatToken(start.getStartIndex(), indent, htmlBlockBalance, start.getText()));
+                    }
                 }
             }
 
             @Override
             public void exitNl_with_space_before(BladeAntlrFormatterParser.Nl_with_space_beforeContext ctx) {
                 if (ctx != null && ctx.WS(0) != null) {
-                    int blockIndent = blockBalance > 0 ? 1 : 0;
-                    //TODO include the whitespace after tab
                     Token ws = ctx.WS(0).getSymbol();
-                    wsTokenAfterArgStm.put(ws.getLine(), new FormatToken(ws.getStopIndex(), indent, htmlIndent, ws.getText()));
+                    wsTokenAfterArgStm.put(ws.getLine(), new FormatToken(ws.getStopIndex(), indent, htmlBlockBalance, ws.getText()));
                 }
             }
 
@@ -161,22 +163,35 @@ public class BladeIndentationService {
                 Token start = ctx.WS(0).getSymbol();
                 int line = start.getLine();
                 if (!formattedLineIndentList.containsKey(line)) {
-                    int blockIndent = blockBalance > 0 ? 1 : 0;
-                    formattedLineIndentList.put(line, new FormatToken(start.getStartIndex(), indent, htmlIndent, "ws"));
+                    formattedLineIndentList.put(line, new FormatToken(start.getStartIndex(), indent, htmlBlockBalance, "ws"));
+                }
+            }
+
+            @Override
+            public void exitHtml_close_tag(BladeAntlrFormatterParser.Html_close_tagContext ctx) {
+                if (htmlBlockBalance > 0) {
+                    htmlBlockBalance--;
+                } else {
+                    htmlBlockBalance = 0;
+                }
+                Token start = ctx.getStart();
+                int line = start.getLine();
+                if (blockBalance > 0 && !formattedLineIndentList.containsKey(line)) {
+                    formattedLineIndentList.put(line, new FormatToken(start.getStartIndex(), indent, htmlBlockBalance, start.getText()));
                 }
             }
 
             @Override
             public void exitHtml_indent(BladeAntlrFormatterParser.Html_indentContext ctx) {
-                if (ctx.WS() == null || ctx.WS().isEmpty()){
+                if (ctx.WS() == null || ctx.WS().isEmpty()) {
                     return;
                 }
-                
-                String ws = "";
-                for (TerminalNode wsNode : ctx.WS()){
-                    ws += wsNode.getText();
+                Token start = ctx.getStart();
+                int line = start.getLine();
+                if (blockBalance > 0 && !formattedLineIndentList.containsKey(line)) {
+                    formattedLineIndentList.put(line, new FormatToken(start.getStartIndex(), indent, htmlBlockBalance, start.getText()));
                 }
-                htmlIndent = ws.length() / 4;
+                htmlBlockBalance++;
             }
 
         };

@@ -100,6 +100,16 @@ public interface BladeAntlrFormatterParserListener extends ParseTreeListener {
 	 */
 	void exitBlock_end(BladeAntlrFormatterParser.Block_endContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link BladeAntlrFormatterParser#block_aligned_directive}.
+	 * @param ctx the parse tree
+	 */
+	void enterBlock_aligned_directive(BladeAntlrFormatterParser.Block_aligned_directiveContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link BladeAntlrFormatterParser#block_aligned_directive}.
+	 * @param ctx the parse tree
+	 */
+	void exitBlock_aligned_directive(BladeAntlrFormatterParser.Block_aligned_directiveContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link BladeAntlrFormatterParser#inline_identable_element}.
 	 * @param ctx the parse tree
 	 */
@@ -109,6 +119,26 @@ public interface BladeAntlrFormatterParserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitInline_identable_element(BladeAntlrFormatterParser.Inline_identable_elementContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link BladeAntlrFormatterParser#section_block}.
+	 * @param ctx the parse tree
+	 */
+	void enterSection_block(BladeAntlrFormatterParser.Section_blockContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link BladeAntlrFormatterParser#section_block}.
+	 * @param ctx the parse tree
+	 */
+	void exitSection_block(BladeAntlrFormatterParser.Section_blockContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link BladeAntlrFormatterParser#section_block_start}.
+	 * @param ctx the parse tree
+	 */
+	void enterSection_block_start(BladeAntlrFormatterParser.Section_block_startContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link BladeAntlrFormatterParser#section_block_start}.
+	 * @param ctx the parse tree
+	 */
+	void exitSection_block_start(BladeAntlrFormatterParser.Section_block_startContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link BladeAntlrFormatterParser#nl_with_space_before}.
 	 * @param ctx the parse tree
@@ -139,4 +169,14 @@ public interface BladeAntlrFormatterParserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitStatic_element(BladeAntlrFormatterParser.Static_elementContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link BladeAntlrFormatterParser#blade_echo}.
+	 * @param ctx the parse tree
+	 */
+	void enterBlade_echo(BladeAntlrFormatterParser.Blade_echoContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link BladeAntlrFormatterParser#blade_echo}.
+	 * @param ctx the parse tree
+	 */
+	void exitBlade_echo(BladeAntlrFormatterParser.Blade_echoContext ctx);
 }
