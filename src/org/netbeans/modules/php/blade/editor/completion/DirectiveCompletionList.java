@@ -13,6 +13,10 @@ import org.netbeans.modules.php.blade.syntax.annotation.DirectiveRegister;
     @Directive(name = "@elseif", params = true),
     @Directive(name = "@else"),
     @Directive(name = "@endif"),
+    @Directive(name="@empty"),
+    @Directive(name="@empty", params=true, endtag = "@endempty"),
+    @Directive(name="@isset", params=true, endtag="@endisset"),
+    @Directive(name="@unless", params=true, endtag="@endunless"),
     //loops
     @Directive(name = "@for", params = true, endtag = "@endfor"),
     @Directive(name = "@foreach", params = true, endtag = "@endforeach"),

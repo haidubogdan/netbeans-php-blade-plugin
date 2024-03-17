@@ -33,6 +33,7 @@ fragment BlockDirectiveName
     : 'auth' | 'guest'
    | 'if' | 'can' ('any' | 'not')? | 'for' ('each' | 'else')? 
    | 'while' | 'hasSection' | 'fragment' | 'verbatim'
+   | 'isset' | 'unless' | 'empty' 
    | 'env' | 'once' | 'error'
    | 'push' ('if' | 'once')? | 'prepend' | 'switch';
 
@@ -63,7 +64,7 @@ D_BLOCK_DIRECTIVE_END : '@end' BlockDirectiveName ;
 
 D_SECTION : ('@section' DirectiveArgLookup)->pushMode(DIRECTIVE_ARG);
 D_ENDSECTION : '@endsection' | '@show' | '@append' | '@stop';
-D_BLOCK_ALIGNED_DIRECTIVE : '@else' | '@elseif';
+D_BLOCK_ALIGNED_DIRECTIVE : '@else' | '@elseif' | '@empty';
 NON_PARAM_DIRECTIVE : '@continue' | '@break';
 
 D_INLINE_DIRECTIVE : '@' DirectiveLabel DirectiveArgLookup | '@csrf';
