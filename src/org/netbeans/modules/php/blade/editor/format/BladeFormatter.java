@@ -18,6 +18,7 @@ import org.netbeans.api.project.Project;
 import org.netbeans.modules.editor.NbEditorUtilities;
 import org.netbeans.modules.editor.indent.spi.CodeStylePreferences;
 import org.netbeans.modules.php.blade.project.BladeProjectProperties;
+import org.netbeans.modules.php.blade.project.OptionsUtils;
 import org.netbeans.spi.project.ui.support.ProjectConvertors;
 import org.openide.filesystems.FileObject;
 
@@ -33,7 +34,6 @@ import org.openide.filesystems.FileObject;
  * @author bhaidu
  */
 public class BladeFormatter implements Formatter {
-    public static String ENABLE_BLADE_INDENTATION = "enable-blade-indent";
     private static final Logger LOGGER = Logger.getLogger(BladeFormatter.class.getName());
 
     public BladeFormatter() {
@@ -41,17 +41,19 @@ public class BladeFormatter implements Formatter {
 
     @Override
     public void reformat(Context context, ParserResult compilationInfo) {
- 
+
         LineDocument doc = LineDocumentUtils.as(context.document(), LineDocument.class);
         if (doc == null) {
             return;
         }
-        if (context.isIndent() && !isBladeIndentEnabled(doc)){
+        if (context.isIndent() && !isBladeIndentEnabled(doc)) {
+            return;
+        } else if (!isBladeFormattingEnabled(doc)) {
             return;
         }
         FileObject file = NbEditorUtilities.getFileObject(doc);
         Project projectOwner = ProjectConvertors.getNonConvertorOwner(file);
-        if (projectOwner == null){
+        if (projectOwner == null) {
             return;
         }
 
@@ -115,10 +117,14 @@ public class BladeFormatter implements Formatter {
         Preferences prefs = CodeStylePreferences.get(doc).getPreferences();
         return prefs.getInt(SimpleValueNames.INDENT_SHIFT_WIDTH, 4);
     }
-    
+
     static boolean isBladeIndentEnabled(Document doc) {
         Preferences prefs = CodeStylePreferences.get(doc).getPreferences();
-        return prefs.getBoolean(ENABLE_BLADE_INDENTATION, false);
+        return prefs.getBoolean(OptionsUtils.ENABLE_INDENTATION, false);
     }
 
+    static boolean isBladeFormattingEnabled(Document doc) {
+        Preferences prefs = CodeStylePreferences.get(doc).getPreferences();
+        return prefs.getBoolean(OptionsUtils.ENABLE_FORMATTING, false);
+    }
 }

@@ -13,7 +13,7 @@ fragment BladeLabel
 
 fragment FullIdentifier 
     : [a-z_\u0080-\ufffe][a-z0-9_\u0080-\ufffe-]*;    
- 
+
 fragment ESC_DOUBLE_QUOTED_STRING 
     : [\\"];
 

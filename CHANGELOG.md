@@ -1,5 +1,21 @@
 # Change Log
 
+## [2.1.3]
+
+**formatting**
+
+- enabled by default
+- fixed bugs ~(almost stable version)
+
+**lexer**
+
+- adding some **livewire** pluging directives
+
+**navigator**
+
+- fix missing `@can` directive from navigator
+- add identifier info in navigator
+
 ## [2.1.2]
 
 **formatting**

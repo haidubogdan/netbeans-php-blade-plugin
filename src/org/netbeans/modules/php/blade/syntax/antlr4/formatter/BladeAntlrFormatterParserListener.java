@@ -70,6 +70,26 @@ public interface BladeAntlrFormatterParserListener extends ParseTreeListener {
 	 */
 	void exitHtml_indent(BladeAntlrFormatterParser.Html_indentContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link BladeAntlrFormatterParser#html_tag}.
+	 * @param ctx the parse tree
+	 */
+	void enterHtml_tag(BladeAntlrFormatterParser.Html_tagContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link BladeAntlrFormatterParser#html_tag}.
+	 * @param ctx the parse tree
+	 */
+	void exitHtml_tag(BladeAntlrFormatterParser.Html_tagContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link BladeAntlrFormatterParser#self_closed_tag}.
+	 * @param ctx the parse tree
+	 */
+	void enterSelf_closed_tag(BladeAntlrFormatterParser.Self_closed_tagContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link BladeAntlrFormatterParser#self_closed_tag}.
+	 * @param ctx the parse tree
+	 */
+	void exitSelf_closed_tag(BladeAntlrFormatterParser.Self_closed_tagContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link BladeAntlrFormatterParser#block_start}.
 	 * @param ctx the parse tree
 	 */
@@ -129,6 +149,16 @@ public interface BladeAntlrFormatterParserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitSection_block(BladeAntlrFormatterParser.Section_blockContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link BladeAntlrFormatterParser#section_block_end}.
+	 * @param ctx the parse tree
+	 */
+	void enterSection_block_end(BladeAntlrFormatterParser.Section_block_endContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link BladeAntlrFormatterParser#section_block_end}.
+	 * @param ctx the parse tree
+	 */
+	void exitSection_block_end(BladeAntlrFormatterParser.Section_block_endContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link BladeAntlrFormatterParser#section_block_start}.
 	 * @param ctx the parse tree

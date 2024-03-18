@@ -11,14 +11,17 @@ options {
  
 //we will hide html in the end
 tokens {HTML, PHP_CODE}
- 
-channels { COMMENT }
-
-fragment DirectiveLabel 
+    
+    channels { COMMENT }
+    
+    fragment DirectiveLabel 
     : [a-z\u0080-\ufffe][a-z0-9_\u0080-\ufffe]*;
 
 fragment Identifier
     : [a-z\u0080-\ufffe][a-z0-9_\u0080-\ufffe]*;
+
+fragment CompomentIdentifier
+    : [a-z\u0080-\ufffe][a-z0-9_.\u0080-\ufffe]*;
 
 fragment DirectiveArgLookup
     : (' ')* {this._input.LA(1) == '('}?;
@@ -31,17 +34,17 @@ fragment SINGLE_QUOTED_STRING_FRAGMENT
 
 fragment BlockDirectiveName 
     : 'auth' | 'guest'
-   | 'if' | 'can' ('any' | 'not')? | 'for' ('each' | 'else')? 
-   | 'while' | 'hasSection' | 'fragment' | 'verbatim'
-   | 'isset' | 'unless' | 'empty' 
-   | 'env' | 'once' | 'error'
-   | 'push' ('if' | 'once')? | 'prepend' | 'switch';
+    | 'if' | 'can' ('any' | 'not')? | 'for' ('each' | 'else')? 
+    | 'while' | 'hasSection' | 'fragment' | 'verbatim'
+    | 'isset' | 'unless' | 'empty' 
+    | 'env' | 'once' | 'error'
+    | 'push' ('if' | 'once')? | 'prepend' | 'switch';
 
 PHP_INLINE : '<?=' .*? '?>' | '<?php' .*? '?>';
 //
 D_ESCAPES 
     : (
-      '{{{'
+    '{{{'
     |  '@@' '@'?
     | '@{' '{'?
     | '@media' [ ]*
@@ -77,14 +80,32 @@ RAW_TAG_OPEN : '{!!' ->pushMode(INSIDE_RAW_ECHO);
 SG_QUOTE : '\'';
 DB_QUOTE : '"';
 
-HTML_CLOSE_TAG : '<' (' ')* '/' (' ')*  [a-z\u0080-\ufffe][a-z0-9_.\u0080-\ufffe]* (' ')* '>';
+HTML_CLOSE_TAG : ('<' (' ')* '/' (' ')*  [a-z\u0080-\ufffe][a-z0-9_.\u0080-\ufffe]* (' ')* '>') | ('</' (' ')* 'x-'  CompomentIdentifier (' ')* '>');
 HTML_COMMENT: '<!--' .*? '-->';
 HTML_START_BLOCK_TAG : '<' ('div'
-   | 'section'
-   | 'script' | 'select' | 'h' [1-9] 
-   | ('p' | 'a') {this._input.LA(1) == '@' || this._input.LA(1) == ' ' || this._input.LA(1) == '\n'}?);
+    | 'section' | 'main' | 'article'
+    | 'html' | 'meta' | 'title' | 'head' | 'style' | 'script' | 'footer'
+    | 'pre' | 'code' | 'blockquote'
+    | 'dt' | 'dl' | 'video'
+    | 'template'
+    | 'span' | 'strong' | 'em' | 'small' | 'sub' | 'sup'
+    | 'figure' | 'canvas' | 'svg' | 'path' | 'polygon' | 'picture'
+    | 'header' | 'h' [1-9] | 'nav'
+    | 'dialog'
+    | 'summary' | 'details' | 'slot'
+    | 'label' | 'select' | 'option' | 'fieldset' | 'textarea' | 'button' | 'form' | 'search'
+    | ('ul' | 'ol' | 'li') {this._input.LA(1) == '>' || this._input.LA(1) == '@' || this._input.LA(1) == ' ' || this._input.LA(1) == '\n'}?
+    | 'table' | 'tr' | 'td' | 'th' | 'tbody' | 'thead' | 'tfoot'
+    | ('var' | 'q' | 'p' | 'a' | 'b' | 'i') {this._input.LA(1) == '>' || this._input.LA(1) == '@' || this._input.LA(1) == ' ' || this._input.LA(1) == '\n'}?);
+
+
+HTML_SELF_CLOSE_TAG : '<img' | '<input' | '<br' | '<hr';
+
+COMPONENT_TAG : '<x-' CompomentIdentifier;
+
 EQ : '=';
-IDENTIFIER : Identifier; 
+IDENTIFIER : Identifier;
+INLINE_GT_SYMBOL : '/>';
 GT_SYMBOL : '>';
 
 D_PHP : '@php' {this._input.LA(1) == ' ' || this._input.LA(1) == '\n'}?->pushMode(BLADE_INLINE_PHP);

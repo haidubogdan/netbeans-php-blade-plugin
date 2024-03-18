@@ -33,12 +33,12 @@ import org.openide.windows.TopComponent;
  */
 @ActionID(id = "org.netbeans.modules.php.blade.editor.actions.ViewAntlrFormatterTokens", category = "DebugAntlrActions")
 @ActionRegistration(displayName = "AntlrFormatter Tokens")
-public class ViewAntlrFormtterTokensAction extends AbstractAction implements ActionListener {
+public class ViewAntlrFormatterTokensAction extends AbstractAction implements ActionListener {
 
     Node node;
     private transient JEditorPane viewer;
 
-    public ViewAntlrFormtterTokensAction(Node node) {
+    public ViewAntlrFormatterTokensAction(Node node) {
         this.node = node;
         putValue(NAME, "AntlrFormatter Tokens");
     }
@@ -130,6 +130,7 @@ public class ViewAntlrFormtterTokensAction extends AbstractAction implements Act
                             result.append("~");
                             result.append(token.getText());
                             break;
+                        case COMPONENT_TAG:
                         case HTML_CLOSE_TAG:
                         case HTML_START_BLOCK_TAG:
                             result.append(token.getText());

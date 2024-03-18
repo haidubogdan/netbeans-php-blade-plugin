@@ -198,6 +198,16 @@ public interface BladeAntlrParserListener extends ParseTreeListener {
 	 */
 	void exitEndif(BladeAntlrParser.EndifContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link BladeAntlrParser#empty_block}.
+	 * @param ctx the parse tree
+	 */
+	void enterEmpty_block(BladeAntlrParser.Empty_blockContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link BladeAntlrParser#empty_block}.
+	 * @param ctx the parse tree
+	 */
+	void exitEmpty_block(BladeAntlrParser.Empty_blockContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link BladeAntlrParser#conditional_block}.
 	 * @param ctx the parse tree
 	 */
@@ -217,6 +227,36 @@ public interface BladeAntlrParserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitAuth_block(BladeAntlrParser.Auth_blockContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link BladeAntlrParser#env_block}.
+	 * @param ctx the parse tree
+	 */
+	void enterEnv_block(BladeAntlrParser.Env_blockContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link BladeAntlrParser#env_block}.
+	 * @param ctx the parse tree
+	 */
+	void exitEnv_block(BladeAntlrParser.Env_blockContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link BladeAntlrParser#permission}.
+	 * @param ctx the parse tree
+	 */
+	void enterPermission(BladeAntlrParser.PermissionContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link BladeAntlrParser#permission}.
+	 * @param ctx the parse tree
+	 */
+	void exitPermission(BladeAntlrParser.PermissionContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link BladeAntlrParser#error_block}.
+	 * @param ctx the parse tree
+	 */
+	void enterError_block(BladeAntlrParser.Error_blockContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link BladeAntlrParser#error_block}.
+	 * @param ctx the parse tree
+	 */
+	void exitError_block(BladeAntlrParser.Error_blockContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link BladeAntlrParser#switch}.
 	 * @param ctx the parse tree
@@ -357,6 +397,16 @@ public interface BladeAntlrParserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitEach(BladeAntlrParser.EachContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link BladeAntlrParser#once_block}.
+	 * @param ctx the parse tree
+	 */
+	void enterOnce_block(BladeAntlrParser.Once_blockContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link BladeAntlrParser#once_block}.
+	 * @param ctx the parse tree
+	 */
+	void exitOnce_block(BladeAntlrParser.Once_blockContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link BladeAntlrParser#hasSection}.
 	 * @param ctx the parse tree

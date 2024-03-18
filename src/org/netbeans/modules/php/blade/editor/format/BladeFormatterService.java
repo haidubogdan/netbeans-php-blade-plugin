@@ -41,48 +41,51 @@ public class BladeFormatterService {
             int tstart = entry.getValue().tokenStart;
             int indent = entry.getValue().indent;
             int htmlIndent = entry.getValue().htmlIndent;
-            int existingLineIndent = 0;
-            try {
-                existingLineIndent = context.lineIndent(tstart);
-            } catch (BadLocationException ex) {
-                Exceptions.printStackTrace(ex);
-            }
-            if (tstart > cend) {
-                System.out.println("finished " + tstart + " > " + cend);
-                System.out.println("line : " + entry.getKey() + " ei " + existingLineIndent);
-                System.out.println("token : " + entry.getValue());
-                break;
+            if (tstart < context.document().getLength()) {
+                int existingLineIndent = 0;
+                try {
+                    existingLineIndent = context.lineIndent(tstart);
+                } catch (BadLocationException ex) {
+                    Exceptions.printStackTrace(ex);
+                    break;
+                }
+                if (tstart > cend) {
+                    System.out.println("finished " + tstart + " > " + cend);
+                    System.out.println("line : " + entry.getKey() + " ei " + existingLineIndent);
+                    System.out.println("token : " + entry.getValue());
+                    break;
+                }
             }
 
             if (tstart >= cstart) {
-                try {
-                    System.out.println(" lineOffset : " + context.document().getLength() + " ~ " + (tstart - textDelta));
-                    if (context.document().getLength() < (tstart - textDelta)) {
-                        //skipping
-                        continue;
-                    }
+                System.out.println("doc length : " + context.document().getLength());
+                System.out.println("delta : " + (tstart - textDelta));
+                if (context.document().getLength() < (tstart - textDelta)) {
+                    //skipping
+                    continue;
+                }
 
-                    System.out.println("line : " + entry.getKey());
-                    System.out.println("token : " + entry.getValue());
+                System.out.println("line : " + entry.getKey());
+                System.out.println("token : " + entry.getValue());
+                System.out.println("indent : " + indent);
+                System.out.println("htmlindent : " + htmlIndent);
+                try {
                     int lineStart_i = context.lineStartOffset(tstart - textDelta);
                     int originalIndent_i = context.lineIndent(lineStart_i);
-
                     int wsIndent = (indent + htmlIndent) * indentSize;
-                    System.out.println("indent : " + indent);
-                    System.out.println("htmlindent : " + htmlIndent);
+                    System.out.println("linestart + offset : " + (lineStart_i + wsIndent));
+                    if (lineStart_i + wsIndent > context.document().getLength()) {
+                        System.out.println("out of range : " + (lineStart_i + wsIndent));
+                        break;
+                    }
                     context.modifyIndent(lineStart_i, wsIndent);
                     System.out.println("delta : " + (originalIndent_i - wsIndent));
                     System.out.println("====================================");
                     textDelta += (originalIndent_i - wsIndent);
                 } catch (BadLocationException ex) {
                     Exceptions.printStackTrace(ex);
+                    break;
                 }
-            } else {
-                //
-                System.out.println("out of range " + tstart + " < " + cstart);
-                System.out.println("line : " + entry.getKey() + " ei " + existingLineIndent);
-                System.out.println("token : " + entry.getValue());
-                System.out.println("===============================");
             }
         }
     }
@@ -107,6 +110,34 @@ public class BladeFormatterService {
 
             @Override
             public void exitBlock_end(BladeAntlrFormatterParser.Block_endContext ctx) {
+                Token start = ctx.getStart();
+                int line = start.getLine();
+                if (!formattedLineIndentList.containsKey(line)) {
+                    indent--;
+                    formattedLineIndentList.put(line, new FormatToken(start.getStartIndex(), indent, htmlBlockBalance, start.getText()));
+                } else {
+                    formattedLineIndentList.remove(line);
+                }
+                //correction
+                if (indent < 0) {
+                    indent = 0;
+                }
+                blockBalance--;
+            }
+
+            @Override
+            public void exitSection_block_start(BladeAntlrFormatterParser.Section_block_startContext ctx) {
+                Token start = ctx.getStart();
+                blockBalance++;
+                if (ctx.getStop() != null && !formattedLineIndentList.containsKey(start.getLine())) {
+                    Token rArgParent = ctx.getStop();
+                    formattedLineIndentList.put(rArgParent.getLine(), new FormatToken(rArgParent.getStopIndex() + 1, indent, htmlBlockBalance, rArgParent.getText()));
+                    indent++;
+                }
+            }
+
+            @Override
+            public void exitSection_block_end(BladeAntlrFormatterParser.Section_block_endContext ctx) {
                 Token start = ctx.getStart();
                 int line = start.getLine();
                 if (!formattedLineIndentList.containsKey(line)) {
@@ -155,19 +186,39 @@ public class BladeFormatterService {
                 }
                 Token start = ctx.getStart();
                 int line = start.getLine();
-                if (blockBalance > 0 && !formattedLineIndentList.containsKey(line)) {
+                if (!formattedLineIndentList.containsKey(line)) {
                     formattedLineIndentList.put(line, new FormatToken(start.getStartIndex(), indent, htmlBlockBalance, start.getText()));
                 }
             }
 
             @Override
-            public void exitHtml_indent(BladeAntlrFormatterParser.Html_indentContext ctx) {
-                if (ctx.WS() == null || ctx.WS().isEmpty()) {
-                    return;
-                }
+            public void exitHtml_tag(BladeAntlrFormatterParser.Html_tagContext ctx) {
                 Token start = ctx.getStart();
                 int line = start.getLine();
-                if (blockBalance > 0 && !formattedLineIndentList.containsKey(line)) {
+                if (!formattedLineIndentList.containsKey(line)) {
+                    if ((htmlBlockBalance > 0 || blockBalance > 0)) {
+                        formattedLineIndentList.put(line, new FormatToken(start.getStartIndex(), indent, htmlBlockBalance, start.getText()));
+                    }
+                    htmlBlockBalance++;
+                }
+            }
+
+            @Override
+            public void exitSelf_closed_tag(BladeAntlrFormatterParser.Self_closed_tagContext ctx) {
+                Token start = ctx.getStart();
+                int line = start.getLine();
+                if (!formattedLineIndentList.containsKey(line)) {
+                    if ((htmlBlockBalance > 0 || blockBalance > 0)) {
+                        formattedLineIndentList.put(line, new FormatToken(start.getStartIndex(), indent, htmlBlockBalance, start.getText()));
+                    }
+                }
+            }
+
+            @Override
+            public void exitHtml_indent(BladeAntlrFormatterParser.Html_indentContext ctx) {
+                Token start = ctx.getStart();
+                int line = start.getLine();
+                if (!formattedLineIndentList.containsKey(line)) {
                     formattedLineIndentList.put(line, new FormatToken(start.getStartIndex(), indent, htmlBlockBalance, start.getText()));
                 }
                 htmlBlockBalance++;

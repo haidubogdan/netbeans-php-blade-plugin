@@ -101,10 +101,17 @@ public abstract class BladeStructureItem implements ElementHandle, StructureItem
 
     public static final class DirectiveBlockStructureItem extends BladeStructureItem {
 
+        private String identifier;
+
         public final List<BladeStructureItem> nestedItems = new ArrayList<>();
 
         public DirectiveBlockStructureItem(String name, FileObject source, int startOffset, int stopOffset) {
             super(name, source, startOffset, stopOffset);
+        }
+
+        public DirectiveBlockStructureItem(String name, String identifier, FileObject source, int startOffset, int stopOffset) {
+            super(name, source, startOffset, stopOffset);
+            this.identifier = identifier;
         }
 
         @Override
@@ -120,6 +127,20 @@ public abstract class BladeStructureItem implements ElementHandle, StructureItem
         @Override
         public ElementKind getKind() {
             return ElementKind.CLASS;
+        }
+
+        @Override
+        public String getHtml(HtmlFormatter formatter) {
+            formatter.appendText(name);
+            if (identifier != null) {
+                formatter.appendText(" ");
+                formatter.appendHtml("<em>");
+                formatter.appendHtml("<font color='5b5b5b'>");
+                formatter.appendText(identifier);
+                formatter.appendHtml("</font>");
+                formatter.appendHtml("</em>");
+            }
+            return formatter.getText();
         }
 
         @Override
@@ -149,7 +170,7 @@ public abstract class BladeStructureItem implements ElementHandle, StructureItem
         @Override
         public String getHtml(HtmlFormatter formatter) {
             formatter.appendText(name);
-            if (identifier != null){
+            if (identifier != null) {
                 formatter.appendText(" ");
                 formatter.appendHtml("<em>");
                 formatter.appendHtml("<font color='5b5b5b'>");

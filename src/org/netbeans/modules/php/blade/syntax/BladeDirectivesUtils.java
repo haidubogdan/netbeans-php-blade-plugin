@@ -73,6 +73,8 @@ public class BladeDirectivesUtils {
             case "@append":
             case "@show":
                 return new String[]{"@section"};
+            case "@endcan":
+                return new String[]{"@can"};
             case "@endpush":
                 return new String[]{"@push"};
             case "@endPushIf":

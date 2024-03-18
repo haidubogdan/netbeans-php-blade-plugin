@@ -60,6 +60,7 @@ inline_directive:
     | loop_action
     | D_LANG singleArgAndDefaultWrapper
     | D_LOOP_ACTION | D_BREAK
+    | D_LIVEWIRE
     | custom_directive
     ;
 
@@ -69,22 +70,20 @@ block_statement:
     | sectionMissing
     | push
     | pushIf
-    | D_ONCE general_statement+ D_ENDONCE
+    | once_block
     | prepend
     | fragmentD
     | if
     | elseif
     | else
     | switch
-    | D_ENV  singleArgWrapper general_statement+ D_ENDENV
-    | D_PRODUCTION general_statement+ D_ENDPRODUCTION
-    | D_EMPTY main_php_expression general_statement+ D_ENDEMPTY
-    | D_ERROR php_expression general_statement+ D_ENDERROR
+    | env_block
+    | error_block
     //we can consider the statements not being empty
     | conditional_block
     | auth_block
     //lazy parser for can
-    | D_PERMISSION_START composed_php_expression general_statement+ D_PERMISSION_END
+    | permission
     | while
     | for
     | foreach
@@ -111,10 +110,16 @@ if : D_IF main_php_expression general_statement+ endif?;
 elseif : D_ELSEIF main_php_expression general_statement+ endif?;
 else : D_ELSE general_statement+ endif?;
 endif: D_ENDIF;
+empty_block : D_EMPTY main_php_expression general_statement+ D_ENDEMPTY;
 
 //the consistency for these blocks need to be checked inside the parser
 conditional_block : D_COND_BLOCK_START main_php_expression general_statement+ D_COND_BLOCK_END;
 auth_block : D_AUTH_START singleArgWrapperNovar* general_statement+ D_AUTH_END;
+env_block: (D_ENV  singleArgWrapper general_statement+ D_ENDENV) | D_PRODUCTION general_statement+ D_ENDPRODUCTION;
+permission : D_PERMISSION_START composed_php_expression general_statement+ D_PERMISSION_END;
+
+//
+error_block :  D_ERROR php_expression general_statement+ D_ENDERROR;
 
 //no need to add complexity to parser
 switch: D_SWITCH php_expression (general_statement | D_BREAK)+ D_ENDSWITCH;
@@ -152,6 +157,7 @@ each : D_EACH BLADE_PARAM_LPAREN
     (identifiableArgument | composedArgument))? //fallback
     BLADE_PARAM_RPAREN;
 
+once_block : D_ONCE general_statement+ D_ENDONCE;
 hasSection : D_HAS_SECTION singleArgWrapper general_statement* D_ENDIF;
 sectionMissing : D_SECTION_MISSING singleArgWrapper general_statement* D_ENDIF;
 

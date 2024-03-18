@@ -125,7 +125,7 @@ public class BladeParserResult extends ParserResult {
             parser.addParseListener(createDeclarationReferencesListener());
             parser.addParseListener(createPhpElementsOccurencesListener());
             parser.addParseListener(createVariableListener());
-            
+
             //not implemented yet
             //parser.addParseListener(createLayoutTreeListener());
             parser.addParseListener(createStructureListener());
@@ -489,13 +489,8 @@ public class BladeParserResult extends ParserResult {
                         DirectiveInlineStructureItem inlineElement;
                         String directiveName = directiveToken.getText();
 
-                        if (identifier != null) {
-                            inlineElement = new DirectiveInlineStructureItem(directiveName, identifier,
-                                    getFileObject(), directiveToken.getStartIndex(), directiveToken.getStopIndex() + 1);
-                        } else {
-                            inlineElement = new DirectiveInlineStructureItem(directiveName,
-                                    getFileObject(), directiveToken.getStartIndex(), directiveToken.getStopIndex() + 1);
-                        }
+                        inlineElement = new DirectiveInlineStructureItem(directiveName, identifier,
+                                getFileObject(), directiveToken.getStartIndex(), directiveToken.getStopIndex() + 1);
 
                         if (blockBalance > 0) {
                             lexerStructure.add(inlineElement);
@@ -510,6 +505,7 @@ public class BladeParserResult extends ParserResult {
 
             @Override
             public void enterBlock_statement(BladeAntlrParser.Block_statementContext ctx) {
+                identifier = null;
                 blockBalance++;
             }
 
@@ -525,7 +521,7 @@ public class BladeParserResult extends ParserResult {
                             return;
                         }
                         String directiveName = directiveToken.getText();
-                        DirectiveBlockStructureItem blockItem = new DirectiveBlockStructureItem(directiveName,
+                        DirectiveBlockStructureItem blockItem = new DirectiveBlockStructureItem(directiveName, identifier,
                                 getFileObject(), ctx.getStart().getStartIndex(), ctx.getStop().getStopIndex() + 1);
 
                         blockItem.nestedItems.addAll(lexerStructure);
@@ -778,7 +774,7 @@ public class BladeParserResult extends ParserResult {
                 OffsetRange range = new OffsetRange(ctx.getStart().getStartIndex(), ctx.getStart().getStartIndex() + directiveName.length());
                 customDirectivesReferences.put(range, new Reference(ReferenceType.CUSTOM_DIRECTIVE, directiveName, range));
             }
-            
+
             @Override
             public void exitPossibleDirective(BladeAntlrParser.PossibleDirectiveContext ctx) {
                 String directiveName = ctx.getStart().getText();

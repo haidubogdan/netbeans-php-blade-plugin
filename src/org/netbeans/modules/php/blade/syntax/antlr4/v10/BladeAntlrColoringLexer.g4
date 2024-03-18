@@ -28,6 +28,9 @@ NEKUDO_WHITELIST_MATCH : '::' | '?:' | ' : ';
 fragment DOUBLE_QUOTED_STRING_FRAGMENT_WITH_PHP 
     : '"' (ESC_DOUBLE_QUOTED_STRING | '{' PhpVariable '}' | . | ~[:])*?  '"';
 
+fragment ComponentTagIdentifier 
+    : [a-z_\u0080-\ufffe][a-z0-9\u0080-\ufffe-]*;   
+
 PHP_INLINE : '<?=' .*? '?>' | '<?php' .*? ('?>' | EOF);
 
 //conditionals
@@ -117,6 +120,9 @@ D_WITH_EXPR : ('@break' | '@continue' | '@selected' | '@disabled' | '@readonly' 
 D_SIMPLE : ('@stop' | '@csrf' | '@default' | '@append')->type(DIRECTIVE);
 D_END : ('@end' NameString)->pushMode(LOOK_FOR_PHP_EXPRESSION),type(DIRECTIVE);
 
+//known plugins
+D_LIVEWIRE : ('@livewireStyles' | '@bukStyles' | '@livewireScripts' | '@bukScripts' | '@click' ('.away')? '=')->type(DIRECTIVE);
+
 //we will decide that a custom directive has expression to avoid email matching
 D_CUSTOM : ('@' NameString {this._input.LA(1) == '(' || 
         (this._input.LA(1) == ' ' && this._input.LA(2) == '(')}? ) ->pushMode(LOOK_FOR_PHP_EXPRESSION);
@@ -133,7 +139,7 @@ UNCLOSED_TAG : ('<' NameString [\r\n]+)->type(HTML);
 
 LAST_NL : [\r\n]+ EOF; 
 
-HTML_X : ('<x-' BladeLabel)->type(HTML),pushMode(INSIDE_HTML_COMPONENT_TAG);
+HTML_X : ('<x-' ComponentTagIdentifier)->type(HTML),pushMode(INSIDE_HTML_COMPONENT_TAG);
 
 HTML : ~[<?@{!]+;
 
@@ -240,6 +246,9 @@ EXIT_VERBATIM_MOD_EOF : EOF->type(ERROR),popMode;
 mode INSIDE_HTML_COMPONENT_TAG;
 
 COMPONENT_ATTRIBUTE : (':' NameString '="') ->type(HTML),pushMode(COMPONENT_PHP_EXPRESSION); 
+
+COMPONENT_CONTENT_TAG_OPEN : '{{' ->pushMode(INSIDE_REGULAR_ECHO),type(CONTENT_TAG);
+COMPONENT_RAW_TAG_OPEN : '{!!' ->pushMode(INSIDE_RAW_ECHO),type(RAW_TAG);
 
 EXIT_HTML_COMPONENT : '>'->type(HTML), popMode;
 

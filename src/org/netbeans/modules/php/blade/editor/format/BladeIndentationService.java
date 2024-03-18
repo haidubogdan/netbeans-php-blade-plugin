@@ -80,12 +80,6 @@ public class BladeIndentationService {
                 } catch (BadLocationException ex) {
                     Exceptions.printStackTrace(ex);
                 }
-            } else {
-                //
-                System.out.println("out of range " + tstart + " < " + cstart);
-                System.out.println("line : " + entry.getKey() + " ei " + existingLineIndent);
-                System.out.println("token : " + entry.getValue());
-                System.out.println("===============================");
             }
         }
     }
@@ -99,10 +93,6 @@ public class BladeIndentationService {
 
             @Override
             public void exitBlock_start(BladeAntlrFormatterParser.Block_startContext ctx) {
-                //we need to get the html indent
-                if (ctx.ws_before != null) {
-                    Token wsBefore = ctx.ws_before.getStop();
-                }
                 Token start = ctx.block_directive_name().getStart();
                 if (!formattedLineIndentList.containsKey(start.getLine())) {
                     formattedLineIndentList.put(start.getLine(), new FormatToken(start.getStartIndex(), indent, htmlBlockBalance, start.getText()));
@@ -120,6 +110,40 @@ public class BladeIndentationService {
 
             @Override
             public void exitBlock_end(BladeAntlrFormatterParser.Block_endContext ctx) {
+                Token start = ctx.getStart();
+                int line = start.getLine();
+                if (!formattedLineIndentList.containsKey(line)) {
+                    formattedLineIndentList.put(line, new FormatToken(start.getStartIndex(), indent, htmlBlockBalance, start.getText()));
+                    indent--;
+                } else {
+                    formattedLineIndentList.remove(line);
+                }
+                //correction
+                if (indent < 0) {
+                    indent = 0;
+                }
+                blockBalance--;
+            }
+
+            @Override
+            public void exitSection_block_start(BladeAntlrFormatterParser.Section_block_startContext ctx) {
+                Token start = ctx.getStart();
+                if (!formattedLineIndentList.containsKey(start.getLine())) {
+                    formattedLineIndentList.put(start.getLine(), new FormatToken(start.getStartIndex(), indent, htmlBlockBalance, start.getText()));
+                    indent++;
+                } else {
+                    formattedLineIndentList.remove(start.getLine());
+                }
+                blockBalance++;
+                if (ctx.getStop() != null) {
+                    Token rArgParent = ctx.getStop();
+                    //TODO include the whitespace after tab
+                    wsTokenAfterArgStm.put(rArgParent.getLine(), new FormatToken(rArgParent.getStopIndex() + 1, indent, htmlBlockBalance, rArgParent.getText()));
+                }
+            }
+
+            @Override
+            public void exitSection_block_end(BladeAntlrFormatterParser.Section_block_endContext ctx) {
                 Token start = ctx.getStart();
                 int line = start.getLine();
                 if (!formattedLineIndentList.containsKey(line)) {
@@ -176,20 +200,19 @@ public class BladeIndentationService {
                 }
                 Token start = ctx.getStart();
                 int line = start.getLine();
-                if (blockBalance > 0 && !formattedLineIndentList.containsKey(line)) {
+                if (!formattedLineIndentList.containsKey(line)) {
                     formattedLineIndentList.put(line, new FormatToken(start.getStartIndex(), indent, htmlBlockBalance, start.getText()));
+                    wsTokenAfterArgStm.put(line, new FormatToken(start.getStartIndex(), indent, htmlBlockBalance, start.getText()));
                 }
             }
 
             @Override
             public void exitHtml_indent(BladeAntlrFormatterParser.Html_indentContext ctx) {
-                if (ctx.WS() == null || ctx.WS().isEmpty()) {
-                    return;
-                }
                 Token start = ctx.getStart();
                 int line = start.getLine();
-                if (blockBalance > 0 && !formattedLineIndentList.containsKey(line)) {
+                if (!formattedLineIndentList.containsKey(line)) {
                     formattedLineIndentList.put(line, new FormatToken(start.getStartIndex(), indent, htmlBlockBalance, start.getText()));
+                    wsTokenAfterArgStm.put(line, new FormatToken(start.getStartIndex(), indent, htmlBlockBalance, start.getText()));
                 }
                 htmlBlockBalance++;
             }

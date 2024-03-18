@@ -91,6 +91,30 @@ public class BladeAntlrFormatterParserBaseListener implements BladeAntlrFormatte
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterHtml_tag(BladeAntlrFormatterParser.Html_tagContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitHtml_tag(BladeAntlrFormatterParser.Html_tagContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterSelf_closed_tag(BladeAntlrFormatterParser.Self_closed_tagContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitSelf_closed_tag(BladeAntlrFormatterParser.Self_closed_tagContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterBlock_start(BladeAntlrFormatterParser.Block_startContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -158,6 +182,18 @@ public class BladeAntlrFormatterParserBaseListener implements BladeAntlrFormatte
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitSection_block(BladeAntlrFormatterParser.Section_blockContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterSection_block_end(BladeAntlrFormatterParser.Section_block_endContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitSection_block_end(BladeAntlrFormatterParser.Section_block_endContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *

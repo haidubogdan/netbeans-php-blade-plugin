@@ -23,7 +23,7 @@
 
 <editor-preferences>
     <entry javaType="java.lang.Boolean" name="enable-indent" xml:space="preserve"><value>true</value></entry>
-    <entry javaType="java.lang.Boolean" name="enable-blade-indent" xml:space="preserve"><value>false</value></entry>
-    <entry javaType="java.lang.Boolean" name="enable-blade-format" xml:space="preserve"><value>false</value></entry>
+    <entry javaType="java.lang.Boolean" name="enable-blade-indent" xml:space="preserve"><value>true</value></entry>
+    <entry javaType="java.lang.Boolean" name="enable-blade-format" xml:space="preserve"><value>true</value></entry>
     <entry javaType="java.lang.Integer" name="indent-shift-width" xml:space="preserve"><value>4</value></entry>
 </editor-preferences>
