@@ -14,9 +14,10 @@ Installation
 Installing from package
 ----------------------
 
+
 The plugin is not uploaded on netbeans site as it is still in experimental version.
 
-//add release link
+Check for relase versions at : https://github.com/haidubogdan/netbeans-php-blade-plugin/tags
 
 1. In Netbeans open Tools -> Plugins, select Downloaded tab.
 2. Click "Add plugins" and select the file from the nbm folder.
@@ -71,6 +72,10 @@ If you use **blade templates** outside of the generic laravel framework or have 
 
 This will help the yielid and view path completion
 
+**Reformat and indentation**
+
+Experimental formatting and indenting
+
 ---
 
 ### Known issues
@@ -91,6 +96,5 @@ Antlr plugin was introduced with Netbeans 18.
 Some features are not implemented in this plugin version : 
 
 - variable completion from controller
-- no code reformat action
 - components completion and declaration finder
 - error diagnostics for inline php code
