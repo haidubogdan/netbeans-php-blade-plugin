@@ -68,6 +68,8 @@ import org.netbeans.modules.php.blade.syntax.annotation.DirectiveRegister;
     @Directive(name = "@auth", params = true, endtag = "@endauth"),
     @Directive(name = "@guest", params = true, endtag = "@endguest"),
     @Directive(name = "@can", params = true, endtag = "@endcan"),
+    @Directive(name = "@canany", params = true, endtag = "@endcanany"),
+    @Directive(name = "@cannot", params = true, endtag = "@endcannot"),
     //php
     @Directive(name = "@php", endtag = "@endphp"),
     @Directive(name = "@use", params = true),
