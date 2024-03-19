@@ -1,5 +1,12 @@
 # Change Log
 
+## [2.1.40]
+
+**completion, lexer, parser, navigator, formatting**
+
+- added `@session` directive
+
+
 ## [2.1.3]
 
 **formatting**

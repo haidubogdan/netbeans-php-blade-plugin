@@ -59,6 +59,8 @@ public class BladeDirectivesUtils {
                 return new String[]{"@enderror"};
             case "@switch":
                 return new String[]{"@endswitch"};
+            case "@session":
+                return new String[]{"@endsession"};
 
         }
         return null;
@@ -109,6 +111,8 @@ public class BladeDirectivesUtils {
                 return new String[]{"@error"};
             case "@endswitch":
                 return new String[]{"@switch"};
+            case "@endsession":
+                return new String[]{"@session"};
         }
         return null;
     }

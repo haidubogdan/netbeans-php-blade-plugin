@@ -88,6 +88,7 @@ block_statement:
     | for
     | foreach
     | forelse
+    | session
     | verbatim_block
     | php_blade
     ;
@@ -129,6 +130,9 @@ while : D_WHILE php_expression (general_statement)+ D_ENDWHILE;
 for : D_FOR php_expression (general_statement)+ D_ENDFOR;
 foreach : D_FOREACH FOREACH_LOOP_LPAREN loop_expression FOREACH_LOOP_RPAREN (general_statement)+ D_ENDFOREACH;
 forelse : D_FORELSE FOREACH_LOOP_LPAREN loop_expression FOREACH_LOOP_RPAREN (general_statement | D_EMPTY)+ D_ENDFORELSE;
+
+//misc block
+session : D_SESSION composed_php_expression general_statement+ D_ENDSESSION;
 
 //layout
 yieldD : D_YIELD singleArgAndDefaultWrapper;

@@ -37,6 +37,7 @@ fragment BlockDirectiveName
     | 'if' | 'can' ('any' | 'not')? | 'for' ('each' | 'else')? 
     | 'while' | 'hasSection' | 'fragment' | 'verbatim'
     | 'isset' | 'unless' | 'empty' 
+    | 'session'
     | 'env' | 'once' | 'error'
     | 'push' ('if' | 'once')? | 'prepend' | 'switch';
 

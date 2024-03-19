@@ -75,6 +75,7 @@ import org.netbeans.modules.php.blade.syntax.annotation.DirectiveRegister;
     @Directive(name = "@use", params = true),
     @Directive(name = "@inject", params = true),
     //utils
+    @Directive(name="@session", params = true, endtag="@endsession"),
     @Directive(name = "@dd", params = true),
     @Directive(name = "@json", params = true),
 })

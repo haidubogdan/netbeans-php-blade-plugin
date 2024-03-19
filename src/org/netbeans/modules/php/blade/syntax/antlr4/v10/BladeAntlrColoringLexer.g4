@@ -34,10 +34,8 @@ fragment ComponentTagIdentifier
 PHP_INLINE : '<?=' .*? '?>' | '<?php' .*? ('?>' | EOF);
 
 //conditionals
-D_IF : '@if'->pushMode(LOOK_FOR_PHP_EXPRESSION),type(DIRECTIVE);
-D_ELSEIF : '@elseif'->pushMode(LOOK_FOR_PHP_EXPRESSION),type(DIRECTIVE);
-D_ELSE : '@else'->type(DIRECTIVE);
-D_ENDIF : '@endif'->type(DIRECTIVE);
+D_COND_ARG : ('@if' | '@elseif')->pushMode(LOOK_FOR_PHP_EXPRESSION),type(DIRECTIVE);
+D_COND : ('@else' | '@endif')->type(DIRECTIVE);
 D_SWITCH : '@switch'->pushMode(LOOK_FOR_PHP_EXPRESSION),type(DIRECTIVE);
 D_CASE : '@case'->pushMode(LOOK_FOR_PHP_EXPRESSION),type(DIRECTIVE);
 D_ENDSWITCH : '@endswitch'->type(DIRECTIVE);
@@ -46,23 +44,15 @@ D_ENDUNLESS : '@endunless'->type(DIRECTIVE);
 
 //loops
 D_EACH : '@each'->pushMode(LOOK_FOR_PHP_EXPRESSION),type(DIRECTIVE);
-D_FOREACH : '@foreach'->pushMode(LOOK_FOR_PHP_EXPRESSION),type(DIRECTIVE);
-D_ENDFOREACH : '@endforeach'->type(DIRECTIVE);
-D_FOR : '@for'->pushMode(LOOK_FOR_PHP_EXPRESSION),type(DIRECTIVE);
-D_ENDFOR : '@endfor'->type(DIRECTIVE);
-D_FORELSE : '@forelse'->pushMode(LOOK_FOR_PHP_EXPRESSION),type(DIRECTIVE);
-D_ENDFORELSE : '@endforelse'->type(DIRECTIVE);
+D_FOR : '@for' ('each' | 'else')?->pushMode(LOOK_FOR_PHP_EXPRESSION),type(DIRECTIVE);
+D_ENDFOR : '@endfor' ('else' | 'each')?->type(DIRECTIVE);
 D_WHILE : '@while'->pushMode(LOOK_FOR_PHP_EXPRESSION),type(DIRECTIVE);
 D_ENDWHILE : '@endwhile'->type(DIRECTIVE);
 D_CONTINUE : '@continue'->pushMode(LOOK_FOR_PHP_EXPRESSION),type(DIRECTIVE);
 D_BREAK : '@break'->pushMode(LOOK_FOR_PHP_EXPRESSION),type(DIRECTIVE);
 
 //includes
-D_INCLUDE : '@include'->pushMode(LOOK_FOR_PHP_EXPRESSION),type(DIRECTIVE);
-D_INCLUDE_IF : '@includeIf'->pushMode(LOOK_FOR_PHP_EXPRESSION),type(DIRECTIVE);
-D_INCLUDE_WHEN : '@includeWhen'->pushMode(LOOK_FOR_PHP_EXPRESSION),type(DIRECTIVE);
-D_INCLUDE_FIRST : '@includeFirst'->pushMode(LOOK_FOR_PHP_EXPRESSION),type(DIRECTIVE);
-D_INCLUDE_UNLESS : '@includeUnless'->pushMode(LOOK_FOR_PHP_EXPRESSION),type(DIRECTIVE);
+D_INCLUDE : '@include' ('If' | 'When' | 'First' | 'Unless')?->pushMode(LOOK_FOR_PHP_EXPRESSION),type(DIRECTIVE);
 
 //layout
 D_EXTENDS : '@extends'->pushMode(LOOK_FOR_PHP_EXPRESSION),type(DIRECTIVE);
@@ -102,9 +92,9 @@ D_EMPTY : '@empty'->pushMode(LOOK_FOR_PHP_EXPRESSION),type(DIRECTIVE);
 D_ENDEMPTY : '@endempty'->type(DIRECTIVE);
 D_AUTH : '@auth'->pushMode(LOOK_FOR_PHP_EXPRESSION),type(DIRECTIVE);
 D_PERMISSION : ('@can' | '@cannot' | '@canany')->pushMode(LOOK_FOR_PHP_EXPRESSION),type(DIRECTIVE);
-D_JSON  : '@json'->pushMode(LOOK_FOR_PHP_EXPRESSION),type(DIRECTIVE);
 D_INJECT : '@inject'->pushMode(LOOK_FOR_PHP_EXPRESSION),type(DIRECTIVE);
-D_DD : '@dd'->pushMode(LOOK_FOR_PHP_EXPRESSION),type(DIRECTIVE);
+D_MISC : ('@session' | '@dd' | '@json')->pushMode(LOOK_FOR_PHP_EXPRESSION),type(DIRECTIVE);
+D_ENDMISC : '@end' ('session')->type(DIRECTIVE);
 D_PHP_SHORT : '@php' (' ')? {this._input.LA(1) == '('}? ->type(D_PHP),pushMode(LOOK_FOR_PHP_EXPRESSION);
 D_PHP : '@php'->pushMode(BLADE_INLINE_PHP);
 

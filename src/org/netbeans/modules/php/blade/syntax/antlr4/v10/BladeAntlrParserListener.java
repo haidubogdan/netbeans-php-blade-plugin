@@ -308,6 +308,16 @@ public interface BladeAntlrParserListener extends ParseTreeListener {
 	 */
 	void exitForelse(BladeAntlrParser.ForelseContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link BladeAntlrParser#session}.
+	 * @param ctx the parse tree
+	 */
+	void enterSession(BladeAntlrParser.SessionContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link BladeAntlrParser#session}.
+	 * @param ctx the parse tree
+	 */
+	void exitSession(BladeAntlrParser.SessionContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link BladeAntlrParser#yieldD}.
 	 * @param ctx the parse tree
 	 */

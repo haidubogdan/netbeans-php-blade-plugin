@@ -134,6 +134,8 @@ D_HTML_ATTR_EXPR : ('@checked' | '@disabled' | '@readonly' | '@required' | '@sel
 D_AWARE : '@aware'->pushMode(LOOK_FOR_PHP_COMPOSED_EXPRESSION);
 
 //misc
+D_SESSION : '@session'->pushMode(LOOK_FOR_PHP_COMPOSED_EXPRESSION);
+D_ENDSESSION : '@endsession';
 D_JSON  : '@json'->pushMode(LOOK_FOR_PHP_COMPOSED_EXPRESSION);
 D_DD : '@dd'->pushMode(LOOK_FOR_PHP_COMPOSED_EXPRESSION);
 D_LANG : '@lang'->pushMode(LOOK_FOR_BLADE_PARAMETERS);
