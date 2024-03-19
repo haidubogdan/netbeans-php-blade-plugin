@@ -1,5 +1,11 @@
 # Change Log
 
+## [2.1.50]
+
+**lexer, formatting**
+
+- fixing formatting issues due to self clossing tags or special composer tags which contain `::` symbols
+
 ## [2.1.40]
 
 **completion, lexer, parser, navigator, formatting**

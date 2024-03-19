@@ -21,7 +21,7 @@ fragment Identifier
     : [a-z\u0080-\ufffe][a-z0-9_\u0080-\ufffe]*;
 
 fragment CompomentIdentifier
-    : [a-z\u0080-\ufffe][a-z0-9_.\u0080-\ufffe]*;
+    : [a-z\u0080-\ufffe][a-z0-9_.:\u0080-\ufffe]*;
 
 fragment DirectiveArgLookup
     : (' ')* {this._input.LA(1) == '('}?;
@@ -81,11 +81,13 @@ RAW_TAG_OPEN : '{!!' ->pushMode(INSIDE_RAW_ECHO);
 SG_QUOTE : '\'';
 DB_QUOTE : '"';
 
-HTML_CLOSE_TAG : ('<' (' ')* '/' (' ')*  [a-z\u0080-\ufffe][a-z0-9_.\u0080-\ufffe]* (' ')* '>') | ('</' (' ')* 'x-'  CompomentIdentifier (' ')* '>');
+HTML_CLOSE_TAG : ('<' (' ')* '/' (' ')*  [a-z\u0080-\ufffe][a-z0-9_.\u0080-\ufffe]* (' ')* '>') 
+| ('</' (' ')* ('x-'  CompomentIdentifier |  CompomentIdentifier ('::' CompomentIdentifier)*) (' ')* '>') 
+;
 HTML_COMMENT: '<!--' .*? '-->';
 HTML_START_BLOCK_TAG : '<' ('div'
     | 'section' | 'main' | 'article'
-    | 'html' | 'meta' | 'title' | 'head' | 'style' | 'script' | 'footer'
+    | 'html' | 'title' | 'head' | 'style' | 'script' | 'footer'
     | 'pre' | 'code' | 'blockquote'
     | 'dt' | 'dl' | 'video'
     | 'template'
@@ -100,9 +102,9 @@ HTML_START_BLOCK_TAG : '<' ('div'
     | ('var' | 'q' | 'p' | 'a' | 'b' | 'i') {this._input.LA(1) == '>' || this._input.LA(1) == '@' || this._input.LA(1) == ' ' || this._input.LA(1) == '\n'}?);
 
 
-HTML_SELF_CLOSE_TAG : '<img' | '<input' | '<br' | '<hr';
+HTML_SELF_CLOSE_TAG : '<' ('img' | 'input' | 'br' | 'hr' | 'link' | 'meta');
 
-COMPONENT_TAG : '<x-' CompomentIdentifier;
+COMPONENT_TAG : '<x-' CompomentIdentifier | '<' CompomentIdentifier ('::' CompomentIdentifier)*;
 
 EQ : '=';
 IDENTIFIER : Identifier;

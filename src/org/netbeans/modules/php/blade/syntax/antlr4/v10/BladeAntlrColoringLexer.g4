@@ -29,7 +29,7 @@ fragment DOUBLE_QUOTED_STRING_FRAGMENT_WITH_PHP
     : '"' (ESC_DOUBLE_QUOTED_STRING | '{' PhpVariable '}' | . | ~[:])*?  '"';
 
 fragment ComponentTagIdentifier 
-    : [a-z_\u0080-\ufffe][a-z0-9\u0080-\ufffe-]*;   
+    : [a-z_\u0080-\ufffe][a-z0-9.:\u0080-\ufffe-]*;   
 
 PHP_INLINE : '<?=' .*? '?>' | '<?php' .*? ('?>' | EOF);
 
@@ -129,7 +129,7 @@ UNCLOSED_TAG : ('<' NameString [\r\n]+)->type(HTML);
 
 LAST_NL : [\r\n]+ EOF; 
 
-HTML_X : ('<x-' ComponentTagIdentifier)->type(HTML),pushMode(INSIDE_HTML_COMPONENT_TAG);
+HTML_X : ('<x-' ComponentTagIdentifier | '<' ComponentTagIdentifier ('::' ComponentTagIdentifier)*)->type(HTML),pushMode(INSIDE_HTML_COMPONENT_TAG);
 
 HTML : ~[<?@{!]+;
 

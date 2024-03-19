@@ -12,7 +12,7 @@ public class BladeDirectivesUtils {
             case "@if":
             case "@hasSection":
             case "@else":
-                return new String[]{"@endif", "@endIf"};
+                return new String[]{"@endif", "@endIf", "@endcan"};
             case "@section":
                 return new String[]{"@endsection", "@show", "@stop", "@append"};
             case "@push":
