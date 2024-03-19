@@ -78,6 +78,7 @@ block_statement:
     | else
     | switch
     | env_block
+    | empty_block
     | error_block
     //we can consider the statements not being empty
     | conditional_block
@@ -111,7 +112,7 @@ if : D_IF main_php_expression general_statement+ endif?;
 elseif : D_ELSEIF main_php_expression general_statement+ endif?;
 else : D_ELSE general_statement+ endif?;
 endif: D_ENDIF;
-empty_block : D_EMPTY main_php_expression general_statement+ D_ENDEMPTY;
+empty_block : D_EMPTY composed_php_expression general_statement+ D_ENDEMPTY;
 
 //the consistency for these blocks need to be checked inside the parser
 conditional_block : D_COND_BLOCK_START main_php_expression general_statement+ D_COND_BLOCK_END;

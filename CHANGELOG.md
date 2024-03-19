@@ -1,5 +1,11 @@
 # Change Log
 
+## [2.1.60]
+
+**parser**
+
+- regression with `@empty` block tag
+
 ## [2.1.50]
 
 **lexer, formatting**
