@@ -5,6 +5,12 @@
 **lexer, formatting**
 
 - fixing formatting issues due to self clossing tags or special composer tags which contain `::` symbols
+- fixing `@section` formatting issue due to lack of separation between block and inline context
+- include standard html keyword attributes
+
+**debug**
+
+- add coloring lexer
 
 ## [2.1.40]
 

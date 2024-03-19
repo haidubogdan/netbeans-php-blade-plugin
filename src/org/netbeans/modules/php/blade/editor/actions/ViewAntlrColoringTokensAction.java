@@ -18,8 +18,8 @@ import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.Token;
-import org.netbeans.modules.php.blade.syntax.antlr4.formatter.BladeAntlrFormatterLexer;
-import static org.netbeans.modules.php.blade.syntax.antlr4.formatter.BladeAntlrFormatterLexer.*;
+import org.netbeans.modules.php.blade.syntax.antlr4.v10.BladeAntlrColoringLexer;
+import static org.netbeans.modules.php.blade.syntax.antlr4.v10.BladeAntlrColoringLexer.*;
 import org.openide.awt.ActionID;
 import org.openide.awt.ActionRegistration;
 import org.openide.filesystems.FileObject;
@@ -31,16 +31,16 @@ import org.openide.windows.TopComponent;
  *
  * @author bhaidu
  */
-@ActionID(id = "org.netbeans.modules.php.blade.editor.actions.ViewAntlrFormatterTokens", category = "DebugAntlrActions")
-@ActionRegistration(displayName = "AntlrFormatter Tokens")
-public class ViewAntlrFormatterTokensAction extends AbstractAction implements ActionListener {
+@ActionID(id = "org.netbeans.modules.php.blade.editor.actions.ViewAntlrColoringTokens", category = "DebugAntlrActions")
+@ActionRegistration(displayName = "AntlrColoring Tokens")
+public class ViewAntlrColoringTokensAction extends AbstractAction implements ActionListener {
 
     Node node;
     private transient JEditorPane viewer;
 
-    public ViewAntlrFormatterTokensAction(Node node) {
+    public ViewAntlrColoringTokensAction(Node node) {
         this.node = node;
-        putValue(NAME, "AntlrFormatter Tokens");
+        putValue(NAME, "AntlrColoring Tokens");
     }
 
     @Override
@@ -69,7 +69,7 @@ public class ViewAntlrFormatterTokensAction extends AbstractAction implements Ac
         }
 
         protected void initComponents() {
-            setName("Antlr formatter token preview - " + fileObject.getName());
+            setName("Antlr token preview - " + fileObject.getName());
             setLayout(new BorderLayout());
             viewer = new JEditorPane();
             viewer.setContentType("text/plain");
@@ -82,7 +82,7 @@ public class ViewAntlrFormatterTokensAction extends AbstractAction implements Ac
             Rectangle vis = viewer.getVisibleRect();
             try {
                 CharStream cs = CharStreams.fromString(String.valueOf(fileObject.asText()));
-                BladeAntlrFormatterLexer lexer = new BladeAntlrFormatterLexer(cs);
+                BladeAntlrColoringLexer lexer = new BladeAntlrColoringLexer(cs);
                 CommonTokenStream tokens = new CommonTokenStream(lexer);
                 tokens.fill();
                 Document doc = viewer.getDocument();
@@ -100,55 +100,23 @@ public class ViewAntlrFormatterTokensAction extends AbstractAction implements Ac
                         }
                         result.append("L");
                         result.append(lastLine);
-                        result.append(": ");
+                        result.append(": ").append(lastLine);
                     }
                     switch (token.getType()) {
-                        case PARAM_COMMA:
-                            result.append(" ~,");
+                        case DIRECTIVE:
+                            result.append(token.getText());
                             break;
-                        case D_ARG_LPAREN:
-                            result.append(" ~(");
-                            break;
-                        case D_ARG_RPAREN:
+                        case HTML:
+                            result.append(" (HTML ");
+                            result.append(token.getText());
                             result.append(" ~)");
                             break;
-                        case SG_QUOTE:
-                            result.append(" '");
-                            break;
-                        case WS:
-                            result.append(" (");
+                        case PHP_EXPRESSION:
+                            result.append(" (PHP_EXPRESSION)");
                             result.append(token.getText());
-                            result.append(" )");
-                            break;
-                        case NL:
-                            result.append(" (n)");
-                            break;
-                        case EQ:
-                            result.append("(EQ)");
-                            break;
-                        case STRING:
-                            result.append("string");
-                            break;
-                        case IDENTIFIER:
-                            result.append("~");
-                            result.append(token.getText());
-                            break;
-                        case COMPONENT_TAG:
-                        case HTML_CLOSE_TAG:
-                        case HTML_START_BLOCK_TAG:
-                            result.append(token.getText());
-                            break;
-                        case GT_SYMBOL:
-                            result.append(" (>)");
-                            break;
-                        case D_PHP:
-                            result.append(" (@php)");
                             break;
                         default:
                             result.append(token.getType());
-                            if (token.getText().startsWith("@")) {
-                                result.append(" (DIRECTIVE)");
-                            }
                     }
                     if (token.getType() > -1) {
                         result.append(" | ");

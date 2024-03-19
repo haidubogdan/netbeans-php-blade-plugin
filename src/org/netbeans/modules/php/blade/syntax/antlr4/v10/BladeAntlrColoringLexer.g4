@@ -129,9 +129,9 @@ UNCLOSED_TAG : ('<' NameString [\r\n]+)->type(HTML);
 
 LAST_NL : [\r\n]+ EOF; 
 
-HTML_X : ('<x-' ComponentTagIdentifier | '<' ComponentTagIdentifier ('::' ComponentTagIdentifier)*)->type(HTML),pushMode(INSIDE_HTML_COMPONENT_TAG);
+HTML_X : ('<x-' ComponentTagIdentifier | '<' ComponentTagIdentifier ('::' ComponentTagIdentifier)+)->type(HTML),pushMode(INSIDE_HTML_COMPONENT_TAG);
 
-HTML : ~[<?@{!]+;
+HTML : ~[<?@{!]+ | 'style' | 'class' | 'required' | 'selected' | 'value';
 
 OTHER : . ->type(HTML);
 

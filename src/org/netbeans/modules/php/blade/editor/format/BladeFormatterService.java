@@ -104,24 +104,25 @@ public class BladeFormatterService {
                 if (ctx.getStop() != null && !formattedLineIndentList.containsKey(start.getLine())) {
                     Token rArgParent = ctx.getStop();
                     formattedLineIndentList.put(rArgParent.getLine(), new FormatToken(rArgParent.getStopIndex() + 1, indent, htmlBlockBalance, rArgParent.getText()));
-                    indent++;
                 }
+                indent++;
             }
 
             @Override
             public void exitBlock_end(BladeAntlrFormatterParser.Block_endContext ctx) {
                 Token start = ctx.getStart();
                 int line = start.getLine();
-                if (!formattedLineIndentList.containsKey(line)) {
-                    indent--;
-                    formattedLineIndentList.put(line, new FormatToken(start.getStartIndex(), indent, htmlBlockBalance, start.getText()));
-                } else {
-                    formattedLineIndentList.remove(line);
-                }
+                indent--;
                 //correction
                 if (indent < 0) {
                     indent = 0;
                 }
+                if (!formattedLineIndentList.containsKey(line)) {
+                    formattedLineIndentList.put(line, new FormatToken(start.getStartIndex(), indent, htmlBlockBalance, start.getText()));
+                } else {
+                    formattedLineIndentList.remove(line);
+                }
+
                 blockBalance--;
             }
 
@@ -142,6 +143,9 @@ public class BladeFormatterService {
                 int line = start.getLine();
                 if (!formattedLineIndentList.containsKey(line)) {
                     indent--;
+                    if (indent < 0) {
+                        indent = 0;
+                    }
                     formattedLineIndentList.put(line, new FormatToken(start.getStartIndex(), indent, htmlBlockBalance, start.getText()));
                 } else {
                     formattedLineIndentList.remove(line);

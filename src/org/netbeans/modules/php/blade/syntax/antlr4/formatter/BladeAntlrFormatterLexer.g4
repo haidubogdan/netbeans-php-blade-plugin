@@ -10,7 +10,7 @@ options {
 }
  
 //we will hide html in the end
-tokens {HTML, PHP_CODE}
+tokens {HTML, PHP_CODE, PARAM_COMMA}
     
     channels { COMMENT }
     
@@ -35,7 +35,7 @@ fragment SINGLE_QUOTED_STRING_FRAGMENT
 fragment BlockDirectiveName 
     : 'auth' | 'guest'
     | 'if' | 'can' ('any' | 'not')? | 'for' ('each' | 'else')? 
-    | 'while' | 'hasSection' | 'fragment' | 'verbatim'
+    | 'while' | 'hasSection' | 'sectionMissing' | 'fragment' | 'verbatim'
     | 'isset' | 'unless' | 'empty' 
     | 'session'
     | 'env' | 'once' | 'error'
@@ -64,9 +64,10 @@ D_ESCAPES
     )->type(HTML);
 
 D_BLOCK_DIRECTIVE_START : ('@' BlockDirectiveName DirectiveArgLookup)->pushMode(DIRECTIVE_ARG);
-D_BLOCK_DIRECTIVE_END : '@end' BlockDirectiveName ;
+D_BLOCK_DIRECTIVE_START_NO_ARG : '@' ('auth' | 'production')->type(D_BLOCK_DIRECTIVE_START);
+D_BLOCK_DIRECTIVE_END : '@end' BlockDirectiveName | '@endphp';
 
-D_SECTION : ('@section' DirectiveArgLookup)->pushMode(DIRECTIVE_ARG);
+D_SECTION : ('@section' DirectiveArgLookup)->pushMode(DIRECTIVE_ARG_WITH_PARAM);
 D_ENDSECTION : '@endsection' | '@show' | '@append' | '@stop';
 D_BLOCK_ALIGNED_DIRECTIVE : '@else' | '@elseif' | '@empty';
 NON_PARAM_DIRECTIVE : '@continue' | '@break';
@@ -82,7 +83,7 @@ SG_QUOTE : '\'';
 DB_QUOTE : '"';
 
 HTML_CLOSE_TAG : ('<' (' ')* '/' (' ')*  [a-z\u0080-\ufffe][a-z0-9_.\u0080-\ufffe]* (' ')* '>') 
-| ('</' (' ')* ('x-'  CompomentIdentifier |  CompomentIdentifier ('::' CompomentIdentifier)*) (' ')* '>') 
+| ('</' (' ')* ('x-'  CompomentIdentifier |  CompomentIdentifier ('::' CompomentIdentifier)+) (' ')* '>') 
 ;
 HTML_COMMENT: '<!--' .*? '-->';
 HTML_START_BLOCK_TAG : '<' ('div'
@@ -97,14 +98,14 @@ HTML_START_BLOCK_TAG : '<' ('div'
     | 'dialog'
     | 'summary' | 'details' | 'slot'
     | 'label' | 'select' | 'option' | 'fieldset' | 'textarea' | 'button' | 'form' | 'search'
-    | ('ul' | 'ol' | 'li') {this._input.LA(1) == '>' || this._input.LA(1) == '@' || this._input.LA(1) == ' ' || this._input.LA(1) == '\n'}?
+    | 'ul' | 'ol' | 'li'
     | 'table' | 'tr' | 'td' | 'th' | 'tbody' | 'thead' | 'tfoot'
-    | ('var' | 'q' | 'p' | 'a' | 'b' | 'i') {this._input.LA(1) == '>' || this._input.LA(1) == '@' || this._input.LA(1) == ' ' || this._input.LA(1) == '\n'}?);
+    | 'var' | 'q' | 'p' | 'a' | 'b' | 'i') {this._input.LA(1) == '>' || this._input.LA(1) == '@' || this._input.LA(1) == ' ' || this._input.LA(1) == '\n'}?;
 
 
 HTML_SELF_CLOSE_TAG : '<' ('img' | 'input' | 'br' | 'hr' | 'link' | 'meta');
 
-COMPONENT_TAG : '<x-' CompomentIdentifier | '<' CompomentIdentifier ('::' CompomentIdentifier)*;
+COMPONENT_TAG : '<x-' CompomentIdentifier | '<' CompomentIdentifier ('::' CompomentIdentifier)+;
 
 EQ : '=';
 IDENTIFIER : Identifier;
@@ -132,6 +133,24 @@ D_ARG_NL : [\r\n]->type(NL);
 PHP_EXPR : . ->skip;
 
 EXIT_EOF : EOF->popMode;
+
+mode DIRECTIVE_ARG_WITH_PARAM;
+
+D_ARG_PARAM_LPAREN : '(' {this.consumeDirectiveArgLParen();};
+D_ARG_PARAM_RPAREN : ')' {this.consumeDirectiveArgRParen();};
+
+BL_SQ_LPAREN : '[' {this.squareParenBalance++;}->skip;
+BL_SQ_RPAREN : ']' {this.squareParenBalance--;}->skip;
+
+BL_CURLY_LPAREN : '{' {this.curlyParenBalance++;}->skip;
+BL_CURLY_RPAREN : '}' {this.curlyParenBalance--;}->skip;
+
+D_ARG_COMMA_EL : ','  {this.consumeBladeParamComma();};
+D_ARG_PARAM_NL : [\r\n]->type(NL);
+
+BL_PHP_EXPR : . ->skip;
+
+BL_EXIT_EOF : EOF->popMode;
 
 mode BLADE_INLINE_PHP;
 

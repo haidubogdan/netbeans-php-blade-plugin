@@ -67,18 +67,6 @@ public class BladeAntlrFormatterParserBaseListener implements BladeAntlrFormatte
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterIndetable_element(BladeAntlrFormatterParser.Indetable_elementContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitIndetable_element(BladeAntlrFormatterParser.Indetable_elementContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
 	@Override public void enterHtml_indent(BladeAntlrFormatterParser.Html_indentContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -170,6 +158,18 @@ public class BladeAntlrFormatterParserBaseListener implements BladeAntlrFormatte
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitInline_identable_element(BladeAntlrFormatterParser.Inline_identable_elementContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterSection_inline(BladeAntlrFormatterParser.Section_inlineContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitSection_inline(BladeAntlrFormatterParser.Section_inlineContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
