@@ -242,7 +242,7 @@ COMPONENT_RAW_TAG_OPEN : '{!!' ->pushMode(INSIDE_RAW_ECHO),type(RAW_TAG);
 
 EXIT_HTML_COMPONENT : '>'->type(HTML), popMode;
 
-HTML_COMPONENT_ANY : . ->more;
+HTML_COMPONENT_ANY : . ->type(HTML);
 
 EXIT_HTML_COMPONENT_EOF : EOF->type(ERROR),popMode;
 

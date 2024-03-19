@@ -6,6 +6,9 @@
 
 - added `@session` directive
 
+**lexer**
+
+- fix component tag coloring
 
 ## [2.1.3]
 
