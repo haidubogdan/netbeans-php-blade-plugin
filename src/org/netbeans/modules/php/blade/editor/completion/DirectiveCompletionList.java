@@ -4,6 +4,9 @@ import org.netbeans.modules.php.blade.syntax.annotation.Directive;
 import org.netbeans.modules.php.blade.syntax.annotation.DirectiveRegister;
 
 /**
+ * 
+ * the since values are taken from https://github.com/onecentlin/laravel-blade-snippets-vscode
+ * 
  *
  * @author bhaidu
  */
@@ -13,8 +16,8 @@ import org.netbeans.modules.php.blade.syntax.annotation.DirectiveRegister;
     @Directive(name = "@elseif", params = true),
     @Directive(name = "@else"),
     @Directive(name = "@endif"),
-    @Directive(name="@empty"),
-    @Directive(name="@empty", params=true, endtag = "@endempty"),
+    @Directive(name="@empty", since="5.4"),
+    @Directive(name="@empty", params=true, endtag = "@endempty", since="5.4"),
     @Directive(name="@isset", params=true, endtag="@endisset"),
     @Directive(name="@unless", params=true, endtag="@endunless"),
     //loops
@@ -67,15 +70,16 @@ import org.netbeans.modules.php.blade.syntax.annotation.DirectiveRegister;
     //auth
     @Directive(name = "@auth", params = true, endtag = "@endauth"),
     @Directive(name = "@guest", params = true, endtag = "@endguest"),
-    @Directive(name = "@can", params = true, endtag = "@endcan"),
-    @Directive(name = "@canany", params = true, endtag = "@endcanany"),
-    @Directive(name = "@cannot", params = true, endtag = "@endcannot"),
+    @Directive(name = "@can", params = true, endtag = "@endcan", since="5.1"),
+    @Directive(name = "@canany", params = true, endtag = "@endcanany", since="5.8"),
+    @Directive(name = "@cannot", params = true, endtag = "@endcannot", since="5.3"),
     //php
     @Directive(name = "@php", endtag = "@endphp"),
     @Directive(name = "@use", params = true),
     @Directive(name = "@inject", params = true),
     //utils
-    @Directive(name="@session", params = true, endtag="@endsession"),
+    @Directive(name="@session", params = true, endtag="@endsession", since="10"),
+    @Directive(name = "@dump", params = true),
     @Directive(name = "@dd", params = true),
     @Directive(name = "@json", params = true),
 })

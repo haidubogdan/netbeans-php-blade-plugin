@@ -183,11 +183,13 @@ raw_echo : RAW_TAG_OPEN echo_expr* RAW_TAG_CLOSE;
 echo_expr : composed_php_expression;
 
 class_expr_usage: class_name_reference 
-| class_alias_static_access 
+| object_alias_static_access 
+| object_alias_direct_access
 | static_direct_class_access 
 | class_instance;
 
-class_alias_static_access : class_name=PHP_VARIABLE PHP_STATIC_ACCESS static_property=PHP_IDENTIFIER;
+object_alias_static_access : alias_name=PHP_VARIABLE PHP_STATIC_ACCESS static_property=PHP_IDENTIFIER;
+object_alias_direct_access : alias_name=PHP_VARIABLE PHP_INSTANCE_ACCESS property=PHP_IDENTIFIER;
 static_direct_class_access : class_identifier PHP_STATIC_ACCESS method_call
     | class_identifier PHP_STATIC_ACCESS static_property=PHP_IDENTIFIER
     ;

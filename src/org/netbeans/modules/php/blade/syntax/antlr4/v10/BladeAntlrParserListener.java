@@ -518,15 +518,25 @@ public interface BladeAntlrParserListener extends ParseTreeListener {
 	 */
 	void exitClass_expr_usage(BladeAntlrParser.Class_expr_usageContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link BladeAntlrParser#class_alias_static_access}.
+	 * Enter a parse tree produced by {@link BladeAntlrParser#object_alias_static_access}.
 	 * @param ctx the parse tree
 	 */
-	void enterClass_alias_static_access(BladeAntlrParser.Class_alias_static_accessContext ctx);
+	void enterObject_alias_static_access(BladeAntlrParser.Object_alias_static_accessContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link BladeAntlrParser#class_alias_static_access}.
+	 * Exit a parse tree produced by {@link BladeAntlrParser#object_alias_static_access}.
 	 * @param ctx the parse tree
 	 */
-	void exitClass_alias_static_access(BladeAntlrParser.Class_alias_static_accessContext ctx);
+	void exitObject_alias_static_access(BladeAntlrParser.Object_alias_static_accessContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link BladeAntlrParser#object_alias_direct_access}.
+	 * @param ctx the parse tree
+	 */
+	void enterObject_alias_direct_access(BladeAntlrParser.Object_alias_direct_accessContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link BladeAntlrParser#object_alias_direct_access}.
+	 * @param ctx the parse tree
+	 */
+	void exitObject_alias_direct_access(BladeAntlrParser.Object_alias_direct_accessContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link BladeAntlrParser#static_direct_class_access}.
 	 * @param ctx the parse tree

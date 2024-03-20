@@ -93,7 +93,7 @@ D_ENDEMPTY : '@endempty'->type(DIRECTIVE);
 D_AUTH : '@auth'->pushMode(LOOK_FOR_PHP_EXPRESSION),type(DIRECTIVE);
 D_PERMISSION : ('@can' | '@cannot' | '@canany')->pushMode(LOOK_FOR_PHP_EXPRESSION),type(DIRECTIVE);
 D_INJECT : '@inject'->pushMode(LOOK_FOR_PHP_EXPRESSION),type(DIRECTIVE);
-D_MISC : ('@session' | '@dd' | '@json')->pushMode(LOOK_FOR_PHP_EXPRESSION),type(DIRECTIVE);
+D_MISC : ('@session' | '@dd' | '@dump' | '@json')->pushMode(LOOK_FOR_PHP_EXPRESSION),type(DIRECTIVE);
 D_ENDMISC : '@end' ('session')->type(DIRECTIVE);
 D_PHP_SHORT : '@php' (' ')? {this._input.LA(1) == '('}? ->type(D_PHP),pushMode(LOOK_FOR_PHP_EXPRESSION);
 D_PHP : '@php'->pushMode(BLADE_INLINE_PHP);

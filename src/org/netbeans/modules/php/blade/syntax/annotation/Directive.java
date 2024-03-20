@@ -11,5 +11,5 @@ public @interface Directive {
     String[] endTags() default {};
     String description() default "";
     String category() default "";
-    int version() default 10;
+    String since() default "";
 }

@@ -627,13 +627,25 @@ public class BladeAntlrParserBaseListener implements BladeAntlrParserListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterClass_alias_static_access(BladeAntlrParser.Class_alias_static_accessContext ctx) { }
+	@Override public void enterObject_alias_static_access(BladeAntlrParser.Object_alias_static_accessContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitClass_alias_static_access(BladeAntlrParser.Class_alias_static_accessContext ctx) { }
+	@Override public void exitObject_alias_static_access(BladeAntlrParser.Object_alias_static_accessContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterObject_alias_direct_access(BladeAntlrParser.Object_alias_direct_accessContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitObject_alias_direct_access(BladeAntlrParser.Object_alias_direct_accessContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
