@@ -173,6 +173,8 @@ public class BladeCompletionProvider implements CompletionProvider {
                             completeBladeTags(nText, currentToken, tokens, doc, caretOffset, resultSet);
                         }
                         break;
+                    case HTML_COMPONENT_PREFIX:
+                        break;
                     case BL_PARAM_STRING: {
                         String pathName = currentToken.getText().substring(1, currentToken.getText().length() - 1);
                         List<Integer> tokensMatch = Arrays.asList(new Integer[]{

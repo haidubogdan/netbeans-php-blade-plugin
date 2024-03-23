@@ -112,6 +112,10 @@ public class ViewAntlrLexerTokensAction extends AbstractAction implements Action
                         case HTML:
                             result.append(" (HTML)");
                             break;
+                        case HTML_COMPONENT_PREFIX:
+                            result.append(" (HTML_COMPONENT_PREFIX)");
+                            result.append(token.getText());
+                            break;
                         case PHP_NEW:
                             result.append(" (\n)");
                             break;
@@ -134,7 +138,7 @@ public class ViewAntlrLexerTokensAction extends AbstractAction implements Action
                                 result.append(" (DIRECTIVE)");
                             }
                     }
-                    if (token.getType() > -1){
+                    if (token.getType() > -1) {
                         result.append(" | ");
                     }
                 }

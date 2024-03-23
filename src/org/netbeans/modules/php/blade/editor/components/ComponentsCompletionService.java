@@ -1,5 +1,7 @@
 package org.netbeans.modules.php.blade.editor.components;
 
+import java.util.Set;
+
 /**
  *
  * @author bhaidu
@@ -7,6 +9,6 @@ package org.netbeans.modules.php.blade.editor.components;
 @NamespaceRegister({
     @Namespace(path="Illuminate\\Console\\View\\Components")
 })
-public class ComponentsDeclarationFinder {
-    
+public class ComponentsCompletionService {
+    private Set<String> cachedElements;
 }
