@@ -85,6 +85,9 @@ public class BladeCompletionHandler implements CodeCompletionHandler2 {
                 break;
         }
 
+        if (completionProposals.isEmpty()){
+            return CodeCompletionResult.NONE;
+        }
         //TODO add context
         return new DefaultCompletionResult(completionProposals, false);
     }

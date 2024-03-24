@@ -6,12 +6,18 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.WeakHashMap;
+import org.netbeans.api.project.Project;
 import org.netbeans.modules.csl.api.OffsetRange;
 import org.netbeans.modules.parsing.spi.indexing.support.IndexResult;
 import org.netbeans.modules.parsing.spi.indexing.support.QuerySupport;
+import org.netbeans.modules.php.blade.editor.cache.QueryCache;
+import org.netbeans.modules.php.blade.editor.directives.CustomDirectives;
 import org.netbeans.modules.php.editor.api.QuerySupportFactory;
 import org.netbeans.modules.php.editor.index.PHPIndexer;
 import org.netbeans.modules.php.editor.index.Signature;
+import org.netbeans.spi.project.ui.support.ProjectConvertors;
 import org.openide.filesystems.FileObject;
 import org.openide.util.Exceptions;
 
@@ -22,6 +28,9 @@ import org.openide.util.Exceptions;
  */
 public class PhpIndexUtils {
 
+    private final static QueryCache<String, Collection<PhpIndexResult>> cache = new QueryCache();
+    
+    private static final Map<Integer, PhpIndexUtils> QUERY_SUPPORT_INSTANCES = new WeakHashMap<>();
     /**
      * class query without namespace
      *
@@ -31,6 +40,20 @@ public class PhpIndexUtils {
      */
     public static Collection<PhpIndexResult> queryClass(FileObject fo, String prefix) {
         QuerySupport phpindex = QuerySupportFactory.get(fo);
+        Project projectOwner = ProjectConvertors.getNonConvertorOwner(fo);
+        QueryCache<String, Collection<PhpIndexResult>> selfCache = null;
+        if (projectOwner != null) {
+            int pathHash = projectOwner.getProjectDirectory().toString().hashCode();
+            if (PhpIndexUtils.QUERY_SUPPORT_INSTANCES.containsKey(pathHash)) {
+                PhpIndexUtils indexUtils = QUERY_SUPPORT_INSTANCES.get(pathHash);
+                selfCache = indexUtils.getQueryCache();
+                if (selfCache.containsKey(prefix)) {
+                    return selfCache.get(prefix).get();
+                }
+            } else {
+                QUERY_SUPPORT_INSTANCES.put(pathHash, new PhpIndexUtils());
+            }
+        }
         Collection<PhpIndexResult> results = new ArrayList<>();
         String queryPrefix = prefix.toLowerCase();
         try {
@@ -51,6 +74,10 @@ public class PhpIndexUtils {
             }
         } catch (IOException ex) {
             Exceptions.printStackTrace(ex);
+        }
+        
+        if (selfCache != null && !results.isEmpty()){
+            selfCache.put(prefix, results);
         }
         return results;
     }
@@ -540,6 +567,10 @@ public class PhpIndexUtils {
             retval = paramName;
         }
         return retval;
+    }
+    
+    public QueryCache<String, Collection<PhpIndexResult>> getQueryCache(){
+        return cache;
     }
 
 }
