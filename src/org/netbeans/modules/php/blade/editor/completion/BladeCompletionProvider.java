@@ -3,6 +3,7 @@ package org.netbeans.modules.php.blade.editor.completion;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -19,11 +20,14 @@ import org.netbeans.api.project.Project;
 import org.netbeans.lib.editor.codetemplates.api.CodeTemplateManager;
 import org.netbeans.modules.php.blade.editor.BladeLanguage;
 import org.netbeans.modules.php.blade.editor.ResourceUtilities;
+import org.netbeans.modules.php.blade.editor.components.ComponentsCompletionService;
 import org.netbeans.modules.php.blade.editor.directives.CustomDirectives;
 import org.netbeans.modules.php.blade.editor.indexing.BladeIndex;
 import org.netbeans.modules.php.blade.editor.indexing.BladeIndex.IndexedReferenceId;
+import org.netbeans.modules.php.blade.editor.indexing.PhpIndexResult;
 import org.netbeans.modules.php.blade.editor.path.PathUtils;
 import org.netbeans.modules.php.blade.project.ProjectUtils;
+import org.netbeans.modules.php.blade.syntax.StringUtils;
 import org.netbeans.modules.php.blade.syntax.annotation.Directive;
 import org.netbeans.modules.php.blade.syntax.antlr4.v10.BladeAntlrLexer;
 import static org.netbeans.modules.php.blade.syntax.antlr4.v10.BladeAntlrLexer.*;
@@ -126,28 +130,28 @@ public class BladeCompletionProvider implements CompletionProvider {
                     return;
                 }
 
-                if (caretOffset > 1){
+                if (caretOffset > 1) {
                     tokens.seekTo(caretOffset - 1);
                 } else {
                     tokens.seekTo(caretOffset);
                 }
 
                 Token currentToken;
-                
+
                 if (!tokens.hasNext() && tokens.hasPrevious()) {
                     //the carret got too far
                     currentToken = tokens.previous().get();
-                } else if (tokens.hasNext()){
+                } else if (tokens.hasNext()) {
                     currentToken = tokens.next().get();
                 } else {
                     return;
                 }
-                
-                if (currentToken == null){
+
+                if (currentToken == null) {
                     return;
                 }
 
-                if (currentToken.getText().trim().length() == 0){
+                if (currentToken.getText().trim().length() == 0) {
                     return;
                 }
 
@@ -174,6 +178,8 @@ public class BladeCompletionProvider implements CompletionProvider {
                         }
                         break;
                     case HTML_COMPONENT_PREFIX:
+                        String compPrefix = currentToken.getText().length() > 3 ? StringUtils.capitalize(currentToken.getText().substring(3)) : "";
+                        completeComponents(compPrefix, fo, caretOffset, resultSet);
                         break;
                     case BL_PARAM_STRING: {
                         String pathName = currentToken.getText().substring(1, currentToken.getText().length() - 1);
@@ -204,7 +210,7 @@ public class BladeCompletionProvider implements CompletionProvider {
                                     lastDotPos = pathName.lastIndexOf(".");
                                 }
                                 int pathOffset;
-                                
+
                                 if (lastDotPos > 0) {
                                     int dotFix = pathName.endsWith(".") ? 0 : 1;
                                     pathOffset = caretOffset - pathName.length() + lastDotPos + dotFix;
@@ -363,7 +369,7 @@ public class BladeCompletionProvider implements CompletionProvider {
             Exceptions.printStackTrace(ex);
         }
     }
-    
+
     private void completeStackIdFromIndex(String prefixIdentifier, FileObject fo,
             int caretOffset, CompletionResultSet resultSet) {
         BladeIndex bladeIndex;
@@ -462,6 +468,35 @@ public class BladeCompletionProvider implements CompletionProvider {
                 .startOffset(caretOffset)
                 .leftHtmlText(identifier)
                 .rightHtmlText(filePath.substring(viewsPos, filePath.length()))
+                .sortPriority(1)
+                .build();
+        resultSet.addItem(item);
+    }
+
+    private void completeComponents(String prefixIdentifier, FileObject fo,
+            int caretOffset, CompletionResultSet resultSet) {
+//        BladeIndex bladeIndex;
+//        Project project = ProjectUtils.getMainOwner(fo);
+        int insertOffset = caretOffset - prefixIdentifier.length();
+        ComponentsCompletionService componentComplervice = new ComponentsCompletionService();
+        Collection<PhpIndexResult> indexedReferences = componentComplervice.queryComponents(prefixIdentifier, fo);
+
+        for (PhpIndexResult indexReference : indexedReferences) {
+            addComponentIdCompletionItem(indexReference,
+                    insertOffset, resultSet);
+        }
+
+    }
+
+    private void addComponentIdCompletionItem(PhpIndexResult indexReference,
+            int caretOffset, CompletionResultSet resultSet) {
+
+        String tagName = StringUtils.toKebabCase(indexReference.name);
+        CompletionItem item = CompletionUtilities.newCompletionItemBuilder(tagName)
+                .iconResource(getReferenceIcon(CompletionType.YIELD_ID))
+                .startOffset(caretOffset)
+                .leftHtmlText(tagName)
+                .rightHtmlText(indexReference.qualifiedName)
                 .sortPriority(1)
                 .build();
         resultSet.addItem(item);

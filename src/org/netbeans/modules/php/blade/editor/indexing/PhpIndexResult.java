@@ -19,6 +19,7 @@ public class PhpIndexResult {
     };
 
     public String name;
+    public String qualifiedName;
     public FileObject declarationFile;
     public PhpIndexResult.Type type;
     public OffsetRange range;
@@ -27,6 +28,16 @@ public class PhpIndexResult {
             PhpIndexResult.Type type,
             OffsetRange range){
         this.name = name;
+        this.declarationFile = fo;
+        this.type = type;
+        this.range = range;
+    }
+    
+    public PhpIndexResult(String name, String qualifiedName, FileObject fo,
+            PhpIndexResult.Type type,
+            OffsetRange range){
+        this.name = name;
+        this.qualifiedName = qualifiedName;
         this.declarationFile = fo;
         this.type = type;
         this.range = range;

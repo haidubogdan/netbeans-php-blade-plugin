@@ -38,6 +38,8 @@ tokens {
  
 channels { COMMENT, PHP_CODE }
 
+fragment CompomentIdentifier
+    : [a-z\u0080-\ufffe][a-z0-9_.:\u0080-\ufffe]*;
 //RULES
 
 
@@ -150,7 +152,7 @@ D_VERBATIM : '@verbatim' ->pushMode(VERBATIM_MODE);
 D_ENDVERBATIM : '@endverbatim';
 
 //known plugins
-D_LIVEWIRE : '@livewireStyles' | '@bukStyles' | '@livewireScripts' | '@bukScripts';
+D_LIVEWIRE : '@livewireStyles' | '@bukStyles' | '@livewireScripts' | '@bukScripts' | '@livewire';
 
 //we will decide that a custom directive has expression to avoid email matching
 D_CUSTOM : ('@' NameString {this._input.LA(1) == '(' || 
@@ -168,7 +170,7 @@ RAW_TAG_START : '{!'->type(HTML);
 PHP_INLINE_START : ('<?php' | '<?=')->pushMode(INSIDE_PHP_INLINE);
 
 HTML_CLOSE_TAG : '<' '/'?  NameString '>'->type(HTML);
-HTML_COMPONENT_PREFIX : '<x-';
+HTML_COMPONENT_PREFIX : '<x-' (CompomentIdentifier |  CompomentIdentifier ('::' CompomentIdentifier)+)?;
 HTML : ~[<?@{!]+;
 
 OTHER : . ->type(HTML);

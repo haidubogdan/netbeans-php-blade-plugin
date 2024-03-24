@@ -36,8 +36,7 @@ public class PhpIndexUtils {
         try {
             Collection<? extends IndexResult> indexResults = phpindex.query(PHPIndexer.FIELD_CLASS,
                     queryPrefix, QuerySupport.Kind.PREFIX, new String[]{
-                        PHPIndexer.FIELD_CLASS,
-                    });
+                        PHPIndexer.FIELD_CLASS,});
             for (IndexResult indexResult : indexResults) {
                 FileObject indexFile = indexResult.getFile();
 
@@ -74,10 +73,9 @@ public class PhpIndexUtils {
                     Signature sig = Signature.get(value);
                     String fullName = sig.string(1);
                     String classNamespace = sig.string(4);
-                    if (fullName.length() > 0 
+                    if (fullName.length() > 0
                             && classNamespace.length() > 0
-                            && classNamespace.startsWith(namespace)
-                            ) {
+                            && classNamespace.startsWith(namespace)) {
                         results.add(new PhpIndexResult(classNamespace + "\\" + fullName, indexFile, PhpIndexResult.Type.CLASS, new OffsetRange(0, 1)));
                     }
                 }
@@ -87,7 +85,39 @@ public class PhpIndexUtils {
         }
         return results;
     }
-    
+
+    public static Collection<PhpIndexResult> queryNamespaceClassesName(String prefix,
+            String namespace, FileObject fo) {
+        QuerySupport phpindex = QuerySupportFactory.get(fo);
+        Collection<PhpIndexResult> results = new ArrayList<>();
+        String queryPrefix = prefix.toLowerCase() + ".*" + namespace.replace("\\", "\\\\") + ";.*";
+
+        try {
+            Collection<? extends IndexResult> indexResults = phpindex.query(
+                    PHPIndexer.FIELD_CLASS, queryPrefix, QuerySupport.Kind.REGEXP, new String[]{
+                        PHPIndexer.FIELD_CLASS});
+            for (IndexResult indexResult : indexResults) {
+                FileObject indexFile = indexResult.getFile();
+
+                String[] values = indexResult.getValues(PHPIndexer.FIELD_CLASS);
+                for (String value : values) {
+                    Signature sig = Signature.get(value);
+                    String fullName = sig.string(1);
+                    String classNamespace = sig.string(4);
+                    if (fullName.length() > 0
+                            && classNamespace.length() > 0
+                            && classNamespace.startsWith(namespace)) {
+                        results.add(new PhpIndexResult(fullName, 
+                                classNamespace + "\\" + fullName, indexFile, PhpIndexResult.Type.CLASS, new OffsetRange(0, 1)));
+                    }
+                }
+            }
+        } catch (IOException ex) {
+            Exceptions.printStackTrace(ex);
+        }
+        return results;
+    }
+
     public static Collection<PhpIndexResult> queryExactNamespaceClasses(String identifier,
             String namespace, FileObject fo) {
         QuerySupport phpindex = QuerySupportFactory.get(fo);
@@ -108,8 +138,7 @@ public class PhpIndexUtils {
                     String classNamespace = sig.string(4);
                     if (fullName.equals(identifier)
                             && classNamespace.length() > 0
-                            && classNamespace.startsWith(namespace)
-                            ) {
+                            && classNamespace.startsWith(namespace)) {
                         results.add(new PhpIndexResult(classNamespace + "\\" + fullName, indexFile, PhpIndexResult.Type.CLASS, new OffsetRange(0, 1)));
                     }
                 }

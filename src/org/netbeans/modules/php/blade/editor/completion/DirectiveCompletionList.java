@@ -30,7 +30,7 @@ import org.netbeans.modules.php.blade.syntax.annotation.DirectiveRegister;
     @Directive(name = "@endforeach"),
     @Directive(name = "@endforelse"),
     //layout
-    @Directive(name = "@extends", params = true, endtag = "@endfor"),
+    @Directive(name = "@extends", params = true),
     @Directive(name = "@section", params = true, endtag = "@endsection"),
     @Directive(name = "@endsection"),
     @Directive(name = "@stop"),

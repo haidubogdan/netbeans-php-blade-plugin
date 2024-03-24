@@ -9,4 +9,6 @@ import org.netbeans.modules.php.blade.syntax.annotation.*;
 public @interface Namespace {
     String path();
     String packageName() default "blade";
+    boolean from_app() default false;
+    boolean from_vendor() default true;
 }

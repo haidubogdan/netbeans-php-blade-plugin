@@ -126,7 +126,7 @@ public class BladeAntlrParser extends Parser {
 			"'@env'", "'@endenv'", null, null, null, null, null, "'@class'", "'@style'", 
 			null, "'@aware'", "'@session'", "'@endsession'", "'@json'", null, "'@lang'", 
 			"'@use'", "'@inject'", null, "'@verbatim'", "'@endverbatim'", null, null, 
-			null, "'{{'", "'{!!'", null, "'<x-'", "'{{--'", null, null, null, null, 
+			null, "'{{'", "'{!!'", null, null, "'{{--'", null, null, null, null, 
 			null, null, null, null, null, null, null, "'as'", null, null, null, null, 
 			"'.'", "','", null, null, null, null, "'@endphp'", "'?>'", null, null, 
 			"'--}}'", null, "'{!'", null, null, null, null, null, null, "'class'", 
