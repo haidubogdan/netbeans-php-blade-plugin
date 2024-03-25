@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.WeakHashMap;
@@ -29,8 +30,10 @@ import org.openide.util.Exceptions;
 public class PhpIndexUtils {
 
     private final static QueryCache<String, Collection<PhpIndexResult>> cache = new QueryCache();
-    
-    private static final Map<Integer, PhpIndexUtils> QUERY_SUPPORT_INSTANCES = new WeakHashMap<>();
+    private final static QueryCache<String, Collection<PhpIndexFunctionResult>> functionCache = new QueryCache();
+
+    private static final Map<Integer, PhpIndexUtils> QUERY_SUPPORT_INSTANCES = new HashMap<>();
+
     /**
      * class query without namespace
      *
@@ -40,19 +43,10 @@ public class PhpIndexUtils {
      */
     public static Collection<PhpIndexResult> queryClass(FileObject fo, String prefix) {
         QuerySupport phpindex = QuerySupportFactory.get(fo);
-        Project projectOwner = ProjectConvertors.getNonConvertorOwner(fo);
-        QueryCache<String, Collection<PhpIndexResult>> selfCache = null;
-        if (projectOwner != null) {
-            int pathHash = projectOwner.getProjectDirectory().toString().hashCode();
-            if (PhpIndexUtils.QUERY_SUPPORT_INSTANCES.containsKey(pathHash)) {
-                PhpIndexUtils indexUtils = QUERY_SUPPORT_INSTANCES.get(pathHash);
-                selfCache = indexUtils.getQueryCache();
-                if (selfCache.containsKey(prefix)) {
-                    return selfCache.get(prefix).get();
-                }
-            } else {
-                QUERY_SUPPORT_INSTANCES.put(pathHash, new PhpIndexUtils());
-            }
+
+        QueryCache<String, Collection<PhpIndexResult>> selfCache = getCache(fo, prefix);
+        if (selfCache != null && selfCache.containsKey(prefix)) {
+            return selfCache.get(prefix).get();
         }
         Collection<PhpIndexResult> results = new ArrayList<>();
         String queryPrefix = prefix.toLowerCase();
@@ -75,8 +69,8 @@ public class PhpIndexUtils {
         } catch (IOException ex) {
             Exceptions.printStackTrace(ex);
         }
-        
-        if (selfCache != null && !results.isEmpty()){
+
+        if (selfCache != null && !results.isEmpty()) {
             selfCache.put(prefix, results);
         }
         return results;
@@ -134,7 +128,7 @@ public class PhpIndexUtils {
                     if (fullName.length() > 0
                             && classNamespace.length() > 0
                             && classNamespace.startsWith(namespace)) {
-                        results.add(new PhpIndexResult(fullName, 
+                        results.add(new PhpIndexResult(fullName,
                                 classNamespace + "\\" + fullName, indexFile, PhpIndexResult.Type.CLASS, new OffsetRange(0, 1)));
                     }
                 }
@@ -178,6 +172,10 @@ public class PhpIndexUtils {
 
     public static Collection<PhpIndexResult> queryExactClass(FileObject fo, String identifier) {
         QuerySupport phpindex = QuerySupportFactory.get(fo);
+        QueryCache<String, Collection<PhpIndexResult>> selfCache = getCache(fo, identifier);
+        if (selfCache != null && selfCache.containsKey(identifier)) {
+            return selfCache.get(identifier).get();
+        }
         Collection<PhpIndexResult> results = new ArrayList<>();
         String queryPrefix = identifier.toLowerCase();
         try {
@@ -197,6 +195,9 @@ public class PhpIndexUtils {
             }
         } catch (IOException ex) {
             Exceptions.printStackTrace(ex);
+        }
+        if (selfCache != null && !results.isEmpty()) {
+            selfCache.put(identifier, results);
         }
         return results;
     }
@@ -237,6 +238,10 @@ public class PhpIndexUtils {
     public static Collection<PhpIndexFunctionResult> queryExactFunctions(FileObject fo, String prefix) {
         QuerySupport phpindex = QuerySupportFactory.get(fo);
         Collection<PhpIndexFunctionResult> results = new ArrayList<>();
+        QueryCache<String, Collection<PhpIndexFunctionResult>> selfCache = getFunctionCache(fo, prefix);
+        if (selfCache != null && selfCache.containsKey(prefix)) {
+            return selfCache.get(prefix).get();
+        }
         String queryPrefix = prefix.toLowerCase();
         try {
             Collection<? extends IndexResult> indexResults = phpindex.query(PHPIndexer.FIELD_BASE, queryPrefix, QuerySupport.Kind.PREFIX, new String[]{PHPIndexer.FIELD_BASE});
@@ -262,6 +267,9 @@ public class PhpIndexUtils {
             }
         } catch (IOException ex) {
             Exceptions.printStackTrace(ex);
+        }
+        if (selfCache != null && !results.isEmpty()) {
+            selfCache.put(prefix, results);
         }
         return results;
     }
@@ -568,9 +576,46 @@ public class PhpIndexUtils {
         }
         return retval;
     }
-    
-    public QueryCache<String, Collection<PhpIndexResult>> getQueryCache(){
+
+    protected static QueryCache<String, Collection<PhpIndexResult>> getCache(FileObject fo, String prefix) {
+        QueryCache<String, Collection<PhpIndexResult>> selfCache = new QueryCache<>();
+        Project projectOwner = ProjectConvertors.getNonConvertorOwner(fo);
+        if (projectOwner == null) {
+            return null;
+        }
+        int pathHash = projectOwner.getProjectDirectory().toString().hashCode();
+        if (PhpIndexUtils.QUERY_SUPPORT_INSTANCES.containsKey(pathHash)) {
+            PhpIndexUtils indexUtils = QUERY_SUPPORT_INSTANCES.get(pathHash);
+            selfCache = indexUtils.getQueryCache();
+
+        } else {
+            QUERY_SUPPORT_INSTANCES.put(pathHash, new PhpIndexUtils());
+        }
+        return selfCache;
+    }
+
+    protected static QueryCache<String, Collection<PhpIndexFunctionResult>> getFunctionCache(FileObject fo, String prefix) {
+        QueryCache<String, Collection<PhpIndexFunctionResult>> selfCache = new QueryCache<>();
+        Project projectOwner = ProjectConvertors.getNonConvertorOwner(fo);
+        if (projectOwner == null) {
+            return null;
+        }
+        int pathHash = projectOwner.getProjectDirectory().toString().hashCode();
+        if (PhpIndexUtils.QUERY_SUPPORT_INSTANCES.containsKey(pathHash)) {
+            PhpIndexUtils indexUtils = QUERY_SUPPORT_INSTANCES.get(pathHash);
+            selfCache = indexUtils.getFunctionQueryCache();
+
+        } else {
+            QUERY_SUPPORT_INSTANCES.put(pathHash, new PhpIndexUtils());
+        }
+        return selfCache;
+    }
+
+    public QueryCache<String, Collection<PhpIndexResult>> getQueryCache() {
         return cache;
     }
 
+    public QueryCache<String, Collection<PhpIndexFunctionResult>> getFunctionQueryCache() {
+        return functionCache;
+    }
 }

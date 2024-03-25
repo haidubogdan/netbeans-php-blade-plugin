@@ -227,6 +227,10 @@ public class BladeParserResult extends ParserResult {
                     case INCLUDE_IF:
                     case INCLUDE_COND:
                     case EACH:
+                        if (bladeParamText.contains("::")){
+                            //don't include package resources
+                            break;
+                        }
                         markIncludeBladeOccurrence(bladeParamText, range);
                         break;
                 }
@@ -825,16 +829,7 @@ public class BladeParserResult extends ParserResult {
 
     @Override
     protected void invalidate() {
-//        occurancesForDeclaration.clear();
-//        structure.clear();
-//        folds.clear();
-//        customDirectivesReferences.clear();
-//        includeBladeOccurences.clear();
-//        phpClassOccurences.clear();
-//        phpConstantOccurences.clear();
-//        phpMethodOccurences.clear();
         loopScopedVariables.clear();
-//        phpFunctionOccurences.clear();
     }
 
     public Map<String, Reference> getYieldReferences() {
