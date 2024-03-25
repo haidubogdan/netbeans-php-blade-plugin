@@ -116,11 +116,13 @@ public class PhpIndexUtils {
         try {
             Collection<? extends IndexResult> indexResults = phpindex.query(
                     PHPIndexer.FIELD_CLASS, queryPrefix, QuerySupport.Kind.REGEXP, new String[]{
-                        PHPIndexer.FIELD_CLASS});
+                        PHPIndexer.FIELD_CLASS, PHPIndexer.FIELD_FIELD});
             for (IndexResult indexResult : indexResults) {
                 FileObject indexFile = indexResult.getFile();
 
                 String[] values = indexResult.getValues(PHPIndexer.FIELD_CLASS);
+                //should use this approach on methods
+                //String[] fields = indexResult.getValues(PHPIndexer.FIELD_FIELD);
                 for (String value : values) {
                     Signature sig = Signature.get(value);
                     String fullName = sig.string(1);
@@ -274,6 +276,7 @@ public class PhpIndexUtils {
         return results;
     }
 
+    //should query the class before?
     public static Collection<PhpIndexFunctionResult> queryExactClassMethods(FileObject fo, String method, String className) {
         QuerySupport phpindex = QuerySupportFactory.get(fo);
         Collection<PhpIndexFunctionResult> results = new ArrayList<>();
@@ -310,7 +313,7 @@ public class PhpIndexUtils {
     }
 
     /**
-     * todo might add project filter
+     * 
      *
      * @param fo
      * @param method
@@ -320,6 +323,7 @@ public class PhpIndexUtils {
     public static Collection<PhpIndexFunctionResult> queryClassMethods(FileObject fo, String method, String className) {
         QuerySupport phpindex = QuerySupportFactory.get(fo);
         Collection<PhpIndexFunctionResult> results = new ArrayList<>();
+        //should query the class befoe
         //for the moment a quick hack
         //maybe send the classNamePath directly?
         String regexQuery = method.toLowerCase() + "(.)*;(.)*(" + className.replace("_", "/") + ")(.)*";
@@ -464,6 +468,38 @@ public class PhpIndexUtils {
                     String name = sig.string(1);
 
                     if (name.length() > 0 && name.startsWith(prefix)) {
+                        Integer offset = sig.integer(2);
+                        results.add(new PhpIndexResult(name, indexFile, PhpIndexResult.Type.CONSTANT, new OffsetRange(offset, offset + name.length())));
+                    }
+                }
+            }
+        } catch (IOException ex) {
+            Exceptions.printStackTrace(ex);
+        }
+        return results;
+    }
+    
+    public static Collection<PhpIndexResult> queryClassProperties(FileObject fo, String prefix, String ownerClass){
+        QuerySupport phpindex = QuerySupportFactory.get(fo);
+        Collection<PhpIndexResult> results = new ArrayList<>();
+        String queryPrefix = prefix.toLowerCase();
+        try {
+            Collection<? extends IndexResult> indexResults = phpindex.query(PHPIndexer.FIELD_FIELD, queryPrefix, QuerySupport.Kind.PREFIX, new String[]{
+                PHPIndexer.FIELD_FIELD, PHPIndexer.FIELD_CLASS});
+            for (IndexResult indexResult : indexResults) {
+                FileObject indexFile = indexResult.getFile();
+                //internal php index
+
+                String classOwnerName = indexResult.getValue(PHPIndexer.FIELD_CLASS);
+                if (!classOwnerName.startsWith(ownerClass.toLowerCase() + ";")) {
+                    continue;
+                }
+                String[] values = indexResult.getValues(PHPIndexer.FIELD_FIELD);
+                for (String value : values) {
+                    Signature sig = Signature.get(value);
+                    String name = sig.string(1);
+
+                    if (name.length() > 0 && name.equals(prefix)) {
                         Integer offset = sig.integer(2);
                         results.add(new PhpIndexResult(name, indexFile, PhpIndexResult.Type.CONSTANT, new OffsetRange(offset, offset + name.length())));
                     }

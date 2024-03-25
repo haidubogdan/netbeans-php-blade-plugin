@@ -25,6 +25,7 @@ import org.netbeans.modules.php.blade.editor.directives.CustomDirectives;
 import org.netbeans.modules.php.blade.editor.indexing.BladeIndex;
 import org.netbeans.modules.php.blade.editor.indexing.BladeIndex.IndexedReferenceId;
 import org.netbeans.modules.php.blade.editor.indexing.PhpIndexResult;
+import org.netbeans.modules.php.blade.editor.indexing.PhpIndexUtils;
 import org.netbeans.modules.php.blade.editor.path.PathUtils;
 import org.netbeans.modules.php.blade.project.ProjectUtils;
 import org.netbeans.modules.php.blade.syntax.StringUtils;
@@ -61,7 +62,8 @@ public class BladeCompletionProvider implements CompletionProvider {
     public enum CompletionType {
         BLADE_PATH,
         YIELD_ID,
-        DIRECTIVE
+        DIRECTIVE,
+        HTML_COMPONENT_TAG,
     }
 
     @Override
@@ -175,6 +177,9 @@ public class BladeCompletionProvider implements CompletionProvider {
                             completeDirectives(nText, doc, caretOffset, resultSet);
                         } else if (nText.startsWith("{")) {
                             completeBladeTags(nText, currentToken, tokens, doc, caretOffset, resultSet);
+                        } else if ("livewire".startsWith(nText)) {
+                            //quick implementation
+                            addHtmlTagCompletionItem(nText, "livewire", "livewire", caretOffset, resultSet);
                         }
                         break;
                     case HTML_COMPONENT_PREFIX:
@@ -484,8 +489,23 @@ public class BladeCompletionProvider implements CompletionProvider {
         for (PhpIndexResult indexReference : indexedReferences) {
             addComponentIdCompletionItem(indexReference,
                     insertOffset, resultSet);
+            
+            PhpIndexUtils.queryClassProperties(fo, "type", indexReference.name);
         }
 
+    }
+
+    private void addHtmlTagCompletionItem(String prefix, String tagName, String plugin,
+            int caretOffset, CompletionResultSet resultSet) {
+        int insertOffset = caretOffset - prefix.length();
+        CompletionItem item = CompletionUtilities.newCompletionItemBuilder(tagName)
+                .iconResource(getReferenceIcon(CompletionType.HTML_COMPONENT_TAG))
+                .startOffset(insertOffset)
+                .leftHtmlText("&lt;" + tagName + "&gt;")
+                .rightHtmlText(plugin)
+                .sortPriority(1)
+                .build();
+        resultSet.addItem(item);
     }
 
     private void addComponentIdCompletionItem(PhpIndexResult indexReference,
@@ -493,7 +513,7 @@ public class BladeCompletionProvider implements CompletionProvider {
 
         String tagName = StringUtils.toKebabCase(indexReference.name);
         CompletionItem item = CompletionUtilities.newCompletionItemBuilder(tagName)
-                .iconResource(getReferenceIcon(CompletionType.YIELD_ID))
+                .iconResource(getReferenceIcon(CompletionType.HTML_COMPONENT_TAG))
                 .startOffset(caretOffset)
                 .leftHtmlText(tagName)
                 .rightHtmlText(indexReference.qualifiedName)
@@ -508,6 +528,8 @@ public class BladeCompletionProvider implements CompletionProvider {
 
     private static String getReferenceIcon(CompletionType type) {
         switch (type) {
+            case HTML_COMPONENT_TAG:
+                return "org/netbeans/modules/html/custom/resources/custom_html_element.png"; //NOI18N
             case YIELD_ID:
                 return ResourceUtilities.ICON_BASE + "icons/layout.png"; //NOI18N
         }

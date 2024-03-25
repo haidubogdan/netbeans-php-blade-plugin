@@ -171,7 +171,7 @@ PHP_INLINE_START : ('<?php' | '<?=')->pushMode(INSIDE_PHP_INLINE);
 
 HTML_CLOSE_TAG : '<' '/'?  NameString '>'->type(HTML);
 HTML_COMPONENT_PREFIX : '<x-' (CompomentIdentifier |  CompomentIdentifier ('::' CompomentIdentifier)+)?;
-HTML : ~[<?@{!]+;
+HTML : ~[<?@{!\n\r]+;
 
 OTHER : . ->type(HTML);
 

@@ -387,6 +387,7 @@
                 <package>org.netbeans.modules.php.blade.csl.elements</package>
                 <package>org.netbeans.modules.php.blade.editor</package>
                 <package>org.netbeans.modules.php.blade.editor.actions</package>
+                <package>org.netbeans.modules.php.blade.editor.cache</package>
                 <package>org.netbeans.modules.php.blade.editor.compiler</package>
                 <package>org.netbeans.modules.php.blade.editor.completion</package>
                 <package>org.netbeans.modules.php.blade.editor.directives</package>
