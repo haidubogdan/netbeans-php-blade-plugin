@@ -51,6 +51,8 @@ public class BladeFormatter implements Formatter {
         } else if (!isBladeFormattingEnabled(doc)) {
             return;
         }
+        //todo
+        //check tab context
         FileObject file = NbEditorUtilities.getFileObject(doc);
         Project projectOwner = ProjectConvertors.getNonConvertorOwner(file);
         if (projectOwner == null) {
