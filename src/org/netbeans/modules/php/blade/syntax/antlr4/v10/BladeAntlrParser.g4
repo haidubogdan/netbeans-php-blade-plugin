@@ -240,4 +240,4 @@ loop_action : (D_LOOP_ACTION | D_BREAK) php_expression?;
 
 
 //html
-html : HTML+ | HTML_COMPONENT_PREFIX;
+html : HTML+ | HTML_COMPONENT_PREFIX | HTML_TAG_START | EQ | HTML_IDENTIFIER;

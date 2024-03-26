@@ -1,5 +1,7 @@
 package org.netbeans.modules.php.blade.editor.components;
 
+import org.netbeans.modules.php.blade.editor.components.annotation.NamespaceRegister;
+import org.netbeans.modules.php.blade.editor.components.annotation.Namespace;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Set;

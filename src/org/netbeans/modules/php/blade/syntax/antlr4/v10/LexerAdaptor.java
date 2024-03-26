@@ -20,6 +20,7 @@ public abstract class LexerAdaptor extends Lexer {
     public int squareParenBalance = 0;
     public int curlyParenBalance = 0;
     public int exitIfModePosition = 0;
+    public boolean compomentTagOpen = false;
 
     public LexerAdaptor(CharStream input) {
         super(input);
@@ -131,22 +132,13 @@ public abstract class LexerAdaptor extends Lexer {
             this.mode(DEFAULT_MODE);
         }
     }
-    
-    //blade coloring lexer
-    public void consumeEscapedEchoToken() {
-        if (this._input.LA(1) == '}' && this._input.LA(2) == '}') {
-            this.setType(BladeAntlrColoringLexer.BLADE_PHP_ECHO_EXPR);
-        } else {
-            this.more();
-        }
-    }
 
-    //blade coloring lexer
-    public void consumeNotEscapedEchoToken() {
-        if (this._input.LA(1) == '!' && this._input.LA(2) == '!' && this._input.LA(3) == '}') {
-            this.setType(BladeAntlrColoringLexer.BLADE_PHP_ECHO_EXPR);
+    
+    public void consumeHtmlIdentifier(){
+        if (this.compomentTagOpen == true) {
+            this.setType(BladeAntlrLexer.HTML_IDENTIFIER);
         } else {
-            this.more();
+            this.setType(BladeAntlrLexer.HTML);
         }
     }
 }

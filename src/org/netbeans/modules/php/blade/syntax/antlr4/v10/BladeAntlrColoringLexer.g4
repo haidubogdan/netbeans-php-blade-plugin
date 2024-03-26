@@ -127,11 +127,15 @@ HTML_CLOSE_TAG : '<' '/'?  NameString [ ]* '>'->type(HTML);
 //to check if we still have this issue
 UNCLOSED_TAG : ('<' NameString [\r\n]+)->type(HTML); 
 
-LAST_NL : [\r\n]+ EOF; 
+LAST_NL : [\r\n]+ EOF;
+
+NL_BEFORE_BLADE : (' ')? [\r\n] {this._input.LA(1) == '@'}?;
+
+NL : [\r\n]->type(HTML);
 
 HTML_X : ('<x-' ComponentTagIdentifier | '<' ComponentTagIdentifier ('::' ComponentTagIdentifier)+)->type(HTML),pushMode(INSIDE_HTML_COMPONENT_TAG);
 
-HTML : ~[<?@{!]+ | 'style' | 'class' | 'required' | 'selected' | 'value';
+HTML : ~[<?@{!\r\n]+ | 'style' | 'class' | 'required' | 'selected' | 'value';
 
 OTHER : . ->type(HTML);
 

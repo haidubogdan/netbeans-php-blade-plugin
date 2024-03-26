@@ -169,10 +169,14 @@ RAW_TAG_START : '{!'->type(HTML);
 
 PHP_INLINE_START : ('<?php' | '<?=')->pushMode(INSIDE_PHP_INLINE);
 
-HTML_CLOSE_TAG : '<' '/'?  NameString '>'->type(HTML);
-HTML_COMPONENT_PREFIX : '<x-' (CompomentIdentifier |  CompomentIdentifier ('::' CompomentIdentifier)+)?;
-HTML : ~[<?@{!\n\r]+;
 
+HTML_COMPONENT_PREFIX : '<x-' (CompomentIdentifier |  CompomentIdentifier ('::' CompomentIdentifier)+)? {this.compomentTagOpen = true;};
+HTML_TAG_START : '<' NameString;
+HTML_CLOSE_TAG : '<' '/' NameString '>' {this.compomentTagOpen = false;} ->type(HTML);
+HTML_TAG_SELF_CLOSE : '/>' {this.compomentTagOpen = false;}->type(HTML);
+HTML_CLOSE_SYMBOL : '>' {this.compomentTagOpen = false;} ->type(HTML);
+HTML_IDENTIFIER : NameString {this.consumeHtmlIdentifier();};
+EQ : '=';
 OTHER : . ->type(HTML);
 
 /**

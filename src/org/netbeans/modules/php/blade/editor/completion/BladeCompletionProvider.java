@@ -20,6 +20,7 @@ import org.netbeans.api.project.Project;
 import org.netbeans.lib.editor.codetemplates.api.CodeTemplateManager;
 import org.netbeans.modules.php.blade.editor.BladeLanguage;
 import org.netbeans.modules.php.blade.editor.ResourceUtilities;
+import org.netbeans.modules.php.blade.editor.components.AttributeCompletionService;
 import org.netbeans.modules.php.blade.editor.components.ComponentsCompletionService;
 import org.netbeans.modules.php.blade.editor.directives.CustomDirectives;
 import org.netbeans.modules.php.blade.editor.indexing.BladeIndex;
@@ -169,6 +170,9 @@ public class BladeCompletionProvider implements CompletionProvider {
                     case CONTENT_TAG_OPEN:
                     case RAW_TAG_OPEN:
                         completeBladeTags(currentToken.getText(), currentToken, tokens, doc, caretOffset, resultSet);
+                        break;
+                    case HTML_IDENTIFIER:
+                        completeAttributes(currentToken.getText(), caretOffset, resultSet);
                         break;
                     case HTML:
                     case D_UNKNOWN:
@@ -489,10 +493,21 @@ public class BladeCompletionProvider implements CompletionProvider {
         for (PhpIndexResult indexReference : indexedReferences) {
             addComponentIdCompletionItem(indexReference,
                     insertOffset, resultSet);
-            
+            //debuging class properties
+            //to move from here
             PhpIndexUtils.queryClassProperties(fo, "type", indexReference.name);
         }
 
+    }
+
+    private void completeAttributes(String prefix, int caretOffset, CompletionResultSet resultSet) {
+        int insertOffset = caretOffset;
+        AttributeCompletionService attributeCompletionService = new AttributeCompletionService();
+        Collection<String> attributes = attributeCompletionService.queryComponents(prefix);
+
+        for (String attribute : attributes) {
+            addSimplAttributeItem(prefix, attribute,insertOffset, resultSet);
+        }
     }
 
     private void addHtmlTagCompletionItem(String prefix, String tagName, String plugin,
@@ -503,6 +518,18 @@ public class BladeCompletionProvider implements CompletionProvider {
                 .startOffset(insertOffset)
                 .leftHtmlText("&lt;" + tagName + "&gt;")
                 .rightHtmlText(plugin)
+                .sortPriority(1)
+                .build();
+        resultSet.addItem(item);
+    }
+
+    private void addSimplAttributeItem(String prefix, String attributeName, int caretOffset, CompletionResultSet resultSet) {
+        int insertOffset = caretOffset - prefix.length();
+        CompletionItem item = CompletionUtilities.newCompletionItemBuilder(attributeName)
+                //.iconResource(getReferenceIcon(CompletionType.HTML_COMPONENT_TAG))
+                .startOffset(insertOffset)
+                .leftHtmlText(attributeName)
+                //.rightHtmlText(plugin)
                 .sortPriority(1)
                 .build();
         resultSet.addItem(item);
