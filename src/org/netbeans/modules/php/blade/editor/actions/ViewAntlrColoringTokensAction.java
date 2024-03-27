@@ -115,6 +115,10 @@ public class ViewAntlrColoringTokensAction extends AbstractAction implements Act
                             result.append(" (PHP_EXPRESSION)");
                             result.append(token.getText());
                             break;
+                        case BLADE_PHP_ECHO_EXPR:
+                            result.append(" (BLADE_PHP_ECHO_EXPR)");
+                            result.append(token.getText());
+                            break;
                         default:
                             result.append(token.getType());
                     }

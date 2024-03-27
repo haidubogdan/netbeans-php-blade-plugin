@@ -18,6 +18,7 @@ public abstract class ColoringLexerAdaptor extends Lexer {
     public int squareParenBalance = 0;
     public int curlyParenBalance = 0;
     public int exitIfModePosition = 0;
+    public boolean hasPhpExprContent = false;
 
     public ColoringLexerAdaptor(CharStream input) {
         super(input);

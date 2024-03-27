@@ -1,5 +1,29 @@
 # Change Log
 
+## [2.1.70]
+
+**lexer**
+
+- fix freezing embedding usecases by splitting the php expression embeded tokens (usually it breaks with `(:`) #25
+
+**components**
+
+- work in progress for autocompleting components with hardcoded paths
+
+it will search for components found in : 
+
+- `App\\View\\Components`
+- `App\\Http\\Livewire`
+- `Illuminate\\Console\\View\\Components`
+
+**indenting**
+
+- quick fix for tab indent blocked after html tag #47 
+
+**hints**
+
+- disable warning path for namespace include `@include('base::my_comp')`
+
 ## [2.1.60]
 
 **parser**

@@ -73,6 +73,10 @@ public class BladeFormatter implements Formatter {
                 try {
                     String currentText = doc.getText(0, doc.getLength());
                     if (context.isIndent()) {
+                        int lineStart = context.lineStartOffset(context.caretOffset());
+                        if ( doc.getText(lineStart, context.caretOffset()).isEmpty()) {
+                            return;
+                        }
                         (new BladeIndentationService()).format(context, currentText, indentSize);
                     } else {
                         (new BladeFormatterService()).format(context, currentText, indentSize);

@@ -106,6 +106,7 @@ public enum BladeTokenId implements TokenId {
                 case PHP_BLADE_INLINE_CODE:
                     Language<? extends TokenId> phpLanguage = PHPTokenId.languageInPHP();
                     return phpLanguage != null ? LanguageEmbedding.create(phpLanguage, 0, 0, false) : null;
+//                    return null;
                 case HTML:
                     LanguageEmbedding<?> lang;
 
