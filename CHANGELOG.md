@@ -1,5 +1,14 @@
 # Change Log
 
+## [2.1.80]
+
+- revert changes on lexer, add a simple error token when detecting `identifier:identifier` or `(:` tokens
+
+**components**
+
+- add `App\\Livewire` in the namespace register
+
+
 ## [2.1.70]
 
 **lexer**

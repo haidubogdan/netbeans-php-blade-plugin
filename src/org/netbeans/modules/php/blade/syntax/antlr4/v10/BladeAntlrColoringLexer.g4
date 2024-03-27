@@ -172,33 +172,26 @@ L_OTHER : . ->type(HTML), popMode;
 // @directive (?)
 mode INSIDE_PHP_EXPRESSION;
 
-OPEN_EXPR_PAREN : {this.roundParenBalance == 0}? '(' {this.increaseRoundParenBalance();} ->type(HTML);
+OPEN_EXPR_PAREN : {this.roundParenBalance == 0}? '(' {this.increaseRoundParenBalance();} ->more;
 CLOSE_EXPR_PAREN : {this.roundParenBalance == 1}? ')' 
-    {this.decreaseRoundParenBalance();}->type(HTML),mode(DEFAULT_MODE);
+    {this.decreaseRoundParenBalance();}->type(PHP_EXPRESSION),mode(DEFAULT_MODE);
 
-LPAREN : {this.roundParenBalance > 0}? '(' {this.increaseRoundParenBalance();}->type(PHP_EXPRESSION);
-RPAREN : {this.roundParenBalance > 0}? ')' {this.decreaseRoundParenBalance();}->type(PHP_EXPRESSION);
+LPAREN : {this.roundParenBalance > 0}? '(' {this.increaseRoundParenBalance();}->more;
+RPAREN : {this.roundParenBalance > 0}? ')' {this.decreaseRoundParenBalance();}->more;
 
 //in case of lexer restart context
-EXIT_RPAREN : ')' {this.roundParenBalance == 0}?->type(HTML),mode(DEFAULT_MODE);
+EXIT_RPAREN : ')' {this.roundParenBalance == 0}?->type(PHP_EXPRESSION),mode(DEFAULT_MODE);
 
 //hack due to a netbeans php embedding issue when adding or deleting ':' chars
-DOUBLE_NEKODU : NEKUDO_WHITELIST_MATCH->type(PHP_EXPRESSION);
-PHP_FREEZE_SYNTAX : (':)' | ':' ) ->skip;
+DOUBLE_NEKODU : NEKUDO_WHITELIST_MATCH ->more;
+PHP_FREEZE_SYNTAX : (':)' | ':' )->type(ERROR),popMode;
 //no string interpolation for the moment
 //freeze issue
-EXPR_STRING_LITERAL : (SINGLE_QUOTED_STRING_FRAGMENT)->type(PHP_EXPRESSION);
+EXPR_STRING_LITERAL : (SINGLE_QUOTED_STRING_FRAGMENT)->more;
 
-//STATIC_STRING : //check if start of token ... check if bracket and
-EXPR_PHP_VAR : PhpVariable->type(PHP_EXPRESSION);
-PHP_OPERATORS : ('->' | '=>')->type(PHP_EXPRESSION);
-GENERIC_EXPRESSION : ('fn()' | NameString '::class')->type(PHP_EXPRESSION);
-PHP_IDENTIFIER : NameString->type(PHP_EXPRESSION);
-PHP_DIGIT : [0-9]('.'? [0-9]+)?->type(PHP_EXPRESSION);
+//STATIC_STRING : //check if start of token ... check if bracket and 
 
-PHP_EXPR_DBQUOTE: '"'->more,pushMode(EXPR_PHP_STRING);
-
-PHP_EXPRESSION_MORE : . ->type(PHP_EXPRESSION);
+PHP_EXPRESSION_MORE : . ->more;
 
 EXIT_EOF : EOF->type(ERROR),popMode;
 
@@ -260,17 +253,3 @@ COMPONENT_PHP_EXPRESSION_LAST : . {this._input.LA(1) == '"'}? ->type(PHP_EXPRESS
 COMPONENT_PHP_EXPRESSION : . ->more;
 
 EXIT_COMPONENT_PHP_EXPRESSION_EOF : EOF->type(ERROR),popMode;
-
-mode EXPR_PHP_STRING;
-
-//
-PHP_STRING_DOUBLE_NEKODU : NEKUDO_WHITELIST_MATCH->more;
-PHP_STRING_FREEZE_SYNTAX : (':)' | ':' ) ->skip;
-
-ESC_PHP_DB_QUOTE : '\\"' ->more;
-
-PHP_EXPR_DBQUOTE_EXIT : '"'->type(PHP_EXPRESSION),popMode;
-
-EXIT_PHP_STRING_EOF : EOF->type(ERROR),popMode;
-
-PHP_STRING_EXTRA : . ->more;

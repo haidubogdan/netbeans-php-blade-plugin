@@ -118,4 +118,13 @@ public abstract class ColoringLexerAdaptor extends Lexer {
             this.more();
         }
     }
+    
+    public void maskFreezeString(){
+        if (this._input.LA(2) == ')'){
+            this.setText("@@");
+        } else {
+            this.setText("@");
+        }
+        this.more();
+    }
 }

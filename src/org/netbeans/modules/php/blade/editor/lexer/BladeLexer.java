@@ -80,6 +80,7 @@ public class BladeLexer extends AbstractAntlrLexerBridge<BladeAntlrColoringLexer
             case BladeAntlrColoringLexer.PHP_INLINE:
                 return token(PHP_INLINE);
             case BladeAntlrColoringLexer.PHP_EXPRESSION:
+                //System.out.println(antlrToken.getText());
                 return token(PHP_BLADE_EXPRESSION);
             case BladeAntlrColoringLexer.BLADE_PHP_INLINE:
                 return token(PHP_BLADE_INLINE_CODE);
