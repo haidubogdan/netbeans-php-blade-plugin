@@ -18,6 +18,7 @@ import org.openide.filesystems.FileObject;
 @NamespaceRegister({
     @Namespace(path = "App\\View\\Components", from_app=true),
     @Namespace(path = "App\\Http\\Livewire", from_app=true),
+    @Namespace(path = "App\\Livewire", from_app=true),//from 10
     @Namespace(path = "Illuminate\\Console\\View\\Components"),
     @Namespace(path = "BladeUIKit\\Components\\Buttons", packageName="blade-ui-kit/blade-ui-kit"),
     @Namespace(path = "BladeUIKit\\Components\\Layouts", packageName="blade-ui-kit/blade-ui-kit"),
