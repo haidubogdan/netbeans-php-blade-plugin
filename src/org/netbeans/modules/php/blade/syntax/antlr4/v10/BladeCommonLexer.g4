@@ -48,7 +48,7 @@ D_ESCAPES
       '{{{'
     |  '@@' '@'?
     | '@{' '{'?
-    | '@media' [ ]*
+    | '@media' [ ]* '('?
     | '@charset'
     | '@import'
     | '@namespace'

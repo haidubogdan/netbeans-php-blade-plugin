@@ -1,5 +1,16 @@
 # Change Log
 
+## [2.2.4.1]
+
+**parser**
+
+- cleaning tokens sent to parser to speed up parsing process [wip]
+
+**lexer**
+
+- optimisation for lexer tokenization
+- fixing `@media` directive
+
 ## [2.2.1.2]
 
 **parser**

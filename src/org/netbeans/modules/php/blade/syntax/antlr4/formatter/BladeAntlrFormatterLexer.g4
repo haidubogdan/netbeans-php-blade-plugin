@@ -99,7 +99,8 @@ HTML_START_BLOCK_TAG : '<' ('div'
     | 'summary' | 'details' | 'slot'
     | 'label' | 'select' | 'option' | 'fieldset' | 'textarea' | 'button' | 'form' | 'search'
     | 'ul' | 'ol' | 'li'
-    | 'table' | 'tr' | 'td' | 'th' | 'tbody' | 'thead' | 'tfoot'
+    | 'table' | 'tr' | 'td' | 'th' | 'tbody' | 'thead' | 'tfoot' | 'caption' |
+    | 'time' |
     | 'var' | 'q' | 'p' | 'a' | 'b' | 'i') {this._input.LA(1) == '>' || this._input.LA(1) == '@' || this._input.LA(1) == ' ' || this._input.LA(1) == '\n'}?;
 
 

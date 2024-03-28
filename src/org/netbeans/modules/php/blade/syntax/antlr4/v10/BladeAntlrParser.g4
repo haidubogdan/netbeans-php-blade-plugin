@@ -108,9 +108,9 @@ pushIf : D_PUSH_IF doubleIfArgWrapper general_statement+ D_ENDPUSH_IF;
 prepend : D_PREPEND singleArgWrapper general_statement+ D_ENDPREPEND;
 fragmentD locals [String version = "10"] : D_FRAGMENT composed_php_expression general_statement+ D_ENDFRAGMENT;
 
-if : D_IF main_php_expression general_statement+ endif?;
+if : D_IF main_php_expression general_statement* endif | D_IF main_php_expression general_statement+ endif?;
 elseif : D_ELSEIF main_php_expression general_statement+ endif?;
-else : D_ELSE general_statement+ endif?;
+else : D_ELSE (general_statement* endif | general_statement+ endif?);
 endif: D_ENDIF;
 empty_block : D_EMPTY composed_php_expression general_statement+ D_ENDEMPTY;
 

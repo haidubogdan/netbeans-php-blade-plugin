@@ -19,6 +19,7 @@ tokens {
  RAW_TAG,
  CONTENT_TAG,
  HTML,
+ HTML_TAG,   
  ERROR
 }
 
@@ -30,6 +31,8 @@ fragment DOUBLE_QUOTED_STRING_FRAGMENT_WITH_PHP
 
 fragment ComponentTagIdentifier 
     : [a-z_\u0080-\ufffe][a-z0-9.:\u0080-\ufffe-]*;   
+
+fragment SpecialChars : '°';
 
 PHP_INLINE : '<?=' .*? '?>' | '<?php' .*? ('?>' | EOF);
 
@@ -90,6 +93,7 @@ D_AWARE : '@aware'->pushMode(LOOK_FOR_PHP_EXPRESSION),type(DIRECTIVE);
 //misc
 D_EMPTY : '@empty'->pushMode(LOOK_FOR_PHP_EXPRESSION),type(DIRECTIVE);
 D_ENDEMPTY : '@endempty'->type(DIRECTIVE);
+D_GUEST : '@guest'->pushMode(LOOK_FOR_PHP_EXPRESSION),type(DIRECTIVE);
 D_AUTH : '@auth'->pushMode(LOOK_FOR_PHP_EXPRESSION),type(DIRECTIVE);
 D_PERMISSION : ('@can' | '@cannot' | '@canany')->pushMode(LOOK_FOR_PHP_EXPRESSION),type(DIRECTIVE);
 D_INJECT : '@inject'->pushMode(LOOK_FOR_PHP_EXPRESSION),type(DIRECTIVE);
@@ -121,20 +125,27 @@ D_CUSTOM : ('@' NameString {this._input.LA(1) == '(' ||
 CONTENT_TAG_OPEN : '{{' ->pushMode(INSIDE_REGULAR_ECHO),type(CONTENT_TAG);
 RAW_TAG_OPEN : '{!!' ->pushMode(INSIDE_RAW_ECHO),type(RAW_TAG);
 
-HTML_CLOSE_TAG : '<' '/'?  FullIdentifier [ ]* '>'->type(HTML); 
-
-
-LAST_NL : [\r\n]+ EOF; 
+CSS_COMMENT : '/*' .*? '*/'->type(HTML);
 
 HTML_X : ('<x-' ComponentTagIdentifier | '<' ComponentTagIdentifier ('::' ComponentTagIdentifier)+)->type(HTML),pushMode(INSIDE_HTML_COMPONENT_TAG);
 
-//hack for the last unclosed tags
-//to check if we still have this issue
-UNCLOSED_TAG : ('<' FullIdentifier [\r\n]+)->type(HTML); 
+HTML : ((' ')+ | [\r\n]+ | ComponentTagIdentifier | SpecialChars | '"' | '\\\'' | '_' | '.' 
+| ',' | '=' | [()-;]+ | '[' | ']' )* '<' {this._input.LA(1) != 'x' && this._input.LA(1) != '?' && this._input.LA(2) != 'p'}? ->pushMode(INSIDE_HTML_TAG),more;
 
-HTML : ~[<?@{!]+ | 'style' | 'class' | 'required' | 'selected' | 'value';
+HTML_MISC : ((' ')+ | [\r\n]+ | ('#' | '.')? ComponentTagIdentifier | SpecialChars | '"' 
+| ',' | '\\\'' | '_' | '.' | '=' | [()-;]+ | '[' | ']'  )+->type(HTML);
+
+HTML_WS : ((' ')+ | [\r\n]+ | '//')+->type(HTML);
 
 OTHER : . ->type(HTML);
+
+mode INSIDE_HTML_TAG;
+
+OTHER_HTML_POP : . {this._input.LA(1) == '@' || this._input.LA(1) == '{' || (this._input.LA(1) == '<' && this._input.LA(2) == '?')}? ->type(HTML_TAG), popMode;
+
+OTHER_HTML : . ->more;
+
+HTML_EOF : EOF->type(HTML_TAG),popMode;
 
 // {{  }}
 mode INSIDE_REGULAR_ECHO;

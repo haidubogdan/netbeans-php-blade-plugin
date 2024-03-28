@@ -77,6 +77,7 @@ public class BladeLexer extends AbstractAntlrLexerBridge<BladeAntlrColoringLexer
                 return token(BLADE_COMMENT);
             case BladeAntlrColoringLexer.BLADE_COMMENT_END:
                 return token(BLADE_COMMENT_END);
+            case BladeAntlrColoringLexer.HTML_TAG:  
             case BladeAntlrColoringLexer.HTML:
                 return token(HTML);
             case BladeAntlrColoringLexer.PHP_INLINE:

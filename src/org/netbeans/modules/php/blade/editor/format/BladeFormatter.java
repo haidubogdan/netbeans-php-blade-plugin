@@ -21,6 +21,7 @@ import org.netbeans.modules.php.blade.project.BladeProjectProperties;
 import org.netbeans.modules.php.blade.project.OptionsUtils;
 import org.netbeans.spi.project.ui.support.ProjectConvertors;
 import org.openide.filesystems.FileObject;
+import org.openide.util.Exceptions;
 
 /**
  * possible strategies
@@ -72,9 +73,11 @@ public class BladeFormatter implements Formatter {
                 }
                 try {
                     String currentText = doc.getText(0, doc.getLength());
+
                     if (context.isIndent()) {
                         int lineStart = context.lineStartOffset(context.caretOffset());
-                        if ( doc.getText(lineStart, context.caretOffset()).isEmpty()) {
+                        String lineText = doc.getText(lineStart, context.caretOffset() - lineStart);
+                        if (!lineText.isEmpty() && lineText.replaceAll(" ", "").isEmpty()) {
                             return;
                         }
                         (new BladeIndentationService()).format(context, currentText, indentSize);

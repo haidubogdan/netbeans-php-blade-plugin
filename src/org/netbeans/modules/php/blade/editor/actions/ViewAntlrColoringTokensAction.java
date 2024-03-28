@@ -106,6 +106,7 @@ public class ViewAntlrColoringTokensAction extends AbstractAction implements Act
                         case DIRECTIVE:
                             result.append(token.getText());
                             break;
+                        case HTML_TAG:    
                         case HTML:
                             result.append(" (HTML ");
                             result.append(token.getText());

@@ -121,20 +121,31 @@ public class BladeParserResult extends ParserResult {
         return ret;
     }
 
-    public BladeParserResult get() {
+    public BladeParserResult get(String taskCkass) {
         long startTime = System.currentTimeMillis();
+        System.out.println("PARSER TRIGGERED BY " + taskCkass);
         if (!finished) {
             BladeAntlrParser parser = createParser(getSnapshot());
             //LOGGER.info(String.format("parser created in %d ms", System.currentTimeMillis() - startTime));
             parser.addErrorListener(createErrorListener());
-            parser.addParseListener(createDeclarationReferencesListener());
+            //if (!taskCkass.toLowerCase().contains("completion") && !taskCkass.toLowerCase().contains("fold") && !taskCkass.toLowerCase().contains("hints")){
+                parser.addParseListener(createDeclarationReferencesListener());
+            //}
+            
             parser.addParseListener(createPhpElementsOccurencesListener());
-            parser.addParseListener(createVariableListener());
+
+            if (taskCkass.toLowerCase().contains("completion")){
+                parser.addParseListener(createVariableListener());
+            }
 
             //not implemented yet
             //parser.addParseListener(createLayoutTreeListener());
-            parser.addParseListener(createStructureListener());
-            parser.addParseListener(createSemanticsListener());
+            if (taskCkass.toLowerCase().contains("fold")){
+                parser.addParseListener(createStructureListener());
+            }
+            if (taskCkass.toLowerCase().contains("hints")){
+                parser.addParseListener(createSemanticsListener());
+            }
             evaluateParser(parser);
 //            LOGGER.info(String.format("Parser evaluated in %d ms", System.currentTimeMillis() - startTime));
 //            BladePhpCompiler phpCompiler = new BladePhpCompiler();

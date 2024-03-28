@@ -31,7 +31,7 @@ public class BladeParser extends org.netbeans.modules.parsing.spi.Parser {
     public void parse(Snapshot snapshot, Task task, SourceModificationEvent event) throws ParseException {
         BladeParserResult parserResult = createParserResult(snapshot);
 
-        BladeParserResult parsed = parserResult.get();
+        BladeParserResult parsed = parserResult.get(task.getClass().getName());
         cacheResult(snapshot.getSource().getFileObject(), parsed);
         lastResult = parsed;
     }
