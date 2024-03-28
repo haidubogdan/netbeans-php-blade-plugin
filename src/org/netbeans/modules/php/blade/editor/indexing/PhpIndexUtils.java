@@ -32,7 +32,7 @@ public class PhpIndexUtils {
     private final static QueryCache<String, Collection<PhpIndexResult>> cache = new QueryCache();
     private final static QueryCache<String, Collection<PhpIndexFunctionResult>> functionCache = new QueryCache();
 
-    private static final Map<Integer, PhpIndexUtils> QUERY_SUPPORT_INSTANCES = new HashMap<>();
+    private static final Map<Integer, PhpIndexUtils> QUERY_SUPPORT_INSTANCES = new WeakHashMap<>();
 
     /**
      * class query without namespace

@@ -194,7 +194,7 @@ static_direct_class_access : class_identifier PHP_STATIC_ACCESS method_call
     | class_identifier PHP_STATIC_ACCESS static_property=PHP_IDENTIFIER
     ;
 
-class_instance : PHP_NEW PHP_WS+ (class_identifier | namespacePath) BLADE_EXPR_LPAREN composed_php_expression* BLADE_EXPR_RPAREN;
+class_instance : PHP_NEW (class_identifier | namespacePath) BLADE_EXPR_LPAREN composed_php_expression* BLADE_EXPR_RPAREN;
 class_name_reference : class_identifier PHP_STATIC_ACCESS PHP_CLASS_KEYWORD;
 
 class_identifier : namespace=PHP_NAMESPACE_PATH? class_name=PHP_IDENTIFIER;
@@ -211,7 +211,7 @@ main_php_expression : BLADE_EXPR_LPAREN composed_php_expression+ BLADE_EXPR_RPAR
 
 composed_php_expression : class_expr_usage | function_call | PHP_IDENTIFIER | namespacePath | PHP_VARIABLE 
 | PHP_NAMESPACE_PATH | EXPR_STRING |
- PHP_KEYWORD | PHP_EXPRESSION+ | PHP_WS | PHP_STATIC_ACCESS | PHP_CLASS_KEYWORD
+ PHP_KEYWORD | PHP_EXPRESSION+ | PHP_STATIC_ACCESS | PHP_CLASS_KEYWORD
 | PHP_INSTANCE_ACCESS | BLADE_EXPR_LPAREN composed_php_expression* BLADE_EXPR_RPAREN | PHP_EXPR_STRING;
 
 simple_foreach_expr: loop_array=PHP_VARIABLE FOREACH_AS key=PHP_VARIABLE (FOREACH_PARAM_ASSIGN item=PHP_VARIABLE)?;

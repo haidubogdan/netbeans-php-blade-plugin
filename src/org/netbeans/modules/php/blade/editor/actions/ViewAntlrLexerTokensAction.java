@@ -111,6 +111,7 @@ public class ViewAntlrLexerTokensAction extends AbstractAction implements Action
                             break;
                         case HTML:
                             result.append(" (HTML)");
+                            result.append(token.getText());
                             break;
                         case HTML_COMPONENT_PREFIX:
                             result.append(" (HTML_COMPONENT_PREFIX)");
@@ -118,9 +119,6 @@ public class ViewAntlrLexerTokensAction extends AbstractAction implements Action
                             break;
                         case PHP_NEW:
                             result.append(" (\n)");
-                            break;
-                        case PHP_WS:
-                            result.append(" (' ')");
                             break;
                         case PHP_EXPRESSION:
                             result.append(" (PHP_EXPRESSION)");
@@ -131,6 +129,7 @@ public class ViewAntlrLexerTokensAction extends AbstractAction implements Action
                             break;
                         case PHP_VARIABLE:
                             result.append(" (PHP_VARIABLE)");
+                            result.append(token.getText());
                             break;
                         default:
                             result.append(token.getType());

@@ -243,48 +243,9 @@ public class BladeCompletionProvider implements CompletionProvider {
                             case D_PUSH_IF:
                             case D_PREPEND:
                                 completeStackIdFromIndex(pathName, fo, caretOffset, resultSet);
-                                return;
-                        }
+                         }
                         break;
                     }
-                    /*
-                        case BLADE_PHP_ECHO_EXPR: {
-                            //completion {{ }} {!! !!}
-                            List<Integer> tokensMatch = Arrays.asList(new Integer[]{CONTENT_TAG_OPEN, RAW_TAG_OPEN});
-                            List<Integer> tokensStop = Arrays.asList(new Integer[]{HTML, CONTENT_TAG_CLOSE, RAW_TAG_CLOSE});
-                            Token curlyStartToken = BladeAntlrUtils.findBackward(tokens, tokensMatch, tokensStop);
-                            if (curlyStartToken != null) {
-                                switch (curlyStartToken.getType()) {
-                                    case CONTENT_TAG_OPEN:
-                                        closeTag = "}}"; //NOI18N
-                                        break;
-                                    case RAW_TAG_OPEN:
-                                        closeTag = "!!}"; //NOI18N
-                                        break;
-                                }
-
-                                int matchTokenType = BladeAntlrUtils.getTagPairTokenType(curlyStartToken.getType());
-                                List<Integer> skipableTokenTypes = new ArrayList<>();
-                                skipableTokenTypes.add(BLADE_PHP_ECHO_EXPR);
-                                skipableTokenTypes.add(PHP_VARIABLE);
-                                skipableTokenTypes.add(PHP_IDENTIFIER);
-                                skipableTokenTypes.add(PHP_STATIC_ACCESS);
-
-                                Token curlyEndToken = BladeAntlrUtils.findForward(doc,
-                                        curlyStartToken,
-                                        matchTokenType,
-                                        skipableTokenTypes);
-
-                                if (curlyEndToken != null){
-                                    return;
-                                }
-
-                                if (closeTag != null) {
-                                    completeCloseTag(curlyStartToken, doc, closeTag, caretOffset, resultSet);
-                                }
-                            }
-                            break;
-                        }*/
                     default:
                         break;
                 }

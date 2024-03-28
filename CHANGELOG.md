@@ -1,5 +1,14 @@
 # Change Log
 
+## [2.2.1.2]
+
+**parser**
+
+Too much tokenisation can hurt. If the token is not necessary for the parser it should be skipped.
+
+- cleaning tokens sent to parser to speed up parsing process [wip]
+
+
 ## [2.1.80]
 
 - revert changes on lexer, add a simple error token when detecting `identifier:identifier` or `(:` tokens

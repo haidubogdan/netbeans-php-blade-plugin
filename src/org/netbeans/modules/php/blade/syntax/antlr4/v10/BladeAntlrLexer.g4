@@ -15,7 +15,6 @@ tokens {
    PHP_VARIABLE,
    PHP_KEYWORD,
    PHP_NEW,
-   PHP_WS,
    PHP_IDENTIFIER,
    PHP_NAMESPACE_PATH, 
    PHP_STATIC_ACCESS,
@@ -171,13 +170,15 @@ PHP_INLINE_START : ('<?php' | '<?=')->pushMode(INSIDE_PHP_INLINE);
 
 
 HTML_COMPONENT_PREFIX : '<x-' (CompomentIdentifier |  CompomentIdentifier ('::' CompomentIdentifier)+)? {this.compomentTagOpen = true;};
-HTML_TAG_START : '<' NameString;
-HTML_CLOSE_TAG : '<' '/' NameString '>' {this.compomentTagOpen = false;} ->type(HTML);
+HTML_TAG_START : '<' FullIdentifier;
+HTML_CLOSE_TAG : '<' '/' FullIdentifier '>' {this.compomentTagOpen = false;} ->type(HTML);
 HTML_TAG_SELF_CLOSE : '/>' {this.compomentTagOpen = false;}->type(HTML);
 HTML_CLOSE_SYMBOL : '>' {this.compomentTagOpen = false;} ->type(HTML);
-HTML_IDENTIFIER : NameString {this.consumeHtmlIdentifier();};
+HTML_IDENTIFIER : FullIdentifier {this.consumeHtmlIdentifier();};
+
 EQ : '=';
-OTHER : . ->type(HTML);
+WS : ((' ')+ | [\r\n]+)->skip;
+OTHER : . ->skip;
 
 /**
 * MODES
@@ -197,7 +198,9 @@ CONTENT_TAG_CLOSE : ('}}')->popMode;
 REGULAR_ECHO_LPAREN : '(' ->type(BLADE_EXPR_LPAREN);
 REGULAR_ECHO_RPAREN : ')' ->type(BLADE_EXPR_RPAREN);
 REGULAR_ECHO_INSTANCE_ACCESS : '->'->type(PHP_INSTANCE_ACCESS);
-REGULAR_ECHO_EXPR_MORE : . ->type(PHP_EXPRESSION);
+
+//not treated
+REGULAR_ECHO_EXPR_MORE : . ->skip;
 EXIT_REGULAR_ECHO_EOF : EOF->type(ERROR),popMode;
 
 // {!!  !!}
@@ -212,7 +215,9 @@ RAW_TAG_CLOSE : ('!!}')->popMode;
 RAW_ECHO_LPAREN : '(' ->type(BLADE_EXPR_LPAREN);
 RAW_ECHO_RPAREN : ')' ->type(BLADE_EXPR_RPAREN);
 RAW_ECHO_INSTANCE_ACCESS : '->'->type(PHP_INSTANCE_ACCESS);
-RAW_ECHO_EXPR_MORE : . ->type(PHP_EXPRESSION);
+
+//NOT TREATED
+RAW_ECHO_EXPR_MORE : . ->skip;
 EXIT_RAW_ECHO_EOF : EOF->type(ERROR),popMode;
 
 mode LOOK_FOR_PHP_EXPRESSION;
@@ -270,7 +275,8 @@ COMPOSED_EXPR_STATIC_ACCESS : '::'->type(PHP_STATIC_ACCESS);
 COMPOSED_EXPR_LPAREN : '(' {this.increaseRoundParenBalance();}->type(BLADE_EXPR_LPAREN);
 COMPOSED_EXPR_RPAREN : ')' {consumeExprRParen();};
 
-PHP_COMPOSED_EXPRESSION : . ->type(PHP_EXPRESSION);
+//not treated
+PHP_COMPOSED_EXPRESSION : . ->skip;
 
 EXIT_COMPOSED_EXPRESSION_EOF : EOF->type(ERROR),popMode;
 
@@ -364,10 +370,12 @@ PHP_D_COMPOSED_EXPR_STATIC_ACCESS : '::'->type(PHP_STATIC_ACCESS);
 
 PHP_D_COMPOSED_EXPR_LPAREN : '('->type(BLADE_EXPR_LPAREN);
 PHP_D_COMPOSED_EXPR_RPAREN : ')' ->type(BLADE_EXPR_RPAREN);
-PHP_D_WS : ' ' ->type(PHP_WS);
-PHP_D_PHP_COMPOSED_EXPRESSION : . ->type(PHP_EXPRESSION);
+PHP_D_WS : ' ' ->skip;
 
 PHP_D_EXIT_COMPOSED_EXPRESSION_EOF : EOF->type(ERROR),popMode;
+
+//untreated
+PHP_D_PHP_COMPOSED_EXPRESSION : . ->skip;
 
 //php inline <?php ?>
 //might think to skip tokens which are not used ??
@@ -398,9 +406,10 @@ PHP_COMPOSED_EXPR_INSTANCE_ACCESS : '->'->type(PHP_INSTANCE_ACCESS);
 PHP_COMPOSED_EXPR_LPAREN : '('->type(BLADE_EXPR_LPAREN);
 PHP_COMPOSED_EXPR_RPAREN : ')' ->type(BLADE_EXPR_RPAREN);
 
-PHP_PHP_COMPOSED_EXPRESSION : . ->type(PHP_EXPRESSION);
 
 PHP_EXIT_COMPOSED_EXPRESSION_EOF : EOF->type(PHP_EXPRESSION),popMode;
+
+PHP_PHP_COMPOSED_EXPRESSION : . ->type(PHP_EXPRESSION);
 
 mode VERBATIM_MODE;
 
@@ -416,6 +425,8 @@ VERBATIM_HTML : . {
         this._input.LA(6) == 'e' &&
         this._input.LA(7) == 'r'
       }? ->type(HTML);
-VERBATIM_HTML_MORE : . ->more;
+
 
 EXIT_VERBATIM_MOD_EOF : EOF->type(ERROR),mode(DEFAULT_MODE);
+
+VERBATIM_HTML_MORE : . ->more;

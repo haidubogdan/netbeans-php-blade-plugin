@@ -3,6 +3,7 @@ package org.netbeans.modules.php.blade.editor.components;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.WeakHashMap;
 import org.netbeans.api.project.Project;
 import org.netbeans.modules.php.blade.editor.cache.QueryCache;
 import org.netbeans.modules.php.blade.editor.indexing.PhpIndexResult;
@@ -16,7 +17,7 @@ import org.openide.filesystems.FileObject;
  */
 public class ComponentModel {
 
-    private static final Map<Integer, ComponentModel> MODEL_INSTANCE = new HashMap<>();
+    private static final Map<Integer, ComponentModel> MODEL_INSTANCE = new WeakHashMap<>();
 
     protected static ComponentModel getModel(FileObject fo, String prefix) {
         ComponentModel selfModel = new ComponentModel();

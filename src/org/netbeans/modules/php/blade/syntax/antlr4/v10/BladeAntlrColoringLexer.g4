@@ -121,15 +121,16 @@ D_CUSTOM : ('@' NameString {this._input.LA(1) == '(' ||
 CONTENT_TAG_OPEN : '{{' ->pushMode(INSIDE_REGULAR_ECHO),type(CONTENT_TAG);
 RAW_TAG_OPEN : '{!!' ->pushMode(INSIDE_RAW_ECHO),type(RAW_TAG);
 
-HTML_CLOSE_TAG : '<' '/'?  NameString [ ]* '>'->type(HTML); 
+HTML_CLOSE_TAG : '<' '/'?  FullIdentifier [ ]* '>'->type(HTML); 
 
-//hack for the last unclosed tags
-//to check if we still have this issue
-UNCLOSED_TAG : ('<' NameString [\r\n]+)->type(HTML); 
 
 LAST_NL : [\r\n]+ EOF; 
 
 HTML_X : ('<x-' ComponentTagIdentifier | '<' ComponentTagIdentifier ('::' ComponentTagIdentifier)+)->type(HTML),pushMode(INSIDE_HTML_COMPONENT_TAG);
+
+//hack for the last unclosed tags
+//to check if we still have this issue
+UNCLOSED_TAG : ('<' FullIdentifier [\r\n]+)->type(HTML); 
 
 HTML : ~[<?@{!]+ | 'style' | 'class' | 'required' | 'selected' | 'value';
 
@@ -184,7 +185,7 @@ EXIT_RPAREN : ')' {this.roundParenBalance == 0}?->type(PHP_EXPRESSION),mode(DEFA
 
 //hack due to a netbeans php embedding issue when adding or deleting ':' chars
 DOUBLE_NEKODU : NEKUDO_WHITELIST_MATCH ->more;
-PHP_FREEZE_SYNTAX : (':)' | ':' )->type(ERROR),popMode;
+PHP_FREEZE_SYNTAX : (':)' | ':' )->type(ERROR),mode(DEFAULT_MODE);
 //no string interpolation for the moment
 //freeze issue
 EXPR_STRING_LITERAL : (SINGLE_QUOTED_STRING_FRAGMENT)->more;
@@ -193,7 +194,7 @@ EXPR_STRING_LITERAL : (SINGLE_QUOTED_STRING_FRAGMENT)->more;
 
 PHP_EXPRESSION_MORE : . ->more;
 
-EXIT_EOF : EOF->type(ERROR),popMode;
+EXIT_EOF : EOF->type(ERROR),mode(DEFAULT_MODE);
 
 // @php
 mode BLADE_INLINE_PHP;
@@ -235,7 +236,7 @@ EXIT_VERBATIM_MOD_EOF : EOF->type(ERROR),popMode;
 
 mode INSIDE_HTML_COMPONENT_TAG;
 
-COMPONENT_ATTRIBUTE : (':' NameString '="') ->type(HTML),pushMode(COMPONENT_PHP_EXPRESSION); 
+COMPONENT_ATTRIBUTE : (':' FullIdentifier '="') ->type(HTML),pushMode(COMPONENT_PHP_EXPRESSION); 
 
 COMPONENT_CONTENT_TAG_OPEN : '{{' ->pushMode(INSIDE_REGULAR_ECHO),type(CONTENT_TAG);
 COMPONENT_RAW_TAG_OPEN : '{!!' ->pushMode(INSIDE_RAW_ECHO),type(RAW_TAG);

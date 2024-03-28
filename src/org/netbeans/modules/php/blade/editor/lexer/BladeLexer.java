@@ -41,6 +41,8 @@
  */
 package org.netbeans.modules.php.blade.editor.lexer;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.netbeans.api.lexer.Token;
 import static org.netbeans.modules.php.blade.editor.lexer.BladeTokenId.*;
 import org.netbeans.modules.php.blade.syntax.antlr4.v10.BladeAntlrColoringLexer;
@@ -92,7 +94,7 @@ public class BladeLexer extends AbstractAntlrLexerBridge<BladeAntlrColoringLexer
             case BladeAntlrColoringLexer.RAW_TAG:
             case BladeAntlrColoringLexer.CONTENT_TAG:
                 return token(BLADE_ECHO_DELIMITOR);
-             case BladeAntlrColoringLexer.BLADE_PHP_ECHO_EXPR:
+            case BladeAntlrColoringLexer.BLADE_PHP_ECHO_EXPR:
                 return token(PHP_BLADE_ECHO_EXPR);
             case BladeAntlrColoringLexer.ERROR:
             case BladeAntlrColoringLexer.WS_EXPR:

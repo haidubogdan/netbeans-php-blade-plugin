@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.antlr.v4.runtime.ANTLRErrorListener;
 import org.antlr.v4.runtime.BaseErrorListener;
 
@@ -43,6 +45,7 @@ import org.openide.filesystems.FileObject;
  */
 public class BladeParserResult extends ParserResult {
 
+    //private static final Logger LOGGER = Logger.getLogger(BladeParserResult.class.getSimpleName());
     public final List<Error> errors = new ArrayList<>();
     private final Map<String, Reference> yieldReferences = new TreeMap<>();
     private final Map<String, Reference> stackReferences = new TreeMap<>();
@@ -119,8 +122,10 @@ public class BladeParserResult extends ParserResult {
     }
 
     public BladeParserResult get() {
+        long startTime = System.currentTimeMillis();
         if (!finished) {
             BladeAntlrParser parser = createParser(getSnapshot());
+            //LOGGER.info(String.format("parser created in %d ms", System.currentTimeMillis() - startTime));
             parser.addErrorListener(createErrorListener());
             parser.addParseListener(createDeclarationReferencesListener());
             parser.addParseListener(createPhpElementsOccurencesListener());
@@ -131,17 +136,21 @@ public class BladeParserResult extends ParserResult {
             parser.addParseListener(createStructureListener());
             parser.addParseListener(createSemanticsListener());
             evaluateParser(parser);
-            BladePhpCompiler phpCompiler = new BladePhpCompiler();
-            PHPParseResult phpParserResult = phpCompiler.extractPhpContent(
-                    this.getSnapshot()).getPhpParserResult();
-
-            if (phpParserResult != null) {
-                //double errors for php inline
-                this.errors.addAll(phpParserResult.getDiagnostics());
-            }
+//            LOGGER.info(String.format("Parser evaluated in %d ms", System.currentTimeMillis() - startTime));
+//            BladePhpCompiler phpCompiler = new BladePhpCompiler();
+////            PHPParseResult phpParserResult = phpCompiler.extractPhpContent(
+////                    this.getSnapshot()).getPhpParserResult();
+////
+////            if (phpParserResult != null) {
+////                //double errors for php inline
+////                this.errors.addAll(phpParserResult.getDiagnostics());
+////            }
 
             finished = true;
+            //LOGGER.log(Level.INFO, "finished parser result for {0}", getFileObject().getName());
         }
+//        long time = System.currentTimeMillis() - startTime;
+//        LOGGER.info(String.format("finished took %d ms", time));
         return this;
     }
 
