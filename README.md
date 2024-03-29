@@ -86,6 +86,14 @@ Experimental formatting and indenting
 - The duplicate file process can create a "blade_1.php" file because by default the extension of a file is the last ".*" element. So for "blade.php" the extension found is ".php"
 - HTML join embedding breaks indentation especially in `<script>` and `<style>` context
 
+**brace matcher**
+
+- Emoji character can break brace matching.
+
+**completion**
+
+- slowness or process is stuck
+
 ### Why Netbeans 18+ requirement ?
 
 The plugin is implemented using **ANTLR** lexer and parser. I migrated from **Jflex** and **jcup** tools due to scalability reason.

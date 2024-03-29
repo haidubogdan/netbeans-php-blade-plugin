@@ -107,26 +107,28 @@ public class BladeCompletionProvider implements CompletionProvider {
         @Override
         protected void query(CompletionResultSet resultSet, Document doc, int caretOffset) {
             long startTime = 0;
+            
             if (LOGGER.isLoggable(Level.FINE)) {
                 startTime = System.currentTimeMillis();
             }
-            AbstractDocument adoc = (AbstractDocument) doc;
+            //AbstractDocument adoc = (AbstractDocument) doc;
             try {
                 FileObject fo = EditorDocumentUtils.getFileObject(doc);
-
+                
                 if (fo == null || !fo.getMIMEType().equals(BladeLanguage.MIME_TYPE)) {
                     return;
                 }
-
-                adoc.readLock();
+                //LOGGER.log(Level.INFO, "Completion requested for {0}", fo.getName());
+                //adoc.readLock();
                 AntlrTokenSequence tokens;
                 try {
                     String docText = doc.getText(0, doc.getLength());
                     tokens = new AntlrTokenSequence(new BladeAntlrLexer(CharStreams.fromString(docText)));
                 } catch (BadLocationException ex) {
+                    Exceptions.printStackTrace(ex);
                     return;
                 } finally {
-                    adoc.readUnlock();
+                    //adoc.readUnlock();
                 }
 
                 if (tokens.isEmpty()) {

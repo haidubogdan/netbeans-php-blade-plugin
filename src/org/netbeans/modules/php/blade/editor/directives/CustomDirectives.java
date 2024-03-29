@@ -8,6 +8,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.WeakHashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.netbeans.api.project.Project;
 import org.netbeans.modules.csl.api.DeclarationFinder;
 import org.netbeans.modules.php.blade.editor.parser.ParsingUtils;
@@ -34,7 +36,9 @@ public final class CustomDirectives {
     public List<String> customDirectiveNames = new ArrayList<>();
 
     private final FileChangeListener fileChangeListener = new FileChangeListenerImpl();
-
+    
+    private static final Logger LOGGER = Logger.getLogger(CustomDirectives.class.getName());
+    
     public static CustomDirectives getInstance(Project project) {
         if (project == null) {
             return new CustomDirectives();
@@ -62,9 +66,11 @@ public final class CustomDirectives {
     private CustomDirectives(Project project) {
         this.project = project;
         extractCustomDirectives();
+        LOGGER.log(Level.INFO, "Finished extracting directives. Found ({0})", customDirectives.size());
     }
 
     private void extractCustomDirectives() {
+        LOGGER.info("Extracting custom directives");
         String[] compilerPathList = BladeProjectProperties.getInstance(project).getCompilerPathList();
 
         if (compilerPathList.length == 0) {

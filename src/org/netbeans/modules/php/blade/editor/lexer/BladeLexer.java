@@ -41,8 +41,6 @@
  */
 package org.netbeans.modules.php.blade.editor.lexer;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.netbeans.api.lexer.Token;
 import static org.netbeans.modules.php.blade.editor.lexer.BladeTokenId.*;
 import org.netbeans.modules.php.blade.syntax.antlr4.v10.BladeAntlrColoringLexer;
@@ -54,9 +52,10 @@ import org.netbeans.spi.lexer.antlr4.AbstractAntlrLexerBridge;
  * @author bogdan
  */
 public class BladeLexer extends AbstractAntlrLexerBridge<BladeAntlrColoringLexer, BladeTokenId> {
-
+   // private static final Logger LOGGER = Logger.getLogger(BladeLexer.class.getName());
     public BladeLexer(LexerRestartInfo<BladeTokenId> info) {
         super(info, BladeAntlrColoringLexer::new);
+        //LOGGER.log(Level.INFO, "Restarting lexer{0}", info.state());
     }
 
     @Override

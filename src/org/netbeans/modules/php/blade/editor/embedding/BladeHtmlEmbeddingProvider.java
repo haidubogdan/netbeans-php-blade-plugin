@@ -12,6 +12,7 @@ import org.netbeans.modules.parsing.api.Snapshot;
 import org.netbeans.modules.parsing.spi.EmbeddingProvider;
 import org.netbeans.modules.php.blade.editor.BladeLanguage;
 import org.netbeans.modules.php.blade.editor.lexer.BladeTokenId;
+import org.openide.util.Exceptions;
 
 /**
  * this will enable braces matches of html elements
@@ -29,7 +30,7 @@ public class BladeHtmlEmbeddingProvider extends EmbeddingProvider {
     public List<Embedding> getEmbeddings(final Snapshot snapshot) {
         TokenHierarchy<?> tokenHierarchy = snapshot.getTokenHierarchy();
         TokenSequence<?> sequence = tokenHierarchy.tokenSequence();
-        if (sequence == null) {
+        if (sequence == null || !sequence.isValid()) {
             return Collections.emptyList();
         }
         sequence.moveStart();
@@ -39,23 +40,29 @@ public class BladeHtmlEmbeddingProvider extends EmbeddingProvider {
         int len = 0;
 
         String fake;
-        
-        while (sequence.moveNext()) {
-            Token<?> t = sequence.token();
-            offset = sequence.offset();
-            TokenId id = t.id();
-            len += t.length();
-            String tText = t.text().toString();
-            if (len == 0) {
-                continue;
+
+        try {
+            while (sequence.moveNext()) {
+                Token<?> t = sequence.token();
+                offset = sequence.offset();
+                TokenId id = t.id();
+                len += t.length();
+                String tText = t.text().toString();
+                if (len == 0) {
+                    continue;
+                }
+                if (id.equals(BladeTokenId.HTML)) {
+                    embeddings.add(snapshot.create(offset, t.length(), TARGET_MIME_TYPE));
+                } else {
+                    fake = new String(new char[tText.length()]).replace("\0", FILLER);
+                    embeddings.add(snapshot.create(fake, TARGET_MIME_TYPE));
+                }
             }
-            if (id.equals(BladeTokenId.HTML)) {
-                embeddings.add(snapshot.create(offset, t.length(), TARGET_MIME_TYPE));
-            } else {
-                fake = new String(new char[tText.length()]).replace("\0", FILLER);
-                embeddings.add(snapshot.create(fake, TARGET_MIME_TYPE));
-            }
+        } catch (Exception ex) {
+            Exceptions.printStackTrace(ex);
+            return Collections.emptyList();
         }
+
 
         if (embeddings.isEmpty()) {
             return Collections.singletonList(snapshot.create("", TARGET_MIME_TYPE));

@@ -1,5 +1,15 @@
 # Change Log
 
+## [2.2.6.1]
+
+**completion, declaration finder**
+
+- remove lock file on complete to avoid stuck behaviour
+
+**completion**
+
+- quick update to enable component completion from hardcoded paths
+
 ## [2.2.4.1]
 
 **parser**

@@ -54,7 +54,7 @@ public class BladeIndexer extends EmbeddingIndexer {
         if (!parserResult.getDiagnostics().isEmpty()) {
             return;
         }
-//        LOGGER.log(Level.INFO, "indexing {0}", result.getSnapshot().getSource().getFileObject().getName());
+       // LOGGER.log(Level.INFO, "indexing {0}", result.getSnapshot().getSource().getFileObject().getName());
         try {
             IndexingSupport support = IndexingSupport.getInstance(context);
             // we need to remove old documents (document per object, not file)

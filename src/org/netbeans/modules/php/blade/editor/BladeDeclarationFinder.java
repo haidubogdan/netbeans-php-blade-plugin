@@ -48,7 +48,7 @@ public class BladeDeclarationFinder implements DeclarationFinder {
     public OffsetRange getReferenceSpan(Document document, int caretOffset) {
         BaseDocument baseDoc = (BaseDocument) document;
 
-        baseDoc.readLock();
+        //baseDoc.readLock();
         AntlrTokenSequence tokens = null;
         OffsetRange offsetRange = OffsetRange.NONE;
         int lineOffset = caretOffset;
@@ -60,7 +60,7 @@ public class BladeDeclarationFinder implements DeclarationFinder {
                 //Exceptions.printStackTrace(ex);
             }
         } finally {
-            baseDoc.readUnlock();
+            //baseDoc.readUnlock();
         }
 
         //inside php expression context ??

@@ -200,6 +200,7 @@ public class BladeBracesMatcher implements BracesMatcher {
                 stopDirectives,
                 startDirectiveForBalance);
 
+        String text = endToken.getText();
         if (endToken != null) {
             int start = endToken.getStartIndex();
             int end = endToken.getStopIndex();

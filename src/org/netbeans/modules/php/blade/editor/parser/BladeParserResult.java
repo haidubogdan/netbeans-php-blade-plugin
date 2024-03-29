@@ -123,7 +123,7 @@ public class BladeParserResult extends ParserResult {
 
     public BladeParserResult get(String taskCkass) {
         long startTime = System.currentTimeMillis();
-        System.out.println("PARSER TRIGGERED BY " + taskCkass);
+        //System.out.println("PARSER TRIGGERED BY " + taskCkass);
         if (!finished) {
             BladeAntlrParser parser = createParser(getSnapshot());
             //LOGGER.info(String.format("parser created in %d ms", System.currentTimeMillis() - startTime));

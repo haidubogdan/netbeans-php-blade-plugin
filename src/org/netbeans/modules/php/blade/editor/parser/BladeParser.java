@@ -1,11 +1,10 @@
 package org.netbeans.modules.php.blade.editor.parser;
 
-import javax.swing.event.ChangeListener;
-import org.netbeans.modules.parsing.api.Snapshot;
 import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
 import java.util.Collections;
 import java.util.WeakHashMap;
+import java.util.logging.Logger;
 import javax.swing.event.ChangeListener;
 import org.netbeans.modules.parsing.api.ParserManager;
 import org.netbeans.modules.parsing.api.ResultIterator;
@@ -23,17 +22,19 @@ import org.openide.util.Exceptions;
  * @author bhaidu
  */
 public class BladeParser extends org.netbeans.modules.parsing.spi.Parser {
-
+    private static final Logger LOGGER = Logger.getLogger(BladeParser.class.getName());
     BladeParserResult lastResult;
     private static final WeakHashMap<FileObject, Reference<BladeParserResult>> CACHE = new WeakHashMap<>();
 
     @Override
     public void parse(Snapshot snapshot, Task task, SourceModificationEvent event) throws ParseException {
+        long startTime = System.currentTimeMillis();
         BladeParserResult parserResult = createParserResult(snapshot);
 
         BladeParserResult parsed = parserResult.get(task.getClass().getName());
         cacheResult(snapshot.getSource().getFileObject(), parsed);
         lastResult = parsed;
+        LOGGER.info(String.format("Finished parsing for " + task.getClass().getName() + ". Time : %d ms", System.currentTimeMillis() - startTime));
     }
     
     private static void cacheResult(FileObject fo, BladeParserResult result) {

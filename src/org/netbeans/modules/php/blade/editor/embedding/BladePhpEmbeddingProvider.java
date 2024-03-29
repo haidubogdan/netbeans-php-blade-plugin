@@ -3,6 +3,7 @@ package org.netbeans.modules.php.blade.editor.embedding;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.logging.Logger;
 import org.netbeans.api.lexer.Token;
 import org.netbeans.api.lexer.TokenHierarchy;
 import org.netbeans.api.lexer.TokenId;
@@ -22,11 +23,12 @@ import org.netbeans.modules.php.blade.editor.lexer.BladeTokenId;
         mimeType = BladeLanguage.MIME_TYPE,
         targetMimeType = "text/x-php5")
 public class BladePhpEmbeddingProvider extends EmbeddingProvider {
-
+     //private static final Logger LOGGER = Logger.getLogger(BladePhpEmbeddingProvider.class.getSimpleName());
     public static final String TARGET_MIME_TYPE = "text/x-php5"; //NOI18N
 
     @Override
     public List<Embedding> getEmbeddings(final Snapshot snapshot) {
+        //LOGGER.info("Embedding requested");
         TokenHierarchy<?> tokenHierarchy = snapshot.getTokenHierarchy();
         TokenSequence<?> sequence = tokenHierarchy.tokenSequence();
         if (sequence == null) {

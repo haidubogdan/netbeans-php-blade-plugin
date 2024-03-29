@@ -174,6 +174,8 @@ HTML_TAG_START : '<' FullIdentifier;
 HTML_CLOSE_TAG : '<' '/' FullIdentifier '>' {this.compomentTagOpen = false;} ->type(HTML);
 HTML_TAG_SELF_CLOSE : '/>' {this.compomentTagOpen = false;}->type(HTML);
 HTML_CLOSE_SYMBOL : '>' {this.compomentTagOpen = false;} ->type(HTML);
+HTML_PATH : (' ')* FullIdentifier ('/' FullIdentifier)+ ->skip;
+HTML_TEXT : (' ')* FullIdentifier ((' ')+ FullIdentifier)+ ->skip;
 HTML_IDENTIFIER : FullIdentifier {this.consumeHtmlIdentifier();};
 
 EQ : '=';

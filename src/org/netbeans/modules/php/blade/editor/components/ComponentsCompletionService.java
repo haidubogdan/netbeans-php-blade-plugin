@@ -16,9 +16,9 @@ import org.openide.filesystems.FileObject;
  * @author bhaidu
  */
 @NamespaceRegister({
-    @Namespace(path = "App\\View\\Components", from_app=true),
-    @Namespace(path = "App\\Http\\Livewire", from_app=true),
-    @Namespace(path = "App\\Livewire", from_app=true),//from 10
+    @Namespace(path = "App\\View\\Components", from_app=true, relativeFilePath="app/View/Components"),
+    @Namespace(path = "App\\Http\\Livewire", from_app=true, relativeFilePath="app/Http/Livewire"),
+    @Namespace(path = "App\\Livewire", from_app=true, relativeFilePath="app/Livewire"),//from 10
     @Namespace(path = "Illuminate\\Console\\View\\Components"),
     @Namespace(path = "BladeUIKit\\Components\\Buttons", packageName="blade-ui-kit/blade-ui-kit"),
     @Namespace(path = "BladeUIKit\\Components\\Layouts", packageName="blade-ui-kit/blade-ui-kit"),
@@ -34,7 +34,7 @@ public class ComponentsCompletionService {
         for (Namespace namespace : getNamespaces()){
             if (namespace.from_app()){
                 //check if folder exists
-                if (project.getProjectDirectory().getFileObject("app/View/Components") == null){
+                if (project.getProjectDirectory().getFileObject(namespace.relativeFilePath()) == null){
                     continue;
                 }
             }

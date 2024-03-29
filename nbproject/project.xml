@@ -390,6 +390,8 @@
                 <package>org.netbeans.modules.php.blade.editor.cache</package>
                 <package>org.netbeans.modules.php.blade.editor.compiler</package>
                 <package>org.netbeans.modules.php.blade.editor.completion</package>
+                <package>org.netbeans.modules.php.blade.editor.components</package>
+                <package>org.netbeans.modules.php.blade.editor.components.annotation</package>
                 <package>org.netbeans.modules.php.blade.editor.directives</package>
                 <package>org.netbeans.modules.php.blade.editor.embedding</package>
                 <package>org.netbeans.modules.php.blade.editor.format</package>
