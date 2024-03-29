@@ -59,7 +59,7 @@ public class BladeHtmlEmbeddingProvider extends EmbeddingProvider {
                 }
             }
         } catch (Exception ex) {
-            Exceptions.printStackTrace(ex);
+            //Exceptions.printStackTrace(ex);
             return Collections.emptyList();
         }
 

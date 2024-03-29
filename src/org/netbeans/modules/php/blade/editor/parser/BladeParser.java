@@ -34,7 +34,7 @@ public class BladeParser extends org.netbeans.modules.parsing.spi.Parser {
         BladeParserResult parsed = parserResult.get(task.getClass().getName());
         cacheResult(snapshot.getSource().getFileObject(), parsed);
         lastResult = parsed;
-        LOGGER.info(String.format("Finished parsing for " + task.getClass().getName() + ". Time : %d ms", System.currentTimeMillis() - startTime));
+        //LOGGER.info(String.format("Finished parsing for " + task.getClass().getName() + ". Time : %d ms", System.currentTimeMillis() - startTime));
     }
     
     private static void cacheResult(FileObject fo, BladeParserResult result) {
