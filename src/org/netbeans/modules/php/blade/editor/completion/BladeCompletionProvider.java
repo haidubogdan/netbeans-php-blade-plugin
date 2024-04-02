@@ -23,6 +23,7 @@ import org.netbeans.modules.php.blade.editor.ResourceUtilities;
 import org.netbeans.modules.php.blade.editor.components.AttributeCompletionService;
 import org.netbeans.modules.php.blade.editor.components.ComponentsCompletionService;
 import org.netbeans.modules.php.blade.editor.directives.CustomDirectives;
+import org.netbeans.modules.php.blade.editor.directives.CustomDirectives.CustomDirective;
 import org.netbeans.modules.php.blade.editor.indexing.BladeIndex;
 import org.netbeans.modules.php.blade.editor.indexing.BladeIndex.IndexedReferenceId;
 import org.netbeans.modules.php.blade.editor.indexing.PhpIndexResult;
@@ -106,11 +107,7 @@ public class BladeCompletionProvider implements CompletionProvider {
 
         @Override
         protected void query(CompletionResultSet resultSet, Document doc, int caretOffset) {
-            long startTime = 0;
-            
-            if (LOGGER.isLoggable(Level.FINE)) {
-                startTime = System.currentTimeMillis();
-            }
+            long startTime = System.currentTimeMillis();
             //AbstractDocument adoc = (AbstractDocument) doc;
             try {
                 FileObject fo = EditorDocumentUtils.getFileObject(doc);
@@ -118,12 +115,13 @@ public class BladeCompletionProvider implements CompletionProvider {
                 if (fo == null || !fo.getMIMEType().equals(BladeLanguage.MIME_TYPE)) {
                     return;
                 }
-                //LOGGER.log(Level.INFO, "Completion requested for {0}", fo.getName());
+                LOGGER.log(Level.INFO, "Completion requested for {0}", fo.getName());
                 //adoc.readLock();
                 AntlrTokenSequence tokens;
                 try {
                     String docText = doc.getText(0, doc.getLength());
                     tokens = new AntlrTokenSequence(new BladeAntlrLexer(CharStreams.fromString(docText)));
+                    LOGGER.info(String.format("complete() antlr scan took %d ms for " + fo.getName(),  System.currentTimeMillis() - startTime));
                 } catch (BadLocationException ex) {
                     Exceptions.printStackTrace(ex);
                     return;
@@ -203,7 +201,7 @@ public class BladeCompletionProvider implements CompletionProvider {
                         List<Integer> tokensStop = Arrays.asList(new Integer[]{HTML, BL_COMMA, BL_PARAM_CONCAT_OPERATOR});
                         Token directiveToken = BladeAntlrUtils.findBackward(tokens, tokensMatch, tokensStop);
                         if (directiveToken == null) {
-                            return;
+                            break;
                         }
                         switch (directiveToken.getType()) {
                             case D_EXTENDS:
@@ -240,7 +238,7 @@ public class BladeCompletionProvider implements CompletionProvider {
                             case D_SECTION:
                             case D_HAS_SECTION:
                                 completeYieldIdFromIndex(pathName, fo, caretOffset, resultSet);
-                                return;
+                                break;
                             case D_PUSH:
                             case D_PUSH_IF:
                             case D_PREPEND:
@@ -252,10 +250,8 @@ public class BladeCompletionProvider implements CompletionProvider {
                         break;
                 }
             } finally {
-                if (LOGGER.isLoggable(Level.FINE)) {
-                    long time = System.currentTimeMillis() - startTime;
-                    LOGGER.fine(String.format("complete() took %d ms", time));
-                }
+                long time = System.currentTimeMillis() - startTime;
+                LOGGER.info(String.format("complete() took %d ms", time));
                 resultSet.finish();
             }
         }
@@ -315,10 +311,10 @@ public class BladeCompletionProvider implements CompletionProvider {
 
         CustomDirectives.getInstance(project).filterAction(new CustomDirectives.FilterCallback() {
             @Override
-            public void filterDirectiveName(String directiveName, FileObject file) {
-                if (directiveName.startsWith(prefix)) {
+            public void filterDirectiveName(CustomDirective directive, FileObject file) {
+                if (directive.name.startsWith(prefix)) {
                     resultSet.addItem(DirectiveCompletionBuilder.itemWithArg(
-                            startOffset, carretOffset, prefix, directiveName,
+                            startOffset, carretOffset, prefix, directive.name,
                             "custom directive", doc, file));
                 }
             }

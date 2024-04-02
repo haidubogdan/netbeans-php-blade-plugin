@@ -19,6 +19,7 @@ import org.netbeans.modules.php.blade.csl.elements.NamedElement;
 import org.netbeans.modules.php.blade.csl.elements.PathElement;
 import org.netbeans.modules.php.blade.csl.elements.PhpFunctionElement;
 import org.netbeans.modules.php.blade.editor.directives.CustomDirectives;
+import org.netbeans.modules.php.blade.editor.directives.CustomDirectives.CustomDirective;
 import org.netbeans.modules.php.blade.editor.indexing.BladeIndex;
 import org.netbeans.modules.php.blade.editor.indexing.PhpIndexFunctionResult;
 import org.netbeans.modules.php.blade.editor.indexing.PhpIndexResult;
@@ -216,10 +217,10 @@ public class BladeDeclarationFinder implements DeclarationFinder {
 
                 CustomDirectives.getInstance(projectOwner).filterAction(new CustomDirectives.FilterCallbackDeclaration(dlcustomDirective) {
                     @Override
-                    public void filterDirectiveName(String directiveName, FileObject file) {
-                        if (directiveName.equals(directiveNameFound)) {
+                    public void filterDirectiveName(CustomDirective directive, FileObject file) {
+                        if (directive.name.equals(directiveNameFound)) {
                             NamedElement customDirectiveHandle = new NamedElement(directiveNameFound, file, ElementType.CUSTOM_DIRECTIVE);
-                            DeclarationFinder.DeclarationLocation newLoc = new DeclarationFinder.DeclarationLocation(file, 0, customDirectiveHandle);
+                            DeclarationFinder.DeclarationLocation newLoc = new DeclarationFinder.DeclarationLocation(file, directive.offset, customDirectiveHandle);
                             this.location.addAlternative(new AlternativeLocationImpl(newLoc));
                         }
                     }

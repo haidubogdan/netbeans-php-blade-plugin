@@ -45,7 +45,7 @@ import org.openide.filesystems.FileObject;
  */
 public class BladeParserResult extends ParserResult {
 
-    //private static final Logger LOGGER = Logger.getLogger(BladeParserResult.class.getSimpleName());
+    private static final Logger LOGGER = Logger.getLogger(BladeParserResult.class.getSimpleName());
     public final List<Error> errors = new ArrayList<>();
     private final Map<String, Reference> yieldReferences = new TreeMap<>();
     private final Map<String, Reference> stackReferences = new TreeMap<>();
@@ -113,6 +113,7 @@ public class BladeParserResult extends ParserResult {
     }
 
     protected BladeAntlrParser createParser(Snapshot snapshot) {
+        LOGGER.log(Level.INFO, "Preparing to parse for {0} ", snapshot.getSource().getFileObject().getName());
         CharStream cs = CharStreams.fromString(String.valueOf(snapshot.getText()));
         BladeAntlrLexer lexer = new BladeAntlrLexer(cs);
         CommonTokenStream tokens = new CommonTokenStream(lexer);
@@ -123,7 +124,7 @@ public class BladeParserResult extends ParserResult {
 
     public BladeParserResult get(String taskCkass) {
         long startTime = System.currentTimeMillis();
-        //System.out.println("PARSER TRIGGERED BY " + taskCkass);
+        LOGGER.log(Level.INFO, "PARSER TRIGGERED BY {0}", taskCkass);
         if (!finished) {
             BladeAntlrParser parser = createParser(getSnapshot());
             //LOGGER.info(String.format("parser created in %d ms", System.currentTimeMillis() - startTime));
@@ -147,7 +148,7 @@ public class BladeParserResult extends ParserResult {
                 parser.addParseListener(createSemanticsListener());
             }
             evaluateParser(parser);
-//            LOGGER.info(String.format("Parser evaluated in %d ms", System.currentTimeMillis() - startTime));
+            LOGGER.info(String.format("Parser evaluated in %d ms " + taskCkass, System.currentTimeMillis() - startTime));
 //            BladePhpCompiler phpCompiler = new BladePhpCompiler();
 ////            PHPParseResult phpParserResult = phpCompiler.extractPhpContent(
 ////                    this.getSnapshot()).getPhpParserResult();
@@ -158,10 +159,10 @@ public class BladeParserResult extends ParserResult {
 ////            }
 
             finished = true;
-            //LOGGER.log(Level.INFO, "finished parser result for {0}", getFileObject().getName());
+//            LOGGER.log(Level.INFO, "finished parser result for {0}", getFileObject().getName());
         }
-//        long time = System.currentTimeMillis() - startTime;
-//        LOGGER.info(String.format("finished took %d ms", time));
+        long time = System.currentTimeMillis() - startTime;
+        LOGGER.info(String.format("finished took %d ms", time));
         return this;
     }
 

@@ -59,7 +59,8 @@ public class BladeHintsProvider implements HintsProvider {
                         if (entry.getValue().type == BladeParserResult.ReferenceType.POSSIBLE_DIRECTIVE) {
                             continue;
                         }
-                        if (ct.customDirectiveNames.contains(entry.getValue().name)) {
+
+                        if (ct.customDirectiveConfigured(entry.getValue().name)) {
                             continue;
                         }
                         hints.add(new Hint(astRule,

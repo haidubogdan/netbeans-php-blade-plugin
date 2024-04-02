@@ -3,6 +3,8 @@ package org.netbeans.modules.php.blade.editor.embedding;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.netbeans.api.lexer.Token;
 import org.netbeans.api.lexer.TokenHierarchy;
 import org.netbeans.api.lexer.TokenId;
@@ -23,11 +25,14 @@ import org.openide.util.Exceptions;
         mimeType = BladeLanguage.MIME_TYPE,
         targetMimeType = "text/html")
 public class BladeHtmlEmbeddingProvider extends EmbeddingProvider {
+    private static final Logger LOGGER = Logger.getLogger(BladeHtmlEmbeddingProvider.class.getSimpleName());
     public static final String FILLER = " ";
     public static final String TARGET_MIME_TYPE = "text/html"; //NOI18N
 
     @Override
     public List<Embedding> getEmbeddings(final Snapshot snapshot) {
+        long startTime = System.currentTimeMillis();
+        LOGGER.log(Level.INFO, "html ebedding started {0}", snapshot.getSource().getFileObject().getName());
         TokenHierarchy<?> tokenHierarchy = snapshot.getTokenHierarchy();
         TokenSequence<?> sequence = tokenHierarchy.tokenSequence();
         if (sequence == null || !sequence.isValid()) {
@@ -62,7 +67,8 @@ public class BladeHtmlEmbeddingProvider extends EmbeddingProvider {
             //Exceptions.printStackTrace(ex);
             return Collections.emptyList();
         }
-
+        
+        LOGGER.log(Level.INFO, "html ebedding finished for {0}, it took " + (System.currentTimeMillis() - startTime), snapshot.getSource().getFileObject().getName());
 
         if (embeddings.isEmpty()) {
             return Collections.singletonList(snapshot.create("", TARGET_MIME_TYPE));

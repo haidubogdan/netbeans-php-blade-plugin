@@ -128,3 +128,4 @@ public abstract class ColoringLexerAdaptor extends Lexer {
         this.more();
     }
 }
+

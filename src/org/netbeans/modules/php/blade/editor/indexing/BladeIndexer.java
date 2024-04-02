@@ -43,6 +43,8 @@ public class BladeIndexer extends EmbeddingIndexer {
 
     @Override
     protected void index(Indexable indxbl, Parser.Result result, Context context) {
+        long startTime = System.currentTimeMillis();
+        LOGGER.log(Level.INFO, "Indexer requested {0}", context.getIndexFolder().getName());
         BladeParserResult parserResult;
         if (result instanceof BladeParserResult) {
             parserResult = (BladeParserResult) result;
@@ -78,6 +80,7 @@ public class BladeIndexer extends EmbeddingIndexer {
             document.addPair(BLADE_INDEXED, Boolean.TRUE.toString(), true, true);
 
             support.addDocument(document);
+            LOGGER.log(Level.INFO, "Indexer finished {0}", System.currentTimeMillis() - startTime);
         } catch (IOException ex) {
             LOGGER.log(Level.WARNING, null, ex);
             Exceptions.printStackTrace(ex);

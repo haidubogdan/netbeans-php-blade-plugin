@@ -1,5 +1,24 @@
 # Change Log
 
+## [2.2.7.1]
+
+**lexer**
+
+- highlight fix for string content with html tags and ':' symbol for directive php expression 
+
+**custom directives**
+
+- declaration finder goes to the declaration of custom directive
+- fixes for custom directives from multiple files
+
+**parser**
+
+- fix parser error message for empty can block body
+
+**debugging**
+
+- adding logs to measure time
+
 ## [2.2.6.1]
 
 **completion, declaration finder**

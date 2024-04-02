@@ -194,11 +194,13 @@ RPAREN : {this.roundParenBalance > 0}? ')' {this.decreaseRoundParenBalance();}->
 //in case of lexer restart context
 EXIT_RPAREN : ')' {this.roundParenBalance == 0}?->type(PHP_EXPRESSION),mode(DEFAULT_MODE);
 
+DB_STRING_OPEN : '"' ->more,pushMode(DB_STRING_MODE);
 //hack due to a netbeans php embedding issue when adding or deleting ':' chars
 DOUBLE_NEKODU : NEKUDO_WHITELIST_MATCH ->more;
 PHP_FREEZE_SYNTAX : (':)' | ':' )->type(ERROR),mode(DEFAULT_MODE);
 //no string interpolation for the moment
 //freeze issue
+
 EXPR_STRING_LITERAL : (SINGLE_QUOTED_STRING_FRAGMENT)->more;
 
 //STATIC_STRING : //check if start of token ... check if bracket and 
@@ -265,3 +267,19 @@ COMPONENT_PHP_EXPRESSION_LAST : . {this._input.LA(1) == '"'}? ->type(PHP_EXPRESS
 COMPONENT_PHP_EXPRESSION : . ->more;
 
 EXIT_COMPONENT_PHP_EXPRESSION_EOF : EOF->type(ERROR),popMode;
+
+mode DB_STRING_MODE;
+
+DB_STRING_NEKUDO_GREEDY : NEKUDO_WHITELIST_MATCH '$'? FullIdentifier '}' ->more;
+
+DB_STRING_NEKUDO : NEKUDO_WHITELIST_MATCH ->more;
+
+DB_POINT : (':' FullIdentifier? '}' | ':$')->type(ERROR),popMode;
+
+DB_QUOTE_MORE : '\\"'->more;
+
+DB_QUOTE_EXIT : '"'->more, popMode;
+
+DB_QUOTE_ANY : . ->more;
+
+DB_QUOTE_EOF : EOF->type(ERROR),popMode;

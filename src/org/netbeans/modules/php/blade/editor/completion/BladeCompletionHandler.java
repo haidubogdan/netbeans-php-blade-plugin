@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.netbeans.editor.BaseDocument;
 import javax.swing.text.Document;
 import javax.swing.text.JTextComponent;
@@ -42,33 +44,39 @@ import org.openide.filesystems.FileObject;
  * @author bogdan
  */
 public class BladeCompletionHandler implements CodeCompletionHandler2 {
-
+    private static final Logger LOGGER = Logger.getLogger(BladeCompletionHandler.class.getName());
     static enum ContextType {
         GENERIC_IDENTIFIER, PHP_FUNCTION, NONE
     }
 
     @Override
     public CodeCompletionResult complete(CodeCompletionContext completionContext) {
+        long startTime = System.currentTimeMillis();
+//        LOGGER.log(Level.INFO, "Completion requested for {0}", completionContext.getParserResult().getSnapshot().getSource().getFileObject());
         BaseDocument doc = (BaseDocument) completionContext.getParserResult().getSnapshot().getSource().getDocument(false);
         if (doc == null) {
+             LOGGER.info(String.format("complete() took %d ms",  System.currentTimeMillis() - startTime));
             return CodeCompletionResult.NONE;
         }
 
         if (CancelSupport.getDefault().isCancelled()) {
+             LOGGER.info(String.format("complete() took %d ms",  System.currentTimeMillis() - startTime));
             return CodeCompletionResult.NONE;
         }
 
         if (completionContext.getCaretOffset() < 1) {
+            LOGGER.info(String.format("complete() took %d ms",  System.currentTimeMillis() - startTime));
             return CodeCompletionResult.NONE;
         }
-
+        
         BladeParserResult parserResult = (BladeParserResult) completionContext.getParserResult();
 
         final List<CompletionProposal> completionProposals = new ArrayList<>();
 
         Token currentToken = BladeAntlrUtils.getToken(doc, completionContext.getCaretOffset() - 1);
-
+        
         if (currentToken == null) {
+            LOGGER.info(String.format("complete() took %d ms",  System.currentTimeMillis() - startTime));
             return CodeCompletionResult.NONE;
         }
 
@@ -86,9 +94,11 @@ public class BladeCompletionHandler implements CodeCompletionHandler2 {
         }
 
         if (completionProposals.isEmpty()){
+            LOGGER.info(String.format("complete() took %d ms",  System.currentTimeMillis() - startTime));
             return CodeCompletionResult.NONE;
         }
         //TODO add context
+        LOGGER.info(String.format("complete() took %d ms",  System.currentTimeMillis() - startTime));
         return new DefaultCompletionResult(completionProposals, false);
     }
 

@@ -73,7 +73,7 @@ public class BladeSemanticAnalyzer extends SemanticAnalyzer<BladeParserResult> {
         CustomDirectives ct = CustomDirectives.getInstance(project);
         for (Object setentry : parserResult.customDirectivesReferences.entrySet()) {
             Map.Entry<OffsetRange, Reference> entry = (Map.Entry<OffsetRange, Reference>) setentry;
-            if (entry.getValue().type == BladeParserResult.ReferenceType.POSSIBLE_DIRECTIVE && ct.customDirectiveNames.contains(entry.getValue().name)) {
+            if (entry.getValue().type == BladeParserResult.ReferenceType.POSSIBLE_DIRECTIVE && ct.customDirectiveList.contains(entry.getValue().name)) {
                 highlights.put(entry.getKey(), CUSTOM_DIRECTIVE_SET);
                 continue;
             }
