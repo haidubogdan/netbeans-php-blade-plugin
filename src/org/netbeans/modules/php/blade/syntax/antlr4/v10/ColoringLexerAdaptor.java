@@ -119,13 +119,12 @@ public abstract class ColoringLexerAdaptor extends Lexer {
         }
     }
     
-    public void maskFreezeString(){
-        if (this._input.LA(2) == ')'){
-            this.setText("@@");
+    public void consumeExprToken(){
+        if (this._input.LA(1) == ':' && this._input.LA(2) != ':'){
+            this.setType(BladeAntlrColoringLexer.PHP_EXPRESSION);
         } else {
-            this.setText("@");
+            this.more();
         }
-        this.more();
     }
 }
 

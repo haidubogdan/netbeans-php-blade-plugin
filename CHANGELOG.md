@@ -1,5 +1,15 @@
 # Change Log
 
+## [2.2.7.2]
+
+**lexer**
+
+- highlight fix for ':' freezing php expression
+
+**misc**
+
+- fix post color highlight for directives with no argument
+
 ## [2.2.7.1]
 
 **lexer**

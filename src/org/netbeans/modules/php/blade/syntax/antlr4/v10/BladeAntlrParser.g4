@@ -116,7 +116,7 @@ empty_block : D_EMPTY composed_php_expression general_statement+ D_ENDEMPTY;
 
 //the consistency for these blocks need to be checked inside the parser
 conditional_block : D_COND_BLOCK_START main_php_expression general_statement* D_COND_BLOCK_END;
-auth_block : D_AUTH_START singleArgWrapperNovar* general_statement+ D_AUTH_END;
+auth_block : D_AUTH_START singleArgWrapperNovar* general_statement* D_AUTH_END;
 env_block: (D_ENV  singleArgWrapper general_statement+ D_ENDENV) | D_PRODUCTION general_statement+ D_ENDPRODUCTION;
 permission : D_PERMISSION_START composed_php_expression general_statement* D_PERMISSION_END;
 

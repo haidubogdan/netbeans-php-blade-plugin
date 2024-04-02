@@ -184,28 +184,31 @@ L_OTHER : . ->type(HTML), popMode;
 // @directive (?)
 mode INSIDE_PHP_EXPRESSION;
 
-OPEN_EXPR_PAREN : {this.roundParenBalance == 0}? '(' {this.increaseRoundParenBalance();} ->more;
+OPEN_EXPR_PAREN : {this.roundParenBalance == 0}? '(' {this.increaseRoundParenBalance();} {this.consumeExprToken();};
 CLOSE_EXPR_PAREN : {this.roundParenBalance == 1}? ')' 
     {this.decreaseRoundParenBalance();}->type(PHP_EXPRESSION),mode(DEFAULT_MODE);
 
-LPAREN : {this.roundParenBalance > 0}? '(' {this.increaseRoundParenBalance();}->more;
-RPAREN : {this.roundParenBalance > 0}? ')' {this.decreaseRoundParenBalance();}->more;
+LPAREN : {this.roundParenBalance > 0}? '(' {this.increaseRoundParenBalance();} {this.consumeExprToken();};
+RPAREN : {this.roundParenBalance > 0}? ')' {this.decreaseRoundParenBalance();} {this.consumeExprToken();};
 
 //in case of lexer restart context
 EXIT_RPAREN : ')' {this.roundParenBalance == 0}?->type(PHP_EXPRESSION),mode(DEFAULT_MODE);
 
 DB_STRING_OPEN : '"' ->more,pushMode(DB_STRING_MODE);
 //hack due to a netbeans php embedding issue when adding or deleting ':' chars
-DOUBLE_NEKODU : NEKUDO_WHITELIST_MATCH ->more;
-PHP_FREEZE_SYNTAX : (':)' | ':' )->type(ERROR),mode(DEFAULT_MODE);
+DOUBLE_NEKODU : ('::' | '?:') {this.consumeExprToken();};
 //no string interpolation for the moment
 //freeze issue
 
-EXPR_STRING_LITERAL : (SINGLE_QUOTED_STRING_FRAGMENT)->more;
+EXPR_STRING_LITERAL : (SINGLE_QUOTED_STRING_FRAGMENT (' ')*) {this.consumeExprToken();};
 
 //STATIC_STRING : //check if start of token ... check if bracket and 
 
-PHP_EXPRESSION_MORE : . ->more;
+FREEZE_NEKUDO_GREEDY : ':' {this._input.LA(1) != ':'}?->skip;
+
+FREEZE_NEKUDO : ':'->skip;
+
+PHP_EXPRESSION_MORE : . {this.consumeExprToken();};
 
 EXIT_EOF : EOF->type(ERROR),mode(DEFAULT_MODE);
 
