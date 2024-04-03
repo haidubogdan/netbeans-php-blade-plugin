@@ -141,7 +141,7 @@ OTHER : . ->type(HTML);
 
 mode INSIDE_HTML_TAG;
 
-OTHER_HTML_POP : . {this._input.LA(1) == '@' || this._input.LA(1) == '{' || (this._input.LA(1) == '<' && this._input.LA(2) == '?')}? ->type(HTML_TAG), popMode;
+OTHER_HTML_POP : . {this._input.LA(1) == '@' || this._input.LA(1) == '{' || (this._input.LA(1) == '<' && (this._input.LA(2) == 'x' || this._input.LA(2) == '?'))}? ->type(HTML_TAG), popMode;
 
 OTHER_HTML : . ->more;
 
@@ -276,10 +276,12 @@ mode DB_STRING_MODE;
 DB_STRING_NEKUDO_GREEDY : NEKUDO_WHITELIST_MATCH '$'? FullIdentifier '}' ->more;
 
 DB_STRING_NEKUDO : NEKUDO_WHITELIST_MATCH ->more;
+//TODO numeric
+DB_JSON_PAIR : '{' [\\']?  FullIdentifier [\\']? ':'+ [\\']?  FullIdentifier?  [\\']?  (',' ( [\\']?  FullIdentifier [\\']?  ':'+ [\\']?   FullIdentifier [\\']? ))* ','? '}' ->more;
 
-DB_JSON_PAIR : '{' FullIdentifier ':'  FullIdentifier? (',' (FullIdentifier ':'  FullIdentifier))* '}' ->more;
+PHP_INTERCALATED : '{' '$' FullIdentifier ('[' [\\'] FullIdentifier  [\\'] ']')* '::' FullIdentifier '}'->more;
 
-DB_POINT : (':' FullIdentifier? '}' | ':$')->type(ERROR);
+DB_POINT : ('{' '$' FullIdentifier ('[' [\\'] FullIdentifier?  [\\'] ']')* (('::'+ FullIdentifier)? (':' FullIdentifier?)+ ) '}' | ':$')->type(ERROR);
 
 DB_QUOTE_MORE : '\\"'->more;
 

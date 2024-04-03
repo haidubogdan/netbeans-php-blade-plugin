@@ -336,7 +336,7 @@ BL_PARAM_CONCAT_OPERATOR : '.';
 
 BL_COMMA_EL : ','  {this.consumeBladeParamComma();};
 
-BL_PARAM_WS : [ \t\r\n]+;
+BL_PARAM_WS : [ \t\r\n]+->skip;
 
 BL_NAME_STRING : NameString;
 

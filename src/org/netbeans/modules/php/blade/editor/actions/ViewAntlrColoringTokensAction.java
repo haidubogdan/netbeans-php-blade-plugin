@@ -108,7 +108,9 @@ public class ViewAntlrColoringTokensAction extends AbstractAction implements Act
                             break;
                         case HTML_TAG:    
                         case HTML:
-                            result.append(" (HTML ");
+                            result.append(" (HTML-");
+                            result.append(token.getType());
+                            result.append(" ");
                             result.append(token.getText());
                             result.append(" ~)");
                             break;

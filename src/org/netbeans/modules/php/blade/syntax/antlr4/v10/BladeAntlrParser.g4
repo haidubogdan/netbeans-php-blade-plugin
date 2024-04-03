@@ -218,22 +218,22 @@ simple_foreach_expr: loop_array=PHP_VARIABLE FOREACH_AS key=PHP_VARIABLE (FOREAC
 
 singleArgWrapper:  BLADE_PARAM_LPAREN (identifiableArgument | composedArgument) BLADE_PARAM_RPAREN;
 singleArgWrapperNovar:  BLADE_PARAM_LPAREN (identifiableArgument | composedArgument)* BLADE_PARAM_RPAREN;
-singleArgAndDefaultWrapper:  BLADE_PARAM_LPAREN (identifiableArgument | composedArgument) (BL_COMMA composedArgument)? (BL_COMMA BL_PARAM_WS*)? BLADE_PARAM_RPAREN;
+singleArgAndDefaultWrapper:  BLADE_PARAM_LPAREN (identifiableArgument | composedArgument) (BL_COMMA composedArgument)? (BL_COMMA)? BLADE_PARAM_RPAREN;
 doubleArgWrapper:  BLADE_PARAM_LPAREN (identifiableArgument | composedArgument) BL_COMMA composedArgument BLADE_PARAM_RPAREN;
 doubleIfArgWrapper:  BLADE_PARAM_LPAREN composedArgument BL_COMMA (identifiableArgument | composedArgument) BLADE_PARAM_RPAREN;
 multiArgWrapper :  BLADE_PARAM_LPAREN (identifiableArgument | composedArgument) (BL_COMMA composedArgument)* BLADE_PARAM_RPAREN;
 
-identifiableArgument : BL_PARAM_WS* BL_PARAM_STRING BL_PARAM_WS*;
-composedArgument : BL_PARAM_WS* (phpExpr)+ BL_PARAM_WS*;
+identifiableArgument : BL_PARAM_STRING;
+composedArgument : (phpExpr)+ ;
 
-phpExpr : identifiableArray | arrayDefine | BLADE_PARAM_EXTRA | PHP_VARIABLE | PHP_KEYWORD |  BL_PARAM_WS | BL_PARAM_CONCAT_OPERATOR | BL_PARAM_STRING | BL_PARAM_ASSIGN | BL_NAME_STRING | BL_PARAM_COMMA;
+phpExpr : identifiableArray | arrayDefine | BLADE_PARAM_EXTRA | PHP_VARIABLE | PHP_KEYWORD |  BL_PARAM_CONCAT_OPERATOR | BL_PARAM_STRING | BL_PARAM_ASSIGN | BL_NAME_STRING | BL_PARAM_COMMA;
 
 //['key' => $value]
 identifiableArray : BL_SQ_LPAREN paramAssign (BL_PARAM_COMMA paramAssign)* BL_PARAM_COMMA? BL_SQ_RPAREN;
 arrayDefine : BL_SQ_LPAREN phpExpr+ BL_SQ_RPAREN
 | BL_SQ_LPAREN BL_SQ_RPAREN;
 
-paramAssign : BL_PARAM_STRING BL_PARAM_WS* BL_PARAM_ASSIGN BL_PARAM_WS* (PHP_VARIABLE | PHP_KEYWORD | BL_PARAM_STRING);
+paramAssign : BL_PARAM_STRING BL_PARAM_ASSIGN (PHP_VARIABLE | PHP_KEYWORD | BL_PARAM_STRING);
 verbatim_block : D_VERBATIM non_blade_statement+ D_ENDVERBATIM;
 
 loop_action : (D_LOOP_ACTION | D_BREAK) php_expression?;
