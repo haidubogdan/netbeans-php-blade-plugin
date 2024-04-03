@@ -277,7 +277,9 @@ DB_STRING_NEKUDO_GREEDY : NEKUDO_WHITELIST_MATCH '$'? FullIdentifier '}' ->more;
 
 DB_STRING_NEKUDO : NEKUDO_WHITELIST_MATCH ->more;
 
-DB_POINT : (':' FullIdentifier? '}' | ':$')->type(ERROR),popMode;
+DB_JSON_PAIR : '{' FullIdentifier ':'  FullIdentifier? (',' (FullIdentifier ':'  FullIdentifier))* '}' ->more;
+
+DB_POINT : (':' FullIdentifier? '}' | ':$')->type(ERROR);
 
 DB_QUOTE_MORE : '\\"'->more;
 

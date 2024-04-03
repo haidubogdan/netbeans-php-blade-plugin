@@ -1,5 +1,19 @@
 # Change Log
 
+## [2.2.8.1]
+
+**parser**
+
+- enable empty blocks
+
+**lexer**
+
+- highlight fix for ':' freezing php expression
+
+**comment**
+
+- adjusting comment block toggle for multi emebedded tokens
+
 ## [2.2.7.2]
 
 **lexer**

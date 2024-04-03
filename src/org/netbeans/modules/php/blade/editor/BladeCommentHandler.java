@@ -1,6 +1,7 @@
 package org.netbeans.modules.php.blade.editor;
 
 import java.util.ArrayList;
+import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 import org.netbeans.api.lexer.Token;
 import org.netbeans.api.lexer.TokenHierarchy;
@@ -9,6 +10,7 @@ import org.netbeans.editor.BaseDocument;
 import org.netbeans.modules.csl.api.OffsetRange;
 import org.netbeans.modules.csl.spi.CommentHandler;
 import org.netbeans.modules.php.blade.editor.lexer.BladeTokenId;
+import org.openide.util.Exceptions;
 
 /**
  *
@@ -66,9 +68,19 @@ public class BladeCommentHandler extends CommentHandler.DefaultCommentHandler {
                             //not working
                             ts.moveNext();
                             if (ts.token().id() == BladeTokenId.PHP_BLADE_EXPRESSION) {
-                                bounds[1] = ts.offset() + ts.token().length();
+                                bounds[1] =  ts.offset() + ts.token().length();
+                            }
+                            //as it contains embedd language
+                            try {
+                                doc.insertString(bounds[0], COMMENT_START_DELIMITER, null);
+                                doc.insertString(Math.max(bounds[1], to) + COMMENT_END_DELIMITER.length(), COMMENT_END_DELIMITER, null);
+                                bounds[0] = 0;
+                                bounds[1] = 0;
+                            } catch (BadLocationException ex) {
+                                Exceptions.printStackTrace(ex);
                             }
                             break;
+
                     }
 
                 }

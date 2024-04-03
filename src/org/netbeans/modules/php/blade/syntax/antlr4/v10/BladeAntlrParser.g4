@@ -102,38 +102,38 @@ non_blade_statement:
 extends : D_EXTENDS singleArgAndDefaultWrapper;
 section_inline: D_SECTION doubleArgWrapper;
 section : D_SECTION singleArgWrapper (general_statement | D_PARENT)* (D_SHOW | D_STOP | D_OVERWRITE | D_ENDSECTION | D_APPEND);
-push : D_PUSH singleArgWrapper general_statement+ D_ENDPUSH;
-pushOnce : D_PUSH_ONCE singleArgWrapper general_statement+ D_ENDPUSH_ONCE;
-pushIf : D_PUSH_IF doubleIfArgWrapper general_statement+ D_ENDPUSH_IF;
-prepend : D_PREPEND singleArgWrapper general_statement+ D_ENDPREPEND;
-fragmentD locals [String version = "10"] : D_FRAGMENT composed_php_expression general_statement+ D_ENDFRAGMENT;
+push : D_PUSH singleArgWrapper general_statement* D_ENDPUSH;
+pushOnce : D_PUSH_ONCE singleArgWrapper general_statement* D_ENDPUSH_ONCE;
+pushIf : D_PUSH_IF doubleIfArgWrapper general_statement* D_ENDPUSH_IF;
+prepend : D_PREPEND singleArgWrapper general_statement* D_ENDPREPEND;
+fragmentD locals [String version = "10"] : D_FRAGMENT composed_php_expression general_statement* D_ENDFRAGMENT;
 
 if : D_IF main_php_expression general_statement* endif | D_IF main_php_expression general_statement+ endif?;
 elseif : D_ELSEIF main_php_expression general_statement+ endif?;
 else : D_ELSE (general_statement* endif | general_statement+ endif?);
 endif: D_ENDIF;
-empty_block : D_EMPTY composed_php_expression general_statement+ D_ENDEMPTY;
+empty_block : D_EMPTY composed_php_expression general_statement* D_ENDEMPTY;
 
 //the consistency for these blocks need to be checked inside the parser
 conditional_block : D_COND_BLOCK_START main_php_expression general_statement* D_COND_BLOCK_END;
 auth_block : D_AUTH_START singleArgWrapperNovar* general_statement* D_AUTH_END;
-env_block: (D_ENV  singleArgWrapper general_statement+ D_ENDENV) | D_PRODUCTION general_statement+ D_ENDPRODUCTION;
+env_block: (D_ENV  singleArgWrapper general_statement* D_ENDENV) | D_PRODUCTION general_statement* D_ENDPRODUCTION;
 permission : D_PERMISSION_START composed_php_expression general_statement* D_PERMISSION_END;
 
 //
-error_block :  D_ERROR php_expression general_statement+ D_ENDERROR;
+error_block :  D_ERROR php_expression general_statement* D_ENDERROR;
 
 //no need to add complexity to parser
 switch: D_SWITCH php_expression (general_statement | D_BREAK)+ D_ENDSWITCH;
 
 //loops
-while : D_WHILE php_expression (general_statement)+ D_ENDWHILE;
-for : D_FOR php_expression (general_statement)+ D_ENDFOR;
-foreach : D_FOREACH FOREACH_LOOP_LPAREN loop_expression FOREACH_LOOP_RPAREN (general_statement)+ D_ENDFOREACH;
-forelse : D_FORELSE FOREACH_LOOP_LPAREN loop_expression FOREACH_LOOP_RPAREN (general_statement | D_EMPTY)+ D_ENDFORELSE;
+while : D_WHILE php_expression (general_statement)* D_ENDWHILE;
+for : D_FOR php_expression (general_statement)* D_ENDFOR;
+foreach : D_FOREACH FOREACH_LOOP_LPAREN loop_expression FOREACH_LOOP_RPAREN (general_statement)* D_ENDFOREACH;
+forelse : D_FORELSE FOREACH_LOOP_LPAREN loop_expression FOREACH_LOOP_RPAREN (general_statement | D_EMPTY)* D_ENDFORELSE;
 
 //misc block
-session : D_SESSION composed_php_expression general_statement+ D_ENDSESSION;
+session : D_SESSION composed_php_expression general_statement* D_ENDSESSION;
 
 //layout
 yieldD : D_YIELD singleArgAndDefaultWrapper;
