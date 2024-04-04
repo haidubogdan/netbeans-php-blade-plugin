@@ -1,13 +1,11 @@
 package org.netbeans.modules.php.blade.editor;
 
-import java.util.ArrayList;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 import org.netbeans.api.lexer.Token;
 import org.netbeans.api.lexer.TokenHierarchy;
 import org.netbeans.api.lexer.TokenSequence;
 import org.netbeans.editor.BaseDocument;
-import org.netbeans.modules.csl.api.OffsetRange;
 import org.netbeans.modules.csl.spi.CommentHandler;
 import org.netbeans.modules.php.blade.editor.lexer.BladeTokenId;
 import org.openide.util.Exceptions;
