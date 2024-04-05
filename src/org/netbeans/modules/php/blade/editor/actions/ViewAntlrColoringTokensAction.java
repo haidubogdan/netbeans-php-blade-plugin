@@ -69,7 +69,7 @@ public class ViewAntlrColoringTokensAction extends AbstractAction implements Act
         }
 
         protected void initComponents() {
-            setName("Antlr token preview - " + fileObject.getName());
+            setName("Antlr coloring token preview - " + fileObject.getName());
             setLayout(new BorderLayout());
             viewer = new JEditorPane();
             viewer.setContentType("text/plain");

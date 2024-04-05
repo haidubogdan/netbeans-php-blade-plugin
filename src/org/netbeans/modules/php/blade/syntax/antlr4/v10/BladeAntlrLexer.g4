@@ -171,7 +171,7 @@ PHP_INLINE_START : ('<?php' | '<?=')->pushMode(INSIDE_PHP_INLINE);
 
 HTML_COMPONENT_PREFIX : '<x-' (CompomentIdentifier |  CompomentIdentifier ('::' CompomentIdentifier)+)? {this.compomentTagOpen = true;};
 HTML_TAG_START : '<' FullIdentifier;
-HTML_CLOSE_TAG : '<' '/' FullIdentifier '>' {this.compomentTagOpen = false;} ->type(HTML);
+HTML_CLOSE_TAG : ('</' FullIdentifier [\n\r ]* '>')+ ->skip;
 HTML_TAG_SELF_CLOSE : '/>' {this.compomentTagOpen = false;}->type(HTML);
 HTML_CLOSE_SYMBOL : '>' {this.compomentTagOpen = false;} ->type(HTML);
 HTML_PATH : (' ')* FullIdentifier ('/' FullIdentifier)+ ->skip;

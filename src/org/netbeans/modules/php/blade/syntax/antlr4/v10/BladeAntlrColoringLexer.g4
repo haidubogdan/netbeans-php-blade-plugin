@@ -129,6 +129,8 @@ CSS_COMMENT : '/*' .*? '*/'->type(HTML);
 
 HTML_X : ('<x-' ComponentTagIdentifier | '<' ComponentTagIdentifier ('::' ComponentTagIdentifier)+)->type(HTML),pushMode(INSIDE_HTML_COMPONENT_TAG);
 
+CLOSE_TAG : ('</' FullIdentifier '>' [\n\r ]*)+->type(HTML);
+
 HTML : ((' ')+ | [\r\n]+ | ComponentTagIdentifier | SpecialChars | '"' | '\\\'' | '_' | '.' 
 | ',' | '=' | [()-;]+ | '[' | ']' )* '<' {this._input.LA(1) != 'x' && this._input.LA(1) != '?' && this._input.LA(2) != 'p'}? ->pushMode(INSIDE_HTML_TAG),more;
 

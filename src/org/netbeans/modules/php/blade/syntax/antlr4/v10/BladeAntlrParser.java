@@ -49,20 +49,20 @@ public class BladeAntlrParser extends Parser {
 		D_AWARE=95, D_SESSION=96, D_ENDSESSION=97, D_JSON=98, D_DD=99, D_LANG=100, 
 		D_USE=101, D_INJECT=102, D_PHP=103, D_VERBATIM=104, D_ENDVERBATIM=105, 
 		D_LIVEWIRE=106, D_CUSTOM=107, D_UNKNOWN=108, CONTENT_TAG_OPEN=109, RAW_TAG_OPEN=110, 
-		PHP_INLINE_START=111, HTML_COMPONENT_PREFIX=112, HTML_TAG_START=113, HTML_PATH=114, 
-		HTML_TEXT=115, HTML_IDENTIFIER=116, EQ=117, WS=118, OTHER=119, BLADE_COMMENT_START=120, 
-		CONTENT_TAG_CLOSE=121, REGULAR_ECHO_EXPR_MORE=122, RAW_TAG_CLOSE=123, 
-		RAW_ECHO_EXPR_MORE=124, WS_EXPR_ESCAPE=125, WS_EXPR=126, WS_COMPOSED_EXPR=127, 
-		EXPR_STRING=128, COMPOSED_EXPR_RPAREN=129, PHP_COMPOSED_EXPRESSION=130, 
-		WS_BL_PARAM=131, FOREACH_WS_EXPR=132, FOREACH_LOOP_LPAREN=133, FOREACH_LOOP_RPAREN=134, 
-		FOREACH_AS=135, FOREACH_PARAM_ASSIGN=136, BL_PARAM_LINE_COMMENT=137, BL_SQ_RPAREN=138, 
-		BL_PARAM_RPAREN=139, BL_PARAM_CONCAT_OPERATOR=140, BL_COMMA_EL=141, BL_PARAM_WS=142, 
-		BL_NAME_STRING=143, PHP_D_BLADE_COMMENT=144, PHP_D_BLADE_ML_COMMENT=145, 
-		D_ENDPHP=146, PHP_D_WS=147, PHP_D_PHP_COMPOSED_EXPRESSION=148, PHP_EXIT=149, 
-		PHP_INLINE_COMMENT=150, PHP_INLINE_ML_COMMENT=151, BLADE_COMMENT_END=152, 
-		AT=153, RAW_TAG_START=154, REGULAR_ECHO_STATIC_ACCESS=155, REGULAR_ECHO_LPAREN=156, 
-		REGULAR_ECHO_RPAREN=157, REGULAR_ECHO_INSTANCE_ACCESS=158, PHP_D_EXPR_CURLY_LPAREN=159, 
-		PHP_D_EXPR_CURLY_RPAREN=160, PHP_D_CLASS=161;
+		PHP_INLINE_START=111, HTML_COMPONENT_PREFIX=112, HTML_TAG_START=113, HTML_CLOSE_TAG=114, 
+		HTML_PATH=115, HTML_TEXT=116, HTML_IDENTIFIER=117, EQ=118, WS=119, OTHER=120, 
+		BLADE_COMMENT_START=121, CONTENT_TAG_CLOSE=122, REGULAR_ECHO_EXPR_MORE=123, 
+		RAW_TAG_CLOSE=124, RAW_ECHO_EXPR_MORE=125, WS_EXPR_ESCAPE=126, WS_EXPR=127, 
+		WS_COMPOSED_EXPR=128, EXPR_STRING=129, COMPOSED_EXPR_RPAREN=130, PHP_COMPOSED_EXPRESSION=131, 
+		WS_BL_PARAM=132, FOREACH_WS_EXPR=133, FOREACH_LOOP_LPAREN=134, FOREACH_LOOP_RPAREN=135, 
+		FOREACH_AS=136, FOREACH_PARAM_ASSIGN=137, BL_PARAM_LINE_COMMENT=138, BL_SQ_RPAREN=139, 
+		BL_PARAM_RPAREN=140, BL_PARAM_CONCAT_OPERATOR=141, BL_COMMA_EL=142, BL_PARAM_WS=143, 
+		BL_NAME_STRING=144, PHP_D_BLADE_COMMENT=145, PHP_D_BLADE_ML_COMMENT=146, 
+		D_ENDPHP=147, PHP_D_WS=148, PHP_D_PHP_COMPOSED_EXPRESSION=149, PHP_EXIT=150, 
+		PHP_INLINE_COMMENT=151, PHP_INLINE_ML_COMMENT=152, BLADE_COMMENT_END=153, 
+		AT=154, RAW_TAG_START=155, REGULAR_ECHO_STATIC_ACCESS=156, REGULAR_ECHO_LPAREN=157, 
+		REGULAR_ECHO_RPAREN=158, REGULAR_ECHO_INSTANCE_ACCESS=159, PHP_D_EXPR_CURLY_LPAREN=160, 
+		PHP_D_EXPR_CURLY_RPAREN=161, PHP_D_CLASS=162;
 	public static final int
 		RULE_file = 0, RULE_general_statement = 1, RULE_inline_statement = 2, 
 		RULE_inline_directive = 3, RULE_block_statement = 4, RULE_non_blade_statement = 5, 
@@ -128,9 +128,9 @@ public class BladeAntlrParser extends Parser {
 			"'@endenv'", null, null, null, null, null, "'@class'", "'@style'", null, 
 			"'@aware'", "'@session'", "'@endsession'", "'@json'", null, "'@lang'", 
 			"'@use'", "'@inject'", null, "'@verbatim'", "'@endverbatim'", null, null, 
-			null, "'{{'", "'{!!'", null, null, null, null, null, null, "'='", null, 
-			null, "'{{--'", null, null, null, null, null, null, null, null, null, 
-			null, null, null, null, null, "'as'", null, null, null, null, "'.'", 
+			null, "'{{'", "'{!!'", null, null, null, null, null, null, null, "'='", 
+			null, null, "'{{--'", null, null, null, null, null, null, null, null, 
+			null, null, null, null, null, null, "'as'", null, null, null, null, "'.'", 
 			"','", null, null, null, null, "'@endphp'", "' '", null, "'?>'", null, 
 			null, "'--}}'", null, "'{!'", null, null, null, null, null, null, "'class'"
 		};
@@ -159,8 +159,8 @@ public class BladeAntlrParser extends Parser {
 			"D_SESSION", "D_ENDSESSION", "D_JSON", "D_DD", "D_LANG", "D_USE", "D_INJECT", 
 			"D_PHP", "D_VERBATIM", "D_ENDVERBATIM", "D_LIVEWIRE", "D_CUSTOM", "D_UNKNOWN", 
 			"CONTENT_TAG_OPEN", "RAW_TAG_OPEN", "PHP_INLINE_START", "HTML_COMPONENT_PREFIX", 
-			"HTML_TAG_START", "HTML_PATH", "HTML_TEXT", "HTML_IDENTIFIER", "EQ", 
-			"WS", "OTHER", "BLADE_COMMENT_START", "CONTENT_TAG_CLOSE", "REGULAR_ECHO_EXPR_MORE", 
+			"HTML_TAG_START", "HTML_CLOSE_TAG", "HTML_PATH", "HTML_TEXT", "HTML_IDENTIFIER", 
+			"EQ", "WS", "OTHER", "BLADE_COMMENT_START", "CONTENT_TAG_CLOSE", "REGULAR_ECHO_EXPR_MORE", 
 			"RAW_TAG_CLOSE", "RAW_ECHO_EXPR_MORE", "WS_EXPR_ESCAPE", "WS_EXPR", "WS_COMPOSED_EXPR", 
 			"EXPR_STRING", "COMPOSED_EXPR_RPAREN", "PHP_COMPOSED_EXPRESSION", "WS_BL_PARAM", 
 			"FOREACH_WS_EXPR", "FOREACH_LOOP_LPAREN", "FOREACH_LOOP_RPAREN", "FOREACH_AS", 
@@ -258,7 +258,7 @@ public class BladeAntlrParser extends Parser {
 			setState(161);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
-			while (((_la) & ~0x3f) == 0 && ((1L << _la) & 864667673345130496L) != 0 || (((_la - 65)) & ~0x3f) == 0 && ((1L << (_la - 65)) & 43346042528586285L) != 0) {
+			while (((_la) & ~0x3f) == 0 && ((1L << _la) & 864667673345130496L) != 0 || (((_la - 65)) & ~0x3f) == 0 && ((1L << (_la - 65)) & 86130238988605997L) != 0) {
 				{
 				{
 				setState(158);
@@ -1317,7 +1317,7 @@ public class BladeAntlrParser extends Parser {
 			setState(271);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
-			while (((_la) & ~0x3f) == 0 && ((1L << _la) & 2017589177951977472L) != 0 || (((_la - 65)) & ~0x3f) == 0 && ((1L << (_la - 65)) & 43346042528586285L) != 0) {
+			while (((_la) & ~0x3f) == 0 && ((1L << _la) & 2017589177951977472L) != 0 || (((_la - 65)) & ~0x3f) == 0 && ((1L << (_la - 65)) & 86130238988605997L) != 0) {
 				{
 				setState(269);
 				_errHandler.sync(this);
@@ -1470,7 +1470,7 @@ public class BladeAntlrParser extends Parser {
 			setState(281);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
-			while (((_la) & ~0x3f) == 0 && ((1L << _la) & 864667673345130496L) != 0 || (((_la - 65)) & ~0x3f) == 0 && ((1L << (_la - 65)) & 43346042528586285L) != 0) {
+			while (((_la) & ~0x3f) == 0 && ((1L << _la) & 864667673345130496L) != 0 || (((_la - 65)) & ~0x3f) == 0 && ((1L << (_la - 65)) & 86130238988605997L) != 0) {
 				{
 				{
 				setState(278);
@@ -1537,7 +1537,7 @@ public class BladeAntlrParser extends Parser {
 			setState(291);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
-			while (((_la) & ~0x3f) == 0 && ((1L << _la) & 864667673345130496L) != 0 || (((_la - 65)) & ~0x3f) == 0 && ((1L << (_la - 65)) & 43346042528586285L) != 0) {
+			while (((_la) & ~0x3f) == 0 && ((1L << _la) & 864667673345130496L) != 0 || (((_la - 65)) & ~0x3f) == 0 && ((1L << (_la - 65)) & 86130238988605997L) != 0) {
 				{
 				{
 				setState(288);
@@ -1604,7 +1604,7 @@ public class BladeAntlrParser extends Parser {
 			setState(301);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
-			while (((_la) & ~0x3f) == 0 && ((1L << _la) & 864667673345130496L) != 0 || (((_la - 65)) & ~0x3f) == 0 && ((1L << (_la - 65)) & 43346042528586285L) != 0) {
+			while (((_la) & ~0x3f) == 0 && ((1L << _la) & 864667673345130496L) != 0 || (((_la - 65)) & ~0x3f) == 0 && ((1L << (_la - 65)) & 86130238988605997L) != 0) {
 				{
 				{
 				setState(298);
@@ -1671,7 +1671,7 @@ public class BladeAntlrParser extends Parser {
 			setState(311);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
-			while (((_la) & ~0x3f) == 0 && ((1L << _la) & 864667673345130496L) != 0 || (((_la - 65)) & ~0x3f) == 0 && ((1L << (_la - 65)) & 43346042528586285L) != 0) {
+			while (((_la) & ~0x3f) == 0 && ((1L << _la) & 864667673345130496L) != 0 || (((_la - 65)) & ~0x3f) == 0 && ((1L << (_la - 65)) & 86130238988605997L) != 0) {
 				{
 				{
 				setState(308);
@@ -1739,7 +1739,7 @@ public class BladeAntlrParser extends Parser {
 			setState(321);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
-			while (((_la) & ~0x3f) == 0 && ((1L << _la) & 864667673345130496L) != 0 || (((_la - 65)) & ~0x3f) == 0 && ((1L << (_la - 65)) & 43346042528586285L) != 0) {
+			while (((_la) & ~0x3f) == 0 && ((1L << _la) & 864667673345130496L) != 0 || (((_la - 65)) & ~0x3f) == 0 && ((1L << (_la - 65)) & 86130238988605997L) != 0) {
 				{
 				{
 				setState(318);
@@ -1813,7 +1813,7 @@ public class BladeAntlrParser extends Parser {
 				setState(331);
 				_errHandler.sync(this);
 				_la = _input.LA(1);
-				while (((_la) & ~0x3f) == 0 && ((1L << _la) & 864667673345130496L) != 0 || (((_la - 65)) & ~0x3f) == 0 && ((1L << (_la - 65)) & 43346042528586285L) != 0) {
+				while (((_la) & ~0x3f) == 0 && ((1L << _la) & 864667673345130496L) != 0 || (((_la - 65)) & ~0x3f) == 0 && ((1L << (_la - 65)) & 86130238988605997L) != 0) {
 					{
 					{
 					setState(328);
@@ -2007,7 +2007,7 @@ public class BladeAntlrParser extends Parser {
 				setState(362);
 				_errHandler.sync(this);
 				_la = _input.LA(1);
-				while (((_la) & ~0x3f) == 0 && ((1L << _la) & 864667673345130496L) != 0 || (((_la - 65)) & ~0x3f) == 0 && ((1L << (_la - 65)) & 43346042528586285L) != 0) {
+				while (((_la) & ~0x3f) == 0 && ((1L << _la) & 864667673345130496L) != 0 || (((_la - 65)) & ~0x3f) == 0 && ((1L << (_la - 65)) & 86130238988605997L) != 0) {
 					{
 					{
 					setState(359);
@@ -2149,7 +2149,7 @@ public class BladeAntlrParser extends Parser {
 			setState(383);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
-			while (((_la) & ~0x3f) == 0 && ((1L << _la) & 864667673345130496L) != 0 || (((_la - 65)) & ~0x3f) == 0 && ((1L << (_la - 65)) & 43346042528586285L) != 0) {
+			while (((_la) & ~0x3f) == 0 && ((1L << _la) & 864667673345130496L) != 0 || (((_la - 65)) & ~0x3f) == 0 && ((1L << (_la - 65)) & 86130238988605997L) != 0) {
 				{
 				{
 				setState(380);
@@ -2216,7 +2216,7 @@ public class BladeAntlrParser extends Parser {
 			setState(393);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
-			while (((_la) & ~0x3f) == 0 && ((1L << _la) & 864667673345130496L) != 0 || (((_la - 65)) & ~0x3f) == 0 && ((1L << (_la - 65)) & 43346042528586285L) != 0) {
+			while (((_la) & ~0x3f) == 0 && ((1L << _la) & 864667673345130496L) != 0 || (((_la - 65)) & ~0x3f) == 0 && ((1L << (_la - 65)) & 86130238988605997L) != 0) {
 				{
 				{
 				setState(390);
@@ -2298,7 +2298,7 @@ public class BladeAntlrParser extends Parser {
 			setState(408);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
-			while (((_la) & ~0x3f) == 0 && ((1L << _la) & 864667673345130496L) != 0 || (((_la - 65)) & ~0x3f) == 0 && ((1L << (_la - 65)) & 43346042528586285L) != 0) {
+			while (((_la) & ~0x3f) == 0 && ((1L << _la) & 864667673345130496L) != 0 || (((_la - 65)) & ~0x3f) == 0 && ((1L << (_la - 65)) & 86130238988605997L) != 0) {
 				{
 				{
 				setState(405);
@@ -2372,7 +2372,7 @@ public class BladeAntlrParser extends Parser {
 				setState(418);
 				_errHandler.sync(this);
 				_la = _input.LA(1);
-				while (((_la) & ~0x3f) == 0 && ((1L << _la) & 864667673345130496L) != 0 || (((_la - 65)) & ~0x3f) == 0 && ((1L << (_la - 65)) & 43346042528586285L) != 0) {
+				while (((_la) & ~0x3f) == 0 && ((1L << _la) & 864667673345130496L) != 0 || (((_la - 65)) & ~0x3f) == 0 && ((1L << (_la - 65)) & 86130238988605997L) != 0) {
 					{
 					{
 					setState(415);
@@ -2396,7 +2396,7 @@ public class BladeAntlrParser extends Parser {
 				setState(427);
 				_errHandler.sync(this);
 				_la = _input.LA(1);
-				while (((_la) & ~0x3f) == 0 && ((1L << _la) & 864667673345130496L) != 0 || (((_la - 65)) & ~0x3f) == 0 && ((1L << (_la - 65)) & 43346042528586285L) != 0) {
+				while (((_la) & ~0x3f) == 0 && ((1L << _la) & 864667673345130496L) != 0 || (((_la - 65)) & ~0x3f) == 0 && ((1L << (_la - 65)) & 86130238988605997L) != 0) {
 					{
 					{
 					setState(424);
@@ -2467,7 +2467,7 @@ public class BladeAntlrParser extends Parser {
 			setState(438);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
-			while (((_la) & ~0x3f) == 0 && ((1L << _la) & 864667673345130496L) != 0 || (((_la - 65)) & ~0x3f) == 0 && ((1L << (_la - 65)) & 43346042528586285L) != 0) {
+			while (((_la) & ~0x3f) == 0 && ((1L << _la) & 864667673345130496L) != 0 || (((_la - 65)) & ~0x3f) == 0 && ((1L << (_la - 65)) & 86130238988605997L) != 0) {
 				{
 				{
 				setState(435);
@@ -2534,7 +2534,7 @@ public class BladeAntlrParser extends Parser {
 			setState(448);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
-			while (((_la) & ~0x3f) == 0 && ((1L << _la) & 864667673345130496L) != 0 || (((_la - 65)) & ~0x3f) == 0 && ((1L << (_la - 65)) & 43346042528586285L) != 0) {
+			while (((_la) & ~0x3f) == 0 && ((1L << _la) & 864667673345130496L) != 0 || (((_la - 65)) & ~0x3f) == 0 && ((1L << (_la - 65)) & 86130238988605997L) != 0) {
 				{
 				{
 				setState(445);
@@ -2627,7 +2627,7 @@ public class BladeAntlrParser extends Parser {
 				setState(459); 
 				_errHandler.sync(this);
 				_la = _input.LA(1);
-			} while ( ((_la) & ~0x3f) == 0 && ((1L << _la) & 864667673345130496L) != 0 || (((_la - 65)) & ~0x3f) == 0 && ((1L << (_la - 65)) & 43346042528586285L) != 0 );
+			} while ( ((_la) & ~0x3f) == 0 && ((1L << _la) & 864667673345130496L) != 0 || (((_la - 65)) & ~0x3f) == 0 && ((1L << (_la - 65)) & 86130238988605997L) != 0 );
 			setState(461);
 			match(D_ENDSWITCH);
 			}
@@ -2684,7 +2684,7 @@ public class BladeAntlrParser extends Parser {
 			setState(468);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
-			while (((_la) & ~0x3f) == 0 && ((1L << _la) & 864667673345130496L) != 0 || (((_la - 65)) & ~0x3f) == 0 && ((1L << (_la - 65)) & 43346042528586285L) != 0) {
+			while (((_la) & ~0x3f) == 0 && ((1L << _la) & 864667673345130496L) != 0 || (((_la - 65)) & ~0x3f) == 0 && ((1L << (_la - 65)) & 86130238988605997L) != 0) {
 				{
 				{
 				setState(465);
@@ -2751,7 +2751,7 @@ public class BladeAntlrParser extends Parser {
 			setState(478);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
-			while (((_la) & ~0x3f) == 0 && ((1L << _la) & 864667673345130496L) != 0 || (((_la - 65)) & ~0x3f) == 0 && ((1L << (_la - 65)) & 43346042528586285L) != 0) {
+			while (((_la) & ~0x3f) == 0 && ((1L << _la) & 864667673345130496L) != 0 || (((_la - 65)) & ~0x3f) == 0 && ((1L << (_la - 65)) & 86130238988605997L) != 0) {
 				{
 				{
 				setState(475);
@@ -2824,7 +2824,7 @@ public class BladeAntlrParser extends Parser {
 			setState(490);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
-			while (((_la) & ~0x3f) == 0 && ((1L << _la) & 864667673345130496L) != 0 || (((_la - 65)) & ~0x3f) == 0 && ((1L << (_la - 65)) & 43346042528586285L) != 0) {
+			while (((_la) & ~0x3f) == 0 && ((1L << _la) & 864667673345130496L) != 0 || (((_la - 65)) & ~0x3f) == 0 && ((1L << (_la - 65)) & 86130238988605997L) != 0) {
 				{
 				{
 				setState(487);
@@ -2901,7 +2901,7 @@ public class BladeAntlrParser extends Parser {
 			setState(503);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
-			while (((_la) & ~0x3f) == 0 && ((1L << _la) & 864667673345130496L) != 0 || (((_la - 65)) & ~0x3f) == 0 && ((1L << (_la - 65)) & 43346042528586285L) != 0) {
+			while (((_la) & ~0x3f) == 0 && ((1L << _la) & 864667673345130496L) != 0 || (((_la - 65)) & ~0x3f) == 0 && ((1L << (_la - 65)) & 86130238988605997L) != 0) {
 				{
 				setState(501);
 				_errHandler.sync(this);
@@ -2980,7 +2980,7 @@ public class BladeAntlrParser extends Parser {
 			setState(513);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
-			while (((_la) & ~0x3f) == 0 && ((1L << _la) & 864667673345130496L) != 0 || (((_la - 65)) & ~0x3f) == 0 && ((1L << (_la - 65)) & 43346042528586285L) != 0) {
+			while (((_la) & ~0x3f) == 0 && ((1L << _la) & 864667673345130496L) != 0 || (((_la - 65)) & ~0x3f) == 0 && ((1L << (_la - 65)) & 86130238988605997L) != 0) {
 				{
 				{
 				setState(510);
@@ -3594,7 +3594,7 @@ public class BladeAntlrParser extends Parser {
 				setState(583); 
 				_errHandler.sync(this);
 				_la = _input.LA(1);
-			} while ( ((_la) & ~0x3f) == 0 && ((1L << _la) & 864667673345130496L) != 0 || (((_la - 65)) & ~0x3f) == 0 && ((1L << (_la - 65)) & 43346042528586285L) != 0 );
+			} while ( ((_la) & ~0x3f) == 0 && ((1L << _la) & 864667673345130496L) != 0 || (((_la - 65)) & ~0x3f) == 0 && ((1L << (_la - 65)) & 86130238988605997L) != 0 );
 			setState(585);
 			match(D_ENDONCE);
 			}
@@ -3651,7 +3651,7 @@ public class BladeAntlrParser extends Parser {
 			setState(592);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
-			while (((_la) & ~0x3f) == 0 && ((1L << _la) & 864667673345130496L) != 0 || (((_la - 65)) & ~0x3f) == 0 && ((1L << (_la - 65)) & 43346042528586285L) != 0) {
+			while (((_la) & ~0x3f) == 0 && ((1L << _la) & 864667673345130496L) != 0 || (((_la - 65)) & ~0x3f) == 0 && ((1L << (_la - 65)) & 86130238988605997L) != 0) {
 				{
 				{
 				setState(589);
@@ -3718,7 +3718,7 @@ public class BladeAntlrParser extends Parser {
 			setState(602);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
-			while (((_la) & ~0x3f) == 0 && ((1L << _la) & 864667673345130496L) != 0 || (((_la - 65)) & ~0x3f) == 0 && ((1L << (_la - 65)) & 43346042528586285L) != 0) {
+			while (((_la) & ~0x3f) == 0 && ((1L << _la) & 864667673345130496L) != 0 || (((_la - 65)) & ~0x3f) == 0 && ((1L << (_la - 65)) & 86130238988605997L) != 0) {
 				{
 				{
 				setState(599);
@@ -4884,7 +4884,7 @@ public class BladeAntlrParser extends Parser {
 						{
 						setState(731);
 						_la = _input.LA(1);
-						if ( !(_la==PHP_EXPRESSION || _la==PHP_VARIABLE || (((_la - 133)) & ~0x3f) == 0 && ((1L << (_la - 133)) & 15L) != 0) ) {
+						if ( !(_la==PHP_EXPRESSION || _la==PHP_VARIABLE || (((_la - 134)) & ~0x3f) == 0 && ((1L << (_la - 134)) & 15L) != 0) ) {
 						_errHandler.recoverInline(this);
 						}
 						else {
@@ -6190,7 +6190,7 @@ public class BladeAntlrParser extends Parser {
 				setState(896); 
 				_errHandler.sync(this);
 				_la = _input.LA(1);
-			} while ( _la==HTML || (((_la - 111)) & ~0x3f) == 0 && ((1L << (_la - 111)) & 103L) != 0 );
+			} while ( _la==HTML || (((_la - 111)) & ~0x3f) == 0 && ((1L << (_la - 111)) & 199L) != 0 );
 			setState(898);
 			match(D_ENDVERBATIM);
 			}
@@ -6368,7 +6368,7 @@ public class BladeAntlrParser extends Parser {
 	}
 
 	public static final String _serializedATN =
-		"\u0004\u0001\u00a1\u0394\u0002\u0000\u0007\u0000\u0002\u0001\u0007\u0001"+
+		"\u0004\u0001\u00a2\u0394\u0002\u0000\u0007\u0000\u0002\u0001\u0007\u0001"+
 		"\u0002\u0002\u0007\u0002\u0002\u0003\u0007\u0003\u0002\u0004\u0007\u0004"+
 		"\u0002\u0005\u0007\u0005\u0002\u0006\u0007\u0006\u0002\u0007\u0007\u0007"+
 		"\u0002\b\u0007\b\u0002\t\u0007\t\u0002\n\u0007\n\u0002\u000b\u0007\u000b"+
@@ -6488,8 +6488,8 @@ public class BladeAntlrParser extends Parser {
 		"\n\f\u000e\u0010\u0012\u0014\u0016\u0018\u001a\u001c\u001e \"$&(*,.02"+
 		"468:<>@BDFHJLNPRTVXZ\\^`bdfhjlnprtvxz|~\u0080\u0082\u0084\u0086\u0088"+
 		"\u008a\u008c\u008e\u0090\u0092\u0094\u0096\u0098\u009a\u009c\u0000\u0007"+
-		"\u0001\u0000\\]\u0002\u0000::=@\u0002\u00001133\u0001\u0001\u0095\u0095"+
-		"\u0002\u0000\u0001\u0002\u0085\u0088\u0002\u0000\u0002\u0003\u0011\u0011"+
+		"\u0001\u0000\\]\u0002\u0000::=@\u0002\u00001133\u0001\u0001\u0096\u0096"+
+		"\u0002\u0000\u0001\u0002\u0086\u0089\u0002\u0000\u0002\u0003\u0011\u0011"+
 		"\u0001\u0000-.\u03f0\u0000\u00a1\u0001\u0000\u0000\u0000\u0002\u00a9\u0001"+
 		"\u0000\u0000\u0000\u0004\u00b8\u0001\u0000\u0000\u0000\u0006\u00e2\u0001"+
 		"\u0000\u0000\u0000\b\u00fd\u0001\u0000\u0000\u0000\n\u0101\u0001\u0000"+
@@ -6536,11 +6536,11 @@ public class BladeAntlrParser extends Parser {
 		"\u0000\u00a9\u00a8\u0001\u0000\u0000\u0000\u00aa\u0003\u0001\u0000\u0000"+
 		"\u0000\u00ab\u00b9\u0003\u0006\u0003\u0000\u00ac\u00b9\u0003V+\u0000\u00ad"+
 		"\u00b9\u0003\\.\u0000\u00ae\u00b9\u0003^/\u0000\u00af\u00b9\u0003Z-\u0000"+
-		"\u00b0\u00b4\u0005x\u0000\u0000\u00b1\u00b3\u0005\u0018\u0000\u0000\u00b2"+
+		"\u00b0\u00b4\u0005y\u0000\u0000\u00b1\u00b3\u0005\u0018\u0000\u0000\u00b2"+
 		"\u00b1\u0001\u0000\u0000\u0000\u00b3\u00b6\u0001\u0000\u0000\u0000\u00b4"+
 		"\u00b2\u0001\u0000\u0000\u0000\u00b4\u00b5\u0001\u0000\u0000\u0000\u00b5"+
 		"\u00b7\u0001\u0000\u0000\u0000\u00b6\u00b4\u0001\u0000\u0000\u0000\u00b7"+
-		"\u00b9\u0005\u0098\u0000\u0000\u00b8\u00ab\u0001\u0000\u0000\u0000\u00b8"+
+		"\u00b9\u0005\u0099\u0000\u0000\u00b8\u00ab\u0001\u0000\u0000\u0000\u00b8"+
 		"\u00ac\u0001\u0000\u0000\u0000\u00b8\u00ad\u0001\u0000\u0000\u0000\u00b8"+
 		"\u00ae\u0001\u0000\u0000\u0000\u00b8\u00af\u0001\u0000\u0000\u0000\u00b8"+
 		"\u00b0\u0001\u0000\u0000\u0000\u00b9\u0005\u0001\u0000\u0000\u0000\u00ba"+
@@ -6723,13 +6723,13 @@ public class BladeAntlrParser extends Parser {
 		"\u01de\u01df\u0001\u0000\u0000\u0000\u01df\u01e1\u0001\u0000\u0000\u0000"+
 		"\u01e0\u01de\u0001\u0000\u0000\u0000\u01e1\u01e2\u0005(\u0000\u0000\u01e2"+
 		"5\u0001\u0000\u0000\u0000\u01e3\u01e4\u0005%\u0000\u0000\u01e4\u01e5\u0005"+
-		"\u0085\u0000\u0000\u01e5\u01e6\u0003x<\u0000\u01e6\u01ea\u0005\u0086\u0000"+
+		"\u0086\u0000\u0000\u01e5\u01e6\u0003x<\u0000\u01e6\u01ea\u0005\u0087\u0000"+
 		"\u0000\u01e7\u01e9\u0003\u0002\u0001\u0000\u01e8\u01e7\u0001\u0000\u0000"+
 		"\u0000\u01e9\u01ec\u0001\u0000\u0000\u0000\u01ea\u01e8\u0001\u0000\u0000"+
 		"\u0000\u01ea\u01eb\u0001\u0000\u0000\u0000\u01eb\u01ed\u0001\u0000\u0000"+
 		"\u0000\u01ec\u01ea\u0001\u0000\u0000\u0000\u01ed\u01ee\u0005&\u0000\u0000"+
 		"\u01ee7\u0001\u0000\u0000\u0000\u01ef\u01f0\u0005)\u0000\u0000\u01f0\u01f1"+
-		"\u0005\u0085\u0000\u0000\u01f1\u01f2\u0003x<\u0000\u01f2\u01f7\u0005\u0086"+
+		"\u0005\u0086\u0000\u0000\u01f1\u01f2\u0003x<\u0000\u01f2\u01f7\u0005\u0087"+
 		"\u0000\u0000\u01f3\u01f6\u0003\u0002\u0001\u0000\u01f4\u01f6\u0005!\u0000"+
 		"\u0000\u01f5\u01f3\u0001\u0000\u0000\u0000\u01f5\u01f4\u0001\u0000\u0000"+
 		"\u0000\u01f6\u01f9\u0001\u0000\u0000\u0000\u01f7\u01f5\u0001\u0000\u0000"+
@@ -6793,7 +6793,7 @@ public class BladeAntlrParser extends Parser {
 		"\u0005g\u0000\u0000\u0268\u026a\u0003|>\u0000\u0269\u0268\u0001\u0000"+
 		"\u0000\u0000\u026a\u026b\u0001\u0000\u0000\u0000\u026b\u0269\u0001\u0000"+
 		"\u0000\u0000\u026b\u026c\u0001\u0000\u0000\u0000\u026c\u026d\u0001\u0000"+
-		"\u0000\u0000\u026d\u026e\u0005\u0092\u0000\u0000\u026e\u0272\u0001\u0000"+
+		"\u0000\u0000\u026d\u026e\u0005\u0093\u0000\u0000\u026e\u0272\u0001\u0000"+
 		"\u0000\u0000\u026f\u0270\u0005g\u0000\u0000\u0270\u0272\u0003z=\u0000"+
 		"\u0271\u0267\u0001\u0000\u0000\u0000\u0271\u026f\u0001\u0000\u0000\u0000"+
 		"\u0272Y\u0001\u0000\u0000\u0000\u0273\u0275\u0005o\u0000\u0000\u0274\u0276"+
@@ -6804,12 +6804,12 @@ public class BladeAntlrParser extends Parser {
 		"\u027c\u027e\u0003`0\u0000\u027d\u027c\u0001\u0000\u0000\u0000\u027e\u0281"+
 		"\u0001\u0000\u0000\u0000\u027f\u027d\u0001\u0000\u0000\u0000\u027f\u0280"+
 		"\u0001\u0000\u0000\u0000\u0280\u0282\u0001\u0000\u0000\u0000\u0281\u027f"+
-		"\u0001\u0000\u0000\u0000\u0282\u0283\u0005y\u0000\u0000\u0283]\u0001\u0000"+
+		"\u0001\u0000\u0000\u0000\u0282\u0283\u0005z\u0000\u0000\u0283]\u0001\u0000"+
 		"\u0000\u0000\u0284\u0288\u0005n\u0000\u0000\u0285\u0287\u0003`0\u0000"+
 		"\u0286\u0285\u0001\u0000\u0000\u0000\u0287\u028a\u0001\u0000\u0000\u0000"+
 		"\u0288\u0286\u0001\u0000\u0000\u0000\u0288\u0289\u0001\u0000\u0000\u0000"+
 		"\u0289\u028b\u0001\u0000\u0000\u0000\u028a\u0288\u0001\u0000\u0000\u0000"+
-		"\u028b\u028c\u0005{\u0000\u0000\u028c_\u0001\u0000\u0000\u0000\u028d\u028e"+
+		"\u028b\u028c\u0005|\u0000\u0000\u028c_\u0001\u0000\u0000\u0000\u028d\u028e"+
 		"\u0003|>\u0000\u028ea\u0001\u0000\u0000\u0000\u028f\u0295\u0003l6\u0000"+
 		"\u0290\u0295\u0003d2\u0000\u0291\u0295\u0003f3\u0000\u0292\u0295\u0003"+
 		"h4\u0000\u0293\u0295\u0003j5\u0000\u0294\u028f\u0001\u0000\u0000\u0000"+
@@ -6862,7 +6862,7 @@ public class BladeAntlrParser extends Parser {
 		"\u0000\u0000\u02e9{\u0001\u0000\u0000\u0000\u02ea\u0304\u0003b1\u0000"+
 		"\u02eb\u0304\u0003t:\u0000\u02ec\u0304\u0005\u0005\u0000\u0000\u02ed\u0304"+
 		"\u0003p8\u0000\u02ee\u0304\u0005\u0002\u0000\u0000\u02ef\u0304\u0005\u0006"+
-		"\u0000\u0000\u02f0\u0304\u0005\u0080\u0000\u0000\u02f1\u0304\u0005\u0003"+
+		"\u0000\u0000\u02f0\u0304\u0005\u0081\u0000\u0000\u02f1\u0304\u0005\u0003"+
 		"\u0000\u0000\u02f2\u02f4\u0005\u0001\u0000\u0000\u02f3\u02f2\u0001\u0000"+
 		"\u0000\u0000\u02f4\u02f5\u0001\u0000\u0000\u0000\u02f5\u02f3\u0001\u0000"+
 		"\u0000\u0000\u02f5\u02f6\u0001\u0000\u0000\u0000\u02f6\u0304\u0001\u0000"+
@@ -6880,8 +6880,8 @@ public class BladeAntlrParser extends Parser {
 		"\u0001\u0000\u0000\u0000\u0303\u02f8\u0001\u0000\u0000\u0000\u0303\u02f9"+
 		"\u0001\u0000\u0000\u0000\u0303\u02fa\u0001\u0000\u0000\u0000\u0303\u0302"+
 		"\u0001\u0000\u0000\u0000\u0304}\u0001\u0000\u0000\u0000\u0305\u0306\u0005"+
-		"\u0002\u0000\u0000\u0306\u0307\u0005\u0087\u0000\u0000\u0307\u030a\u0005"+
-		"\u0002\u0000\u0000\u0308\u0309\u0005\u0088\u0000\u0000\u0309\u030b\u0005"+
+		"\u0002\u0000\u0000\u0306\u0307\u0005\u0088\u0000\u0000\u0307\u030a\u0005"+
+		"\u0002\u0000\u0000\u0308\u0309\u0005\u0089\u0000\u0000\u0309\u030b\u0005"+
 		"\u0002\u0000\u0000\u030a\u0308\u0001\u0000\u0000\u0000\u030a\u030b\u0001"+
 		"\u0000\u0000\u0000\u030b\u007f\u0001\u0000\u0000\u0000\u030c\u030f\u0005"+
 		"\u000b\u0000\u0000\u030d\u0310\u0003\u008cF\u0000\u030e\u0310\u0003\u008e"+
@@ -6925,8 +6925,8 @@ public class BladeAntlrParser extends Parser {
 		"\u008f\u0001\u0000\u0000\u0000\u0352\u035d\u0003\u0092I\u0000\u0353\u035d"+
 		"\u0003\u0094J\u0000\u0354\u035d\u0005\n\u0000\u0000\u0355\u035d\u0005"+
 		"\u0002\u0000\u0000\u0356\u035d\u0005\u0003\u0000\u0000\u0357\u035d\u0005"+
-		"\u008c\u0000\u0000\u0358\u035d\u0005\u0011\u0000\u0000\u0359\u035d\u0005"+
-		"\u0012\u0000\u0000\u035a\u035d\u0005\u008f\u0000\u0000\u035b\u035d\u0005"+
+		"\u008d\u0000\u0000\u0358\u035d\u0005\u0011\u0000\u0000\u0359\u035d\u0005"+
+		"\u0012\u0000\u0000\u035a\u035d\u0005\u0090\u0000\u0000\u035b\u035d\u0005"+
 		"\u0014\u0000\u0000\u035c\u0352\u0001\u0000\u0000\u0000\u035c\u0353\u0001"+
 		"\u0000\u0000\u0000\u035c\u0354\u0001\u0000\u0000\u0000\u035c\u0355\u0001"+
 		"\u0000\u0000\u0000\u035c\u0356\u0001\u0000\u0000\u0000\u035c\u0357\u0001"+
@@ -6939,13 +6939,13 @@ public class BladeAntlrParser extends Parser {
 		"\u0000\u0364\u0365\u0001\u0000\u0000\u0000\u0365\u0368\u0001\u0000\u0000"+
 		"\u0000\u0366\u0364\u0001\u0000\u0000\u0000\u0367\u0369\u0005\u0014\u0000"+
 		"\u0000\u0368\u0367\u0001\u0000\u0000\u0000\u0368\u0369\u0001\u0000\u0000"+
-		"\u0000\u0369\u036a\u0001\u0000\u0000\u0000\u036a\u036b\u0005\u008a\u0000"+
+		"\u0000\u0369\u036a\u0001\u0000\u0000\u0000\u036a\u036b\u0005\u008b\u0000"+
 		"\u0000\u036b\u0093\u0001\u0000\u0000\u0000\u036c\u036e\u0005\u000f\u0000"+
 		"\u0000\u036d\u036f\u0003\u0090H\u0000\u036e\u036d\u0001\u0000\u0000\u0000"+
 		"\u036f\u0370\u0001\u0000\u0000\u0000\u0370\u036e\u0001\u0000\u0000\u0000"+
 		"\u0370\u0371\u0001\u0000\u0000\u0000\u0371\u0372\u0001\u0000\u0000\u0000"+
-		"\u0372\u0373\u0005\u008a\u0000\u0000\u0373\u0377\u0001\u0000\u0000\u0000"+
-		"\u0374\u0375\u0005\u000f\u0000\u0000\u0375\u0377\u0005\u008a\u0000\u0000"+
+		"\u0372\u0373\u0005\u008b\u0000\u0000\u0373\u0377\u0001\u0000\u0000\u0000"+
+		"\u0374\u0375\u0005\u000f\u0000\u0000\u0375\u0377\u0005\u008b\u0000\u0000"+
 		"\u0376\u036c\u0001\u0000\u0000\u0000\u0376\u0374\u0001\u0000\u0000\u0000"+
 		"\u0377\u0095\u0001\u0000\u0000\u0000\u0378\u0379\u0005\u0011\u0000\u0000"+
 		"\u0379\u037a\u0005\u0012\u0000\u0000\u037a\u037b\u0007\u0005\u0000\u0000"+
@@ -6960,7 +6960,7 @@ public class BladeAntlrParser extends Parser {
 		"\u0000\u038a\u038b\u0001\u0000\u0000\u0000\u038b\u0389\u0001\u0000\u0000"+
 		"\u0000\u038b\u038c\u0001\u0000\u0000\u0000\u038c\u0392\u0001\u0000\u0000"+
 		"\u0000\u038d\u0392\u0005p\u0000\u0000\u038e\u0392\u0005q\u0000\u0000\u038f"+
-		"\u0392\u0005u\u0000\u0000\u0390\u0392\u0005t\u0000\u0000\u0391\u0389\u0001"+
+		"\u0392\u0005v\u0000\u0000\u0390\u0392\u0005u\u0000\u0000\u0391\u0389\u0001"+
 		"\u0000\u0000\u0000\u0391\u038d\u0001\u0000\u0000\u0000\u0391\u038e\u0001"+
 		"\u0000\u0000\u0000\u0391\u038f\u0001\u0000\u0000\u0000\u0391\u0390\u0001"+
 		"\u0000\u0000\u0000\u0392\u009d\u0001\u0000\u0000\u0000[\u00a1\u00a9\u00b4"+
