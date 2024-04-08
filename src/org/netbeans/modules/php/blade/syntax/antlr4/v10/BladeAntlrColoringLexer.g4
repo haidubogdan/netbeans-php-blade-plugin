@@ -23,95 +23,50 @@ tokens {
  ERROR
 }
 
-fragment
-NEKUDO_WHITELIST_MATCH : '::' | '?:' | ' : ';
+fragment NekudoWithelistMatch : '::' | '?:' | ' : ';
 
+fragment DirectivesWithEndTag : 'for' ('each')? | 'if' | 'while' 
+   | 'section' | 'session' | 'once' | 'push' | 'PushOnce'
+   | 'switch' | 'unless' | 'can' ('any' | 'not')
+   | 'auth' | 'guest'
+   | 'error' | 'production' | 'empty';
+
+fragment Include : '@include' ('If' | 'When' | 'First' | 'Unless')?;
+
+//to remove
 fragment DOUBLE_QUOTED_STRING_FRAGMENT_WITH_PHP 
     : '"' (ESC_DOUBLE_QUOTED_STRING | '{' PhpVariable '}' | . | ~[:])*?  '"';
 
 fragment ComponentTagIdentifier 
     : [a-z_\u0080-\ufffe][a-z0-9.:\u0080-\ufffe-]*;   
 
+//??
 fragment SpecialChars : '°';
 
 PHP_INLINE : '<?=' .*? '?>' | '<?php' .*? ('?>' | EOF);
 
-//conditionals
-D_COND_ARG : ('@if' | '@elseif')->pushMode(LOOK_FOR_PHP_EXPRESSION),type(DIRECTIVE);
-D_COND : ('@else' | '@endif')->type(DIRECTIVE);
-D_SWITCH : '@switch'->pushMode(LOOK_FOR_PHP_EXPRESSION),type(DIRECTIVE);
-D_CASE : '@case'->pushMode(LOOK_FOR_PHP_EXPRESSION),type(DIRECTIVE);
-D_ENDSWITCH : '@endswitch'->type(DIRECTIVE);
-D_UNLESS : '@unless'->pushMode(LOOK_FOR_PHP_EXPRESSION),type(DIRECTIVE);
-D_ENDUNLESS : '@endunless'->type(DIRECTIVE);
+D_GENERIC_BLOCK_DIRECTIVES : '@' DirectivesWithEndTag | '@sectionMissing' | '@hasSection';
 
-//loops
-D_EACH : '@each'->pushMode(LOOK_FOR_PHP_EXPRESSION),type(DIRECTIVE);
-D_FOR : '@for' ('each' | 'else')?->pushMode(LOOK_FOR_PHP_EXPRESSION),type(DIRECTIVE);
-D_ENDFOR : '@endfor' ('else' | 'each')?->type(DIRECTIVE);
-D_WHILE : '@while'->pushMode(LOOK_FOR_PHP_EXPRESSION),type(DIRECTIVE);
-D_ENDWHILE : '@endwhile'->type(DIRECTIVE);
-D_CONTINUE : '@continue'->pushMode(LOOK_FOR_PHP_EXPRESSION),type(DIRECTIVE);
-D_BREAK : '@break'->pushMode(LOOK_FOR_PHP_EXPRESSION),type(DIRECTIVE);
+D_GENERIC_INLINE_DIRECTIVES : ('@elseif' |  Include | '@extends' | '@each' | '@yield' | '@props' | '@method' 
+   | '@class' | '@style' | '@aware')->pushMode(LOOK_FOR_PHP_EXPRESSION),type(DIRECTIVE);
 
-//includes
-D_INCLUDE : '@include' ('If' | 'When' | 'First' | 'Unless')?->pushMode(LOOK_FOR_PHP_EXPRESSION),type(DIRECTIVE);
+D_GENERIC_INLINE_DIRECTIVES2 : ('@break' | '@continue' | '@selected' | '@disabled' | '@readonly' | '@required')->pushMode(LOOK_FOR_PHP_EXPRESSION),type(DIRECTIVE);
 
-//layout
-D_EXTENDS : '@extends'->pushMode(LOOK_FOR_PHP_EXPRESSION),type(DIRECTIVE);
-D_JS : '@js'->pushMode(LOOK_FOR_PHP_EXPRESSION),type(DIRECTIVE);
-D_SECTION : '@section'->pushMode(LOOK_FOR_PHP_EXPRESSION),type(DIRECTIVE);
-D_HAS_SECTION : '@hasSection'->pushMode(LOOK_FOR_PHP_EXPRESSION),type(DIRECTIVE);
-D_SECTION_MISSING : '@sectionMissing'->pushMode(LOOK_FOR_PHP_EXPRESSION),type(DIRECTIVE);
-D_ENDSECTION : '@endsection'->type(DIRECTIVE);
-D_YIELD : '@yield'->pushMode(LOOK_FOR_PHP_EXPRESSION),type(DIRECTIVE);
-D_PARENT : '@parent'->type(DIRECTIVE);
-D_SHOW : '@show'->type(DIRECTIVE);
-D_OVERWRITE : '@overwrite'->type(DIRECTIVE);
-D_ONCE : '@once'->type(DIRECTIVE);
-D_ENDONCE : '@endonce'->type(DIRECTIVE);
-D_PUSH : '@push'->pushMode(LOOK_FOR_PHP_EXPRESSION),type(DIRECTIVE);
-D_ENDPUSH : '@endpush'->type(DIRECTIVE);
-D_PUSH_ONCE : '@pushOnce'->pushMode(LOOK_FOR_PHP_EXPRESSION),type(DIRECTIVE);
-D_ENDPUSH_ONCE : '@endPushOnce';
-D_PROPS : '@props'->pushMode(LOOK_FOR_PHP_EXPRESSION),type(DIRECTIVE);
+D_GENERIC_END_TAGS : ('@stop' | '@show' | '@overwrite' | '@end' DirectivesWithEndTag)->type(DIRECTIVE);
 
-//forms
-D_METHOD : '@method'->pushMode(LOOK_FOR_PHP_EXPRESSION),type(DIRECTIVE);
-D_ERROR : '@error'->pushMode(LOOK_FOR_PHP_EXPRESSION),type(DIRECTIVE);
-D_ENDERROR : '@enderror'->type(DIRECTIVE);
+D_MISC : ('@dd' | '@dump' | '@js' | '@json' | '@inject')->pushMode(LOOK_FOR_PHP_EXPRESSION),type(DIRECTIVE);
 
-//env
-D_PRODUCTION : '@production'->type(DIRECTIVE);
-D_ENDPRODUCTION : '@endproduction'->type(DIRECTIVE);
+D_SIMPLE : ('@else' | '@csrf' | '@default' | '@append' | '@parent')->type(DIRECTIVE);
 
-//styles, attributes
-D_CLASS : '@class'->pushMode(LOOK_FOR_PHP_EXPRESSION),type(DIRECTIVE);
-D_STYLE : '@style'->pushMode(LOOK_FOR_PHP_EXPRESSION),type(DIRECTIVE);
-D_AWARE : '@aware'->pushMode(LOOK_FOR_PHP_EXPRESSION),type(DIRECTIVE);
-
-//misc
-D_EMPTY : '@empty'->pushMode(LOOK_FOR_PHP_EXPRESSION),type(DIRECTIVE);
-D_ENDEMPTY : '@endempty'->type(DIRECTIVE);
-D_GUEST : '@guest'->pushMode(LOOK_FOR_PHP_EXPRESSION),type(DIRECTIVE);
-D_AUTH : '@auth'->pushMode(LOOK_FOR_PHP_EXPRESSION),type(DIRECTIVE);
-D_PERMISSION : ('@can' | '@cannot' | '@canany')->pushMode(LOOK_FOR_PHP_EXPRESSION),type(DIRECTIVE);
-D_INJECT : '@inject'->pushMode(LOOK_FOR_PHP_EXPRESSION),type(DIRECTIVE);
-D_MISC : ('@session' | '@dd' | '@dump' | '@json')->pushMode(LOOK_FOR_PHP_EXPRESSION),type(DIRECTIVE);
-D_ENDMISC : '@end' ('session')->type(DIRECTIVE);
+//php emebeddings
 D_PHP_SHORT : '@php' (' ')? {this._input.LA(1) == '('}? ->type(D_PHP),pushMode(LOOK_FOR_PHP_EXPRESSION);
 D_PHP : '@php'->pushMode(BLADE_INLINE_PHP);
 
+//verbatim has special blade escape logic
 D_VERBATIM : '@verbatim' ->pushMode(VERBATIM_MODE), type(DIRECTIVE);
 D_ENDVERBATIM : '@endverbatim'->type(DIRECTIVE);
 
-//starting the optimisation
-//D_WITH_EXPR: ''
-//lazy end match
-D_WITH_EXPR : ('@break' | '@continue' | '@selected' | '@disabled' | '@readonly' |
-               '@required')->pushMode(LOOK_FOR_PHP_EXPRESSION),type(DIRECTIVE);
-
-D_SIMPLE : ('@stop' | '@csrf' | '@default' | '@append')->type(DIRECTIVE);
+//allow php expression highlight for custom directives which start with 'end' also
 D_END : ('@end' NameString)->pushMode(LOOK_FOR_PHP_EXPRESSION),type(DIRECTIVE);
 
 //known plugins
@@ -154,7 +109,7 @@ mode INSIDE_REGULAR_ECHO;
 
 CONTENT_TAG_CLOSE : ('}}')->popMode,type(CONTENT_TAG);
 //hack due to a netbeans php embedding issue when adding or deleting ':' chars
-ECHO_DOUBLE_NEKODU : NEKUDO_WHITELIST_MATCH {this.consumeEscapedEchoToken();};
+ECHO_DOUBLE_NEKODU : NekudoWithelistMatch {this.consumeEscapedEchoToken();};
 ECHO_STRING_LITERAL : (SINGLE_QUOTED_STRING_FRAGMENT | DOUBLE_QUOTED_STRING_FRAGMENT_WITH_PHP) {this.consumeEscapedEchoToken();};
 ECHO_PHP_FREEZE_SYNTAX : (':)' | ':') ->skip;
 
@@ -168,7 +123,7 @@ mode INSIDE_RAW_ECHO;
 
 RAW_TAG_CLOSE : ('!!}')->popMode, type(RAW_TAG);
 //hack due to a netbeans php embedding issue when adding or deleting ':' chars
-RAW_ECHO_DOUBLE_NEKODU : NEKUDO_WHITELIST_MATCH {this.consumeNotEscapedEchoToken();};
+RAW_ECHO_DOUBLE_NEKODU : NekudoWithelistMatch {this.consumeNotEscapedEchoToken();};
 RAW_ECHO_STRING_LITERAL : (SINGLE_QUOTED_STRING_FRAGMENT | DOUBLE_QUOTED_STRING_FRAGMENT_WITH_PHP) {this.consumeNotEscapedEchoToken();};
 RAW_ECHO_PHP_FREEZE_SYNTAX : (':)' | ':') ->skip;
 RAW_ECHO_EXPR : ~[ ':!{}]+ {this.consumeNotEscapedEchoToken();};
@@ -275,9 +230,9 @@ EXIT_COMPONENT_PHP_EXPRESSION_EOF : EOF->type(ERROR),popMode;
 
 mode DB_STRING_MODE;
 
-DB_STRING_NEKUDO_GREEDY : NEKUDO_WHITELIST_MATCH '$'? FullIdentifier '}' ->more;
+DB_STRING_NEKUDO_GREEDY : NekudoWithelistMatch '$'? FullIdentifier '}' ->more;
 
-DB_STRING_NEKUDO : NEKUDO_WHITELIST_MATCH ->more;
+DB_STRING_NEKUDO : NekudoWithelistMatch ->more;
 //TODO numeric
 DB_JSON_PAIR : '{' [\\']?  FullIdentifier [\\']? ':'+ [\\']?  FullIdentifier?  [\\']?  (',' ( [\\']?  FullIdentifier [\\']?  ':'+ [\\']?   FullIdentifier [\\']? ))* ','? '}' ->more;
 
