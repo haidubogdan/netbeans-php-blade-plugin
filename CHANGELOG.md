@@ -1,5 +1,15 @@
 # Change Log
 
+## [2.3.2.1]
+
+**filesystem**
+
+- fix #53 file duplication issue with `blade.php` extension
+
+**lexer**
+
+- refactor
+
 ## [2.2.8.1]
 
 **parser**

@@ -45,14 +45,16 @@ fragment SpecialChars : '°';
 
 PHP_INLINE : '<?=' .*? '?>' | '<?php' .*? ('?>' | EOF);
 
-D_GENERIC_BLOCK_DIRECTIVES : '@' DirectivesWithEndTag | '@sectionMissing' | '@hasSection';
+D_GENERIC_BLOCK_DIRECTIVES : ('@' DirectivesWithEndTag | '@sectionMissing' | '@hasSection')->pushMode(LOOK_FOR_PHP_EXPRESSION),type(DIRECTIVE);
 
 D_GENERIC_INLINE_DIRECTIVES : ('@elseif' |  Include | '@extends' | '@each' | '@yield' | '@props' | '@method' 
-   | '@class' | '@style' | '@aware')->pushMode(LOOK_FOR_PHP_EXPRESSION),type(DIRECTIVE);
-
-D_GENERIC_INLINE_DIRECTIVES2 : ('@break' | '@continue' | '@selected' | '@disabled' | '@readonly' | '@required')->pushMode(LOOK_FOR_PHP_EXPRESSION),type(DIRECTIVE);
+   | '@class' | '@style' | '@aware' | '@break' | '@continue' | '@selected' | '@disabled' | '@readonly' | '@required')->pushMode(LOOK_FOR_PHP_EXPRESSION),type(DIRECTIVE);
 
 D_GENERIC_END_TAGS : ('@stop' | '@show' | '@overwrite' | '@end' DirectivesWithEndTag)->type(DIRECTIVE);
+
+//verbatim has special blade escape logic
+D_VERBATIM : '@verbatim' ->pushMode(VERBATIM_MODE), type(DIRECTIVE);
+D_ENDVERBATIM : '@endverbatim'->type(DIRECTIVE);
 
 D_MISC : ('@dd' | '@dump' | '@js' | '@json' | '@inject')->pushMode(LOOK_FOR_PHP_EXPRESSION),type(DIRECTIVE);
 
@@ -61,10 +63,6 @@ D_SIMPLE : ('@else' | '@csrf' | '@default' | '@append' | '@parent')->type(DIRECT
 //php emebeddings
 D_PHP_SHORT : '@php' (' ')? {this._input.LA(1) == '('}? ->type(D_PHP),pushMode(LOOK_FOR_PHP_EXPRESSION);
 D_PHP : '@php'->pushMode(BLADE_INLINE_PHP);
-
-//verbatim has special blade escape logic
-D_VERBATIM : '@verbatim' ->pushMode(VERBATIM_MODE), type(DIRECTIVE);
-D_ENDVERBATIM : '@endverbatim'->type(DIRECTIVE);
 
 //allow php expression highlight for custom directives which start with 'end' also
 D_END : ('@end' NameString)->pushMode(LOOK_FOR_PHP_EXPRESSION),type(DIRECTIVE);
@@ -80,9 +78,12 @@ D_CUSTOM : ('@' NameString {this._input.LA(1) == '(' ||
 CONTENT_TAG_OPEN : '{{' ->pushMode(INSIDE_REGULAR_ECHO),type(CONTENT_TAG);
 RAW_TAG_OPEN : '{!!' ->pushMode(INSIDE_RAW_ECHO),type(RAW_TAG);
 
-CSS_COMMENT : '/*' .*? '*/'->type(HTML);
+CSS_COMMENT : ('/*' .*? '*/' | '//')->type(HTML);
 
 HTML_X : ('<x-' ComponentTagIdentifier | '<' ComponentTagIdentifier ('::' ComponentTagIdentifier)+)->type(HTML),pushMode(INSIDE_HTML_COMPONENT_TAG);
+
+
+WS_BEFORE_DIRECTIVE : [\r\n] (' ')* {this._input.LA(1) == '@'}?;
 
 CLOSE_TAG : ('</' FullIdentifier '>' [\n\r ]*)+->type(HTML);
 
@@ -92,7 +93,7 @@ HTML : ((' ')+ | [\r\n]+ | ComponentTagIdentifier | SpecialChars | '"' | '\\\'' 
 HTML_MISC : ((' ')+ | [\r\n]+ | ('#' | '.')? ComponentTagIdentifier | SpecialChars | '"' 
 | ',' | '\\\'' | '_' | '.' | '=' | [()-;]+ | '[' | ']'  )+->type(HTML);
 
-HTML_WS : ((' ')+ | [\r\n]+ | '//')+->type(HTML);
+HTML_WS : ((' ')+ | [\r\n]+)->type(HTML);
 
 OTHER : . ->type(HTML);
 
