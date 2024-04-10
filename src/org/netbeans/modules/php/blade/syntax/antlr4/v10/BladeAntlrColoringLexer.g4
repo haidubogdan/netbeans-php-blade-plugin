@@ -82,9 +82,6 @@ CSS_COMMENT : ('/*' .*? '*/' | '//')->type(HTML);
 
 HTML_X : ('<x-' ComponentTagIdentifier | '<' ComponentTagIdentifier ('::' ComponentTagIdentifier)+)->type(HTML),pushMode(INSIDE_HTML_COMPONENT_TAG);
 
-
-WS_BEFORE_DIRECTIVE : [\r\n] (' ')* {this._input.LA(1) == '@'}?;
-
 CLOSE_TAG : ('</' FullIdentifier '>' [\n\r ]*)+->type(HTML);
 
 HTML : ((' ')+ | [\r\n]+ | ComponentTagIdentifier | SpecialChars | '"' | '\\\'' | '_' | '.' 

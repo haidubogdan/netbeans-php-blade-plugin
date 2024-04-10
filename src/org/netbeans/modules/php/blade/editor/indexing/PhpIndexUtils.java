@@ -459,7 +459,7 @@ public class PhpIndexUtils {
                 //internal php index
 
                 String classOwnerName = indexResult.getValue(PHPIndexer.FIELD_CLASS);
-                if (!classOwnerName.startsWith(ownerClass.toLowerCase())) {
+                if (classOwnerName == null || !classOwnerName.startsWith(ownerClass.toLowerCase())) {
                     continue;
                 }
                 String[] values = indexResult.getValues(PHPIndexer.FIELD_CLASS_CONST);

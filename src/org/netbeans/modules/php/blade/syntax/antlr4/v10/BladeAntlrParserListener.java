@@ -68,16 +68,6 @@ public interface BladeAntlrParserListener extends ParseTreeListener {
 	 */
 	void exitBlock_statement(BladeAntlrParser.Block_statementContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link BladeAntlrParser#non_blade_statement}.
-	 * @param ctx the parse tree
-	 */
-	void enterNon_blade_statement(BladeAntlrParser.Non_blade_statementContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link BladeAntlrParser#non_blade_statement}.
-	 * @param ctx the parse tree
-	 */
-	void exitNon_blade_statement(BladeAntlrParser.Non_blade_statementContext ctx);
-	/**
 	 * Enter a parse tree produced by {@link BladeAntlrParser#extends}.
 	 * @param ctx the parse tree
 	 */
@@ -168,16 +158,6 @@ public interface BladeAntlrParserListener extends ParseTreeListener {
 	 */
 	void exitIf(BladeAntlrParser.IfContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link BladeAntlrParser#elseif}.
-	 * @param ctx the parse tree
-	 */
-	void enterElseif(BladeAntlrParser.ElseifContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link BladeAntlrParser#elseif}.
-	 * @param ctx the parse tree
-	 */
-	void exitElseif(BladeAntlrParser.ElseifContext ctx);
-	/**
 	 * Enter a parse tree produced by {@link BladeAntlrParser#else}.
 	 * @param ctx the parse tree
 	 */
@@ -247,6 +227,16 @@ public interface BladeAntlrParserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitPermission(BladeAntlrParser.PermissionContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link BladeAntlrParser#simple_conditional_stm}.
+	 * @param ctx the parse tree
+	 */
+	void enterSimple_conditional_stm(BladeAntlrParser.Simple_conditional_stmContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link BladeAntlrParser#simple_conditional_stm}.
+	 * @param ctx the parse tree
+	 */
+	void exitSimple_conditional_stm(BladeAntlrParser.Simple_conditional_stmContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link BladeAntlrParser#error_block}.
 	 * @param ctx the parse tree

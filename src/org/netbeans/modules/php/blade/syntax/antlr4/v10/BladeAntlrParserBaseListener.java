@@ -87,18 +87,6 @@ public class BladeAntlrParserBaseListener implements BladeAntlrParserListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterNon_blade_statement(BladeAntlrParser.Non_blade_statementContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitNon_blade_statement(BladeAntlrParser.Non_blade_statementContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
 	@Override public void enterExtends(BladeAntlrParser.ExtendsContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -207,18 +195,6 @@ public class BladeAntlrParserBaseListener implements BladeAntlrParserListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterElseif(BladeAntlrParser.ElseifContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitElseif(BladeAntlrParser.ElseifContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
 	@Override public void enterElse(BladeAntlrParser.ElseContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -298,6 +274,18 @@ public class BladeAntlrParserBaseListener implements BladeAntlrParserListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitPermission(BladeAntlrParser.PermissionContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterSimple_conditional_stm(BladeAntlrParser.Simple_conditional_stmContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitSimple_conditional_stm(BladeAntlrParser.Simple_conditional_stmContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *

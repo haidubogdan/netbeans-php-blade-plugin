@@ -74,8 +74,6 @@ block_statement:
     | prepend
     | fragmentD
     | if
-    | elseif
-    | else
     | switch
     | env_block
     | empty_block
@@ -94,11 +92,6 @@ block_statement:
     | php_blade
     ;
 
-non_blade_statement:
-    html
-    | phpInline
-    ;
-
 extends : D_EXTENDS singleArgAndDefaultWrapper;
 section_inline: D_SECTION doubleArgWrapper;
 section : D_SECTION singleArgWrapper (general_statement | D_PARENT)* (D_SHOW | D_STOP | D_OVERWRITE | D_ENDSECTION | D_APPEND);
@@ -108,18 +101,18 @@ pushIf : D_PUSH_IF doubleIfArgWrapper general_statement* D_ENDPUSH_IF;
 prepend : D_PREPEND singleArgWrapper general_statement* D_ENDPREPEND;
 fragmentD locals [String version = "10"] : D_FRAGMENT composed_php_expression general_statement* D_ENDFRAGMENT;
 
-if : D_IF main_php_expression general_statement* endif | D_IF main_php_expression general_statement+ endif?;
-elseif : D_ELSEIF main_php_expression general_statement+ endif?;
-else : D_ELSE (general_statement* endif | general_statement+ endif?);
+if : D_IF main_php_expression general_statement*  (D_ELSEIF main_php_expression general_statement*)* else?  endif;
+else : D_ELSE general_statement*;
 endif: D_ENDIF;
-empty_block : D_EMPTY composed_php_expression general_statement* D_ENDEMPTY;
+empty_block : D_EMPTY composed_php_expression simple_conditional_stm D_ENDEMPTY;
 
 //the consistency for these blocks need to be checked inside the parser
-conditional_block : D_COND_BLOCK_START main_php_expression general_statement* D_COND_BLOCK_END;
-auth_block : D_AUTH_START singleArgWrapperNovar* general_statement* D_AUTH_END;
-env_block: (D_ENV  singleArgWrapper general_statement* D_ENDENV) | D_PRODUCTION general_statement* D_ENDPRODUCTION;
-permission : D_PERMISSION_START composed_php_expression general_statement* D_PERMISSION_END;
+conditional_block : D_COND_BLOCK_START main_php_expression simple_conditional_stm D_COND_BLOCK_END;
+auth_block : D_AUTH_START singleArgWrapperNovar* simple_conditional_stm D_AUTH_END;
+env_block: (D_ENV  singleArgWrapper simple_conditional_stm D_ENDENV) | D_PRODUCTION simple_conditional_stm D_ENDPRODUCTION;
+permission : D_PERMISSION_START composed_php_expression simple_conditional_stm D_PERMISSION_END;
 
+simple_conditional_stm : general_statement* else?;
 //
 error_block :  D_ERROR php_expression general_statement* D_ENDERROR;
 
@@ -163,7 +156,7 @@ each : D_EACH BLADE_PARAM_LPAREN
     BLADE_PARAM_RPAREN;
 
 once_block : D_ONCE general_statement+ D_ENDONCE;
-hasSection : D_HAS_SECTION singleArgWrapper general_statement* D_ENDIF;
+hasSection : D_HAS_SECTION singleArgWrapper general_statement* else? D_ENDIF;
 sectionMissing : D_SECTION_MISSING singleArgWrapper general_statement* D_ENDIF;
 
 custom_directive : D_CUSTOM (multiArgWrapper 
@@ -234,7 +227,7 @@ arrayDefine : BL_SQ_LPAREN phpExpr+ BL_SQ_RPAREN
 | BL_SQ_LPAREN BL_SQ_RPAREN;
 
 paramAssign : BL_PARAM_STRING BL_PARAM_ASSIGN (PHP_VARIABLE | PHP_KEYWORD | BL_PARAM_STRING);
-verbatim_block : D_VERBATIM non_blade_statement+ D_ENDVERBATIM;
+verbatim_block : D_VERBATIM D_ENDVERBATIM;
 
 loop_action : (D_LOOP_ACTION | D_BREAK) php_expression?;
 

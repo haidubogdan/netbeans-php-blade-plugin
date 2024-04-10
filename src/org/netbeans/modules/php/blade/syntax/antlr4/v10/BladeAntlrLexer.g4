@@ -80,7 +80,13 @@ D_EACH : '@each'->pushMode(LOOK_FOR_BLADE_PARAMETERS);
 
 //layout
 D_EXTENDS : '@extends'->pushMode(LOOK_FOR_BLADE_PARAMETERS);
+
+//from livewire (converts variable to javascript syntax)
 D_JS : '@js'->pushMode(LOOK_FOR_PHP_COMPOSED_EXPRESSION);
+
+//safe json_encode
+D_JSON  : '@json'->pushMode(LOOK_FOR_PHP_COMPOSED_EXPRESSION);
+
 D_SECTION : '@section'->pushMode(LOOK_FOR_BLADE_PARAMETERS);
 D_HAS_SECTION : '@hasSection'->pushMode(LOOK_FOR_BLADE_PARAMETERS);
 D_SECTION_MISSING : '@sectionMissing'->pushMode(LOOK_FOR_BLADE_PARAMETERS);
@@ -137,7 +143,7 @@ D_AWARE : '@aware'->pushMode(LOOK_FOR_PHP_COMPOSED_EXPRESSION);
 //misc
 D_SESSION : '@session'->pushMode(LOOK_FOR_PHP_COMPOSED_EXPRESSION);
 D_ENDSESSION : '@endsession';
-D_JSON  : '@json'->pushMode(LOOK_FOR_PHP_COMPOSED_EXPRESSION);
+
 D_DD : ('@dd' | '@dump')->pushMode(LOOK_FOR_PHP_COMPOSED_EXPRESSION);
 D_LANG : '@lang'->pushMode(LOOK_FOR_BLADE_PARAMETERS);
 
@@ -432,7 +438,7 @@ VERBATIM_HTML : . {
         this._input.LA(5) == 'v' &&
         this._input.LA(6) == 'e' &&
         this._input.LA(7) == 'r'
-      }? ->type(HTML);
+      }? ->skip;
 
 
 EXIT_VERBATIM_MOD_EOF : EOF->type(ERROR),mode(DEFAULT_MODE);
