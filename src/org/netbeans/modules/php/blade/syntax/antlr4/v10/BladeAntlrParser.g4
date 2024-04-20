@@ -183,8 +183,11 @@ class_expr_usage: class_name_reference
 
 object_alias_static_access : alias_name=PHP_VARIABLE PHP_STATIC_ACCESS static_property=PHP_IDENTIFIER;
 object_alias_direct_access : alias_name=PHP_VARIABLE PHP_INSTANCE_ACCESS property=PHP_IDENTIFIER;
-static_direct_class_access : class_identifier PHP_STATIC_ACCESS method_call
-    | class_identifier PHP_STATIC_ACCESS static_property=PHP_IDENTIFIER
+static_direct_class_access : class_name=PHP_IDENTIFIER PHP_STATIC_ACCESS method_call
+    | class_name=PHP_IDENTIFIER PHP_STATIC_ACCESS static_property=PHP_IDENTIFIER
+    ;
+static_direct_namespace_class_access : namespace=PHP_NAMESPACE_PATH? class_name=PHP_IDENTIFIER PHP_STATIC_ACCESS method_call
+    | namespace=PHP_NAMESPACE_PATH? class_name=PHP_IDENTIFIER PHP_STATIC_ACCESS static_property=PHP_IDENTIFIER
     ;
 
 class_instance : PHP_NEW (class_identifier | namespacePath) BLADE_EXPR_LPAREN composed_php_expression* BLADE_EXPR_RPAREN;

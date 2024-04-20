@@ -28,7 +28,10 @@ import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeListener;
 import org.antlr.v4.runtime.tree.TerminalNode;
+import org.netbeans.api.annotations.common.NonNull;
+import org.netbeans.api.annotations.common.NullAllowed;
 import org.netbeans.modules.csl.api.Severity;
+import org.netbeans.modules.csl.spi.DefaultError;
 import org.netbeans.modules.php.blade.editor.compiler.BladePhpCompiler;
 import org.netbeans.modules.php.blade.editor.navigator.BladeStructureItem;
 import org.netbeans.modules.php.blade.editor.navigator.BladeStructureItem.DirectiveBlockStructureItem;
@@ -122,33 +125,35 @@ public class BladeParserResult extends ParserResult {
         return ret;
     }
 
-    public BladeParserResult get(String taskCkass) {
+    public BladeParserResult get(String taskClass) {
         long startTime = System.currentTimeMillis();
-        LOGGER.log(Level.INFO, "PARSER TRIGGERED BY {0}", taskCkass);
+        LOGGER.log(Level.INFO, "PARSER TRIGGERED BY {0}", taskClass);
         if (!finished) {
             BladeAntlrParser parser = createParser(getSnapshot());
+            //don't need a parse tree (memory efficiency)
+            parser.setBuildParseTree(false);
             //LOGGER.info(String.format("parser created in %d ms", System.currentTimeMillis() - startTime));
             parser.addErrorListener(createErrorListener());
             //if (!taskCkass.toLowerCase().contains("completion") && !taskCkass.toLowerCase().contains("fold") && !taskCkass.toLowerCase().contains("hints")){
-                parser.addParseListener(createDeclarationReferencesListener());
+            parser.addParseListener(createDeclarationReferencesListener());
             //}
-            
+
             parser.addParseListener(createPhpElementsOccurencesListener());
 
-            if (taskCkass.toLowerCase().contains("completion")){
+            if (taskClass.toLowerCase().contains("completion")) {
                 parser.addParseListener(createVariableListener());
             }
 
             //not implemented yet
             //parser.addParseListener(createLayoutTreeListener());
-            if (taskCkass.toLowerCase().contains("fold")){
+            if (taskClass.toLowerCase().contains("fold") || taskClass.contains("navigator") || taskClass.contains("semantic")) {
                 parser.addParseListener(createStructureListener());
             }
-            if (taskCkass.toLowerCase().contains("hints")){
+            if (taskClass.toLowerCase().contains("hints")) {
                 parser.addParseListener(createSemanticsListener());
             }
             evaluateParser(parser);
-            LOGGER.info(String.format("Parser evaluated in %d ms " + taskCkass, System.currentTimeMillis() - startTime));
+            LOGGER.info(String.format("Parser evaluated in %d ms " + taskClass, System.currentTimeMillis() - startTime));
 //            BladePhpCompiler phpCompiler = new BladePhpCompiler();
 ////            PHPParseResult phpParserResult = phpCompiler.extractPhpContent(
 ////                    this.getSnapshot()).getPhpParserResult();
@@ -248,7 +253,7 @@ public class BladeParserResult extends ParserResult {
                     case INCLUDE_IF:
                     case INCLUDE_COND:
                     case EACH:
-                        if (bladeParamText.contains("::")){
+                        if (bladeParamText.contains("::")) {
                             //don't include package resources
                             break;
                         }
@@ -416,27 +421,64 @@ public class BladeParserResult extends ParserResult {
                 }
             }
 
-            //this will be always static
             @Override
-            public void exitStatic_direct_class_access(BladeAntlrParser.Static_direct_class_accessContext ctx) {
-                if (ctx.class_identifier() == null || ctx.class_identifier().class_name == null) {
+            public void exitStatic_direct_namespace_class_access(BladeAntlrParser.Static_direct_namespace_class_accessContext ctx) {
+                if (ctx.class_name == null) {
                     return;
                 }
 
-                Token classIdentifier = ctx.class_identifier().class_name;
+                Token classIdentifier = ctx.class_name;
                 String className = classIdentifier.getText();
                 OffsetRange range = new OffsetRange(classIdentifier.getStartIndex(), classIdentifier.getStopIndex() + 1);
 
-                if (ctx.class_identifier().namespace != null) {
-                    occurancesForDeclaration.put(range, new Reference(
-                            ReferenceType.PHP_CLASS,
-                            className, range,
-                            null,
-                            ctx.class_identifier().namespace.getText())
-                    );
-                } else {
-                    phpClassOccurences.put(range, className);
+                occurancesForDeclaration.put(range, new Reference(
+                        ReferenceType.PHP_CLASS,
+                        className, range,
+                        null,
+                        ctx.namespace.getText())
+                );
+
+                OffsetRange callRange = null;
+                int start = ctx.PHP_STATIC_ACCESS().getSymbol().getStartIndex();
+                String fieldName = null;
+                FieldType fieldType = null;
+                if (ctx.static_property != null) {
+                    //constants
+                    callRange = new OffsetRange(start, ctx.static_property.getStopIndex() + 1);
+                    fieldName = ctx.static_property.getText();
+                    fieldType = FieldType.CONSTANT;
+                } else if (ctx.method_call() != null) {
+                    //methods
+                    callRange = new OffsetRange(start, ctx.method_call().getStop().getStopIndex() + 1);
+                    fieldName = ctx.method_call().func_name.getText();
+                    fieldType = FieldType.METHOD;
+                    OffsetRange functionRange = new OffsetRange(ctx.method_call().func_name.getStartIndex(), ctx.method_call().func_name.getStopIndex() + 1);
+                    phpMethodOccurences.put(functionRange, new Reference(ReferenceType.PHP_METHOD, fieldName, range, className));
                 }
+
+                if (callRange != null) {
+                    FieldAccessReference fieldAccess = new FieldAccessReference(
+                            ReferenceType.STATIC_FIELD_ACCESS,
+                            className,
+                            fieldName,
+                            fieldType
+                    );
+                    fieldCallType.put(callRange, fieldAccess);
+                }
+            }
+
+            //this will be always static
+            @Override
+            public void exitStatic_direct_class_access(BladeAntlrParser.Static_direct_class_accessContext ctx) {
+                if (ctx.class_name == null) {
+                    return;
+                }
+
+                Token classIdentifier = ctx.class_name;
+                String className = classIdentifier.getText();
+                OffsetRange range = new OffsetRange(classIdentifier.getStartIndex(), classIdentifier.getStopIndex() + 1);
+
+                phpClassOccurences.put(range, className);
 
                 OffsetRange callRange = null;
                 int start = ctx.PHP_STATIC_ACCESS().getSymbol().getStartIndex();
@@ -939,5 +981,22 @@ public class BladeParserResult extends ParserResult {
         public String arrayVariable;
         public String keyVariable;
         public String itemVariable;
+    }
+
+    /**
+     * seems that java caches only this class ? BladeError is not found in some
+     * occasions
+     */
+    public static class BladeError extends DefaultError implements org.netbeans.modules.csl.api.Error.Badging {
+
+        public BladeError(@NullAllowed String key, @NonNull String displayName, @NullAllowed String description, @NonNull FileObject file, @NonNull int start, @NonNull int end, @NonNull Severity severity) {
+            super(key, displayName, description, file, start, end, severity);
+        }
+
+        @Override
+        public boolean showExplorerBadge() {
+            return true;
+        }
+
     }
 }

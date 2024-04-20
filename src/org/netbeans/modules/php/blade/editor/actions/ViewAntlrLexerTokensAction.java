@@ -124,8 +124,13 @@ public class ViewAntlrLexerTokensAction extends AbstractAction implements Action
                             result.append(" (PHP_EXPRESSION)");
                             result.append(token.getText());
                             break;
+                        case PHP_NAMESPACE_PATH:
+                            result.append(" (PHP_NAMESPACE_PATH)");
+                            result.append(token.getText());
+                            break;
                         case PHP_IDENTIFIER:
                             result.append(" (PHP_IDENTIFIER)");
+                            result.append(token.getText());
                             break;
                         case PHP_VARIABLE:
                             result.append(" (PHP_VARIABLE)");

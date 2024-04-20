@@ -538,6 +538,16 @@ public interface BladeAntlrParserListener extends ParseTreeListener {
 	 */
 	void exitStatic_direct_class_access(BladeAntlrParser.Static_direct_class_accessContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link BladeAntlrParser#static_direct_namespace_class_access}.
+	 * @param ctx the parse tree
+	 */
+	void enterStatic_direct_namespace_class_access(BladeAntlrParser.Static_direct_namespace_class_accessContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link BladeAntlrParser#static_direct_namespace_class_access}.
+	 * @param ctx the parse tree
+	 */
+	void exitStatic_direct_namespace_class_access(BladeAntlrParser.Static_direct_namespace_class_accessContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link BladeAntlrParser#class_instance}.
 	 * @param ctx the parse tree
 	 */

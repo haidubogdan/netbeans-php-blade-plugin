@@ -1,5 +1,11 @@
 # Change Log
 
+## [2.3.4.1]
+
+**antlr parser**
+
+- disable BuildParserTree for memory efficiency
+
 ## [2.3.2.1]
 
 **filesystem**

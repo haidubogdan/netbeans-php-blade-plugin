@@ -39,6 +39,21 @@ channels { COMMENT, PHP_CODE }
 
 fragment CompomentIdentifier
     : [a-z\u0080-\ufffe][a-z0-9_.:\u0080-\ufffe]*;
+
+fragment CssSelector
+    : ('#' | '.')? [a-z\u0080-\ufffe][a-z0-9-_:\u0080-\ufffe]* | CssAttrSelector;
+
+fragment JsFunctionStart
+    : NameString '(' NameString* (',' (' ')* NameString)* (' ')* ')' (' ')* ('{' { this._input.LA(1) != '{'}?)?;
+
+fragment StringParam
+    : [\\'] CssSelector ((' ')* CssSelector)* [\\'] | '"' CssSelector ((' ')* CssSelector)* [\\'] '"';
+
+fragment CssAttrSelector 
+    : '[' FullIdentifier (EQ StringAttrValue)?  ']';
+
+fragment StringAttrValue
+    : '"' FullIdentifier '"' | [\\'] FullIdentifier [\\'];
 //RULES
 
 
@@ -176,12 +191,16 @@ PHP_INLINE_START : ('<?php' | '<?=')->pushMode(INSIDE_PHP_INLINE);
 
 
 HTML_COMPONENT_PREFIX : '<x-' (CompomentIdentifier |  CompomentIdentifier ('::' CompomentIdentifier)+)? {this.compomentTagOpen = true;};
+JS_SCRIPT : ('$'? '(' StringParam | FullIdentifier ')' ('.' NameString)? |  JsFunctionStart ('.' JsFunctionStart)*) ->skip;
 HTML_TAG_START : '<' FullIdentifier;
 HTML_CLOSE_TAG : ('</' FullIdentifier [\n\r ]* '>')+ ->skip;
 HTML_TAG_SELF_CLOSE : '/>' {this.compomentTagOpen = false;}->type(HTML);
 HTML_CLOSE_SYMBOL : '>' {this.compomentTagOpen = false;} ->type(HTML);
-HTML_PATH : (' ')* FullIdentifier ('/' FullIdentifier)+ ->skip;
+STRING_PATH : ('"' HTML_PATH* '"' | [\\'] HTML_PATH [\\'])->skip;
+HTML_PATH : (' ')* FullIdentifier ('/' FullIdentifier)+ ('.' NameString)? ('?' NameString (EQ NameString)*)? ->skip;
 HTML_TEXT : (' ')* FullIdentifier ((' ')+ FullIdentifier)+ ->skip;
+
+
 HTML_IDENTIFIER : FullIdentifier {this.consumeHtmlIdentifier();};
 
 EQ : '=';
