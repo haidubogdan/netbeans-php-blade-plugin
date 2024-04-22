@@ -152,6 +152,14 @@ public class BladeCompletionItem implements CompletionProposal {
             return -50;//priority
         }
     }
+    
+    public static class DirectiveItem extends BladeCompletionItem {
+        
+        public DirectiveItem(ElementHandle element, CompletionRequest request, String previewValue) {
+            super(element, request, previewValue);
+        }
+        
+    }
 
     public static class ClassItem extends PhpElementItem {
 

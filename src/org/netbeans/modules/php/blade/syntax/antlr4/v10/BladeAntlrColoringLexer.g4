@@ -48,7 +48,7 @@ PHP_INLINE : '<?=' .*? '?>' | '<?php' .*? ('?>' | EOF);
 D_GENERIC_BLOCK_DIRECTIVES : ('@' DirectivesWithEndTag | '@sectionMissing' | '@hasSection')->pushMode(LOOK_FOR_PHP_EXPRESSION),type(DIRECTIVE);
 
 D_GENERIC_INLINE_DIRECTIVES : ('@elseif' |  Include | '@extends' | '@each' | '@yield' | '@props' | '@method' 
-   | '@class' | '@style' | '@aware' | '@break' | '@continue' | '@selected' | '@disabled' | '@readonly' | '@required')->pushMode(LOOK_FOR_PHP_EXPRESSION),type(DIRECTIVE);
+   | '@class' | '@style' | '@aware' | '@break' | '@continue' | '@selected' | '@disabled' | '@readonly' | '@required') (' ')+ {this._input.LA(1) == '('}? ->pushMode(LOOK_FOR_PHP_EXPRESSION),type(DIRECTIVE);
 
 D_GENERIC_END_TAGS : ('@stop' | '@show' | '@overwrite' | '@end' DirectivesWithEndTag)->type(DIRECTIVE);
 
@@ -74,6 +74,8 @@ D_ASSET_BUNDLER : '@vite'->pushMode(LOOK_FOR_PHP_EXPRESSION),type(DIRECTIVE);
 //we will decide that a custom directive has expression to avoid email matching
 D_CUSTOM : ('@' NameString {this._input.LA(1) == '(' || 
         (this._input.LA(1) == ' ' && this._input.LA(2) == '(')}? ) ->pushMode(LOOK_FOR_PHP_EXPRESSION);
+
+D_UNKNOWN : '@' NameString;
 
 //display
 CONTENT_TAG_OPEN : '{{' ->pushMode(INSIDE_REGULAR_ECHO),type(CONTENT_TAG);
@@ -135,7 +137,8 @@ mode LOOK_FOR_PHP_EXPRESSION;
 WS_EXPR : [ ]+ {this._input.LA(1) == '('}? ->pushMode(INSIDE_PHP_EXPRESSION);
 OPEN_EXPR_PAREN_MORE : '(' {this.increaseRoundParenBalance();} ->more,pushMode(INSIDE_PHP_EXPRESSION);
 
-L_OTHER : . ->type(HTML), popMode;
+AFTER_DIRECTIVE : NameString->type(ERROR), popMode;
+L_OTHER : . ->type(ERROR), popMode;
 
 // @directive (?)
 mode INSIDE_PHP_EXPRESSION;

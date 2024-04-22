@@ -76,35 +76,6 @@ public class BladeParserResult extends ParserResult {
         TEMPLATE_PATH,
     }
 
-    public enum ParserContext {
-        INCLUDE_COND(BladeAntlrParser.IncludeCondContext.class.getSimpleName()),
-        STACK(BladeAntlrParser.StackContext.class.getSimpleName()),
-        SECTION(BladeAntlrParser.SectionContext.class.getSimpleName()),
-        SECTION_INLINE(BladeAntlrParser.Section_inlineContext.class.getSimpleName()),
-        PUSH(BladeAntlrParser.PushContext.class.getSimpleName()),
-        PUSH_IF(BladeAntlrParser.PushIfContext.class.getSimpleName()),
-        PREPEND(BladeAntlrParser.PrependContext.class.getSimpleName()),
-        EACH(BladeAntlrParser.EachContext.class.getSimpleName()),
-        INJECT(BladeAntlrParser.InjectContext.class.getSimpleName());
-
-        String className;
-
-        ParserContext(String className) {
-            this.className = className;
-        }
-
-        public static ParserContext getValue(String name) {
-
-            for (ParserContext c : ParserContext.values()) {
-                if (c.className.equals(name)) {
-                    return c;
-                }
-            }
-
-            return null;
-        }
-    }
-
     public BladeParserResult(Snapshot snapshot) {
         super(snapshot);
     }
@@ -161,7 +132,7 @@ public class BladeParserResult extends ParserResult {
         return new BladeAntlrParserBaseListener() {
             @Override
             public void exitDoubleArgWrapperP(BladeAntlrParser.DoubleArgWrapperPContext ctx) {
-                Token directive  = ctx.getParent().getStart();
+                Token directive = ctx.getParent().getStart();
                 if (directive == null) {
                     return;
                 }
@@ -174,10 +145,10 @@ public class BladeParserResult extends ParserResult {
 
                 addIdentifiableOccurenceForDeclaration(directive, paramString);
             }
-            
+
             @Override
             public void exitSingleArgWrapperP(BladeAntlrParser.SingleArgWrapperPContext ctx) {
-                Token directive  = ctx.getParent().getStart();
+                Token directive = ctx.getParent().getStart();
                 if (directive == null) {
                     return;
                 }
@@ -249,16 +220,26 @@ public class BladeParserResult extends ParserResult {
             private void addIdentifiableOccurenceForDeclaration(Token directive,
                     Token paramString) {
 
+                OffsetRange range = new OffsetRange(paramString.getStartIndex(), paramString.getStopIndex());
+                String bladeParamText = paramString.getText();
+                bladeParamText = bladeParamText.substring(1, bladeParamText.length() - 1);
+
+                //used for indexing
+                switch (directive.getType()) {
+                    case D_STACK:
+                        addStackReference(ReferenceType.STACK, bladeParamText, range);
+                        break;
+                    case D_YIELD:
+                        addYieldReference(ReferenceType.YIELD, bladeParamText, range);
+                        break;
+                }
+                
                 ReferenceType type = getReferenceType(directive.getType());
 
                 if (type == null) {
                     return;
                 }
 
-                String bladeParamText = paramString.getText();
-                bladeParamText = bladeParamText.substring(1, bladeParamText.length() - 1);
-
-                OffsetRange range;
                 Reference ref;
                 if (type.equals(ReferenceType.USE) || type.equals(ReferenceType.INJECT)) {
                     int lastSlashPos = bladeParamText.lastIndexOf("\\");
@@ -269,19 +250,12 @@ public class BladeParserResult extends ParserResult {
                     //extracting the namespace and classname
                     ref = new Reference(type, bladeParamText.substring(lastSlashPos + 1), range, null, bladeParamText.substring(0, lastSlashPos - 1));
                 } else {
-                    range = new OffsetRange(paramString.getStartIndex(), paramString.getStopIndex());
                     ref = new Reference(type, bladeParamText, range);
                 }
 
                 occurancesForDeclaration.put(range, ref);
 
                 switch (directive.getType()) {
-                    case D_STACK:
-                        addStackReference(ReferenceType.STACK, bladeParamText, range);
-                        break;
-                    case D_YIELD:
-                        addYieldReference(ReferenceType.YIELD, bladeParamText, range);
-                        break;
                     case D_EACH:
                     case D_INCLUDE_WHEN:
                     case D_INCLUDE_UNLESS:
@@ -297,7 +271,6 @@ public class BladeParserResult extends ParserResult {
                 }
             }
 
-           
         };
 
     }
@@ -661,34 +634,24 @@ public class BladeParserResult extends ParserResult {
                 return ReferenceType.INCLUDE_IF;
             case D_EXTENDS:
                 return ReferenceType.EXTENDS;
-            case D_YIELD:
-                return ReferenceType.YIELD;
             case D_USE:
                 return ReferenceType.USE;
-            default:
-                return null;
-        }
-    }
-
-    private ReferenceType getReferenceType(ParserContext classType) {
-        switch (classType) {
-            case EACH:
-                return ReferenceType.EACH;
-            case INCLUDE_COND:
-                return ReferenceType.INCLUDE_COND;
-            case STACK:
-                return ReferenceType.STACK;
-            case SECTION:
-            case SECTION_INLINE:
-                return ReferenceType.SECTION;
-            case PUSH:
-                return ReferenceType.PUSH;
-            case PUSH_IF:
-                return ReferenceType.PUSH_IF;
-            case PREPEND:
-                return ReferenceType.PREPEND;
-            case INJECT:
+            case D_INJECT:
                 return ReferenceType.INJECT;
+            case D_SECTION:
+                return ReferenceType.SECTION;
+            case D_HAS_SECTION:
+                return ReferenceType.HAS_SECTION;
+            case D_SECTION_MISSING:
+                return ReferenceType.SECTION_MISSING;
+            case D_PUSH:
+                return ReferenceType.PUSH;
+            case D_PUSH_IF:
+                return ReferenceType.PUSH_IF;
+            case D_PREPEND:
+                return ReferenceType.PREPEND;
+            case D_EACH:
+                return ReferenceType.EACH;
             default:
                 return null;
         }

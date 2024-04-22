@@ -166,6 +166,10 @@ public class BladeCompletionProvider implements CompletionProvider {
                         return;
                 }
 
+                if (currentToken.getText().startsWith("@")) {
+                    completeDirectives(currentToken.getText(), doc, caretOffset, resultSet);
+                }
+
                 switch (currentToken.getType()) {
                     case CONTENT_TAG_OPEN:
                     case RAW_TAG_OPEN:
@@ -177,9 +181,7 @@ public class BladeCompletionProvider implements CompletionProvider {
                     case HTML:
                     case D_UNKNOWN:
                         String nText = currentToken.getText();
-                        if (nText.startsWith("@")) {
-                            completeDirectives(nText, doc, caretOffset, resultSet);
-                        } else if (nText.startsWith("{")) {
+                         if (nText.startsWith("{")) {
                             completeBladeTags(nText, currentToken, tokens, doc, caretOffset, resultSet);
                         } else if ("livewire".startsWith(nText)) {
                             //quick implementation

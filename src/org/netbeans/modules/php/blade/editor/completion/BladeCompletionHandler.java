@@ -13,6 +13,7 @@ import org.netbeans.editor.BaseDocument;
 import javax.swing.text.Document;
 import javax.swing.text.JTextComponent;
 import org.antlr.v4.runtime.Token;
+import org.netbeans.api.editor.document.EditorDocumentUtils;
 import org.netbeans.api.project.Project;
 import org.netbeans.modules.csl.api.CodeCompletionContext;
 import org.netbeans.modules.csl.api.CodeCompletionHandler2;
@@ -28,12 +29,15 @@ import org.netbeans.modules.php.blade.csl.elements.ElementType;
 import org.netbeans.modules.php.blade.csl.elements.NamedElement;
 import org.netbeans.modules.php.blade.csl.elements.PhpFunctionElement;
 import org.netbeans.modules.php.blade.editor.completion.BladeCompletionItem.CompletionRequest;
+import org.netbeans.modules.php.blade.editor.directives.CustomDirectives;
 import org.netbeans.modules.php.blade.editor.indexing.PhpIndexFunctionResult;
 import org.netbeans.modules.php.blade.editor.indexing.PhpIndexResult;
 import org.netbeans.modules.php.blade.editor.indexing.PhpIndexUtils;
 import org.netbeans.modules.php.blade.editor.parser.BladeParserResult;
 import org.netbeans.modules.php.blade.editor.parser.BladeParserResult.FieldAccessReference;
 import org.netbeans.modules.php.blade.editor.parser.BladeParserResult.Reference;
+import org.netbeans.modules.php.blade.project.ProjectUtils;
+import org.netbeans.modules.php.blade.syntax.annotation.Directive;
 import org.netbeans.modules.php.blade.syntax.antlr4.v10.BladeAntlrUtils;
 import static org.netbeans.modules.php.blade.syntax.antlr4.v10.BladeAntlrLexer.*;
 import org.netbeans.spi.project.ui.support.ProjectConvertors;
@@ -44,7 +48,9 @@ import org.openide.filesystems.FileObject;
  * @author bogdan
  */
 public class BladeCompletionHandler implements CodeCompletionHandler2 {
+
     private static final Logger LOGGER = Logger.getLogger(BladeCompletionHandler.class.getName());
+
     static enum ContextType {
         GENERIC_IDENTIFIER, PHP_FUNCTION, NONE
     }
@@ -55,51 +61,106 @@ public class BladeCompletionHandler implements CodeCompletionHandler2 {
 //        LOGGER.log(Level.INFO, "Completion requested for {0}", completionContext.getParserResult().getSnapshot().getSource().getFileObject());
         BaseDocument doc = (BaseDocument) completionContext.getParserResult().getSnapshot().getSource().getDocument(false);
         if (doc == null) {
-             LOGGER.info(String.format("complete() took %d ms",  System.currentTimeMillis() - startTime));
+            LOGGER.info(String.format("complete() took %d ms", System.currentTimeMillis() - startTime));
             return CodeCompletionResult.NONE;
         }
 
         if (CancelSupport.getDefault().isCancelled()) {
-             LOGGER.info(String.format("complete() took %d ms",  System.currentTimeMillis() - startTime));
+            LOGGER.info(String.format("complete() took %d ms", System.currentTimeMillis() - startTime));
             return CodeCompletionResult.NONE;
         }
 
         if (completionContext.getCaretOffset() < 1) {
-            LOGGER.info(String.format("complete() took %d ms",  System.currentTimeMillis() - startTime));
+            LOGGER.info(String.format("complete() took %d ms", System.currentTimeMillis() - startTime));
             return CodeCompletionResult.NONE;
         }
-        
+
         BladeParserResult parserResult = (BladeParserResult) completionContext.getParserResult();
 
         final List<CompletionProposal> completionProposals = new ArrayList<>();
 
         Token currentToken = BladeAntlrUtils.getToken(doc, completionContext.getCaretOffset() - 1);
-        
+
         if (currentToken == null) {
-            LOGGER.info(String.format("complete() took %d ms",  System.currentTimeMillis() - startTime));
+            LOGGER.info(String.format("complete() took %d ms", System.currentTimeMillis() - startTime));
             return CodeCompletionResult.NONE;
         }
 
-        switch (currentToken.getType()) {
-            case PHP_IDENTIFIER:
-            case PHP_NAMESPACE_PATH:
-                completePhpElements(completionProposals, parserResult, completionContext.getCaretOffset(), currentToken);
-                break;
-            case PHP_EXPRESSION:
-                completePhpSnippet(completionProposals, completionContext.getCaretOffset(), currentToken);
-                break;
-            case PHP_VARIABLE:
-                completeScopedVariables(completionProposals, completionContext, parserResult, currentToken);
-                break;
+        String tokenText = currentToken.getText();
+
+        if (tokenText.startsWith("@")) {
+            //completeDirectives(completionProposals, parserResult, completionContext.getCaretOffset(), currentToken);
+        } else {
+            switch (currentToken.getType()) {
+                case PHP_IDENTIFIER:
+                case PHP_NAMESPACE_PATH:
+                    completePhpElements(completionProposals, parserResult, completionContext.getCaretOffset(), currentToken);
+                    break;
+                case PHP_EXPRESSION:
+                    completePhpSnippet(completionProposals, completionContext.getCaretOffset(), currentToken);
+                    break;
+                case PHP_VARIABLE:
+                    completeScopedVariables(completionProposals, completionContext, parserResult, currentToken);
+                    break;
+            }
         }
 
-        if (completionProposals.isEmpty()){
-            LOGGER.info(String.format("complete() took %d ms",  System.currentTimeMillis() - startTime));
+        if (completionProposals.isEmpty()) {
+            LOGGER.info(String.format("complete() took %d ms", System.currentTimeMillis() - startTime));
             return CodeCompletionResult.NONE;
         }
         //TODO add context
-        LOGGER.info(String.format("complete() took %d ms",  System.currentTimeMillis() - startTime));
+        LOGGER.info(String.format("complete() took %d ms", System.currentTimeMillis() - startTime));
         return new DefaultCompletionResult(completionProposals, false);
+    }
+
+    private void completeDirectives(final List<CompletionProposal> completionProposals,
+            BladeParserResult parserResult,
+            int offset, Token currentToken) {
+        FileObject currentFile = parserResult.getFileObject();
+        String prefix = currentToken.getText();
+        int startOffset = offset - prefix.length();
+        DirectiveCompletionList completionList = new DirectiveCompletionList();
+        CompletionRequest request = new CompletionRequest();
+        request.anchorOffset = offset - prefix.length();
+        request.carretOffset = offset;
+        request.prefix = prefix;
+        for (Directive directive : completionList.getDirectives()) {
+            String directiveName = directive.name();
+            if (directiveName.startsWith(prefix)) {
+                NamedElement directiveEl = new NamedElement(directiveName, currentFile, ElementType.DIRECTIVE);
+                completionProposals.add(new BladeCompletionItem.DirectiveItem(directiveEl, request, directiveName));
+                if (directive.params()) {
+//                    resultSet.addItem(DirectiveCompletionBuilder.itemWithArg(
+//                            startOffset, carretOffset, prefix, directiveName, directive.description(), doc));
+//                    if (!directive.endtag().isEmpty()) {
+//                        resultSet.addItem(DirectiveCompletionBuilder.itemWithArg(
+//                                startOffset, carretOffset, prefix, directiveName, directive.endtag(), directive.description(), doc));
+//                    }
+                } else {
+//                    resultSet.addItem(DirectiveCompletionBuilder.simpleItem(
+//                            startOffset, directiveName, directive.description()));
+//                    if (!directive.endtag().isEmpty()) {
+//                        resultSet.addItem(DirectiveCompletionBuilder.simpleItem(
+//                                startOffset, carretOffset, prefix, directiveName, directive.endtag(), directive.description(), doc));
+//                    }
+                }
+
+            }
+        }
+
+        Project project = ProjectUtils.getMainOwner(currentFile);
+
+        CustomDirectives.getInstance(project).filterAction(new CustomDirectives.FilterCallback() {
+            @Override
+            public void filterDirectiveName(CustomDirectives.CustomDirective directive, FileObject file) {
+                if (directive.name.startsWith(prefix)) {
+//                    resultSet.addItem(DirectiveCompletionBuilder.itemWithArg(
+//                            startOffset, carretOffset, prefix, directive.name,
+//                            "custom directive", doc, file));
+                }
+            }
+        });
     }
 
     //we need a context

@@ -49,18 +49,18 @@ D_ESCAPES
     |  '@@' '@'?
     | '@{' '{'?
     | '@media' [ ]* '('?
-    | '@charset'
-    | '@import'
-    | '@namespace'
-    | '@document'
-    | '@font-face'
-    | '@page'
-    | '@supports'
-    | '@layer'
-    | '@tailwind'
-    | '@apply' 
-    | '@-webkit-keyframes' 
-    | '@keyframes'
+    | '@charset' [ ]*
+    | '@import' [ ]*
+    | '@namespace' [ ]*
+    | '@document' [ ]*
+    | '@font-face' [ ]*
+    | '@page' [ ]*
+    | '@supports' [ ]*
+    | '@layer' [ ]*
+    | '@tailwind' [ ]*
+    | '@apply'  [ ]*
+    | '@-webkit-keyframes' [ ]*
+    | '@keyframes' [ ]*
     )->type(HTML);
 
 mode INSIDE_BLADE_COMMENT;

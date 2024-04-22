@@ -11,6 +11,7 @@ public enum ElementType {
     NA,
     CUSTOM_DIRECTIVE,
     PATH,
+    DIRECTIVE,
     VARIABLE,
     PHP_CLASS,
     PHP_NAMESPACE,

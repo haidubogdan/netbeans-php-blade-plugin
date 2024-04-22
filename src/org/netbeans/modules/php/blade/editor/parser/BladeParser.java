@@ -4,6 +4,7 @@ import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
 import java.util.Collections;
 import java.util.WeakHashMap;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.event.ChangeListener;
 import org.netbeans.modules.parsing.api.ParserManager;
@@ -28,7 +29,11 @@ public class BladeParser extends org.netbeans.modules.parsing.spi.Parser {
 
     @Override
     public void parse(Snapshot snapshot, Task task, SourceModificationEvent event) throws ParseException {
-        //HtmlCssIndexContributor
+
+        if (task.getClass().getName().contains("HtmlCssIndexContributor")){
+            LOGGER.log(Level.INFO, "Skipped parsing for {0}", task.getClass().getName());
+            return;
+        }
         long startTime = System.currentTimeMillis();
         BladeParserResult parserResult = createParserResult(snapshot);
 
