@@ -36,7 +36,7 @@ fragment PhpKeyword
 fragment Digit
     : ('0'..'9');
 
-BLADE_COMMENT_START : '{{--' ->pushMode(INSIDE_BLADE_COMMENT), skip;
+BLADE_COMMENT_START : '{{--' ->pushMode(INSIDE_BLADE_COMMENT);
 
 EMAIL_SUBSTRING : ('@' FullIdentifier '.')->type(HTML);
 
@@ -65,7 +65,7 @@ D_ESCAPES
 
 mode INSIDE_BLADE_COMMENT;
 
-BLADE_COMMENT_END : '--}}'->popMode, skip;
+BLADE_COMMENT_END : '--}}'->popMode;
 
 //hack to merge all php inputs into one token
 BLADE_COMMENT_PEEK : . {
@@ -73,7 +73,7 @@ BLADE_COMMENT_PEEK : . {
         this._input.LA(2) == '-' &&
         this._input.LA(3) == '}' &&
         this._input.LA(4) == '}'
-      }? ->skip;
-BLADE_COMMENT_MORE : . ->skip;
+      }? ->type(BLADE_COMMENT);
+BLADE_COMMENT_MORE : . ->more;
 
-BLADE_COMMENT_EOF : EOF->popMode, skip;
+BLADE_COMMENT_EOF : EOF->type(BLADE_COMMENT),popMode;

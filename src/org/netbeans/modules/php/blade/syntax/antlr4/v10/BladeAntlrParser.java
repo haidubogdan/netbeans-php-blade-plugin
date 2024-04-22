@@ -61,9 +61,10 @@ public class BladeAntlrParser extends Parser {
 		BL_NAME_STRING=147, PHP_D_BLADE_COMMENT=148, PHP_D_BLADE_ML_COMMENT=149, 
 		D_ENDPHP=150, PHP_D_WS=151, PHP_D_PHP_COMPOSED_EXPRESSION=152, PHP_EXIT=153, 
 		PHP_INLINE_COMMENT=154, PHP_INLINE_ML_COMMENT=155, VERBATIM_HTML=156, 
-		BLADE_COMMENT_END=157, AT=158, RAW_TAG_START=159, REGULAR_ECHO_STATIC_ACCESS=160, 
-		REGULAR_ECHO_LPAREN=161, REGULAR_ECHO_RPAREN=162, REGULAR_ECHO_INSTANCE_ACCESS=163, 
-		PHP_D_EXPR_CURLY_LPAREN=164, PHP_D_EXPR_CURLY_RPAREN=165, PHP_D_CLASS=166;
+		BLADE_COMMENT_END=157, BLADE_COMMENT_PEEK=158, BLADE_COMMENT_MORE=159, 
+		BLADE_COMMENT_EOF=160, AT=161, RAW_TAG_START=162, REGULAR_ECHO_STATIC_ACCESS=163, 
+		REGULAR_ECHO_LPAREN=164, REGULAR_ECHO_RPAREN=165, REGULAR_ECHO_INSTANCE_ACCESS=166, 
+		PHP_D_EXPR_CURLY_LPAREN=167, PHP_D_EXPR_CURLY_RPAREN=168, PHP_D_CLASS=169;
 	public static final int
 		RULE_file = 0, RULE_general_statement = 1, RULE_inline_statement = 2, 
 		RULE_inline_directive = 3, RULE_block_statement = 4, RULE_identifiableType = 5, 
@@ -130,8 +131,8 @@ public class BladeAntlrParser extends Parser {
 			null, null, "'='", null, null, "'{{--'", null, null, null, null, null, 
 			null, null, null, null, null, null, null, null, null, "'as'", null, null, 
 			null, null, "'.'", "','", null, null, null, null, "'@endphp'", "' '", 
-			null, "'?>'", null, null, null, "'--}}'", null, "'{!'", null, null, null, 
-			null, null, null, "'class'"
+			null, "'?>'", null, null, null, "'--}}'", null, null, null, null, "'{!'", 
+			null, null, null, null, null, null, "'class'"
 		};
 	}
 	private static final String[] _LITERAL_NAMES = makeLiteralNames();
@@ -168,7 +169,8 @@ public class BladeAntlrParser extends Parser {
 			"BL_PARAM_CONCAT_OPERATOR", "BL_COMMA_EL", "BL_PARAM_WS", "BL_NAME_STRING", 
 			"PHP_D_BLADE_COMMENT", "PHP_D_BLADE_ML_COMMENT", "D_ENDPHP", "PHP_D_WS", 
 			"PHP_D_PHP_COMPOSED_EXPRESSION", "PHP_EXIT", "PHP_INLINE_COMMENT", "PHP_INLINE_ML_COMMENT", 
-			"VERBATIM_HTML", "BLADE_COMMENT_END", "AT", "RAW_TAG_START", "REGULAR_ECHO_STATIC_ACCESS", 
+			"VERBATIM_HTML", "BLADE_COMMENT_END", "BLADE_COMMENT_PEEK", "BLADE_COMMENT_MORE", 
+			"BLADE_COMMENT_EOF", "AT", "RAW_TAG_START", "REGULAR_ECHO_STATIC_ACCESS", 
 			"REGULAR_ECHO_LPAREN", "REGULAR_ECHO_RPAREN", "REGULAR_ECHO_INSTANCE_ACCESS", 
 			"PHP_D_EXPR_CURLY_LPAREN", "PHP_D_EXPR_CURLY_RPAREN", "PHP_D_CLASS"
 		};
@@ -5573,7 +5575,7 @@ public class BladeAntlrParser extends Parser {
 	}
 
 	public static final String _serializedATN =
-		"\u0004\u0001\u00a6\u030c\u0002\u0000\u0007\u0000\u0002\u0001\u0007\u0001"+
+		"\u0004\u0001\u00a9\u030c\u0002\u0000\u0007\u0000\u0002\u0001\u0007\u0001"+
 		"\u0002\u0002\u0007\u0002\u0002\u0003\u0007\u0003\u0002\u0004\u0007\u0004"+
 		"\u0002\u0005\u0007\u0005\u0002\u0006\u0007\u0006\u0002\u0007\u0007\u0007"+
 		"\u0002\b\u0007\b\u0002\t\u0007\t\u0002\n\u0007\n\u0002\u000b\u0007\u000b"+

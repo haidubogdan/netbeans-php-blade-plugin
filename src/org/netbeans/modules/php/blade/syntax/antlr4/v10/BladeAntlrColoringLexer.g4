@@ -1,5 +1,5 @@
 lexer grammar BladeAntlrColoringLexer;
-import BladeCommonLexer;
+import BladeColoringCommonLexer;
 
 @header{
   package org.netbeans.modules.php.blade.syntax.antlr4.v10;
