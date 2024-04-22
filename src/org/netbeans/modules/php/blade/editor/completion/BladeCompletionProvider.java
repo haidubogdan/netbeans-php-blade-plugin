@@ -187,7 +187,7 @@ public class BladeCompletionProvider implements CompletionProvider {
                         }
                         break;
                     case HTML_COMPONENT_PREFIX:
-                        String compPrefix = currentToken.getText().length() > 3 ? StringUtils.capitalize(currentToken.getText().substring(3)) : "";
+                        String compPrefix = currentToken.getText().length() > 3 ? StringUtils.kebabToCamel(currentToken.getText().substring(3)) : "";
                         completeComponents(compPrefix, fo, caretOffset, resultSet);
                         break;
                     case BL_PARAM_STRING: {

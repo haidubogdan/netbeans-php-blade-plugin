@@ -14,7 +14,7 @@ import org.netbeans.spi.editor.highlighting.ZOrder;
  * 
  * @author bhaidu
  */
-@MimeRegistration(service=HighlightsLayerFactory.class, mimeType=BladeLanguage.MIME_TYPE)
+@MimeRegistration(service=HighlightsLayerFactory.class, mimeType=BladeLanguage.MIME_TYPE, position=200)
 public class BladeHighlightsLayerFactory implements HighlightsLayerFactory {
 
     public @Override HighlightsLayer[] createLayers(final Context context) {

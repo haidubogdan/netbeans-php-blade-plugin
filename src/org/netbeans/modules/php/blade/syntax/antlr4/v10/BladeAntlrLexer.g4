@@ -38,7 +38,7 @@ tokens {
 channels { COMMENT, PHP_CODE }
 
 fragment CompomentIdentifier
-    : [a-z\u0080-\ufffe][a-z0-9_.:\u0080-\ufffe]*;
+    : [a-z\u0080-\ufffe][a-z0-9-_.:\u0080-\ufffe]*;
 
 fragment CssSelector
     : ('#' | '.')? [a-z\u0080-\ufffe][a-z0-9-_:\u0080-\ufffe]* | CssAttrSelector;
@@ -173,6 +173,7 @@ D_ENDVERBATIM : '@endverbatim';
 
 //known plugins
 D_LIVEWIRE : '@livewireStyles' | '@bukStyles' | '@livewireScripts' | '@bukScripts' | '@livewire';
+D_ASSET_BUNDLER : '@vite'->pushMode(LOOK_FOR_PHP_EXPRESSION);
 
 //we will decide that a custom directive has expression to avoid email matching
 D_CUSTOM : ('@' NameString {this._input.LA(1) == '(' || 
@@ -191,6 +192,7 @@ PHP_INLINE_START : ('<?php' | '<?=')->pushMode(INSIDE_PHP_INLINE);
 
 
 HTML_COMPONENT_PREFIX : '<x-' (CompomentIdentifier |  CompomentIdentifier ('::' CompomentIdentifier)+)? {this.compomentTagOpen = true;};
+HTML_L_COMPONENT : '<x-' CompomentIdentifier {this._input.LA(1) == '>'}? ->type(HTML_COMPONENT_PREFIX);
 JS_SCRIPT : ('$'? '(' StringParam | FullIdentifier ')' ('.' NameString)? |  JsFunctionStart ('.' JsFunctionStart)*) ->skip;
 HTML_TAG_START : '<' FullIdentifier;
 HTML_CLOSE_TAG : ('</' FullIdentifier [\n\r ]* '>')+ ->skip;

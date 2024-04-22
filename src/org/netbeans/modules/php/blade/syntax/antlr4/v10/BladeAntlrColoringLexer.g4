@@ -69,6 +69,7 @@ D_END : ('@end' NameString)->pushMode(LOOK_FOR_PHP_EXPRESSION),type(DIRECTIVE);
 
 //known plugins
 D_LIVEWIRE : ('@livewireStyles' | '@bukStyles' | '@livewireScripts' | '@bukScripts' | '@click' ('.away')? '=')->type(DIRECTIVE);
+D_ASSET_BUNDLER : '@vite'->pushMode(LOOK_FOR_PHP_EXPRESSION),type(DIRECTIVE);
 
 //we will decide that a custom directive has expression to avoid email matching
 D_CUSTOM : ('@' NameString {this._input.LA(1) == '(' || 

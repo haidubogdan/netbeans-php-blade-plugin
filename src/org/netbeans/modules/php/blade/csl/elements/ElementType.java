@@ -16,6 +16,7 @@ public enum ElementType {
     PHP_NAMESPACE,
     PHP_FUNCTION,
     PHP_CONSTANT,
+    LARAVEL_COMPONENT,
     STACK_ID,
     YIELD_ID
 }

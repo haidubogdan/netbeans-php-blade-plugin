@@ -28,6 +28,7 @@ public class BladeParser extends org.netbeans.modules.parsing.spi.Parser {
 
     @Override
     public void parse(Snapshot snapshot, Task task, SourceModificationEvent event) throws ParseException {
+        //HtmlCssIndexContributor
         long startTime = System.currentTimeMillis();
         BladeParserResult parserResult = createParserResult(snapshot);
 

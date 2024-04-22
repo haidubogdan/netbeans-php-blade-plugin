@@ -37,6 +37,7 @@ import org.netbeans.modules.php.blade.editor.navigator.BladeStructureItem;
 import org.netbeans.modules.php.blade.editor.navigator.BladeStructureItem.DirectiveBlockStructureItem;
 import org.netbeans.modules.php.blade.editor.navigator.BladeStructureItem.DirectiveInlineStructureItem;
 import org.netbeans.modules.php.blade.syntax.antlr4.v10.BladeAntlrLexer;
+import static org.netbeans.modules.php.blade.syntax.antlr4.v10.BladeAntlrLexer.*;
 import org.netbeans.modules.php.blade.syntax.antlr4.v10.BladeAntlrParser;
 import org.netbeans.modules.php.blade.syntax.antlr4.v10.BladeAntlrParserBaseListener;
 import org.netbeans.modules.php.editor.parser.PHPParseResult;
@@ -76,21 +77,14 @@ public class BladeParserResult extends ParserResult {
     }
 
     public enum ParserContext {
-        EXTENDS(BladeAntlrParser.ExtendsContext.class.getSimpleName()),
-        INCLUDE(BladeAntlrParser.IncludeContext.class.getSimpleName()),
-        INCLUDE_IF(BladeAntlrParser.IncludeIfContext.class.getSimpleName()),
         INCLUDE_COND(BladeAntlrParser.IncludeCondContext.class.getSimpleName()),
-        YIELD(BladeAntlrParser.YieldDContext.class.getSimpleName()),
         STACK(BladeAntlrParser.StackContext.class.getSimpleName()),
         SECTION(BladeAntlrParser.SectionContext.class.getSimpleName()),
         SECTION_INLINE(BladeAntlrParser.Section_inlineContext.class.getSimpleName()),
         PUSH(BladeAntlrParser.PushContext.class.getSimpleName()),
         PUSH_IF(BladeAntlrParser.PushIfContext.class.getSimpleName()),
         PREPEND(BladeAntlrParser.PrependContext.class.getSimpleName()),
-        HAS_SECTION(BladeAntlrParser.HasSectionContext.class.getSimpleName()),
-        SECTION_MISSING(BladeAntlrParser.SectionMissingContext.class.getSimpleName()),
         EACH(BladeAntlrParser.EachContext.class.getSimpleName()),
-        USE(BladeAntlrParser.UseDContext.class.getSimpleName()),
         INJECT(BladeAntlrParser.InjectContext.class.getSimpleName());
 
         String className;
@@ -116,7 +110,6 @@ public class BladeParserResult extends ParserResult {
     }
 
     protected BladeAntlrParser createParser(Snapshot snapshot) {
-        LOGGER.log(Level.INFO, "Preparing to parse for {0} ", snapshot.getSource().getFileObject().getName());
         CharStream cs = CharStreams.fromString(String.valueOf(snapshot.getText()));
         BladeAntlrLexer lexer = new BladeAntlrLexer(cs);
         CommonTokenStream tokens = new CommonTokenStream(lexer);
@@ -143,9 +136,6 @@ public class BladeParserResult extends ParserResult {
             if (taskClass.toLowerCase().contains("completion")) {
                 parser.addParseListener(createVariableListener());
             }
-
-            //not implemented yet
-            //parser.addParseListener(createLayoutTreeListener());
             if (taskClass.toLowerCase().contains("fold") || taskClass.contains("navigator") || taskClass.contains("semantic")) {
                 parser.addParseListener(createStructureListener());
             }
@@ -153,21 +143,12 @@ public class BladeParserResult extends ParserResult {
                 parser.addParseListener(createSemanticsListener());
             }
             evaluateParser(parser);
-            LOGGER.info(String.format("Parser evaluated in %d ms " + taskClass, System.currentTimeMillis() - startTime));
-//            BladePhpCompiler phpCompiler = new BladePhpCompiler();
-////            PHPParseResult phpParserResult = phpCompiler.extractPhpContent(
-////                    this.getSnapshot()).getPhpParserResult();
-////
-////            if (phpParserResult != null) {
-////                //double errors for php inline
-////                this.errors.addAll(phpParserResult.getDiagnostics());
-////            }
+            LOGGER.info(String.format("Parser evaluated in %d ms " + taskClass + " | " + this.getFileObject().getNameExt(), System.currentTimeMillis() - startTime));
 
             finished = true;
-//            LOGGER.log(Level.INFO, "finished parser result for {0}", getFileObject().getName());
         }
         long time = System.currentTimeMillis() - startTime;
-        LOGGER.info(String.format("finished took %d ms", time));
+        LOGGER.info(String.format("finished parser took %d ms " + this.getFileObject().getNameExt(), time));
         return this;
     }
 
@@ -178,11 +159,84 @@ public class BladeParserResult extends ParserResult {
     protected ParseTreeListener createDeclarationReferencesListener() {
 
         return new BladeAntlrParserBaseListener() {
+            @Override
+            public void exitDoubleArgWrapperP(BladeAntlrParser.DoubleArgWrapperPContext ctx) {
+                Token directive  = ctx.getParent().getStart();
+                if (directive == null) {
+                    return;
+                }
+
+                Token paramString = ctx.idString;
+
+                if (paramString == null || paramString.getText().length() < 3) {
+                    return;
+                }
+
+                addIdentifiableOccurenceForDeclaration(directive, paramString);
+            }
+            
+            @Override
+            public void exitSingleArgWrapperP(BladeAntlrParser.SingleArgWrapperPContext ctx) {
+                Token directive  = ctx.getParent().getStart();
+                if (directive == null) {
+                    return;
+                }
+
+                Token paramString = ctx.idString;
+
+                if (paramString == null || paramString.getText().length() < 3) {
+                    return;
+                }
+
+                addIdentifiableOccurenceForDeclaration(directive, paramString);
+            }
 
             @Override
-            public void exitIdentifiableArgument(BladeAntlrParser.IdentifiableArgumentContext ctx) {
-                // ctx.each_path.BL_PARAM_STRING();
-                addIdentifiableOccurenceForDeclaration(ctx);
+            public void exitIncludeCond(BladeAntlrParser.IncludeCondContext ctx) {
+                Token directive = ctx.d_name;
+                if (directive == null) {
+                    return;
+                }
+
+                Token paramString = ctx.idString;
+
+                if (paramString == null || paramString.getText().length() < 3) {
+                    return;
+                }
+
+                addIdentifiableOccurenceForDeclaration(directive, paramString);
+            }
+
+            @Override
+            public void exitEach(BladeAntlrParser.EachContext ctx) {
+                Token directive = ctx.getStart();
+                if (directive == null) {
+                    return;
+                }
+
+                Token paramString = ctx.idString;
+
+                if (paramString == null || paramString.getText().length() < 3) {
+                    return;
+                }
+
+                addIdentifiableOccurenceForDeclaration(directive, paramString);
+            }
+
+            @Override
+            public void exitIdentifiableType(BladeAntlrParser.IdentifiableTypeContext ctx) {
+                Token directive = ctx.d_name;
+                if (directive == null) {
+                    return;
+                }
+
+                Token paramString = ctx.idString;
+
+                if (paramString == null || paramString.getText().length() < 3) {
+                    return;
+                }
+
+                addIdentifiableOccurenceForDeclaration(directive, paramString);
             }
 
             @Override
@@ -192,37 +246,18 @@ public class BladeParserResult extends ParserResult {
                 occurancesForDeclaration.put(range, new Reference(ReferenceType.CUSTOM_DIRECTIVE, directiveName, range));
             }
 
-            /**
-             * - adds occurences for declaration - stores specific type
-             * references
-             */
-            private void addIdentifiableOccurenceForDeclaration(BladeAntlrParser.IdentifiableArgumentContext ctx) {
-                if (ctx.BL_PARAM_STRING() == null) {
-                    return;
-                }
+            private void addIdentifiableOccurenceForDeclaration(Token directive,
+                    Token paramString) {
 
-                String className = ctx.getParent().getClass().getSimpleName();
-
-                if (className.endsWith("WrapperContext")) {
-                    className = ctx.getParent().getParent().getClass().getSimpleName();
-                }
-
-                ParserContext classType = ParserContext.getValue(className);
-
-                if (classType == null) {
-                    return;
-                }
-
-                ReferenceType type = getReferenceType(classType);
+                ReferenceType type = getReferenceType(directive.getType());
 
                 if (type == null) {
-                    //not handled
                     return;
                 }
 
-                Token paramString = ctx.BL_PARAM_STRING().getSymbol();
                 String bladeParamText = paramString.getText();
                 bladeParamText = bladeParamText.substring(1, bladeParamText.length() - 1);
+
                 OffsetRange range;
                 Reference ref;
                 if (type.equals(ReferenceType.USE) || type.equals(ReferenceType.INJECT)) {
@@ -238,21 +273,21 @@ public class BladeParserResult extends ParserResult {
                     ref = new Reference(type, bladeParamText, range);
                 }
 
-                //to add include path ??
                 occurancesForDeclaration.put(range, ref);
 
-                //adding references to be indexed
-                switch (type) {
-                    case YIELD:
-                        addYieldReference(ReferenceType.YIELD, bladeParamText, range);
-                        break;
-                    case STACK:
+                switch (directive.getType()) {
+                    case D_STACK:
                         addStackReference(ReferenceType.STACK, bladeParamText, range);
                         break;
-                    case INCLUDE:
-                    case INCLUDE_IF:
-                    case INCLUDE_COND:
-                    case EACH:
+                    case D_YIELD:
+                        addYieldReference(ReferenceType.YIELD, bladeParamText, range);
+                        break;
+                    case D_EACH:
+                    case D_INCLUDE_WHEN:
+                    case D_INCLUDE_UNLESS:
+                    case D_INCLUDE:
+                    case D_INCLUDE_IF:
+                    case D_INCLUDE_FIRST:
                         if (bladeParamText.contains("::")) {
                             //don't include package resources
                             break;
@@ -261,6 +296,8 @@ public class BladeParserResult extends ParserResult {
                         break;
                 }
             }
+
+           
         };
 
     }
@@ -616,20 +653,29 @@ public class BladeParserResult extends ParserResult {
         };
     }
 
+    private ReferenceType getReferenceType(int type) {
+        switch (type) {
+            case D_INCLUDE:
+                return ReferenceType.INCLUDE;
+            case D_INCLUDE_IF:
+                return ReferenceType.INCLUDE_IF;
+            case D_EXTENDS:
+                return ReferenceType.EXTENDS;
+            case D_YIELD:
+                return ReferenceType.YIELD;
+            case D_USE:
+                return ReferenceType.USE;
+            default:
+                return null;
+        }
+    }
+
     private ReferenceType getReferenceType(ParserContext classType) {
         switch (classType) {
             case EACH:
                 return ReferenceType.EACH;
-            case EXTENDS:
-                return ReferenceType.EXTENDS;
-            case INCLUDE:
-                return ReferenceType.INCLUDE;
-            case INCLUDE_IF:
-                return ReferenceType.INCLUDE_IF;
             case INCLUDE_COND:
                 return ReferenceType.INCLUDE_COND;
-            case YIELD:
-                return ReferenceType.YIELD;
             case STACK:
                 return ReferenceType.STACK;
             case SECTION:
@@ -641,12 +687,6 @@ public class BladeParserResult extends ParserResult {
                 return ReferenceType.PUSH_IF;
             case PREPEND:
                 return ReferenceType.PREPEND;
-            case HAS_SECTION:
-                return ReferenceType.HAS_SECTION;
-            case SECTION_MISSING:
-                return ReferenceType.SECTION_MISSING;
-            case USE:
-                return ReferenceType.USE;
             case INJECT:
                 return ReferenceType.INJECT;
             default:
@@ -812,21 +852,6 @@ public class BladeParserResult extends ParserResult {
 
             }
 
-            @Override
-            public void enterInclude(BladeAntlrParser.IncludeContext ctx) {
-                includeContext = true;
-            }
-
-            @Override
-            public void exitParamAssign(BladeAntlrParser.ParamAssignContext ctx) {
-                String variableName = ctx.BL_PARAM_STRING(0).getSymbol().getText();
-                int y = 1;
-            }
-
-            @Override
-            public void exitInclude(BladeAntlrParser.IncludeContext ctx) {
-                includeContext = false;
-            }
         };
     }
 

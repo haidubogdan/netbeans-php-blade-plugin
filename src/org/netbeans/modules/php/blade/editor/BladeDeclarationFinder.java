@@ -18,6 +18,7 @@ import org.netbeans.modules.php.blade.csl.elements.ElementType;
 import org.netbeans.modules.php.blade.csl.elements.NamedElement;
 import org.netbeans.modules.php.blade.csl.elements.PathElement;
 import org.netbeans.modules.php.blade.csl.elements.PhpFunctionElement;
+import org.netbeans.modules.php.blade.editor.declaration.ComponentDeclarationService;
 import org.netbeans.modules.php.blade.editor.directives.CustomDirectives;
 import org.netbeans.modules.php.blade.editor.directives.CustomDirectives.CustomDirective;
 import org.netbeans.modules.php.blade.editor.indexing.BladeIndex;
@@ -29,6 +30,7 @@ import org.netbeans.modules.php.blade.editor.parser.BladeParserResult;
 import org.netbeans.modules.php.blade.editor.parser.BladeParserResult.FieldAccessReference;
 import org.netbeans.modules.php.blade.editor.parser.BladeParserResult.Reference;
 import org.netbeans.modules.php.blade.editor.path.PathUtils;
+import org.netbeans.modules.php.blade.syntax.StringUtils;
 import org.netbeans.modules.php.blade.syntax.antlr4.v10.BladeAntlrLexer;
 import org.netbeans.spi.lexer.antlr4.AntlrTokenSequence;
 import org.openide.filesystems.FileObject;
@@ -45,6 +47,9 @@ import org.openide.filesystems.FileUtil;
  */
 public class BladeDeclarationFinder implements DeclarationFinder {
 
+    private int currentTokenId;
+    private String tokenText;
+
     @Override
     public OffsetRange getReferenceSpan(Document document, int caretOffset) {
         BaseDocument baseDoc = (BaseDocument) document;
@@ -52,6 +57,7 @@ public class BladeDeclarationFinder implements DeclarationFinder {
         //baseDoc.readLock();
         AntlrTokenSequence tokens = null;
         OffsetRange offsetRange = OffsetRange.NONE;
+        tokenText = null;
         int lineOffset = caretOffset;
         try {
             try {
@@ -97,6 +103,12 @@ public class BladeDeclarationFinder implements DeclarationFinder {
                     offsetRange = new OffsetRange(nt.getStartIndex() + offsetCorrection, nt.getStopIndex() + offsetCorrection + 1);
                 }
                 return offsetRange;
+            } else if (nt.getType() == HTML_COMPONENT_PREFIX) {
+                //direct detection
+                currentTokenId = HTML_COMPONENT_PREFIX;
+                //remove '<x-'
+                tokenText = nt.getText().length() > 3 ? nt.getText() : null;
+                offsetRange = new OffsetRange(nt.getStartIndex() + 1, nt.getStopIndex() + 1);
             }
         }
         return offsetRange;
@@ -108,6 +120,32 @@ public class BladeDeclarationFinder implements DeclarationFinder {
 
         FileObject currentFile = parserResult.getFileObject();
         DeclarationLocation location = DeclarationLocation.NONE;
+
+        if (tokenText != null && currentTokenId == HTML_COMPONENT_PREFIX) {
+            String componentId = tokenText.substring(3);
+            String className = StringUtils.kebabToCamel(componentId);
+            ComponentDeclarationService componentComplervice = new ComponentDeclarationService();
+            Collection<PhpIndexResult> indexedReferences = componentComplervice.queryComponents(className, currentFile);
+
+            for (PhpIndexResult indexReference : indexedReferences) {
+                NamedElement resultHandle = new NamedElement(className, indexReference.declarationFile, ElementType.LARAVEL_COMPONENT);
+                DeclarationLocation constantLocation = new DeclarationFinder.DeclarationLocation(indexReference.declarationFile, indexReference.getStartOffset(), resultHandle);
+                if (location.equals(DeclarationLocation.NONE)) {
+                    location = constantLocation;
+                }
+                location.addAlternative(new AlternativeLocationImpl(constantLocation));
+
+                if (!location.equals(DeclarationLocation.NONE)) {
+                    FileObject resource = componentComplervice.getComponentResourceFile(componentId, indexReference.name, currentFile);
+                    if (resource != null) {
+                        PathElement resourceHandle = new PathElement(componentId, resource);
+                        DeclarationLocation resourceLocation = new DeclarationFinder.DeclarationLocation(resource, indexReference.getStartOffset(), resourceHandle);
+                        location.addAlternative(new AlternativeLocationImpl(resourceLocation));
+                    }
+                }
+            }
+            return location;
+        }
 
         FieldAccessReference fieldAccessReference = parserResult.findFieldAccessRefrence(caretOffset);
 
@@ -190,8 +228,8 @@ public class BladeDeclarationFinder implements DeclarationFinder {
 
                 return location;
             case PUSH:
-            case PUSH_IF:    
-            case PREPEND:      
+            case PUSH_IF:
+            case PREPEND:
                 String stackId = reference.name;
                 List<BladeIndex.IndexedReference> stacks = QueryUtils.getStacksReferences(stackId, currentFile);
 

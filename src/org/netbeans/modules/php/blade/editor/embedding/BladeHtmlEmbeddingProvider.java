@@ -32,7 +32,7 @@ public class BladeHtmlEmbeddingProvider extends EmbeddingProvider {
     @Override
     public List<Embedding> getEmbeddings(final Snapshot snapshot) {
         long startTime = System.currentTimeMillis();
-        LOGGER.log(Level.INFO, "html ebedding started {0}", snapshot.getSource().getFileObject().getName());
+        //LOGGER.log(Level.INFO, "html ebedding started {0}", snapshot.getSource().getFileObject().getName());
         TokenHierarchy<?> tokenHierarchy = snapshot.getTokenHierarchy();
         TokenSequence<?> sequence = tokenHierarchy.tokenSequence();
         if (sequence == null || !sequence.isValid()) {
@@ -68,7 +68,7 @@ public class BladeHtmlEmbeddingProvider extends EmbeddingProvider {
             return Collections.emptyList();
         }
         
-        LOGGER.log(Level.INFO, "html ebedding finished for {0}, it took " + (System.currentTimeMillis() - startTime), snapshot.getSource().getFileObject().getName());
+        //LOGGER.log(Level.INFO, "html ebedding finished for {0}, it took " + (System.currentTimeMillis() - startTime), snapshot.getSource().getFileObject().getName());
 
         if (embeddings.isEmpty()) {
             return Collections.singletonList(snapshot.create("", TARGET_MIME_TYPE));
