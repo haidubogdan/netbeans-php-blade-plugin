@@ -142,7 +142,7 @@ custom_directive : D_CUSTOM ((BLADE_PARAM_LPAREN BLADE_PARAM_RPAREN) | multiArgW
 
 possibleDirective : D_UNKNOWN;
     
-php_blade : D_PHP composed_php_expression+ D_ENDPHP | D_PHP main_php_expression;
+php_blade : D_PHP composed_php_expression* D_ENDPHP | D_PHP main_php_expression;
 
 phpInline : PHP_INLINE_START composed_php_expression+ (PHP_EXIT | EOF);
 //echo

@@ -88,9 +88,7 @@ public class BladeCompletionHandler implements CodeCompletionHandler2 {
 
         String tokenText = currentToken.getText();
 
-        if (tokenText.startsWith("@")) {
-            //completeDirectives(completionProposals, parserResult, completionContext.getCaretOffset(), currentToken);
-        } else {
+        if (!tokenText.startsWith("@")) {
             switch (currentToken.getType()) {
                 case PHP_IDENTIFIER:
                 case PHP_NAMESPACE_PATH:
@@ -112,55 +110,6 @@ public class BladeCompletionHandler implements CodeCompletionHandler2 {
         //TODO add context
         LOGGER.info(String.format("complete() took %d ms", System.currentTimeMillis() - startTime));
         return new DefaultCompletionResult(completionProposals, false);
-    }
-
-    private void completeDirectives(final List<CompletionProposal> completionProposals,
-            BladeParserResult parserResult,
-            int offset, Token currentToken) {
-        FileObject currentFile = parserResult.getFileObject();
-        String prefix = currentToken.getText();
-        int startOffset = offset - prefix.length();
-        DirectiveCompletionList completionList = new DirectiveCompletionList();
-        CompletionRequest request = new CompletionRequest();
-        request.anchorOffset = offset - prefix.length();
-        request.carretOffset = offset;
-        request.prefix = prefix;
-        for (Directive directive : completionList.getDirectives()) {
-            String directiveName = directive.name();
-            if (directiveName.startsWith(prefix)) {
-                NamedElement directiveEl = new NamedElement(directiveName, currentFile, ElementType.DIRECTIVE);
-                completionProposals.add(new BladeCompletionItem.DirectiveItem(directiveEl, request, directiveName));
-                if (directive.params()) {
-//                    resultSet.addItem(DirectiveCompletionBuilder.itemWithArg(
-//                            startOffset, carretOffset, prefix, directiveName, directive.description(), doc));
-//                    if (!directive.endtag().isEmpty()) {
-//                        resultSet.addItem(DirectiveCompletionBuilder.itemWithArg(
-//                                startOffset, carretOffset, prefix, directiveName, directive.endtag(), directive.description(), doc));
-//                    }
-                } else {
-//                    resultSet.addItem(DirectiveCompletionBuilder.simpleItem(
-//                            startOffset, directiveName, directive.description()));
-//                    if (!directive.endtag().isEmpty()) {
-//                        resultSet.addItem(DirectiveCompletionBuilder.simpleItem(
-//                                startOffset, carretOffset, prefix, directiveName, directive.endtag(), directive.description(), doc));
-//                    }
-                }
-
-            }
-        }
-
-        Project project = ProjectUtils.getMainOwner(currentFile);
-
-        CustomDirectives.getInstance(project).filterAction(new CustomDirectives.FilterCallback() {
-            @Override
-            public void filterDirectiveName(CustomDirectives.CustomDirective directive, FileObject file) {
-                if (directive.name.startsWith(prefix)) {
-//                    resultSet.addItem(DirectiveCompletionBuilder.itemWithArg(
-//                            startOffset, carretOffset, prefix, directive.name,
-//                            "custom directive", doc, file));
-                }
-            }
-        });
     }
 
     //we need a context

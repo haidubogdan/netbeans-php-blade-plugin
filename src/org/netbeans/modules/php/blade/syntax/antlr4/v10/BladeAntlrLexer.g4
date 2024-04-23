@@ -375,7 +375,7 @@ BL_PARAM_EXIT_EOF : EOF->type(ERROR),popMode;
 mode BLADE_INLINE_PHP;
 
 PHP_D_BLADE_COMMENT : ('//' ~[\n\r]+)->skip;
-PHP_D_BLADE_ML_COMMENT : ('/*' .*? '*/')->skip;
+PHP_D_BLADE_ML_COMMENT : '/*' .*? '*/' [\n\r]*->skip;
 
 D_ENDPHP : '@endphp'->popMode;
 PHP_D_UNKNOWN : '@'->type(HTML),popMode;
