@@ -1,0 +1,349 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <name>BladePlugin for netbeans</name>
+    <description>BladePlugin for netbeans</description>
+    <url>https://github.com/haidubogdan/netbeans-php-blade-plugin</url>
+
+    <groupId>netbeans.modules.php.blade</groupId>
+    <artifactId>php.blade</artifactId>
+    
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+         <nbversion>RELEASE180</nbversion>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
+    </properties>
+
+    <!--keep until maven changes it-->
+    <version>2.4.1.1</version>
+    <packaging>nbm</packaging>
+
+    <licenses>
+      <license>
+        <name>The GNU Lesser General Public License, Version 3.0</name>
+        <url>https://www.gnu.org/licenses/lgpl-3.0.tx</url>
+      </license>
+    </licenses>
+
+    <developers>
+        <developer>
+            <id>haidubogdan</id>
+            <name>Haidu Bogdan</name>
+            <email>haidubogdan@gmail.com</email>
+            <url>https://github.com/haidubogdan/</url>
+        </developer>
+    </developers>
+
+<!--     <scm>
+        <connection>scm:git:https://github.com/haidubogdan/netbeans-php-blade-plugin.git</connection>
+        <developerConnection>scm:https://github.com/haidubogdan/netbeans-php-blade-plugin.git</developerConnection>
+        <url>https://github.com/haidubogdan/netbeans-php-blade-plugin</url>
+        <tag>main</tag>
+    </scm> -->
+
+
+
+    <!-- <distributionManagement>
+        <snapshotRepository>
+            <id>ossrh</id>
+            <url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>
+        </snapshotRepository>
+        <repository>
+            <id>ossrh</id>
+            <url>https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+        </repository>
+    </distributionManagement> -->
+
+    <build>
+        <plugins>
+            <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>properties-maven-plugin</artifactId>
+            <version>1.0-alpha-2</version>
+            <executions>
+               <!-- Associate the read-project-properties goal with the initialize phase, to read the properties file. -->
+              <execution>
+                <phase>initialize</phase>
+                <goals>
+                  <goal>read-project-properties</goal>
+                </goals>
+                <configuration>
+                  <files>
+                    <file>project.properties</file>
+                  </files>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.10.1</version>
+                <executions>
+                    <execution>
+                        <id>default-compile</id>
+                        <configuration>
+                            <release>11</release>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>default-testCompile</id>
+                        <configuration>
+                            <release>17</release>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>3.3.0</version>
+                <configuration>
+                    <archive>
+                        <manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile>
+                    </archive>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.netbeans.utilities</groupId>
+                <artifactId>nbm-maven-plugin</artifactId>
+                <version>4.8</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <codeNameBase>php.blade</codeNameBase>
+                    <author>haidubogdan@gmail.com</author>
+                    <verifyRuntime>warn</verifyRuntime>
+                    <licenseName>LICENSE</licenseName>
+                    <licenseFile>LICENSE</licenseFile>
+                    <!--not working-->
+                    <nbmNeedsRestart>true</nbmNeedsRestart>
+                    <additionalArguments>
+                    </additionalArguments>
+                    <publicPackages>
+                        <publicPackage>org.netbeans.modules.php.blade.csl.elements</publicPackage>
+                        <publicPackage>org.netbeans.modules.php.blade.editor.*</publicPackage>
+                        <publicPackage>org.netbeans.modules.php.blade.project</publicPackage>
+                        <publicPackage>org.netbeans.modules.php.blade.syntax.*</publicPackage>
+                    </publicPackages>
+                    <moduleDependencies>
+                        <dependency>
+                            <id>org.netbeans.modules:org-netbeans-modules-php-editor</id>
+                            <type>impl</type>
+                            <explicitValue>org.netbeans.modules.php.editor/2 = 2</explicitValue>
+                        </dependency>
+                    </moduleDependencies>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+    <dependencies>
+        <dependency>
+            <groupId>org.netbeans.api</groupId>
+            <artifactId>org-netbeans-api-annotations-common</artifactId>
+            <version>${nbversion}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.netbeans.api</groupId>
+            <artifactId>org-netbeans-api-templates</artifactId>
+            <version>${nbversion}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.netbeans.api</groupId>
+            <artifactId>org-openide-filesystems</artifactId>
+            <version>${nbversion}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.netbeans.api</groupId>
+            <artifactId>org-openide-loaders</artifactId>
+            <version>${nbversion}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.netbeans.api</groupId>
+            <artifactId>org-openide-nodes</artifactId>
+            <version>${nbversion}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.netbeans.api</groupId>
+            <artifactId>org-openide-util</artifactId>
+            <version>${nbversion}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.netbeans.api</groupId>
+            <artifactId>org-openide-util-lookup</artifactId>
+            <version>${nbversion}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.netbeans.api</groupId>
+            <artifactId>org-openide-util-ui</artifactId>
+            <version>${nbversion}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.netbeans.api</groupId>
+            <artifactId>org-openide-windows</artifactId>
+            <version>${nbversion}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.netbeans.api</groupId>
+            <artifactId>org-openide-text</artifactId>
+            <version>${nbversion}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.netbeans.api</groupId>
+            <artifactId>org-netbeans-core-multiview</artifactId>
+            <version>${nbversion}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.netbeans.api</groupId>
+            <artifactId>org-openide-awt</artifactId>
+            <version>${nbversion}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.netbeans.api</groupId>
+            <artifactId>org-openide-dialogs</artifactId>
+            <version>${nbversion}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.netbeans.api</groupId>
+            <artifactId>org-netbeans-modules-csl-api</artifactId>
+            <version>${nbversion}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.netbeans.api</groupId>
+            <artifactId>org-netbeans-modules-editor</artifactId>
+            <version>${nbversion}</version>
+          </dependency>
+        <dependency>
+            <groupId>org.netbeans.api</groupId>
+            <artifactId>org-netbeans-modules-html-lexer</artifactId>
+            <version>${nbversion}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.netbeans.modules</groupId>
+            <artifactId>org-netbeans-modules-php-editor</artifactId>
+            <version>${nbversion}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.netbeans.api</groupId>
+            <artifactId>org-netbeans-libs-antlr4-runtime</artifactId>
+            <version>${nbversion}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.netbeans.api</groupId>
+            <artifactId>org-netbeans-modules-editor-bracesmatching</artifactId>
+            <version>${nbversion}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.netbeans.api</groupId>
+            <artifactId>org-netbeans-modules-editor-codetemplates</artifactId>
+            <version>${nbversion}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.netbeans.api</groupId>
+            <artifactId>org-netbeans-modules-lexer</artifactId>
+            <version>${nbversion}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.netbeans.api</groupId>
+            <artifactId>org-netbeans-modules-lexer-antlr4</artifactId>
+            <version>${nbversion}</version>
+        </dependency>
+        <dependency>
+          <groupId>org.netbeans.api</groupId>
+          <artifactId>org-netbeans-modules-parsing-indexing</artifactId>
+          <version>${nbversion}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.netbeans.api</groupId>
+            <artifactId>org-netbeans-modules-refactoring-api</artifactId>
+            <version>${nbversion}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>3.12.0</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.netbeans.api</groupId>
+            <artifactId>org-netbeans-modules-editor-completion</artifactId>
+            <version>${nbversion}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.netbeans.api</groupId>
+            <artifactId>org-netbeans-modules-projectapi</artifactId>
+            <version>${nbversion}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.netbeans.api</groupId>
+            <artifactId>org-netbeans-modules-editor-lib</artifactId>
+            <version>${nbversion}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.netbeans.api</groupId>
+            <artifactId>org-netbeans-modules-editor-lib2</artifactId>
+            <version>${nbversion}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.netbeans.api</groupId>
+            <artifactId>org-netbeans-modules-editor-util</artifactId>
+            <version>${nbversion}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.netbeans.api</groupId>
+            <artifactId>org-netbeans-modules-editor-mimelookup</artifactId>
+            <version>${nbversion}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.netbeans.api</groupId>
+            <artifactId>org-netbeans-modules-editor-settings</artifactId>
+            <version>${nbversion}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.netbeans.modules</groupId>
+            <artifactId>org-netbeans-modules-editor-errorstripe</artifactId>
+            <version>${nbversion}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.netbeans.api</groupId>
+            <artifactId>org-netbeans-modules-csl-types</artifactId>
+            <version>${nbversion}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.netbeans.api</groupId>
+            <artifactId>org-openide-filesystems-nb</artifactId>
+            <version>${nbversion}</version>
+        </dependency>
+        <dependency>
+    <groupId>org.netbeans.api</groupId>
+    <artifactId>org-netbeans-modules-parsing-api</artifactId>
+    <version>${nbversion}</version>
+</dependency>
+<dependency>
+    <groupId>org.netbeans.api</groupId>
+    <artifactId>org-netbeans-modules-editor-indent</artifactId>
+    <version>${nbversion}</version>
+</dependency>
+<dependency>
+    <groupId>org.netbeans.api</groupId>
+    <artifactId>org-netbeans-modules-options-api</artifactId>
+    <version>${nbversion}</version>
+</dependency>
+<dependency>
+    <groupId>org.netbeans.api</groupId>
+    <artifactId>org-netbeans-modules-editor-document</artifactId>
+    <version>${nbversion}</version>
+</dependency>
+<dependency>
+    <groupId>org.netbeans.api</groupId>
+    <artifactId>org-netbeans-modules-projectuiapi</artifactId>
+    <version>${nbversion}</version>
+</dependency>
+<dependency>
+    <groupId>org.netbeans.api</groupId>
+    <artifactId>org-netbeans-modules-projectuiapi-base</artifactId>
+    <version>${nbversion}</version>
+</dependency>
+    </dependencies>
+</project>
