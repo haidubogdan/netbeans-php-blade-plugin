@@ -11,7 +11,10 @@ import org.netbeans.modules.php.blade.editor.lexer.BladeTokenId;
 import org.openide.util.Exceptions;
 
 /**
- *
+ * known issues 
+ * currently blade tag comment not wokring inside htmtl tags <div>{{ $x }}</div>
+ * 
+ * 
  * @author bhaidu
  */
 public class BladeCommentHandler extends CommentHandler.DefaultCommentHandler {
@@ -41,10 +44,7 @@ public class BladeCommentHandler extends CommentHandler.DefaultCommentHandler {
                 TokenHierarchy th = TokenHierarchy.get(doc);
                 TokenSequence<?> ts = th.tokenSequence();
                 ts.move(from);
-
-                //if (ts.movePrevious()) {
                 ts.moveNext();
-                //}
 
                 Token<?> token = ts.token();
 

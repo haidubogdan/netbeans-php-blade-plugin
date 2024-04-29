@@ -71,7 +71,8 @@
                        replace="\1${version}"
                        byline="true" />
     </target>
-
+    <echo message="Dir : ${nbplatform.default.harness.dir}" />
+    <echo message="Dir : ${nbplatform.default.netbeans.dest.dir}" />
     <!-- Need close and release on https://oss.sonatype.org after the nbm is uploaded -->
     <target name="deploy" depends="clean,nbm" description="deploy release version to Maven repository">
         <move file="${build}/php-blade.nbm" toFile="${nbm-path}.nbm"/>

@@ -187,6 +187,9 @@ public class BladeBracesMatcher implements BracesMatcher {
 
     public int[] findDirectiveEnd(String directive) {
         String[] pair = BladeDirectivesUtils.directiveStart2EndPair(directive);
+        if (pair == null){
+            return null;
+        }
         List<String> startDirectiveForBalance = new ArrayList<>();
         List<String> stopDirectives = Arrays.asList(pair);
 

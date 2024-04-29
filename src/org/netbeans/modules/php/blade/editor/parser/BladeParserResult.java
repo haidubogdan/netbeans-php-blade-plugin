@@ -107,9 +107,9 @@ public class BladeParserResult extends ParserResult {
             if (taskClass.toLowerCase().contains("completion")) {
                 parser.addParseListener(createVariableListener());
             }
-            if (taskClass.toLowerCase().contains("fold") || taskClass.contains("navigator") || taskClass.contains("semantic")) {
-                parser.addParseListener(createStructureListener());
-            }
+            //if (taskClass.toLowerCase().contains("fold") || taskClass.contains("navigator") || taskClass.contains("semantic") || taskClass.contains("HtmlStructureItem")) {
+            parser.addParseListener(createStructureListener());
+            //}
             if (taskClass.toLowerCase().contains("hints")) {
                 parser.addParseListener(createSemanticsListener());
             }
@@ -233,7 +233,7 @@ public class BladeParserResult extends ParserResult {
                         addYieldReference(ReferenceType.YIELD, bladeParamText, range);
                         break;
                 }
-                
+
                 ReferenceType type = getReferenceType(directive.getType());
 
                 if (type == null) {
@@ -545,39 +545,42 @@ public class BladeParserResult extends ParserResult {
             }
 
             @Override
-            public void exitIdentifiableArgument(BladeAntlrParser.IdentifiableArgumentContext ctx) {
-                identifier = null;
-                if (ctx.BL_PARAM_STRING() == null) {
+            public void exitIdentifiableType(BladeAntlrParser.IdentifiableTypeContext ctx) {
+                Token directive = ctx.d_name;
+                if (directive == null) {
                     return;
                 }
-                identifier = ctx.BL_PARAM_STRING().getText();
-            }
 
+                Token paramString = ctx.idString;
+
+                if (paramString == null || paramString.getText().length() < 3) {
+                    return;
+                }
+
+                String bladeParamText = paramString.getText();
+                identifier = bladeParamText.substring(1, bladeParamText.length() - 1);
+            }
+            
             @Override
             public void exitInline_directive(BladeAntlrParser.Inline_directiveContext ctx) {
-                ParseTree rootRule = ctx.getChild(0);
-                if (rootRule instanceof ParserRuleContext) {
-                    ParseTree directive = ((ParserRuleContext) rootRule).getChild(0);
-                    if (directive instanceof TerminalNode) {
-                        Token directiveToken = ((TerminalNode) directive).getSymbol();
-                        if (directiveToken == null) {
-                            return;
-                        }
-                        DirectiveInlineStructureItem inlineElement;
-                        String directiveName = directiveToken.getText();
+                Token directiveToken = ctx.getStart();
 
-                        inlineElement = new DirectiveInlineStructureItem(directiveName, identifier,
-                                getFileObject(), directiveToken.getStartIndex(), directiveToken.getStopIndex() + 1);
-
-                        if (blockBalance > 0) {
-                            lexerStructure.add(inlineElement);
-                        } else {
-                            structure.add(inlineElement);
-                        }
-
-                    }
-
+                if (directiveToken == null) {
+                    return;
                 }
+
+                DirectiveInlineStructureItem inlineElement;
+                String directiveName = directiveToken.getText();
+
+                inlineElement = new DirectiveInlineStructureItem(directiveName, identifier,
+                        getFileObject(), directiveToken.getStartIndex(), directiveToken.getStopIndex() + 1);
+
+                if (blockBalance > 0) {
+                    lexerStructure.add(inlineElement);
+                } else {
+                    structure.add(inlineElement);
+                }
+
             }
 
             @Override
@@ -588,39 +591,34 @@ public class BladeParserResult extends ParserResult {
 
             @Override
             public void exitBlock_statement(BladeAntlrParser.Block_statementContext ctx) {
-                ParseTree rootRule = ctx.getChild(0);
                 blockBalance--;
-                if (rootRule instanceof ParserRuleContext) {
-                    ParseTree directive = ((ParserRuleContext) rootRule).getChild(0);
-                    if (directive instanceof TerminalNode) {
-                        Token directiveToken = ((TerminalNode) directive).getSymbol();
-                        if (directiveToken == null) {
-                            return;
-                        }
-                        String directiveName = directiveToken.getText();
-                        DirectiveBlockStructureItem blockItem = new DirectiveBlockStructureItem(directiveName, identifier,
-                                getFileObject(), ctx.getStart().getStartIndex(), ctx.getStop().getStopIndex() + 1);
+                Token directiveToken = ctx.getStart();
 
-                        blockItem.nestedItems.addAll(lexerStructure);
-                        lexerStructure.clear();
-                        if (blockBalance > 0 && !directiveName.startsWith("@else")) {
-                            lexerStructure.add(blockItem);
-                        } else {
-                            structure.add(blockItem);
-                        }
-                        //folds
-                        int start = ctx.getStart().getStartIndex() + 1 + directiveName.length();
-                        int end = ctx.getStop().getStartIndex();//the start of the close directive
+                if (directiveToken == null) {
+                    return;
+                }
 
-                        if (start > end) {
-                            return;
-                        }
-                        OffsetRange range = new OffsetRange(start, end);
-                        if (!folds.contains(range)) {
-                            folds.add(range);
-                        }
-                    }
+                String directiveName = directiveToken.getText();
+                DirectiveBlockStructureItem blockItem = new DirectiveBlockStructureItem(directiveName, identifier,
+                        getFileObject(), ctx.getStart().getStartIndex(), ctx.getStop().getStopIndex() + 1);
 
+                blockItem.nestedItems.addAll(lexerStructure);
+                lexerStructure.clear();
+                if (blockBalance > 0 && !directiveName.startsWith("@else")) {
+                    lexerStructure.add(blockItem);
+                } else {
+                    structure.add(blockItem);
+                }
+                //folds
+                int start = ctx.getStart().getStartIndex() + 1 + directiveName.length();
+                int end = ctx.getStop().getStartIndex();//the start of the close directive
+
+                if (start > end) {
+                    return;
+                }
+                OffsetRange range = new OffsetRange(start, end);
+                if (!folds.contains(range)) {
+                    folds.add(range);
                 }
             }
         };
