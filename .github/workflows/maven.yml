@@ -36,7 +36,6 @@ jobs:
       run : cp ./nbproject/project.properties nb-plugin-package/project.properties
     - name : prepare the files from project  
       run : cp ./LICENSE nb-plugin-package/LICENSE
-    - name : prepare the files from project  
-      run : cd nb-plugin-package
     - name : package  
+      working-directory: ./nb-plugin-package
       run : mvn package
