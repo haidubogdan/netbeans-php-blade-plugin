@@ -84,16 +84,10 @@
                 <executions>
                     <execution>
                         <id>default-compile</id>
-                        <configuration>
-                            <release>11</release>
-                        </configuration>
                     </execution>
                     <execution>
                         <id>default-testCompile</id>
-                        <configuration>
-                            <release>17</release>
-                        </configuration>
-                    </execution>
+                      </execution>
                 </executions>
             </plugin>
             <plugin>
