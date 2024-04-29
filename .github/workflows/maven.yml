@@ -41,6 +41,7 @@ jobs:
       run : mvn package
     - name : upload nbm
       uses: actions/upload-artifact@v4
+      working-directory: ./nb-plugin-package
       with:
         name: blade-php-nbm
         path: target/nbm/*.nbm
