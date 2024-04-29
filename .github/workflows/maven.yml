@@ -20,13 +20,23 @@ jobs:
         distribution: 'temurin'
     - name : prepare the files from project
       run : mkdir -p  nb-plugin-package/src/main/java
+    - name : prepare the files from project  
       run : mkdir -p nb-plugin-package/src/main/nbm
+    - name : prepare the files from project  
       run : mkdir -p nb-plugin-package/src/main/resources/org/netbeans/modules/php/blade
+    - name : prepare the files from project  
       run : cp -rf ./src/org nb-plugin-package/src/main/java
+    - name : prepare the files from project  
       run : cp -rf ./src/org/netbeans/modules/php/blade/resources nb-plugin-package/src/main/resources/org/netbeans/modules/php/blade
+    - name : prepare the files from project  
       run : cp ./manifest.mf nb-plugin-package/src/main/nbm/manifest.mf
+    - name : prepare the files from project  
       run : cp ./.github/pom.xml nb-plugin-package/pom.xml
+    - name : prepare the files from project  
       run : cp ./nbproject/project.properties nb-plugin-package/project.properties
+    - name : prepare the files from project  
       run : cp ./LICENSE nb-plugin-package/LICENSE
+    - name : prepare the files from project  
       run : cd nb-plugin-package
+    - name : package  
       run : mvn package
