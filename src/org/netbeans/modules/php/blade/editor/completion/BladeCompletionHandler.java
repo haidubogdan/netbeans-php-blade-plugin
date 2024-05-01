@@ -7,13 +7,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.netbeans.editor.BaseDocument;
 import javax.swing.text.Document;
 import javax.swing.text.JTextComponent;
 import org.antlr.v4.runtime.Token;
-import org.netbeans.api.editor.document.EditorDocumentUtils;
 import org.netbeans.api.project.Project;
 import org.netbeans.modules.csl.api.CodeCompletionContext;
 import org.netbeans.modules.csl.api.CodeCompletionHandler2;
@@ -28,16 +26,13 @@ import org.netbeans.modules.csl.spi.support.CancelSupport;
 import org.netbeans.modules.php.blade.csl.elements.ElementType;
 import org.netbeans.modules.php.blade.csl.elements.NamedElement;
 import org.netbeans.modules.php.blade.csl.elements.PhpFunctionElement;
-import org.netbeans.modules.php.blade.editor.completion.BladeCompletionItem.CompletionRequest;
-import org.netbeans.modules.php.blade.editor.directives.CustomDirectives;
+import org.netbeans.modules.php.blade.editor.completion.BladeCompletionProposal.CompletionRequest;
 import org.netbeans.modules.php.blade.editor.indexing.PhpIndexFunctionResult;
 import org.netbeans.modules.php.blade.editor.indexing.PhpIndexResult;
 import org.netbeans.modules.php.blade.editor.indexing.PhpIndexUtils;
 import org.netbeans.modules.php.blade.editor.parser.BladeParserResult;
 import org.netbeans.modules.php.blade.editor.parser.BladeParserResult.FieldAccessReference;
 import org.netbeans.modules.php.blade.editor.parser.BladeParserResult.Reference;
-import org.netbeans.modules.php.blade.project.ProjectUtils;
-import org.netbeans.modules.php.blade.syntax.annotation.Directive;
 import org.netbeans.modules.php.blade.syntax.antlr4.v10.BladeAntlrUtils;
 import static org.netbeans.modules.php.blade.syntax.antlr4.v10.BladeAntlrLexer.*;
 import org.netbeans.spi.project.ui.support.ProjectConvertors;
@@ -160,7 +155,6 @@ public class BladeCompletionHandler implements CodeCompletionHandler2 {
                     completeNamespacedPhpClasses(classQuery, namespace, offsetNamespace, completionProposals, parserResult);
                 } else if (prefix.endsWith("\\")) {
                     String namespace = elementReference.name;
-                    int offsetNamespace = offset - (prefix.length() + 1);
                     completeNamespacedPhpClasses("", namespace, offset, completionProposals, parserResult);
                 }
                 break;
@@ -181,7 +175,7 @@ public class BladeCompletionHandler implements CodeCompletionHandler2 {
         request.prefix = prefix;
         for (PhpIndexResult indexResult : indexClassResults) {
             NamedElement classElement = new NamedElement(indexResult.name, indexResult.declarationFile, ElementType.PHP_CLASS);
-            completionProposals.add(new BladeCompletionItem.ClassItem(classElement, request, indexResult.name));
+            completionProposals.add(new BladeCompletionProposal.ClassItem(classElement, request, indexResult.name));
         }
     }
 
@@ -196,7 +190,7 @@ public class BladeCompletionHandler implements CodeCompletionHandler2 {
         request.prefix = namespace;
         for (PhpIndexResult indexResult : indexClassResults) {
             NamedElement classElement = new NamedElement(indexResult.name, indexResult.declarationFile, ElementType.PHP_CLASS);
-            completionProposals.add(new BladeCompletionItem.ClassItem(classElement, request, indexResult.name));
+            completionProposals.add(new BladeCompletionProposal.ClassItem(classElement, request, indexResult.name));
         }
     }
 
@@ -218,7 +212,7 @@ public class BladeCompletionHandler implements CodeCompletionHandler2 {
             String completion = indexResult.name + "()";
             String preview = indexResult.name + indexResult.getParamsAsString();
             NamedElement functionElement = new NamedElement(completion, indexResult.declarationFile, ElementType.PHP_FUNCTION);
-            completionProposals.add(new BladeCompletionItem.FunctionItem(functionElement, request, preview));
+            completionProposals.add(new BladeCompletionProposal.FunctionItem(functionElement, request, preview));
         }
     }
 
@@ -241,7 +235,7 @@ public class BladeCompletionHandler implements CodeCompletionHandler2 {
             String completion = indexResult.name + "()";
             String preview = indexResult.name + indexResult.getParamsAsString();
             NamedElement functionElement = new NamedElement(completion, indexResult.declarationFile, ElementType.PHP_FUNCTION);
-            completionProposals.add(new BladeCompletionItem.FunctionItem(functionElement, request, preview));
+            completionProposals.add(new BladeCompletionProposal.FunctionItem(functionElement, request, preview));
         }
     }
 
@@ -263,7 +257,7 @@ public class BladeCompletionHandler implements CodeCompletionHandler2 {
         request.prefix = prefix;
         for (PhpIndexResult indexResult : indexClassResults) {
             NamedElement constantElement = new NamedElement(indexResult.name, indexResult.declarationFile, ElementType.PHP_CONSTANT);
-            completionProposals.add(new BladeCompletionItem.NamespaceItem(constantElement, request, indexResult.name));
+            completionProposals.add(new BladeCompletionProposal.NamespaceItem(constantElement, request, indexResult.name));
         }
     }
 
@@ -281,7 +275,7 @@ public class BladeCompletionHandler implements CodeCompletionHandler2 {
         request.prefix = prefix;
         for (PhpIndexResult indexResult : indexClassResults) {
             NamedElement constantElement = new NamedElement(indexResult.name, indexResult.declarationFile, ElementType.PHP_CONSTANT);
-            completionProposals.add(new BladeCompletionItem.ConstantItem(constantElement, request, indexResult.name));
+            completionProposals.add(new BladeCompletionProposal.ConstantItem(constantElement, request, indexResult.name));
         }
     }
 
@@ -299,7 +293,7 @@ public class BladeCompletionHandler implements CodeCompletionHandler2 {
         request.prefix = prefix;
         for (PhpIndexResult indexResult : indexClassResults) {
             NamedElement constantElement = new NamedElement(indexResult.name, indexResult.declarationFile, ElementType.PHP_CONSTANT);
-            completionProposals.add(new BladeCompletionItem.ConstantItem(constantElement, request, indexResult.name));
+            completionProposals.add(new BladeCompletionProposal.ConstantItem(constantElement, request, indexResult.name));
         }
     }
 
@@ -334,12 +328,12 @@ public class BladeCompletionHandler implements CodeCompletionHandler2 {
             if ("$loop".startsWith(variablePrefix)) {
                 String variableName = "$loop";
                 NamedElement variableElement = new NamedElement(variableName, fo, ElementType.VARIABLE);
-                completionProposals.add(new BladeCompletionItem.BladeVariableItem(variableElement, request, variableName));
+                completionProposals.add(new BladeCompletionProposal.BladeVariableItem(variableElement, request, variableName));
             }
             for (String variableName : scopedVariables) {
                 if (variableName.startsWith(variablePrefix)) {
                     NamedElement variableElement = new NamedElement(variableName, fo, ElementType.VARIABLE);
-                    completionProposals.add(new BladeCompletionItem.VariableItem(variableElement, request, variableName));
+                    completionProposals.add(new BladeCompletionProposal.VariableItem(variableElement, request, variableName));
                 }
             }
         }

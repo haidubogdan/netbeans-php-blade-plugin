@@ -273,10 +273,12 @@ public class BladeCompletionProvider implements CompletionProvider {
                 completeBladeTag(currentToken, doc, "!", "!!}", -40, carretOffset, "raw echo", resultSet);
                 break;
             case "{{":
-                completeCloseTag(currentToken, doc, "}}", carretOffset, resultSet);
+                String type = "regular";
+                completeCloseTag(currentToken, doc, "}}", carretOffset, type, resultSet);
                 break;
             case "{!!":
-                completeCloseTag(currentToken, doc, "!!}", carretOffset, resultSet);
+                String typeRaw = "raw";
+                completeCloseTag(currentToken, doc, "!!}", carretOffset, typeRaw, resultSet);
                 break;
         }
     }
@@ -288,20 +290,24 @@ public class BladeCompletionProvider implements CompletionProvider {
 
         for (Directive directive : completionList.getDirectives()) {
             String directiveName = directive.name();
+            String description = directive.since();
+            if (!description.isEmpty()){
+                description = "(v." + description + ")"; 
+            }
             if (directiveName.startsWith(prefix)) {
                 if (directive.params()) {
                     resultSet.addItem(DirectiveCompletionBuilder.itemWithArg(
-                            startOffset, carretOffset, prefix, directiveName, directive.description(), doc));
+                            startOffset, carretOffset, prefix, directiveName, description, doc));
                     if (!directive.endtag().isEmpty()) {
                         resultSet.addItem(DirectiveCompletionBuilder.itemWithArg(
-                                startOffset, carretOffset, prefix, directiveName, directive.endtag(), directive.description(), doc));
+                                startOffset, carretOffset, prefix, directiveName, directive.endtag(), description, doc));
                     }
                 } else {
                     resultSet.addItem(DirectiveCompletionBuilder.simpleItem(
-                            startOffset, directiveName, directive.description()));
+                            startOffset, directiveName, description));
                     if (!directive.endtag().isEmpty()) {
                         resultSet.addItem(DirectiveCompletionBuilder.simpleItem(
-                                startOffset, carretOffset, prefix, directiveName, directive.endtag(), directive.description(), doc));
+                                startOffset, carretOffset, prefix, directiveName, directive.endtag(), description, doc));
                     }
                 }
 
@@ -386,13 +392,13 @@ public class BladeCompletionProvider implements CompletionProvider {
     }
 
     private void completeCloseTag(Token curlyStartToken, Document doc, String closeTag,
-            int caretOffset, CompletionResultSet resultSet) {
+            int caretOffset, String type, CompletionResultSet resultSet) {
         final String finalCloseTag = closeTag;
         CompletionItem item = CompletionUtilities.newCompletionItemBuilder(closeTag)
                 .iconResource(getReferenceIcon())
                 .startOffset(caretOffset)
                 .leftHtmlText(closeTag)
-                .rightHtmlText(null)
+                .rightHtmlText(type)
                 .onSelect(ctx -> {
                     try {
                         StringBuilder sb = new StringBuilder();

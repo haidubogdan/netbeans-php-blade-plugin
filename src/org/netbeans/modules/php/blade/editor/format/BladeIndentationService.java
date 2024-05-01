@@ -16,7 +16,10 @@ import org.netbeans.modules.php.blade.syntax.antlr4.formatter.BladeAntlrFormatte
 import org.openide.util.Exceptions;
 
 /**
- *
+ * ready for deprecation
+ * might just use the formatter service
+ * 
+ * 
  * @author bhaidu
  */
 public class BladeIndentationService {
@@ -31,6 +34,7 @@ public class BladeIndentationService {
         BladeAntlrFormatterParser parser = new BladeAntlrFormatterParser(tokens);
         parser.removeErrorListener(ConsoleErrorListener.INSTANCE);
         parser.addParseListener(createFormatterListener());
+        parser.setBuildParseTree(false);
         parser.file();
 
         final int cstart = context.startOffset();

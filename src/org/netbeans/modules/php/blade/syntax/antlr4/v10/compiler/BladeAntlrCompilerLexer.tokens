@@ -1,9 +1,0 @@
-HTML=1
-PHP_CODE=2
-PHP_INLINE=3
-D_IF=4
-D_PHP=5
-OTHER=6
-D_ENDPHP=7
-'@if'=4
-'@endphp'=7

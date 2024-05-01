@@ -17,7 +17,7 @@
     </properties>
 
     <!--keep until maven changes it-->
-    <version>2.4.3.3</version>
+    <version>1.0.0</version>
     <packaging>nbm</packaging>
 
     <licenses>
@@ -312,32 +312,32 @@
         <dependency>
     <groupId>org.netbeans.api</groupId>
     <artifactId>org-netbeans-modules-parsing-api</artifactId>
-    <version>${nbversion}</version>
+    <version>1.0.0</version>
 </dependency>
 <dependency>
     <groupId>org.netbeans.api</groupId>
     <artifactId>org-netbeans-modules-editor-indent</artifactId>
-    <version>${nbversion}</version>
+    <version>1.0.0</version>
 </dependency>
 <dependency>
     <groupId>org.netbeans.api</groupId>
     <artifactId>org-netbeans-modules-options-api</artifactId>
-    <version>${nbversion}</version>
+    <version>1.0.0</version>
 </dependency>
 <dependency>
     <groupId>org.netbeans.api</groupId>
     <artifactId>org-netbeans-modules-editor-document</artifactId>
-    <version>${nbversion}</version>
+    <version>1.0.0</version>
 </dependency>
 <dependency>
     <groupId>org.netbeans.api</groupId>
     <artifactId>org-netbeans-modules-projectuiapi</artifactId>
-    <version>${nbversion}</version>
+    <version>1.0.0</version>
 </dependency>
 <dependency>
     <groupId>org.netbeans.api</groupId>
     <artifactId>org-netbeans-modules-projectuiapi-base</artifactId>
-    <version>${nbversion}</version>
+    <version>1.0.0</version>
 </dependency>
     </dependencies>
 </project>

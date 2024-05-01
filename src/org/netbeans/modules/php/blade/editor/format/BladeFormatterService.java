@@ -16,20 +16,24 @@ import org.netbeans.modules.php.blade.syntax.antlr4.formatter.BladeAntlrFormatte
 import org.openide.util.Exceptions;
 
 /**
- *
+ * TODO fix indentation
+ * 
  * @author bhaidu
  */
 public class BladeFormatterService {
 
     public final Map<Integer, FormatToken> wsTokenAfterArgStm = new TreeMap<>();
     public final Map<Integer, FormatToken> formattedLineIndentList = new TreeMap<>();
+    public boolean isIndentation;
 
     public void format(Context context, String text, int indentSize) {
+        isIndentation = context.isIndent();
         BladeAntlrFormatterLexer lexer = new BladeAntlrFormatterLexer(CharStreams.fromString(text));
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         BladeAntlrFormatterParser parser = new BladeAntlrFormatterParser(tokens);
         parser.removeErrorListener(ConsoleErrorListener.INSTANCE);
         parser.addParseListener(createFormatterListener());
+        parser.setBuildParseTree(false);
         parser.file();
 
         final int cstart = context.startOffset();
@@ -99,7 +103,7 @@ public class BladeFormatterService {
             @Override
             public void exitBlock_start(BladeAntlrFormatterParser.Block_startContext ctx) {
 
-                Token start = ctx.block_directive_name().getStart();
+                Token start = ctx.getStart();
                 blockBalance++;
                 if (ctx.getStop() != null && !formattedLineIndentList.containsKey(start.getLine())) {
                     Token rArgParent = ctx.getStop();

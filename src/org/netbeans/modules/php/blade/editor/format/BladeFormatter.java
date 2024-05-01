@@ -80,10 +80,9 @@ public class BladeFormatter implements Formatter {
                         if (!lineText.isEmpty() && lineText.replaceAll(" ", "").isEmpty()) {
                             return;
                         }
-                        (new BladeIndentationService()).format(context, currentText, indentSize);
-                    } else {
-                        (new BladeFormatterService()).format(context, currentText, indentSize);
                     }
+                    (new BladeFormatterService()).format(context, currentText, indentSize);
+
                 } catch (BadLocationException ex) {
                 }
 
