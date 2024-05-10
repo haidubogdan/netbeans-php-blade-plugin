@@ -20,6 +20,7 @@ import org.netbeans.api.project.Project;
 import org.netbeans.lib.editor.codetemplates.api.CodeTemplateManager;
 import org.netbeans.modules.php.blade.editor.BladeLanguage;
 import org.netbeans.modules.php.blade.editor.ResourceUtilities;
+import org.netbeans.modules.php.blade.editor.completion.BladeCompletionItem.BladeTag;
 import org.netbeans.modules.php.blade.editor.components.AttributeCompletionService;
 import org.netbeans.modules.php.blade.editor.components.ComponentsCompletionService;
 import org.netbeans.modules.php.blade.editor.directives.CustomDirectives;
@@ -166,10 +167,6 @@ public class BladeCompletionProvider implements CompletionProvider {
                         return;
                 }
 
-                if (currentToken.getText().startsWith("@")) {
-                    completeDirectives(currentToken.getText(), doc, caretOffset, resultSet);
-                }
-
                 switch (currentToken.getType()) {
                     case CONTENT_TAG_OPEN:
                     case RAW_TAG_OPEN:
@@ -185,6 +182,7 @@ public class BladeCompletionProvider implements CompletionProvider {
                             completeBladeTags(nText, currentToken, tokens, doc, caretOffset, resultSet);
                         } else if ("livewire".startsWith(nText)) {
                             //quick implementation
+                            //??
                             addHtmlTagCompletionItem(nText, "livewire", "livewire", caretOffset, resultSet);
                         }
                         break;
@@ -212,7 +210,6 @@ public class BladeCompletionProvider implements CompletionProvider {
                             case D_INCLUDE_WHEN:
                             case D_INCLUDE_UNLESS:
                             case D_EACH:
-
                                 int lastDotPos;
 
                                 if (pathName.endsWith(".")) {
@@ -286,47 +283,9 @@ public class BladeCompletionProvider implements CompletionProvider {
     @SuppressWarnings("rawtypes")
     private void completeDirectives(String prefix, Document doc, int carretOffset, CompletionResultSet resultSet) {
         int startOffset = carretOffset - prefix.length();
-        DirectiveCompletionList completionList = new DirectiveCompletionList();
 
-        for (Directive directive : completionList.getDirectives()) {
-            String directiveName = directive.name();
-            String description = directive.since();
-            if (!description.isEmpty()){
-                description = "(v." + description + ")"; 
-            }
-            if (directiveName.startsWith(prefix)) {
-                if (directive.params()) {
-                    resultSet.addItem(DirectiveCompletionBuilder.itemWithArg(
-                            startOffset, carretOffset, prefix, directiveName, description, doc));
-                    if (!directive.endtag().isEmpty()) {
-                        resultSet.addItem(DirectiveCompletionBuilder.itemWithArg(
-                                startOffset, carretOffset, prefix, directiveName, directive.endtag(), description, doc));
-                    }
-                } else {
-                    resultSet.addItem(DirectiveCompletionBuilder.simpleItem(
-                            startOffset, directiveName, description));
-                    if (!directive.endtag().isEmpty()) {
-                        resultSet.addItem(DirectiveCompletionBuilder.simpleItem(
-                                startOffset, carretOffset, prefix, directiveName, directive.endtag(), description, doc));
-                    }
-                }
 
-            }
-        }
 
-        FileObject fo = EditorDocumentUtils.getFileObject(doc);
-        Project project = ProjectUtils.getMainOwner(fo);
-
-        CustomDirectives.getInstance(project).filterAction(new CustomDirectives.FilterCallback() {
-            @Override
-            public void filterDirectiveName(CustomDirective directive, FileObject file) {
-                if (directive.name.startsWith(prefix)) {
-                    resultSet.addItem(DirectiveCompletionBuilder.itemWithArg(
-                            startOffset, carretOffset, prefix, directive.name,
-                            "custom directive", doc, file));
-                }
-            }
-        });
     }
 
     private void completeYieldIdFromIndex(String prefixIdentifier, FileObject fo,
@@ -421,15 +380,9 @@ public class BladeCompletionProvider implements CompletionProvider {
             int caretOffset, CompletionResultSet resultSet) {
 
         String filePath = originFile.getPath();
-        int viewsPos = filePath.indexOf("/views/");
-
-        CompletionItem item = CompletionUtilities.newCompletionItemBuilder(bladePath)
-                .iconResource(getReferenceIcon(originFile))
-                .startOffset(caretOffset)
-                .leftHtmlText(bladePath)
-                .rightHtmlText(filePath.substring(viewsPos, filePath.length()))
-                .sortPriority(1)
-                .build();
+        
+        BladeCompletionItem item = BladeCompletionItem.createViewPath(
+                bladePath, caretOffset, originFile.isFolder(), filePath);
         resultSet.addItem(item);
     }
 
@@ -477,17 +430,22 @@ public class BladeCompletionProvider implements CompletionProvider {
         }
     }
 
+    //??
     private void addHtmlTagCompletionItem(String prefix, String tagName, String plugin,
             int caretOffset, CompletionResultSet resultSet) {
+        
         int insertOffset = caretOffset - prefix.length();
-        CompletionItem item = CompletionUtilities.newCompletionItemBuilder(tagName)
-                .iconResource(getReferenceIcon(CompletionType.HTML_COMPONENT_TAG))
-                .startOffset(insertOffset)
-                .leftHtmlText("&lt;" + tagName + "&gt;")
-                .rightHtmlText(plugin)
-                .sortPriority(1)
-                .build();
+        BladeTag item = new BladeTag(tagName, insertOffset);
         resultSet.addItem(item);
+//        
+//        CompletionItem item = CompletionUtilities.newCompletionItemBuilder(tagName)
+//                .iconResource(getReferenceIcon(CompletionType.HTML_COMPONENT_TAG))
+//                .startOffset(insertOffset)
+//                .leftHtmlText("&lt;" + tagName + "&gt;")
+//                .rightHtmlText(plugin)
+//                .sortPriority(1)
+//                .build();
+//        resultSet.addItem(item);
     }
 
     private void addSimplAttributeItem(String prefix, String attributeName, int caretOffset, CompletionResultSet resultSet) {
