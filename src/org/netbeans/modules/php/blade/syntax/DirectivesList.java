@@ -80,6 +80,7 @@ import org.netbeans.modules.php.blade.syntax.annotation.DirectiveRegister;
     @Directive(name = "@use", params = true),
     @Directive(name = "@inject", params = true),
     //utils
+    @Directive(name = "@lang", params = true),
     @Directive(name = "@session", params = true, endtag = "@endsession", since = "10"),
     @Directive(name = "@dump", params = true),
     @Directive(name = "@dd", params = true),

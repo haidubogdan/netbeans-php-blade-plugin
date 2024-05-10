@@ -11,8 +11,12 @@ import org.netbeans.modules.csl.api.ElementHandle;
 import org.netbeans.modules.csl.api.ElementKind;
 import org.netbeans.modules.csl.api.HtmlFormatter;
 import org.netbeans.modules.csl.api.Modifier;
+import org.netbeans.modules.php.blade.editor.ResourceUtilities;
+import org.netbeans.modules.php.blade.syntax.annotation.Directive;
+import org.netbeans.modules.php.blade.syntax.annotation.Tag;
 
 import org.openide.filesystems.FileObject;
+import org.openide.util.ImageUtilities;
 
 /**
  *
@@ -24,11 +28,19 @@ public class BladeCompletionProposal implements CompletionProposal {
     final CompletionRequest request;
     private final ElementHandle element;
     final String previewValue;
+    protected Directive directive;
 
     public BladeCompletionProposal(ElementHandle element, CompletionRequest request, String previewValue) {
         this.element = element;
         this.request = request;
         this.previewValue = previewValue;
+    }
+
+    public BladeCompletionProposal(ElementHandle element, CompletionRequest request, Directive directive) {
+        this.element = element;
+        this.request = request;
+        this.previewValue = directive.name();
+        this.directive = directive;
     }
 
     @Override
@@ -152,13 +164,13 @@ public class BladeCompletionProposal implements CompletionProposal {
             return -50;//priority
         }
     }
-    
+
     public static class DirectiveItem extends BladeCompletionProposal {
-        
+
         public DirectiveItem(ElementHandle element, CompletionRequest request, String previewValue) {
             super(element, request, previewValue);
         }
-        
+
     }
 
     public static class ClassItem extends PhpElementItem {
@@ -243,5 +255,158 @@ public class BladeCompletionProposal implements CompletionProposal {
         public int anchorOffset;
         public int carretOffset;
         public String prefix;
+    }
+    
+    public static class BladeTag extends BladeCompletionProposal {
+
+        protected Tag tag;
+
+        public BladeTag(ElementHandle element, CompletionRequest request, Tag tag) {
+            super(element, request, "");
+            this.tag = tag;
+        }
+
+        @Override
+        public String getCustomInsertTemplate() {
+            return tag.openTag() + " ${cursor} " + tag.closeTag();
+        }
+
+        @Override
+        public String getLhsHtml(HtmlFormatter formatter) {
+            return tag.openTag() + " " + tag.closeTag();
+        }
+        
+        @Override
+        public String getRhsHtml(HtmlFormatter formatter) {
+            return tag.description();
+        }
+        
+        @Override
+        public int getSortPrioOverride() {
+            return 0;
+        }
+    }
+    
+    
+    public static class DirectiveProposal extends BladeCompletionProposal {
+    
+        public DirectiveProposal(ElementHandle element, CompletionRequest request, Directive directive) {
+            super(element, request, directive);
+        }
+
+        public DirectiveProposal(ElementHandle element, CompletionRequest request, String previewValue) {
+            super(element, request, previewValue);
+        }
+    
+        @Override
+        public ImageIcon getIcon() {
+            String path = ResourceUtilities.ICON_BASE + "icons/at.png";//NOI18N
+            return ImageUtilities.loadImageIcon(path, false);
+        }
+        
+        @Override
+        public String getRhsHtml(HtmlFormatter formatter) {
+            if (this.directive == null){
+                return null;
+            }
+            
+            if (directive.description().isEmpty() && !this.directive.since().isEmpty()){
+                return "v" +  this.directive.since();
+            }
+            return this.directive.description();
+        }
+
+    }
+
+    public static class CustomDirective extends DirectiveProposal {
+
+        public CustomDirective(ElementHandle element, CompletionRequest request, String preview) {
+            super(element, request, preview);
+        }
+
+        @Override
+        public String getRhsHtml(HtmlFormatter formatter) {
+            if (this.getElement().getFileObject() != null){
+                return this.getElement().getFileObject().getNameExt();
+            }
+            return "custom directive";
+        }
+
+    }
+
+    public static class InlineDirective extends DirectiveProposal {
+
+        public InlineDirective(ElementHandle element, CompletionRequest request, Directive directive) {
+            super(element, request, directive);
+        }
+
+    }
+
+    public static class DirectiveWithArg extends InlineDirective {
+
+        public DirectiveWithArg(ElementHandle element, CompletionRequest request, Directive directive) {
+            super(element, request, directive);
+        }
+
+        @Override
+        public String getCustomInsertTemplate() {
+            String template = getName() + "($$${arg})";
+            switch (getName()) {
+                case "@include":
+                case "@extends":
+                    template = getName() + "('${path}')";
+                    break;
+            }
+            return template;
+        }
+
+        @Override
+        public String getLhsHtml(HtmlFormatter formatter) {
+            return getName() + "()";
+        }
+    }
+
+    public static class BlockDirective extends DirectiveProposal {
+
+        public BlockDirective(ElementHandle element, CompletionRequest request, Directive directive) {
+            super(element, request, directive);
+        }
+
+        @Override
+        public String getLhsHtml(HtmlFormatter formatter) {
+            return getName() + " ... " + directive.endtag();
+        }
+
+        @Override
+        public String getCustomInsertTemplate() {
+            return getName() + "\n${selection}${cursor}\n" + directive.endtag();
+        }
+
+    }
+
+    public static class BlockDirectiveWithArg extends DirectiveProposal {
+
+        public BlockDirectiveWithArg(ElementHandle element, CompletionRequest request, Directive directive) {
+            super(element, request, directive);
+        }
+
+        @Override
+        public String getLhsHtml(HtmlFormatter formatter) {
+            return getName() + "() ... " + directive.endtag();
+        }
+
+        @Override
+        public String getCustomInsertTemplate() {
+            String template = getName() + "($$${arg})\n\n${selection}${cursor}\n" + directive.endtag();
+
+            switch (getName()) {
+                case "@foreach":
+                    template = getName() + "($$${array} as $$${item})\n${selection}${cursor}\n" + directive.endtag();
+                    break;
+            }
+
+            return template;
+        }
+
     }
 }

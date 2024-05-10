@@ -39,7 +39,7 @@ public class BladeFormatterService {
         final int cstart = context.startOffset();
         final int cend = context.endOffset();
         int textDelta = 0;
-        System.out.println("Startng formatting :\n");
+        System.out.println("Starting formatting :\n");
 
         for (Map.Entry<Integer, FormatToken> entry : formattedLineIndentList.entrySet()) {
             int tstart = entry.getValue().tokenStart;

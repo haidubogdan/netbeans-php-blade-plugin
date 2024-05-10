@@ -50,6 +50,8 @@ D_GENERIC_BLOCK_DIRECTIVES : ('@' DirectivesWithEndTag | '@sectionMissing' | '@h
 D_GENERIC_INLINE_DIRECTIVES : ('@elseif' |  Include | '@extends' | '@each' | '@yield' | '@props' | '@method' 
    | '@class' | '@style' | '@aware' | '@break' | '@continue' | '@selected' | '@disabled' | '@readonly' | '@required') (' ')+ {this._input.LA(1) == '('}? ->pushMode(LOOK_FOR_PHP_EXPRESSION),type(DIRECTIVE);
 
+D_GENERIC_INLINE_MIXED_DIRECTIVES : ('@break' | '@continue')->type(DIRECTIVE);
+
 D_GENERIC_END_TAGS : ('@stop' | '@show' | '@overwrite' | '@end' DirectivesWithEndTag)->type(DIRECTIVE);
 
 //verbatim has special blade escape logic
@@ -76,6 +78,9 @@ D_CUSTOM : ('@' NameString {this._input.LA(1) == '(' ||
         (this._input.LA(1) == ' ' && this._input.LA(2) == '(')}? ) ->pushMode(LOOK_FOR_PHP_EXPRESSION);
 
 D_UNKNOWN : '@' NameString;
+
+//hack to allow completion for directives
+D_AT : '@' (' ' | '>' | [\n\r])?;
 
 //display
 CONTENT_TAG_OPEN : '{{' ->pushMode(INSIDE_REGULAR_ECHO),type(CONTENT_TAG);

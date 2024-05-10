@@ -33,8 +33,10 @@ public class BladeHtmlEmbeddingProvider extends EmbeddingProvider {
     public List<Embedding> getEmbeddings(final Snapshot snapshot) {
         long startTime = System.currentTimeMillis();
         //LOGGER.log(Level.INFO, "html ebedding started {0}", snapshot.getSource().getFileObject().getName());
+        //TODO look for java.lang.IndexOutOfBoundsException: Cannot backup 1 characters. Maximum: 0.
         TokenHierarchy<?> tokenHierarchy = snapshot.getTokenHierarchy();
         TokenSequence<?> sequence = tokenHierarchy.tokenSequence();
+        
         if (sequence == null || !sequence.isValid()) {
             return Collections.emptyList();
         }

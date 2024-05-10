@@ -7,15 +7,15 @@ import org.openide.filesystems.FileObject;
  *
  * @author bhaidu
  */
-public class PathElement extends NamedElement {
+public class DirectiveElement extends NamedElement {
 
-    public PathElement(String name, FileObject file) {
+    public DirectiveElement(String name, FileObject file) {
         super(name, file, ElementType.PATH);
     }
 
     //for better visibility on type searcher
     @Override
     public ElementKind getKind() {
-        return ElementKind.PACKAGE;
+        return ElementKind.METHOD;
     }
 }

@@ -97,6 +97,7 @@ public class BladeLexer extends AbstractAntlrLexerBridge<BladeAntlrColoringLexer
             case BladeAntlrColoringLexer.BLADE_PHP_ECHO_EXPR:
                 return token(PHP_BLADE_ECHO_EXPR);
             case BladeAntlrColoringLexer.D_UNKNOWN:
+            case BladeAntlrColoringLexer.D_AT:
                 return token(BLADE_DIRECTIVE_UNKNOWN);
             case BladeAntlrColoringLexer.ERROR:
             case BladeAntlrColoringLexer.WS_EXPR:

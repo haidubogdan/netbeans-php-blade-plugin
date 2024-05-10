@@ -1,13 +1,11 @@
 package org.netbeans.modules.php.blade.editor.completion;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.swing.text.AbstractDocument;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.JTextComponent;
 import javax.swing.text.Document;
@@ -23,8 +21,6 @@ import org.netbeans.modules.php.blade.editor.ResourceUtilities;
 import org.netbeans.modules.php.blade.editor.completion.BladeCompletionItem.BladeTag;
 import org.netbeans.modules.php.blade.editor.components.AttributeCompletionService;
 import org.netbeans.modules.php.blade.editor.components.ComponentsCompletionService;
-import org.netbeans.modules.php.blade.editor.directives.CustomDirectives;
-import org.netbeans.modules.php.blade.editor.directives.CustomDirectives.CustomDirective;
 import org.netbeans.modules.php.blade.editor.indexing.BladeIndex;
 import org.netbeans.modules.php.blade.editor.indexing.BladeIndex.IndexedReferenceId;
 import org.netbeans.modules.php.blade.editor.indexing.PhpIndexResult;
@@ -32,10 +28,8 @@ import org.netbeans.modules.php.blade.editor.indexing.PhpIndexUtils;
 import org.netbeans.modules.php.blade.editor.path.PathUtils;
 import org.netbeans.modules.php.blade.project.ProjectUtils;
 import org.netbeans.modules.php.blade.syntax.StringUtils;
-import org.netbeans.modules.php.blade.syntax.annotation.Directive;
 import org.netbeans.modules.php.blade.syntax.antlr4.v10.BladeAntlrLexer;
 import static org.netbeans.modules.php.blade.syntax.antlr4.v10.BladeAntlrLexer.*;
-import static org.netbeans.modules.php.blade.syntax.antlr4.v10.BladeAntlrParser.CONTENT_TAG_OPEN;
 import static org.netbeans.modules.php.blade.syntax.antlr4.v10.BladeAntlrParser.RAW_TAG_CLOSE;
 import org.netbeans.modules.php.blade.syntax.antlr4.v10.BladeAntlrUtils;
 import org.netbeans.spi.editor.completion.CompletionItem;
@@ -54,8 +48,6 @@ import org.openide.util.Exceptions;
  * @author bhaidu
  */
 @MimeRegistrations(value = {
-    @MimeRegistration(mimeType = BladeLanguage.MIME_TYPE, service = CompletionProvider.class),
-    //nb18 compatibility
     @MimeRegistration(mimeType = "text/html", service = CompletionProvider.class)
 })
 public class BladeCompletionProvider implements CompletionProvider {
@@ -109,6 +101,7 @@ public class BladeCompletionProvider implements CompletionProvider {
         @Override
         protected void query(CompletionResultSet resultSet, Document doc, int caretOffset) {
             long startTime = System.currentTimeMillis();
+
             //AbstractDocument adoc = (AbstractDocument) doc;
             try {
                 FileObject fo = EditorDocumentUtils.getFileObject(doc);
@@ -162,25 +155,17 @@ public class BladeCompletionProvider implements CompletionProvider {
                 switch (currentToken.getType()) {
                     case BLADE_COMMENT:
                     case RAW_TAG_CLOSE:
-                        return;
                     case PHP_EXPRESSION:
                         return;
                 }
 
                 switch (currentToken.getType()) {
-                    case CONTENT_TAG_OPEN:
-                    case RAW_TAG_OPEN:
-                        completeBladeTags(currentToken.getText(), currentToken, tokens, doc, caretOffset, resultSet);
-                        break;
                     case HTML_IDENTIFIER:
                         completeAttributes(currentToken.getText(), caretOffset, resultSet);
                         break;
                     case HTML:
-                    case D_UNKNOWN:
                         String nText = currentToken.getText();
-                         if (nText.startsWith("{")) {
-                            completeBladeTags(nText, currentToken, tokens, doc, caretOffset, resultSet);
-                        } else if ("livewire".startsWith(nText)) {
+                         if ("livewire".startsWith(nText)) {
                             //quick implementation
                             //??
                             addHtmlTagCompletionItem(nText, "livewire", "livewire", caretOffset, resultSet);
@@ -254,38 +239,6 @@ public class BladeCompletionProvider implements CompletionProvider {
                 resultSet.finish();
             }
         }
-    }
-
-    private void completeBladeTags(String tag, Token currentToken,
-            AntlrTokenSequence tokens,
-            Document doc, int carretOffset, CompletionResultSet resultSet) {
-
-        switch (tag) {
-            case "{":
-                completeBladeTag(currentToken, doc, "{", "}}", -50, carretOffset, "regular echo", resultSet);
-                completeBladeTag(currentToken, doc, "!!", "!!}", -40, carretOffset, "raw echo", resultSet);
-                completeBladeTag(currentToken, doc, "{--", "--}}", -30, carretOffset, "comment", resultSet);
-                break;
-            case "{!":
-                completeBladeTag(currentToken, doc, "!", "!!}", -40, carretOffset, "raw echo", resultSet);
-                break;
-            case "{{":
-                String type = "regular";
-                completeCloseTag(currentToken, doc, "}}", carretOffset, type, resultSet);
-                break;
-            case "{!!":
-                String typeRaw = "raw";
-                completeCloseTag(currentToken, doc, "!!}", carretOffset, typeRaw, resultSet);
-                break;
-        }
-    }
-
-    @SuppressWarnings("rawtypes")
-    private void completeDirectives(String prefix, Document doc, int carretOffset, CompletionResultSet resultSet) {
-        int startOffset = carretOffset - prefix.length();
-
-
-
     }
 
     private void completeYieldIdFromIndex(String prefixIdentifier, FileObject fo,

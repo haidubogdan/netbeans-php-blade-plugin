@@ -83,7 +83,6 @@ Experimental formatting and indenting
 > [!WARNING]
 > .
 
-- The duplicate file process can create a "blade_1.php" file because by default the extension of a file is the last ".*" element. So for "blade.php" the extension found is ".php"
 - HTML join embedding breaks indentation especially in `<script>` and `<style>` context
 
 **brace matcher**
@@ -92,7 +91,7 @@ Experimental formatting and indenting
 
 **completion**
 
-- slowness or process is stuck
+- lag, when changing between projects, or on idle after indexing has finished
 
 ### Why Netbeans 18+ requirement ?
 
