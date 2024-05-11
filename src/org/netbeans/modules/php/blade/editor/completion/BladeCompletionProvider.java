@@ -102,25 +102,21 @@ public class BladeCompletionProvider implements CompletionProvider {
         protected void query(CompletionResultSet resultSet, Document doc, int caretOffset) {
             long startTime = System.currentTimeMillis();
 
-            //AbstractDocument adoc = (AbstractDocument) doc;
             try {
                 FileObject fo = EditorDocumentUtils.getFileObject(doc);
                 
                 if (fo == null || !fo.getMIMEType().equals(BladeLanguage.MIME_TYPE)) {
                     return;
                 }
-                LOGGER.log(Level.INFO, "Completion requested for {0}", fo.getName());
-                //adoc.readLock();
+
                 AntlrTokenSequence tokens;
                 try {
                     String docText = doc.getText(0, doc.getLength());
                     tokens = new AntlrTokenSequence(new BladeAntlrLexer(CharStreams.fromString(docText)));
-                    LOGGER.info(String.format("complete() antlr scan took %d ms for " + fo.getName(),  System.currentTimeMillis() - startTime));
                 } catch (BadLocationException ex) {
                     Exceptions.printStackTrace(ex);
                     return;
                 } finally {
-                    //adoc.readUnlock();
                 }
 
                 if (tokens.isEmpty()) {
@@ -150,13 +146,6 @@ public class BladeCompletionProvider implements CompletionProvider {
 
                 if (currentToken.getText().trim().length() == 0) {
                     return;
-                }
-
-                switch (currentToken.getType()) {
-                    case BLADE_COMMENT:
-                    case RAW_TAG_CLOSE:
-                    case PHP_EXPRESSION:
-                        return;
                 }
 
                 switch (currentToken.getType()) {
@@ -227,6 +216,7 @@ public class BladeCompletionProvider implements CompletionProvider {
                             case D_PUSH_IF:
                             case D_PREPEND:
                                 completeStackIdFromIndex(pathName, fo, caretOffset, resultSet);
+                                break;
                          }
                         break;
                     }
@@ -234,8 +224,7 @@ public class BladeCompletionProvider implements CompletionProvider {
                         break;
                 }
             } finally {
-                long time = System.currentTimeMillis() - startTime;
-                LOGGER.info(String.format("complete() took %d ms", time));
+//                long time = System.currentTimeMillis() - startTime;
                 resultSet.finish();
             }
         }

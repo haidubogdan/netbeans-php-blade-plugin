@@ -397,11 +397,15 @@ public class BladeCompletionProposal implements CompletionProposal {
 
         @Override
         public String getCustomInsertTemplate() {
-            String template = getName() + "($$${arg})\n\n${selection}${cursor}\n" + directive.endtag();
+            String template = getName() + "($$${arg})\n${cursor}\n" + directive.endtag();
 
             switch (getName()) {
                 case "@foreach":
-                    template = getName() + "($$${array} as $$${item})\n${selection}${cursor}\n" + directive.endtag();
+                    template = getName() + "($$${array} as $$${item})\n$${cursor}\n" + directive.endtag();
+                    break;
+                case "@section":
+                case "@session":
+                    template = getName() + "('${id}')\n\n${cursor}\n" + directive.endtag();
                     break;
             }
 
