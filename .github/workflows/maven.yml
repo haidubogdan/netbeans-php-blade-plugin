@@ -44,3 +44,22 @@ jobs:
       with:
         name: blade-php-nbm
         path: ./nb-plugin-package/target/nbm/*.nbm
+    - name: release
+      uses: actions/create-release@v1
+      env:
+          GITHUB_TOKEN: ${{ github.token }}
+      id: create_release
+      with:
+        draft: false
+        prerelease: true
+        release_name: prerelease_test_2.8
+        tag_name: nb2.8
+        body_path: CHANGELOG.md
+    - name: upload nbm artifact
+      uses: actions/upload-release-asset@v1
+      env:
+          GITHUB_TOKEN: ${{ github.token }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./nb-plugin-package/target/nbm/*.nbm
+        asset_name: nb-plugin-test
