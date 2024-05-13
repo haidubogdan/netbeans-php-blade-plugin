@@ -100,6 +100,7 @@ public class BladeFormatterService {
             int indent = 0;
             int blockBalance = 0;
             int htmlBlockBalance = 0;
+            int lastIncrementedLine = 0;
 
             @Override
             public void exitBlock_start(BladeAntlrFormatterParser.Block_startContext ctx) {
@@ -193,13 +194,17 @@ public class BladeFormatterService {
 
             @Override
             public void exitHtml_close_tag(BladeAntlrFormatterParser.Html_close_tagContext ctx) {
-                if (htmlBlockBalance > 0) {
-                    htmlBlockBalance--;
-                } else {
-                    htmlBlockBalance = 0;
-                }
+
                 Token start = ctx.getStart();
                 int line = start.getLine();
+                if (line > 0 && lastIncrementedLine != line){
+                    if (htmlBlockBalance > 0) {
+                        htmlBlockBalance--;
+                    } else {
+                        htmlBlockBalance = 0;
+                    }
+                    lastIncrementedLine = line;
+                }
                 if (!formattedLineIndentList.containsKey(line)) {
                     formattedLineIndentList.put(line, new FormatToken(start.getStartIndex(), indent, htmlBlockBalance, start.getText()));
                 }

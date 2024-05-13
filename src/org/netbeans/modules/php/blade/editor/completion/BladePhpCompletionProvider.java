@@ -48,11 +48,11 @@ import org.openide.util.Exceptions;
  * @author bhaidu
  */
 @MimeRegistrations(value = {
-    @MimeRegistration(mimeType = "text/html", service = CompletionProvider.class),
+    @MimeRegistration(mimeType = "text/x-php5", service = CompletionProvider.class),
 })
-public class BladeCompletionProvider implements CompletionProvider {
+public class BladePhpCompletionProvider implements CompletionProvider {
 
-    private static final Logger LOGGER = Logger.getLogger(BladeCompletionProvider.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(BladePhpCompletionProvider.class.getName());
 
     public enum CompletionType {
         BLADE_PATH,
@@ -149,21 +149,62 @@ public class BladeCompletionProvider implements CompletionProvider {
                 }
 
                 switch (currentToken.getType()) {
-                    case HTML_IDENTIFIER:
-                        completeAttributes(currentToken.getText(), caretOffset, resultSet);
-                        break;
-                    case HTML:
-                        String nText = currentToken.getText();
-                         if ("livewire".startsWith(nText)) {
-                            //quick implementation
-                            //??
-                            addHtmlTagCompletionItem(nText, "livewire", "livewire", caretOffset, resultSet);
+                    case BL_PARAM_STRING: {
+                        String pathName = currentToken.getText().substring(1, currentToken.getText().length() - 1);
+                        List<Integer> tokensMatch = Arrays.asList(new Integer[]{
+                            D_EXTENDS, D_INCLUDE, D_SECTION, D_HAS_SECTION,
+                            D_INCLUDE_IF, D_INCLUDE_WHEN, D_INCLUDE_UNLESS, D_INCLUDE_FIRST,
+                            D_EACH, D_PUSH, D_PUSH_IF, D_PREPEND
+                        });     //todo 
+                        //we should have the stop tokens depending on context
+                        List<Integer> tokensStop = Arrays.asList(new Integer[]{HTML, BL_COMMA, BL_PARAM_CONCAT_OPERATOR});
+                        Token directiveToken = BladeAntlrUtils.findBackward(tokens, tokensMatch, tokensStop);
+                        if (directiveToken == null) {
+                            break;
                         }
+                        switch (directiveToken.getType()) {
+                            case D_EXTENDS:
+                            case D_INCLUDE:
+                            case D_INCLUDE_IF:
+                            case D_INCLUDE_WHEN:
+                            case D_INCLUDE_UNLESS:
+                            case D_EACH:
+                                int lastDotPos;
+
+                                if (pathName.endsWith(".")) {
+                                    lastDotPos = pathName.length();
+                                } else {
+                                    lastDotPos = pathName.lastIndexOf(".");
+                                }
+                                int pathOffset;
+
+                                if (lastDotPos > 0) {
+                                    int dotFix = pathName.endsWith(".") ? 0 : 1;
+                                    pathOffset = caretOffset - pathName.length() + lastDotPos + dotFix;
+                                } else {
+                                    pathOffset = caretOffset - pathName.length();
+                                }
+                                List<FileObject> childrenFiles = PathUtils.getParentChildrenFromPrefixPath(fo, pathName);
+                                for (FileObject file : childrenFiles) {
+                                    String pathFileName = file.getName();
+                                    if (!file.isFolder()) {
+                                        pathFileName = pathFileName.replace(".blade", "");
+                                    }
+                                    completeBladePath(pathFileName, file, pathOffset, resultSet);
+                                }
+                                return;
+                            case D_SECTION:
+                            case D_HAS_SECTION:
+                                completeYieldIdFromIndex(pathName, fo, caretOffset, resultSet);
+                                break;
+                            case D_PUSH:
+                            case D_PUSH_IF:
+                            case D_PREPEND:
+                                completeStackIdFromIndex(pathName, fo, caretOffset, resultSet);
+                                break;
+                         }
                         break;
-                    case HTML_COMPONENT_PREFIX:
-                        String compPrefix = currentToken.getText().length() > 3 ? StringUtils.kebabToCamel(currentToken.getText().substring(3)) : "";
-                        completeComponents(compPrefix, fo, caretOffset, resultSet);
-                        break;
+                    }
                     default:
                         break;
                 }
