@@ -20,7 +20,7 @@ The plugin is not uploaded on netbeans site as it is still in experimental versi
 Check for relase versions at : https://github.com/haidubogdan/netbeans-php-blade-plugin/tags
 
 1. In Netbeans open Tools -> Plugins, select Downloaded tab.
-2. Click "Add plugins" and select the file from the nbm folder.
+2. Click "Add plugins" and select the downloaded nbm.
 3. Select the checkbox next to the "Blade for Netbeans" plugin and click Install.
 4. Restart the IDE when demanded and enjoy your new plugin.
 
@@ -80,6 +80,10 @@ This will help the yielid and view path completion
 
 Experimental formatting and indenting
 
+**blade components**
+
+Limited completion and declaration finder
+
 ---
 
 ### Known issues
@@ -126,6 +130,10 @@ after enter from cursor position
     </tr>
 </table>
 ```
+
+**php code validation**
+
+- embedded php code doesn't have syntax error warning
 
 ### Why Netbeans 18+ requirement ?
 

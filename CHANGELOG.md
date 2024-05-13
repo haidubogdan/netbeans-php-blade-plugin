@@ -1,6 +1,6 @@
 # Change Log
 
-## [2.4.71]
+## [2.4.7.1]
 
 **formatting**
 
@@ -13,7 +13,8 @@
 
 **Package & releases**
 
-- using github actions to do releases
+- using github actions to do releases and nbm generation : https://github.com/haidubogdan/netbeans-php-blade-plugin/blob/main/.github/workflows/maven.yml
+- deleting **nbm** folder as all versions will be available in releases
 
 ## [2.3.4.1]
 
