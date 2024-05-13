@@ -11,6 +11,7 @@ import org.antlr.v4.runtime.Token;
 import org.netbeans.api.annotations.common.NonNull;
 import org.netbeans.api.editor.mimelookup.MimeRegistration;
 import org.netbeans.editor.BaseDocument;
+import org.netbeans.modules.php.blade.editor.tools.MemoryHeap;
 import org.netbeans.modules.php.blade.syntax.BladeDirectivesUtils;
 import org.netbeans.modules.php.blade.syntax.BladeTagsUtils;
 import org.netbeans.modules.php.blade.syntax.antlr4.v10.BladeAntlrLexer;
@@ -47,6 +48,7 @@ public class BladeBracesMatcher implements BracesMatcher {
         document.readLock();
         try {
             Token currentToken = BladeAntlrUtils.getToken(context.getDocument(), context.getSearchOffset());
+
             if (currentToken == null) {
                 return result;
             }
@@ -60,7 +62,7 @@ public class BladeBracesMatcher implements BracesMatcher {
             int end = currentToken.getStopIndex();
 
             String tokenText = originToken.getText();
-
+            
             if (!tokenText.startsWith("@")
                     && !tokenText.startsWith("{")
                     && !tokenText.endsWith("}")) {
@@ -124,20 +126,21 @@ public class BladeBracesMatcher implements BracesMatcher {
             return BraceDirectionType.CURLY_END_TO_START;
         }
 
-        if (tokenText.startsWith("@end") || tokenText.equals("@show")) {
-            return BraceDirectionType.END_TO_START;
-        }
-
         boolean isStartTag = Arrays.asList(BladeTagsUtils.outputStartTags()).indexOf(tokenText) >= 0;
 
         if (isStartTag) {
             return BraceDirectionType.CURLY_START_TO_END;
+        }
+        
+        if (tokenText.startsWith("@end") || tokenText.equals("@show")) {
+            return BraceDirectionType.END_TO_START;
         }
 
         if (BladeDirectivesUtils.directiveStart2EndPair(tokenText) != null) {
             return BraceDirectionType.START_TO_END;
         }
 
+        //TODO get more directive context
         if (token.getType() == BladeAntlrLexer.D_CUSTOM
                 || token.getType() == BladeAntlrLexer.D_UNKNOWN) {
             return BraceDirectionType.CUSTOM_START_TO_END;
@@ -184,6 +187,9 @@ public class BladeBracesMatcher implements BracesMatcher {
 
     public int[] findDirectiveEnd(String directive) {
         String[] pair = BladeDirectivesUtils.directiveStart2EndPair(directive);
+        if (pair == null){
+            return null;
+        }
         List<String> startDirectiveForBalance = new ArrayList<>();
         List<String> stopDirectives = Arrays.asList(pair);
 
@@ -199,9 +205,9 @@ public class BladeBracesMatcher implements BracesMatcher {
                 originToken,
                 stopDirectives,
                 startDirectiveForBalance);
-
-        String text = endToken.getText();
+        
         if (endToken != null) {
+            //String text = endToken.getText();
             int start = endToken.getStartIndex();
             int end = endToken.getStopIndex();
             return new int[]{start, end + 1};

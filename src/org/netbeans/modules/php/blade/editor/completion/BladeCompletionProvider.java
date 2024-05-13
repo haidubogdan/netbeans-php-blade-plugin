@@ -1,13 +1,11 @@
 package org.netbeans.modules.php.blade.editor.completion;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.swing.text.AbstractDocument;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.JTextComponent;
 import javax.swing.text.Document;
@@ -20,10 +18,9 @@ import org.netbeans.api.project.Project;
 import org.netbeans.lib.editor.codetemplates.api.CodeTemplateManager;
 import org.netbeans.modules.php.blade.editor.BladeLanguage;
 import org.netbeans.modules.php.blade.editor.ResourceUtilities;
+import org.netbeans.modules.php.blade.editor.completion.BladeCompletionItem.BladeTag;
 import org.netbeans.modules.php.blade.editor.components.AttributeCompletionService;
 import org.netbeans.modules.php.blade.editor.components.ComponentsCompletionService;
-import org.netbeans.modules.php.blade.editor.directives.CustomDirectives;
-import org.netbeans.modules.php.blade.editor.directives.CustomDirectives.CustomDirective;
 import org.netbeans.modules.php.blade.editor.indexing.BladeIndex;
 import org.netbeans.modules.php.blade.editor.indexing.BladeIndex.IndexedReferenceId;
 import org.netbeans.modules.php.blade.editor.indexing.PhpIndexResult;
@@ -31,10 +28,8 @@ import org.netbeans.modules.php.blade.editor.indexing.PhpIndexUtils;
 import org.netbeans.modules.php.blade.editor.path.PathUtils;
 import org.netbeans.modules.php.blade.project.ProjectUtils;
 import org.netbeans.modules.php.blade.syntax.StringUtils;
-import org.netbeans.modules.php.blade.syntax.annotation.Directive;
 import org.netbeans.modules.php.blade.syntax.antlr4.v10.BladeAntlrLexer;
 import static org.netbeans.modules.php.blade.syntax.antlr4.v10.BladeAntlrLexer.*;
-import static org.netbeans.modules.php.blade.syntax.antlr4.v10.BladeAntlrParser.CONTENT_TAG_OPEN;
 import static org.netbeans.modules.php.blade.syntax.antlr4.v10.BladeAntlrParser.RAW_TAG_CLOSE;
 import org.netbeans.modules.php.blade.syntax.antlr4.v10.BladeAntlrUtils;
 import org.netbeans.spi.editor.completion.CompletionItem;
@@ -53,9 +48,7 @@ import org.openide.util.Exceptions;
  * @author bhaidu
  */
 @MimeRegistrations(value = {
-    @MimeRegistration(mimeType = BladeLanguage.MIME_TYPE, service = CompletionProvider.class),
-    //nb18 compatibility
-    @MimeRegistration(mimeType = "text/html", service = CompletionProvider.class)
+    @MimeRegistration(mimeType = "text/html", service = CompletionProvider.class),
 })
 public class BladeCompletionProvider implements CompletionProvider {
 
@@ -108,25 +101,22 @@ public class BladeCompletionProvider implements CompletionProvider {
         @Override
         protected void query(CompletionResultSet resultSet, Document doc, int caretOffset) {
             long startTime = System.currentTimeMillis();
-            //AbstractDocument adoc = (AbstractDocument) doc;
+
             try {
                 FileObject fo = EditorDocumentUtils.getFileObject(doc);
                 
                 if (fo == null || !fo.getMIMEType().equals(BladeLanguage.MIME_TYPE)) {
                     return;
                 }
-                LOGGER.log(Level.INFO, "Completion requested for {0}", fo.getName());
-                //adoc.readLock();
+
                 AntlrTokenSequence tokens;
                 try {
                     String docText = doc.getText(0, doc.getLength());
                     tokens = new AntlrTokenSequence(new BladeAntlrLexer(CharStreams.fromString(docText)));
-                    LOGGER.info(String.format("complete() antlr scan took %d ms for " + fo.getName(),  System.currentTimeMillis() - startTime));
                 } catch (BadLocationException ex) {
                     Exceptions.printStackTrace(ex);
                     return;
                 } finally {
-                    //adoc.readUnlock();
                 }
 
                 if (tokens.isEmpty()) {
@@ -159,166 +149,29 @@ public class BladeCompletionProvider implements CompletionProvider {
                 }
 
                 switch (currentToken.getType()) {
-                    case BLADE_COMMENT:
-                    case RAW_TAG_CLOSE:
-                        return;
-                    case PHP_EXPRESSION:
-                        return;
-                }
-
-                switch (currentToken.getType()) {
-                    case CONTENT_TAG_OPEN:
-                    case RAW_TAG_OPEN:
-                        completeBladeTags(currentToken.getText(), currentToken, tokens, doc, caretOffset, resultSet);
-                        break;
                     case HTML_IDENTIFIER:
                         completeAttributes(currentToken.getText(), caretOffset, resultSet);
                         break;
                     case HTML:
-                    case D_UNKNOWN:
                         String nText = currentToken.getText();
-                        if (nText.startsWith("@")) {
-                            completeDirectives(nText, doc, caretOffset, resultSet);
-                        } else if (nText.startsWith("{")) {
-                            completeBladeTags(nText, currentToken, tokens, doc, caretOffset, resultSet);
-                        } else if ("livewire".startsWith(nText)) {
+                         if ("livewire".startsWith(nText)) {
                             //quick implementation
+                            //??
                             addHtmlTagCompletionItem(nText, "livewire", "livewire", caretOffset, resultSet);
                         }
                         break;
                     case HTML_COMPONENT_PREFIX:
-                        String compPrefix = currentToken.getText().length() > 3 ? StringUtils.capitalize(currentToken.getText().substring(3)) : "";
+                        String compPrefix = currentToken.getText().length() > 3 ? StringUtils.kebabToCamel(currentToken.getText().substring(3)) : "";
                         completeComponents(compPrefix, fo, caretOffset, resultSet);
                         break;
-                    case BL_PARAM_STRING: {
-                        String pathName = currentToken.getText().substring(1, currentToken.getText().length() - 1);
-                        List<Integer> tokensMatch = Arrays.asList(new Integer[]{
-                            D_EXTENDS, D_INCLUDE, D_SECTION, D_HAS_SECTION,
-                            D_INCLUDE_IF, D_INCLUDE_WHEN, D_INCLUDE_UNLESS, D_INCLUDE_FIRST,
-                            D_EACH, D_PUSH, D_PUSH_IF, D_PREPEND
-                        });     //todo 
-                        //we should have the stop tokens depending on context
-                        List<Integer> tokensStop = Arrays.asList(new Integer[]{HTML, BL_COMMA, BL_PARAM_CONCAT_OPERATOR});
-                        Token directiveToken = BladeAntlrUtils.findBackward(tokens, tokensMatch, tokensStop);
-                        if (directiveToken == null) {
-                            break;
-                        }
-                        switch (directiveToken.getType()) {
-                            case D_EXTENDS:
-                            case D_INCLUDE:
-                            case D_INCLUDE_IF:
-                            case D_INCLUDE_WHEN:
-                            case D_INCLUDE_UNLESS:
-                            case D_EACH:
-
-                                int lastDotPos;
-
-                                if (pathName.endsWith(".")) {
-                                    lastDotPos = pathName.length();
-                                } else {
-                                    lastDotPos = pathName.lastIndexOf(".");
-                                }
-                                int pathOffset;
-
-                                if (lastDotPos > 0) {
-                                    int dotFix = pathName.endsWith(".") ? 0 : 1;
-                                    pathOffset = caretOffset - pathName.length() + lastDotPos + dotFix;
-                                } else {
-                                    pathOffset = caretOffset - pathName.length();
-                                }
-                                List<FileObject> childrenFiles = PathUtils.getParentChildrenFromPrefixPath(fo, pathName);
-                                for (FileObject file : childrenFiles) {
-                                    String pathFileName = file.getName();
-                                    if (!file.isFolder()) {
-                                        pathFileName = pathFileName.replace(".blade", "");
-                                    }
-                                    completeBladePath(pathFileName, file, pathOffset, resultSet);
-                                }
-                                return;
-                            case D_SECTION:
-                            case D_HAS_SECTION:
-                                completeYieldIdFromIndex(pathName, fo, caretOffset, resultSet);
-                                break;
-                            case D_PUSH:
-                            case D_PUSH_IF:
-                            case D_PREPEND:
-                                completeStackIdFromIndex(pathName, fo, caretOffset, resultSet);
-                         }
-                        break;
-                    }
                     default:
                         break;
                 }
             } finally {
-                long time = System.currentTimeMillis() - startTime;
-                LOGGER.info(String.format("complete() took %d ms", time));
+//                long time = System.currentTimeMillis() - startTime;
                 resultSet.finish();
             }
         }
-    }
-
-    private void completeBladeTags(String tag, Token currentToken,
-            AntlrTokenSequence tokens,
-            Document doc, int carretOffset, CompletionResultSet resultSet) {
-
-        switch (tag) {
-            case "{":
-                completeBladeTag(currentToken, doc, "{", "}}", -50, carretOffset, "regular echo", resultSet);
-                completeBladeTag(currentToken, doc, "!!", "!!}", -40, carretOffset, "raw echo", resultSet);
-                completeBladeTag(currentToken, doc, "{--", "--}}", -30, carretOffset, "comment", resultSet);
-                break;
-            case "{!":
-                completeBladeTag(currentToken, doc, "!", "!!}", -40, carretOffset, "raw echo", resultSet);
-                break;
-            case "{{":
-                completeCloseTag(currentToken, doc, "}}", carretOffset, resultSet);
-                break;
-            case "{!!":
-                completeCloseTag(currentToken, doc, "!!}", carretOffset, resultSet);
-                break;
-        }
-    }
-
-    @SuppressWarnings("rawtypes")
-    private void completeDirectives(String prefix, Document doc, int carretOffset, CompletionResultSet resultSet) {
-        int startOffset = carretOffset - prefix.length();
-        DirectiveCompletionList completionList = new DirectiveCompletionList();
-
-        for (Directive directive : completionList.getDirectives()) {
-            String directiveName = directive.name();
-            if (directiveName.startsWith(prefix)) {
-                if (directive.params()) {
-                    resultSet.addItem(DirectiveCompletionBuilder.itemWithArg(
-                            startOffset, carretOffset, prefix, directiveName, directive.description(), doc));
-                    if (!directive.endtag().isEmpty()) {
-                        resultSet.addItem(DirectiveCompletionBuilder.itemWithArg(
-                                startOffset, carretOffset, prefix, directiveName, directive.endtag(), directive.description(), doc));
-                    }
-                } else {
-                    resultSet.addItem(DirectiveCompletionBuilder.simpleItem(
-                            startOffset, directiveName, directive.description()));
-                    if (!directive.endtag().isEmpty()) {
-                        resultSet.addItem(DirectiveCompletionBuilder.simpleItem(
-                                startOffset, carretOffset, prefix, directiveName, directive.endtag(), directive.description(), doc));
-                    }
-                }
-
-            }
-        }
-
-        FileObject fo = EditorDocumentUtils.getFileObject(doc);
-        Project project = ProjectUtils.getMainOwner(fo);
-
-        CustomDirectives.getInstance(project).filterAction(new CustomDirectives.FilterCallback() {
-            @Override
-            public void filterDirectiveName(CustomDirective directive, FileObject file) {
-                if (directive.name.startsWith(prefix)) {
-                    resultSet.addItem(DirectiveCompletionBuilder.itemWithArg(
-                            startOffset, carretOffset, prefix, directive.name,
-                            "custom directive", doc, file));
-                }
-            }
-        });
     }
 
     private void completeYieldIdFromIndex(String prefixIdentifier, FileObject fo,
@@ -384,13 +237,13 @@ public class BladeCompletionProvider implements CompletionProvider {
     }
 
     private void completeCloseTag(Token curlyStartToken, Document doc, String closeTag,
-            int caretOffset, CompletionResultSet resultSet) {
+            int caretOffset, String type, CompletionResultSet resultSet) {
         final String finalCloseTag = closeTag;
         CompletionItem item = CompletionUtilities.newCompletionItemBuilder(closeTag)
                 .iconResource(getReferenceIcon())
                 .startOffset(caretOffset)
                 .leftHtmlText(closeTag)
-                .rightHtmlText(null)
+                .rightHtmlText(type)
                 .onSelect(ctx -> {
                     try {
                         StringBuilder sb = new StringBuilder();
@@ -413,15 +266,9 @@ public class BladeCompletionProvider implements CompletionProvider {
             int caretOffset, CompletionResultSet resultSet) {
 
         String filePath = originFile.getPath();
-        int viewsPos = filePath.indexOf("/views/");
-
-        CompletionItem item = CompletionUtilities.newCompletionItemBuilder(bladePath)
-                .iconResource(getReferenceIcon(originFile))
-                .startOffset(caretOffset)
-                .leftHtmlText(bladePath)
-                .rightHtmlText(filePath.substring(viewsPos, filePath.length()))
-                .sortPriority(1)
-                .build();
+        
+        BladeCompletionItem item = BladeCompletionItem.createViewPath(
+                bladePath, caretOffset, originFile.isFolder(), filePath);
         resultSet.addItem(item);
     }
 
@@ -469,17 +316,22 @@ public class BladeCompletionProvider implements CompletionProvider {
         }
     }
 
+    //??
     private void addHtmlTagCompletionItem(String prefix, String tagName, String plugin,
             int caretOffset, CompletionResultSet resultSet) {
+        
         int insertOffset = caretOffset - prefix.length();
-        CompletionItem item = CompletionUtilities.newCompletionItemBuilder(tagName)
-                .iconResource(getReferenceIcon(CompletionType.HTML_COMPONENT_TAG))
-                .startOffset(insertOffset)
-                .leftHtmlText("&lt;" + tagName + "&gt;")
-                .rightHtmlText(plugin)
-                .sortPriority(1)
-                .build();
+        BladeTag item = new BladeTag(tagName, insertOffset);
         resultSet.addItem(item);
+//        
+//        CompletionItem item = CompletionUtilities.newCompletionItemBuilder(tagName)
+//                .iconResource(getReferenceIcon(CompletionType.HTML_COMPONENT_TAG))
+//                .startOffset(insertOffset)
+//                .leftHtmlText("&lt;" + tagName + "&gt;")
+//                .rightHtmlText(plugin)
+//                .sortPriority(1)
+//                .build();
+//        resultSet.addItem(item);
     }
 
     private void addSimplAttributeItem(String prefix, String attributeName, int caretOffset, CompletionResultSet resultSet) {

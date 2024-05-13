@@ -35,6 +35,10 @@ Installing from source
 
 For more information refer yourself to: http://platform.netbeans.org/tutorials/nbm-google.html
 
+## Github actions
+
+- releases and nbm artifact upload can be done with github action also
+
 ## Usage
 
 ### Features
@@ -83,16 +87,45 @@ Experimental formatting and indenting
 > [!WARNING]
 > .
 
-- The duplicate file process can create a "blade_1.php" file because by default the extension of a file is the last ".*" element. So for "blade.php" the extension found is ".php"
-- HTML join embedding breaks indentation especially in `<script>` and `<style>` context
-
 **brace matcher**
 
 - Emoji character can break brace matching.
 
 **completion**
 
-- slowness or process is stuck
+- lag, when changing between projects, or on idle after indexing has finished
+
+**formatting**
+
+- some indentation are broken from netbeans core HTML plugin
+
+ex: a basic html file
+
+```
+<table>
+    <tr>
+        <th>Col</th>
+    </tr>
+    <tr>
+        <td><a href="">{cursor}</a></td>
+    </tr>
+</table>
+```
+
+after enter from cursor position
+
+```
+<table>
+    <tr>
+        <th>Col</th>
+    </tr>
+    <tr>
+                <td><a href="">
+            
+            </a></td>
+    </tr>
+</table>
+```
 
 ### Why Netbeans 18+ requirement ?
 

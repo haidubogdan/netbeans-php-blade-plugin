@@ -210,7 +210,7 @@ public class BladeIndexer extends EmbeddingIndexer {
         }
     }
 
-    @MimeRegistration(mimeType = BladeLanguage.MIME_TYPE, service = EmbeddingIndexerFactory.class) //NOI18N
+    @MimeRegistration(mimeType = BladeLanguage.MIME_TYPE, service = EmbeddingIndexerFactory.class, position=500) //NOI18N
     public static class Factory extends EmbeddingIndexerFactory {
 
         public static final String NAME = "blade"; //NOI18N

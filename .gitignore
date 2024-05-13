@@ -4,3 +4,4 @@ tools/*.java
 tools/*.java~
 lib
 pom.xml.asc
+/.github/target/

@@ -11,11 +11,13 @@ public enum ElementType {
     NA,
     CUSTOM_DIRECTIVE,
     PATH,
+    DIRECTIVE,
     VARIABLE,
     PHP_CLASS,
     PHP_NAMESPACE,
     PHP_FUNCTION,
     PHP_CONSTANT,
+    LARAVEL_COMPONENT,
     STACK_ID,
     YIELD_ID
 }

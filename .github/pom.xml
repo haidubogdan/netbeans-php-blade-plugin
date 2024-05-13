@@ -11,20 +11,20 @@
     
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-         <nbversion>RELEASE180</nbversion>
+        <nbversion>RELEASE180</nbversion>
         <maven.compiler.source>8</maven.compiler.source>
         <maven.compiler.target>8</maven.compiler.target>
     </properties>
 
     <!--keep until maven changes it-->
-    <version>2.4.1.1</version>
+    <version>1.0.0</version>
     <packaging>nbm</packaging>
 
     <licenses>
-      <license>
-        <name>The GNU Lesser General Public License, Version 3.0</name>
-        <url>https://www.gnu.org/licenses/lgpl-3.0.tx</url>
-      </license>
+        <license>
+            <name>The GNU Lesser General Public License, Version 3.0</name>
+            <url>https://www.gnu.org/licenses/lgpl-3.0.tx</url>
+        </license>
     </licenses>
 
     <developers>
@@ -36,7 +36,7 @@
         </developer>
     </developers>
 
-<!--     <scm>
+    <!--     <scm>
         <connection>scm:git:https://github.com/haidubogdan/netbeans-php-blade-plugin.git</connection>
         <developerConnection>scm:https://github.com/haidubogdan/netbeans-php-blade-plugin.git</developerConnection>
         <url>https://github.com/haidubogdan/netbeans-php-blade-plugin</url>
@@ -59,25 +59,25 @@
     <build>
         <plugins>
             <plugin>
-            <groupId>org.codehaus.mojo</groupId>
-            <artifactId>properties-maven-plugin</artifactId>
-            <version>1.0-alpha-2</version>
-            <executions>
-               <!-- Associate the read-project-properties goal with the initialize phase, to read the properties file. -->
-              <execution>
-                <phase>initialize</phase>
-                <goals>
-                  <goal>read-project-properties</goal>
-                </goals>
-                <configuration>
-                  <files>
-                    <file>project.properties</file>
-                  </files>
-                </configuration>
-              </execution>
-            </executions>
-          </plugin>
-             <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>properties-maven-plugin</artifactId>
+                <version>1.0-alpha-2</version>
+                <executions>
+                    <!-- Associate the read-project-properties goal with the initialize phase, to read the properties file. -->
+                    <execution>
+                        <phase>initialize</phase>
+                        <goals>
+                            <goal>read-project-properties</goal>
+                        </goals>
+                        <configuration>
+                            <files>
+                                <file>project.properties</file>
+                            </files>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.10.1</version>
@@ -87,7 +87,7 @@
                     </execution>
                     <execution>
                         <id>default-testCompile</id>
-                      </execution>
+                    </execution>
                 </executions>
             </plugin>
             <plugin>
@@ -207,7 +207,7 @@
             <groupId>org.netbeans.api</groupId>
             <artifactId>org-netbeans-modules-editor</artifactId>
             <version>${nbversion}</version>
-          </dependency>
+        </dependency>
         <dependency>
             <groupId>org.netbeans.api</groupId>
             <artifactId>org-netbeans-modules-html-lexer</artifactId>
@@ -244,9 +244,9 @@
             <version>${nbversion}</version>
         </dependency>
         <dependency>
-          <groupId>org.netbeans.api</groupId>
-          <artifactId>org-netbeans-modules-parsing-indexing</artifactId>
-          <version>${nbversion}</version>
+            <groupId>org.netbeans.api</groupId>
+            <artifactId>org-netbeans-modules-parsing-indexing</artifactId>
+            <version>${nbversion}</version>
         </dependency>
         <dependency>
             <groupId>org.netbeans.api</groupId>
@@ -310,34 +310,34 @@
             <version>${nbversion}</version>
         </dependency>
         <dependency>
-    <groupId>org.netbeans.api</groupId>
-    <artifactId>org-netbeans-modules-parsing-api</artifactId>
-    <version>${nbversion}</version>
-</dependency>
-<dependency>
-    <groupId>org.netbeans.api</groupId>
-    <artifactId>org-netbeans-modules-editor-indent</artifactId>
-    <version>${nbversion}</version>
-</dependency>
-<dependency>
-    <groupId>org.netbeans.api</groupId>
-    <artifactId>org-netbeans-modules-options-api</artifactId>
-    <version>${nbversion}</version>
-</dependency>
-<dependency>
-    <groupId>org.netbeans.api</groupId>
-    <artifactId>org-netbeans-modules-editor-document</artifactId>
-    <version>${nbversion}</version>
-</dependency>
-<dependency>
-    <groupId>org.netbeans.api</groupId>
-    <artifactId>org-netbeans-modules-projectuiapi</artifactId>
-    <version>${nbversion}</version>
-</dependency>
-<dependency>
-    <groupId>org.netbeans.api</groupId>
-    <artifactId>org-netbeans-modules-projectuiapi-base</artifactId>
-    <version>${nbversion}</version>
-</dependency>
+            <groupId>org.netbeans.api</groupId>
+            <artifactId>org-netbeans-modules-parsing-api</artifactId>
+            <version>${nbversion}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.netbeans.api</groupId>
+            <artifactId>org-netbeans-modules-editor-indent</artifactId>
+            <version>${nbversion}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.netbeans.api</groupId>
+            <artifactId>org-netbeans-modules-options-api</artifactId>
+            <version>${nbversion}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.netbeans.api</groupId>
+            <artifactId>org-netbeans-modules-editor-document</artifactId>
+            <version>${nbversion}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.netbeans.api</groupId>
+            <artifactId>org-netbeans-modules-projectuiapi</artifactId>
+            <version>${nbversion}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.netbeans.api</groupId>
+            <artifactId>org-netbeans-modules-projectuiapi-base</artifactId>
+            <version>${nbversion}</version>
+        </dependency>
     </dependencies>
 </project>

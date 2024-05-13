@@ -29,53 +29,35 @@ inline_statement:
     | regular_echo
     | raw_echo
     | phpInline
-    | BLADE_COMMENT_START BLADE_COMMENT* BLADE_COMMENT_END
     ;
 
 inline_directive: 
-    extends
-    | section_inline
-    | yieldD //yield identifier will be used by antlr
+     section_inline
+    | identifiableType
     | stack
-    | include
-    | includeIf
     | includeCond
-    | includeFirst
     | each
-    | (D_CLASS | D_STYLE) composed_php_expression
-    | (D_METHOD) composed_php_expression
-    | D_PROPS composed_php_expression
-    | D_DD composed_php_expression
-    | D_JS composed_php_expression
-    | D_AWARE composed_php_expression
-    | D_CSRF
-    | useD
+    | (D_INCLUDE_FIRST | D_CLASS | D_STYLE | D_METHOD | D_PROPS 
+           | D_DD | D_JS | D_JS | D_AWARE | D_ASSET_BUNDLER 
+           | D_HTML_ATTR_EXPR | D_CASE | D_JSON) composed_php_expression
+    | (D_CSRF | D_LOOP_ACTION | D_BREAK | D_LIVEWIRE | D_DEFAULT)
     | inject
-    | D_HTML_ATTR_EXPR composed_php_expression
     //using basic inline case statement to not add complexity to parser
-    | D_CASE composed_php_expression
-    | D_JSON composed_php_expression
-    | D_DEFAULT
     | D_PERMISSION_ELSE composed_php_expression
     | loop_action
-    | D_LANG singleArgAndDefaultWrapper
-    | D_LOOP_ACTION | D_BREAK
-    | D_LIVEWIRE
+    | D_ELSE //custom block directives?
     | custom_directive
     ;
 
 block_statement: 
     section
-    | hasSection
-    | sectionMissing
+    | condSection
     | push
     | pushIf
     | once_block
     | prepend
     | fragmentD
     | if
-    | elseif
-    | else
     | switch
     | env_block
     | empty_block
@@ -94,32 +76,28 @@ block_statement:
     | php_blade
     ;
 
-non_blade_statement:
-    html
-    | phpInline
-    ;
-
-extends : D_EXTENDS singleArgAndDefaultWrapper;
-section_inline: D_SECTION doubleArgWrapper;
-section : D_SECTION singleArgWrapper (general_statement | D_PARENT)* (D_SHOW | D_STOP | D_OVERWRITE | D_ENDSECTION | D_APPEND);
-push : D_PUSH singleArgWrapper general_statement* D_ENDPUSH;
-pushOnce : D_PUSH_ONCE singleArgWrapper general_statement* D_ENDPUSH_ONCE;
-pushIf : D_PUSH_IF doubleIfArgWrapper general_statement* D_ENDPUSH_IF;
-prepend : D_PREPEND singleArgWrapper general_statement* D_ENDPREPEND;
+identifiableType : d_name=(D_INCLUDE | D_INCLUDE_IF | D_EXTENDS 
+        |  D_YIELD | D_USE | D_LANG) BLADE_PARAM_LPAREN (idString = BL_PARAM_STRING | composedArgument) (BL_COMMA composedArgument)? (BL_COMMA)? BLADE_PARAM_RPAREN;
+section_inline: D_SECTION doubleArgWrapperP;
+section : D_SECTION singleArgWrapperP (general_statement | D_PARENT)* (D_SHOW | D_STOP | D_OVERWRITE | D_ENDSECTION | D_APPEND);
+push : D_PUSH singleArgWrapperP general_statement* D_ENDPUSH;
+pushOnce : D_PUSH_ONCE singleArgWrapperP general_statement* D_ENDPUSH_ONCE;
+pushIf : D_PUSH_IF singleArgWrapperP general_statement* D_ENDPUSH_IF;
+prepend : D_PREPEND singleArgWrapperP general_statement* D_ENDPREPEND;
 fragmentD locals [String version = "10"] : D_FRAGMENT composed_php_expression general_statement* D_ENDFRAGMENT;
 
-if : D_IF main_php_expression general_statement* endif | D_IF main_php_expression general_statement+ endif?;
-elseif : D_ELSEIF main_php_expression general_statement+ endif?;
-else : D_ELSE (general_statement* endif | general_statement+ endif?);
+if : D_IF main_php_expression general_statement*  (D_ELSEIF main_php_expression general_statement*)* else?  endif;
+else : D_ELSE general_statement*;
 endif: D_ENDIF;
-empty_block : D_EMPTY composed_php_expression general_statement* D_ENDEMPTY;
+empty_block : D_EMPTY composed_php_expression simple_conditional_stm D_ENDEMPTY;
 
 //the consistency for these blocks need to be checked inside the parser
-conditional_block : D_COND_BLOCK_START main_php_expression general_statement* D_COND_BLOCK_END;
-auth_block : D_AUTH_START singleArgWrapperNovar* general_statement* D_AUTH_END;
-env_block: (D_ENV  singleArgWrapper general_statement* D_ENDENV) | D_PRODUCTION general_statement* D_ENDPRODUCTION;
-permission : D_PERMISSION_START composed_php_expression general_statement* D_PERMISSION_END;
+conditional_block : D_COND_BLOCK_START main_php_expression simple_conditional_stm D_COND_BLOCK_END;
+auth_block : D_AUTH_START (BLADE_PARAM_LPAREN (composedArgument)* BLADE_PARAM_RPAREN)* simple_conditional_stm D_AUTH_END;
+env_block: (D_ENV  singleArgWrapperP simple_conditional_stm D_ENDENV) | D_PRODUCTION simple_conditional_stm D_ENDPRODUCTION;
+permission : D_PERMISSION_START composed_php_expression simple_conditional_stm D_PERMISSION_END;
 
+simple_conditional_stm : general_statement* else?;
 //
 error_block :  D_ERROR php_expression general_statement* D_ENDERROR;
 
@@ -136,24 +114,18 @@ forelse : D_FORELSE FOREACH_LOOP_LPAREN loop_expression FOREACH_LOOP_RPAREN (gen
 session : D_SESSION composed_php_expression general_statement* D_ENDSESSION;
 
 //layout
-yieldD : D_YIELD singleArgAndDefaultWrapper;
-stack : D_STACK singleArgWrapper;
-useD : D_USE singleArgAndDefaultWrapper;
+stack : D_STACK singleArgWrapperP;
 inject : D_INJECT BLADE_PARAM_LPAREN composedArgument BL_COMMA (identifiableArgument | composedArgument) BLADE_PARAM_RPAREN;
 
-include : D_INCLUDE singleArgAndDefaultWrapper;
-includeIf : D_INCLUDE_IF singleArgAndDefaultWrapper;
-includeCond : (D_INCLUDE_WHEN | D_INCLUDE_UNLESS) BLADE_PARAM_LPAREN
+includeCond : d_name=(D_INCLUDE_WHEN | D_INCLUDE_UNLESS) BLADE_PARAM_LPAREN
     composedArgument
     BL_COMMA
-    (identifiableArgument | composedArgument)
+    (idString=BL_PARAM_STRING | composedArgument)
     (BL_COMMA composedArgument)?
     BLADE_PARAM_RPAREN;
 
-includeFirst : D_INCLUDE_FIRST singleArgAndDefaultWrapper;
-
 each : D_EACH BLADE_PARAM_LPAREN 
-    (identifiableArgument | composedArgument) //default path
+    (idString=BL_PARAM_STRING | composedArgument) //default path
     BL_COMMA
     composedArgument
     BL_COMMA
@@ -163,16 +135,14 @@ each : D_EACH BLADE_PARAM_LPAREN
     BLADE_PARAM_RPAREN;
 
 once_block : D_ONCE general_statement+ D_ENDONCE;
-hasSection : D_HAS_SECTION singleArgWrapper general_statement* D_ENDIF;
-sectionMissing : D_SECTION_MISSING singleArgWrapper general_statement* D_ENDIF;
+condSection : (D_SECTION_MISSING | D_HAS_SECTION) singleArgWrapperP simple_conditional_stm D_ENDIF;
 
-custom_directive : D_CUSTOM (multiArgWrapper 
-| (BLADE_PARAM_LPAREN BLADE_PARAM_RPAREN))
+custom_directive : D_CUSTOM ((BLADE_PARAM_LPAREN BLADE_PARAM_RPAREN) | multiArgWrapper )
 ;
 
 possibleDirective : D_UNKNOWN;
     
-php_blade : D_PHP composed_php_expression+ D_ENDPHP | D_PHP main_php_expression;
+php_blade : D_PHP composed_php_expression* D_ENDPHP | D_PHP main_php_expression;
 
 phpInline : PHP_INLINE_START composed_php_expression+ (PHP_EXIT | EOF);
 //echo
@@ -190,8 +160,11 @@ class_expr_usage: class_name_reference
 
 object_alias_static_access : alias_name=PHP_VARIABLE PHP_STATIC_ACCESS static_property=PHP_IDENTIFIER;
 object_alias_direct_access : alias_name=PHP_VARIABLE PHP_INSTANCE_ACCESS property=PHP_IDENTIFIER;
-static_direct_class_access : class_identifier PHP_STATIC_ACCESS method_call
-    | class_identifier PHP_STATIC_ACCESS static_property=PHP_IDENTIFIER
+static_direct_class_access : class_name=PHP_IDENTIFIER PHP_STATIC_ACCESS method_call
+    | class_name=PHP_IDENTIFIER PHP_STATIC_ACCESS static_property=PHP_IDENTIFIER
+    ;
+static_direct_namespace_class_access : namespace=PHP_NAMESPACE_PATH? class_name=PHP_IDENTIFIER PHP_STATIC_ACCESS method_call
+    | namespace=PHP_NAMESPACE_PATH? class_name=PHP_IDENTIFIER PHP_STATIC_ACCESS static_property=PHP_IDENTIFIER
     ;
 
 class_instance : PHP_NEW (class_identifier | namespacePath) BLADE_EXPR_LPAREN composed_php_expression* BLADE_EXPR_RPAREN;
@@ -216,12 +189,9 @@ composed_php_expression : class_expr_usage | function_call | PHP_IDENTIFIER | na
 
 simple_foreach_expr: loop_array=PHP_VARIABLE FOREACH_AS key=PHP_VARIABLE (FOREACH_PARAM_ASSIGN item=PHP_VARIABLE)?;
 
-singleArgWrapper:  BLADE_PARAM_LPAREN (identifiableArgument | composedArgument) BLADE_PARAM_RPAREN;
-singleArgWrapperNovar:  BLADE_PARAM_LPAREN (identifiableArgument | composedArgument)* BLADE_PARAM_RPAREN;
-singleArgAndDefaultWrapper:  BLADE_PARAM_LPAREN (identifiableArgument | composedArgument) (BL_COMMA composedArgument)? (BL_COMMA)? BLADE_PARAM_RPAREN;
-doubleArgWrapper:  BLADE_PARAM_LPAREN (identifiableArgument | composedArgument) BL_COMMA composedArgument BLADE_PARAM_RPAREN;
-doubleIfArgWrapper:  BLADE_PARAM_LPAREN composedArgument BL_COMMA (identifiableArgument | composedArgument) BLADE_PARAM_RPAREN;
-multiArgWrapper :  BLADE_PARAM_LPAREN (identifiableArgument | composedArgument) (BL_COMMA composedArgument)* BLADE_PARAM_RPAREN;
+singleArgWrapperP:  BLADE_PARAM_LPAREN (idString=BL_PARAM_STRING | composedArgument) BLADE_PARAM_RPAREN;
+doubleArgWrapperP:  BLADE_PARAM_LPAREN (idString=BL_PARAM_STRING | composedArgument) BL_COMMA composedArgument BLADE_PARAM_RPAREN;
+multiArgWrapper :  BLADE_PARAM_LPAREN (composedArgument) (BL_COMMA composedArgument)* BLADE_PARAM_RPAREN;
 
 identifiableArgument : BL_PARAM_STRING;
 composedArgument : (phpExpr)+ ;
@@ -234,7 +204,7 @@ arrayDefine : BL_SQ_LPAREN phpExpr+ BL_SQ_RPAREN
 | BL_SQ_LPAREN BL_SQ_RPAREN;
 
 paramAssign : BL_PARAM_STRING BL_PARAM_ASSIGN (PHP_VARIABLE | PHP_KEYWORD | BL_PARAM_STRING);
-verbatim_block : D_VERBATIM non_blade_statement+ D_ENDVERBATIM;
+verbatim_block : D_VERBATIM D_ENDVERBATIM;
 
 loop_action : (D_LOOP_ACTION | D_BREAK) php_expression?;
 

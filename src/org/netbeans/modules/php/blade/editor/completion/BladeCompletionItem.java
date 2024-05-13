@@ -1,239 +1,363 @@
-/*
-Licensed to the Apache Software Foundation (ASF)
- */
 package org.netbeans.modules.php.blade.editor.completion;
 
-import java.util.Collections;
-import java.util.Set;
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.Graphics;
+import java.awt.event.KeyEvent;
 import javax.swing.ImageIcon;
-import org.netbeans.modules.csl.api.CompletionProposal;
-import org.netbeans.modules.csl.api.ElementHandle;
-import org.netbeans.modules.csl.api.ElementKind;
-import org.netbeans.modules.csl.api.HtmlFormatter;
-import org.netbeans.modules.csl.api.Modifier;
-
-import org.openide.filesystems.FileObject;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.Caret;
+import javax.swing.text.JTextComponent;
+import org.netbeans.api.editor.completion.Completion;
+import org.netbeans.editor.BaseDocument;
+import org.netbeans.lib.editor.codetemplates.api.CodeTemplateManager;
+import org.netbeans.modules.php.blade.editor.ResourceUtilities;
+import org.netbeans.spi.editor.completion.CompletionItem;
+import org.netbeans.spi.editor.completion.CompletionTask;
+import org.netbeans.spi.editor.completion.support.CompletionUtilities;
+import org.openide.util.ImageUtilities;
 
 /**
  *
- * @author bogdan
+ * @author bhaidu
  */
-public class BladeCompletionItem implements CompletionProposal {
+public class BladeCompletionItem implements CompletionItem {
 
-    //@StaticResource
-    final CompletionRequest request;
-    private final ElementHandle element;
-    final String previewValue;
+    protected static final int DEFAULT_SORT_PRIORITY = 20;
+    protected int substitutionOffset;
+    protected String text;
+    protected boolean shift;
 
-    public BladeCompletionItem(ElementHandle element, CompletionRequest request, String previewValue) {
-        this.element = element;
-        this.request = request;
-        this.previewValue = previewValue;
+    //----------- Factory methods --------------
+    public static BladeCompletionItem createTag(String name, int substitutionOffset) {
+        return new BladeTag(name, substitutionOffset);
+    }
+
+    public static BladeCompletionItem createViewPath(String name,
+            int substitutionOffset, boolean isFolder, String path) {
+        return new ViewPath(name, substitutionOffset, isFolder, path);
+    }
+
+    public static BladeCompletionItem createInlineDirective(String directive,
+            int substitutionOffset, String description) {
+        return new InlineDirective(directive, substitutionOffset, description);
+    }
+
+    public static BladeCompletionItem createDirectiveWithArg(String directive,
+            int substitutionOffset, String description) {
+        return new DirectiveWithArg(directive, substitutionOffset, description);
+    }
+
+    public static BladeCompletionItem createBlockDirective(String directive,
+            String endTag, int substitutionOffset, String description) {
+        return new BlockDirective(directive, endTag, substitutionOffset, description);
+    }
+
+    public static BladeCompletionItem createBlockDirectiveWithArg(String directive,
+            String endTag, int substitutionOffset, String description) {
+        return new BlockDirectiveWithArg(directive, endTag, substitutionOffset, description);
+    }
+    
+    @Override
+    public void defaultAction(JTextComponent component) {
+        if (component != null) {
+            if (!shift) {
+                Completion.get().hideDocumentation();
+                Completion.get().hideCompletion();
+            }
+            int caretOffset = component.getSelectionEnd();
+            int len = caretOffset - substitutionOffset;
+            if (len >= 0) {
+                substituteText(component, len);
+            }
+        }
     }
 
     @Override
-    public int getAnchorOffset() {
-        return request.anchorOffset;
+    public void processKeyEvent(KeyEvent e) {
+        shift = (e.getKeyCode() == KeyEvent.VK_ENTER && e.getID() == KeyEvent.KEY_PRESSED && e.isShiftDown());
     }
 
     @Override
-    public ElementHandle getElement() {
-        return element;
+    public int getPreferredWidth(Graphics grphcs, Font font) {
+        return CompletionUtilities.getPreferredWidth(getLeftHtmlText(), getRightHtmlText(), grphcs, font);
     }
 
-    @Override
-    public String getName() {
-        return element.getName();
+    protected String getLeftHtmlText() {
+        return text;
     }
 
-    @Override
-    public String getSortText() {
-        return getName();
-    }
-
-    @Override
-    public int getSortPrioOverride() {
-        return 0;
-    }
-
-    @Override
-    public String getLhsHtml(HtmlFormatter formatter) {
-        formatter.name(getKind(), true);
-        formatter.appendHtml("<font>");
-        formatter.appendHtml("<b>");
-        formatter.appendText(previewValue);
-        formatter.appendHtml("</b>");
-        formatter.appendHtml("</font>");
-        formatter.name(getKind(), false);
-        return formatter.getText();
-    }
-
-    @Override
-    public ImageIcon getIcon() {
+    protected String getRightHtmlText() {
         return null;
     }
 
     @Override
-    public Set<Modifier> getModifiers() {
-        return Collections.emptySet();
+    public void render(Graphics g, Font defaultFont, Color defaultColor, Color backgroundColor, int width, int height, boolean selected) {
+        CompletionUtilities.renderHtml(getIcon(), getLeftHtmlText(), getRightHtmlText(), g, defaultFont, defaultColor, width, height, selected);
     }
 
-    @Override
-    public String getCustomInsertTemplate() {
+    protected ImageIcon getIcon() {
         return null;
     }
 
     @Override
-    public String getInsertPrefix() {
-        StringBuilder template = new StringBuilder();
-        template.append(getName());
-        return template.toString();
-
+    public CompletionTask createDocumentationTask() {
+        return null;
     }
 
     @Override
-    public String getRhsHtml(HtmlFormatter formatter) {
-        FileObject file = null;
-        if (element != null) {
-            file = element.getFileObject();
+    public CompletionTask createToolTipTask() {
+        return null;
+    }
+
+    @Override
+    public boolean instantSubstitution(JTextComponent component) {
+        if (component != null) {
+            try {
+                int caretOffset = component.getSelectionEnd();
+                if (caretOffset > substitutionOffset) {
+                    String currentText = component.getDocument().getText(substitutionOffset, caretOffset - substitutionOffset);
+                    if (!getSubstituteText().startsWith(currentText)) {
+                        return false;
+                    }
+                }
+            } catch (BadLocationException ble) {
+            }
         }
-        if (file != null) {
-            formatter.reset();
-            formatter.appendText(" ");
-            formatter.appendText(file.getName());
-        }
-        return formatter.getText();
-    }
-
-    @Override
-    public ElementKind getKind() {
-        return ElementKind.CONSTRUCTOR;
-    }
-
-    @Override
-    public boolean isSmart() {
+        defaultAction(component);
         return true;
     }
 
-    public static class PhpElementItem extends BladeCompletionItem {
+    @Override
+    public int getSortPriority() {
+        return DEFAULT_SORT_PRIORITY;
+    }
 
-        public PhpElementItem(ElementHandle element, CompletionRequest request, String previewValue) {
-            super(element, request, previewValue);
-        }
+    @Override
+    public CharSequence getSortText() {
+        return getItemText();
+    }
 
-        @Override
-        public String getRhsHtml(HtmlFormatter formatter) {
-            FileObject file = null;
-            if (this.getElement() != null) {
-                file = this.getElement().getFileObject();
+    @Override
+    public CharSequence getInsertPrefix() {
+        return getItemText();
+    }
+
+    protected String getSubstituteText() {
+        return getItemText();
+    }
+
+    public String getItemText() {
+        return text;
+    }
+
+    private boolean substituteText(JTextComponent component, int len) {
+        return substituteText(component, getSubstituteText(), len, 0);
+    }
+
+    private boolean substituteText(JTextComponent c, final String substituteText, final int len, int moveBack) {
+        final BaseDocument doc = (BaseDocument) c.getDocument();
+        final boolean[] result = new boolean[1];
+        result[0] = true;
+
+        doc.runAtomic(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    //test whether we are trying to insert sg. what is already present in the text
+                    String currentText = doc.getText(substitutionOffset, (doc.getLength() - substitutionOffset) < substituteText.length() ? (doc.getLength() - substitutionOffset) : substituteText.length());
+                    if (!substituteText.equals(currentText)) {
+                        //remove common part
+                        doc.remove(substitutionOffset, len);
+                        insertString(doc, substitutionOffset, substituteText, c);
+                    } else {
+                        c.setCaretPosition(c.getSelectionEnd() + substituteText.length() - len);
+                    }
+                } catch (BadLocationException ex) {
+                    result[0] = false;
+                }
+
             }
-            if (file != null) {
-                formatter.reset();
-                formatter.appendText(" ");
-                formatter.appendText(file.getNameExt());
+        });
+
+        //format the inserted text
+        reindent(c);
+
+        if (moveBack != 0) {
+            Caret caret = c.getCaret();
+            int dot = caret.getDot();
+            caret.setDot(dot - moveBack);
+        }
+
+        return result[0];
+    }
+
+    protected void insertString(BaseDocument doc, int substitutionOffset,
+            String substituteText, JTextComponent c) throws BadLocationException {
+        doc.insertString(substitutionOffset, substituteText, null);
+    }
+
+    protected void reindent(JTextComponent c) {
+
+    }
+
+    public static class BladeTag extends BladeCompletionItem {
+
+        public BladeTag(String name, int substitutionOffset) {
+            this.text = name;
+            this.substitutionOffset = substitutionOffset;
+        }
+    }
+
+    public static class InlineDirective extends BladeCompletionItem {
+
+        protected String description;
+
+        public InlineDirective(String directive, int substitutionOffset,
+                String description) {
+            this.text = directive;
+            this.substitutionOffset = substitutionOffset;
+            this.description = description;
+        }
+
+        @Override
+        protected String getRightHtmlText() {
+            return description;
+        }
+
+        @Override
+        protected ImageIcon getIcon() {
+            String path = ResourceUtilities.ICON_BASE + "icons/at.png";//NOI18N
+            return ImageUtilities.loadImageIcon(path, false);
+        }
+    }
+
+    public static class DirectiveWithArg extends InlineDirective {
+
+        public DirectiveWithArg(String directive, int substitutionOffset,
+                String description) {
+            super(directive, substitutionOffset, description);
+        }
+
+        @Override
+        protected String getSubstituteText() {
+            String template = getItemText() + "($$${arg})";
+            switch (text){
+                case "@include":
+                case "@extends":    
+                    template = getItemText() + "('${path}')";
+                    break;
             }
-            return formatter.getText();
+            return template;
+        }
+
+        @Override
+        protected String getLeftHtmlText() {
+            return text + "()";
+        }
+
+        @Override
+        protected void insertString(BaseDocument doc, int substitutionOffset,
+                String substituteText, JTextComponent ctx) throws BadLocationException {
+            ctx.setCaretPosition(substitutionOffset);
+            CodeTemplateManager.get(doc).createTemporary(substituteText).insert(ctx);
         }
     }
 
-    public static class NamespaceItem extends PhpElementItem {
+    public static class BlockDirective extends BladeCompletionItem {
 
-        public NamespaceItem(ElementHandle element, CompletionRequest request, String previewValue) {
-            super(element, request, previewValue);
+        protected String description;
+        protected String endTag;
+
+        public BlockDirective(String directive, String endTag, int substitutionOffset,
+                String description) {
+            this.text = directive;
+            this.substitutionOffset = substitutionOffset;
+            this.description = description;
+            this.endTag = endTag;
         }
 
         @Override
-        public ElementKind getKind() {
-            return ElementKind.PACKAGE;
+        protected String getSubstituteText() {
+            return getItemText() + "\n${selection}${cursor}\n" + endTag;
         }
 
         @Override
-        public int getSortPrioOverride() {
-            return -50;//priority
+        protected String getLeftHtmlText() {
+            return text + " ... " + endTag;
+        }
+
+        @Override
+        protected String getRightHtmlText() {
+            return description;
+        }
+
+        @Override
+        protected ImageIcon getIcon() {
+            String path = ResourceUtilities.ICON_BASE + "icons/at.png";//NOI18N
+            return ImageUtilities.loadImageIcon(path, false);
+        }
+
+        @Override
+        protected void insertString(BaseDocument doc, int substitutionOffset,
+                String substituteText, JTextComponent ctx) throws BadLocationException {
+            ctx.setCaretPosition(substitutionOffset);
+            CodeTemplateManager.get(doc).createTemporary(substituteText).insert(ctx);
         }
     }
+    
+    public static class BlockDirectiveWithArg extends BlockDirective {
 
-    public static class ClassItem extends PhpElementItem {
-
-        public ClassItem(ElementHandle element, CompletionRequest request, String previewValue) {
-            super(element, request, previewValue);
+        public BlockDirectiveWithArg(String directive, String endTag, int substitutionOffset, String description) {
+            super(directive, endTag, substitutionOffset, description);
         }
 
         @Override
-        public ElementKind getKind() {
-            return ElementKind.CLASS;
+        protected String getSubstituteText() {
+            String template = getItemText() + "($$${arg})\n\n${selection}${cursor}\n" + endTag;
+            
+            switch (text){
+                case "@foreach":
+                    template = getItemText() + "($$${array} as $$${item})\n${selection}${cursor}\n" + endTag;
+                    break;
+            }
+            
+            return template;
         }
 
         @Override
-        public int getSortPrioOverride() {
-            return 10;//priority
-        }
-    }
-
-    public static class FunctionItem extends PhpElementItem {
-
-        public FunctionItem(ElementHandle element, CompletionRequest request, String previewValue) {
-            super(element, request, previewValue);
-        }
-
-        @Override
-        public ElementKind getKind() {
-            return ElementKind.METHOD;
-        }
-
-        @Override
-        public int getSortPrioOverride() {
-            return 20;//priority
-        }
-    }
-
-    public static class ConstantItem extends PhpElementItem {
-
-        public ConstantItem(ElementHandle element, CompletionRequest request, String previewValue) {
-            super(element, request, previewValue);
-        }
-
-        @Override
-        public ElementKind getKind() {
-            return ElementKind.CONSTANT;
-        }
-
-    }
-
-    public static class VariableItem extends BladeCompletionItem {
-
-        public VariableItem(ElementHandle element, CompletionRequest request, String previewValue) {
-            super(element, request, previewValue);
-        }
-
-        @Override
-        public ElementKind getKind() {
-            return ElementKind.VARIABLE;
+        protected String getLeftHtmlText() {
+            return text + "() ... " + endTag;
         }
 
     }
 
-    public static class BladeVariableItem extends BladeCompletionItem {
+    public static class ViewPath extends BladeCompletionItem {
 
-        public BladeVariableItem(ElementHandle element, CompletionRequest request, String previewValue) {
-            super(element, request, previewValue);
+        protected boolean isFolder;
+        protected String filePath;
+
+        public ViewPath(String name, int substitutionOffset,
+                boolean isFolder, String filePath) {
+            this.text = name;
+            this.substitutionOffset = substitutionOffset;
+            this.isFolder = isFolder;
+            this.filePath = filePath;
         }
 
         @Override
-        public ElementKind getKind() {
-            return ElementKind.VARIABLE;
+        protected ImageIcon getIcon() {
+            String path = ResourceUtilities.ICON_BASE + "icons/file.png";
+            if (isFolder) {
+                path = "org/openide/loaders/defaultFolder.gif";//NOI18N
+            }
+            return ImageUtilities.loadImageIcon(path, false);
         }
 
         @Override
-        public String getRhsHtml(HtmlFormatter formatter) {
-            return "blade";
+        protected String getRightHtmlText() {
+            int viewsPos = filePath.indexOf("/views/");
+            return filePath.substring(viewsPos, filePath.length());
         }
-    }
-
-    public static class CompletionRequest {
-
-        public int anchorOffset;
-        public int carretOffset;
-        public String prefix;
     }
 }

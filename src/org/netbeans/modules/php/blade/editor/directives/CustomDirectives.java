@@ -77,8 +77,9 @@ public final class CustomDirectives {
         
         if (defaultAppProvider != null){
             addDirectiveNamesFromFile(defaultAppProvider);
-            defaultAppPath = defaultAppProvider.getPath();
-            FileUtil.addRecursiveListener(fileChangeListener, new File(defaultAppPath));
+            File defaultAppFile = new File(defaultAppProvider.getPath());
+            defaultAppPath = defaultAppFile.getAbsolutePath();
+            FileUtil.addRecursiveListener(fileChangeListener, defaultAppFile);
         }
         
         if (compilerPathList.length == 0) {
@@ -93,7 +94,9 @@ public final class CustomDirectives {
                 //remove
                 continue;
             }
-            if (defaultAppPath.equals(path)){
+            
+            String filePath = file.getPath();
+            if (defaultAppPath.equals(filePath)){
                 continue;
             }
             FileUtil.addRecursiveListener(fileChangeListener, file);

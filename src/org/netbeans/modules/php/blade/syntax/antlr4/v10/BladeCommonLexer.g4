@@ -36,7 +36,7 @@ fragment PhpKeyword
 fragment Digit
     : ('0'..'9');
 
-BLADE_COMMENT_START : '{{--' ->pushMode(INSIDE_BLADE_COMMENT);
+BLADE_COMMENT_START : '{{--' ->pushMode(INSIDE_BLADE_COMMENT), skip;
 
 EMAIL_SUBSTRING : ('@' FullIdentifier '.')->type(HTML);
 
@@ -49,23 +49,23 @@ D_ESCAPES
     |  '@@' '@'?
     | '@{' '{'?
     | '@media' [ ]* '('?
-    | '@charset'
-    | '@import'
-    | '@namespace'
-    | '@document'
-    | '@font-face'
-    | '@page'
-    | '@supports'
-    | '@layer'
-    | '@tailwind'
-    | '@apply' 
-    | '@-webkit-keyframes' 
-    | '@keyframes'
+    | '@charset' [ ]*
+    | '@import' [ ]*
+    | '@namespace' [ ]*
+    | '@document' [ ]*
+    | '@font-face' [ ]*
+    | '@page' [ ]*
+    | '@supports' [ ]*
+    | '@layer' [ ]*
+    | '@tailwind' [ ]*
+    | '@apply'  [ ]*
+    | '@-webkit-keyframes' [ ]*
+    | '@keyframes' [ ]*
     )->type(HTML);
 
 mode INSIDE_BLADE_COMMENT;
 
-BLADE_COMMENT_END : '--}}'->popMode;
+BLADE_COMMENT_END : '--}}'->popMode, skip;
 
 //hack to merge all php inputs into one token
 BLADE_COMMENT_PEEK : . {
@@ -73,7 +73,7 @@ BLADE_COMMENT_PEEK : . {
         this._input.LA(2) == '-' &&
         this._input.LA(3) == '}' &&
         this._input.LA(4) == '}'
-      }? ->type(BLADE_COMMENT);
-BLADE_COMMENT_MORE : . ->more;
+      }? ->skip;
+BLADE_COMMENT_MORE : . ->skip;
 
-BLADE_COMMENT_EOF : EOF->type(BLADE_COMMENT),popMode;
+BLADE_COMMENT_EOF : EOF->popMode, skip;

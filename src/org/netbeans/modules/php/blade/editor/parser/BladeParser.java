@@ -4,6 +4,7 @@ import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
 import java.util.Collections;
 import java.util.WeakHashMap;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.event.ChangeListener;
 import org.netbeans.modules.parsing.api.ParserManager;
@@ -28,11 +29,19 @@ public class BladeParser extends org.netbeans.modules.parsing.spi.Parser {
 
     @Override
     public void parse(Snapshot snapshot, Task task, SourceModificationEvent event) throws ParseException {
+        if (snapshot == null) {
+            return;
+        }
+        LOGGER.info(String.format("Parsing request for for " + task.getClass().getName() + " event changed : " + event.sourceChanged()));
+        if (task.getClass().getName().contains("HtmlCssIndexContributor")){
+            LOGGER.log(Level.INFO, "Skipped parsing for {0}", task.getClass().getName());
+            return;
+        }
         long startTime = System.currentTimeMillis();
         BladeParserResult parserResult = createParserResult(snapshot);
 
         BladeParserResult parsed = parserResult.get(task.getClass().getName());
-        cacheResult(snapshot.getSource().getFileObject(), parsed);
+        //cacheResult(snapshot.getSource().getFileObject(), parsed);
         lastResult = parsed;
         //LOGGER.info(String.format("Finished parsing for " + task.getClass().getName() + ". Time : %d ms", System.currentTimeMillis() - startTime));
     }
@@ -61,6 +70,7 @@ public class BladeParser extends org.netbeans.modules.parsing.spi.Parser {
         return new BladeParserResult(snapshot);
     }
 
+    /*
     public static BladeParserResult getParserResult(FileObject fo) {
         BladeParserResult result = null;
         java.lang.ref.Reference<BladeParserResult> ceReference;
@@ -93,4 +103,5 @@ public class BladeParser extends org.netbeans.modules.parsing.spi.Parser {
 
         return result;
     }
+*/
 }

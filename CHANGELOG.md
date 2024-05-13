@@ -1,5 +1,36 @@
 # Change Log
 
+## [2.4.71]
+
+**formatting**
+
+- fix indentation for some html tags
+
+**completion**
+
+- move directive completion to ComplentionHandler trigger for better template insert
+- add version of blade laravel for some directives 
+
+**Package & releases**
+
+- using github actions to do releases
+
+## [2.3.4.1]
+
+**antlr parser**
+
+- disable BuildParserTree for memory efficiency
+
+## [2.3.2.1]
+
+**filesystem**
+
+- fix #53 file duplication issue with `blade.php` extension
+
+**lexer**
+
+- refactor
+
 ## [2.2.8.1]
 
 **parser**

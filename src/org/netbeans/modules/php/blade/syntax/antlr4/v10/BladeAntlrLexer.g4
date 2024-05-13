@@ -38,7 +38,22 @@ tokens {
 channels { COMMENT, PHP_CODE }
 
 fragment CompomentIdentifier
-    : [a-z\u0080-\ufffe][a-z0-9_.:\u0080-\ufffe]*;
+    : [a-z\u0080-\ufffe][a-z0-9-_.:\u0080-\ufffe]*;
+
+fragment CssSelector
+    : ('#' | '.')? [a-z\u0080-\ufffe][a-z0-9-_:\u0080-\ufffe]* | CssAttrSelector;
+
+fragment JsFunctionStart
+    : NameString '(' NameString* (',' (' ')* NameString)* (' ')* ')' (' ')* ('{' { this._input.LA(1) != '{'}?)?;
+
+fragment StringParam
+    : [\\'] CssSelector ((' ')* CssSelector)* [\\'] | '"' CssSelector ((' ')* CssSelector)* [\\'] '"';
+
+fragment CssAttrSelector 
+    : '[' FullIdentifier (EQ StringAttrValue)?  ']';
+
+fragment StringAttrValue
+    : '"' FullIdentifier '"' | [\\'] FullIdentifier [\\'];
 //RULES
 
 
@@ -80,7 +95,13 @@ D_EACH : '@each'->pushMode(LOOK_FOR_BLADE_PARAMETERS);
 
 //layout
 D_EXTENDS : '@extends'->pushMode(LOOK_FOR_BLADE_PARAMETERS);
+
+//from livewire (converts variable to javascript syntax)
 D_JS : '@js'->pushMode(LOOK_FOR_PHP_COMPOSED_EXPRESSION);
+
+//safe json_encode
+D_JSON  : '@json'->pushMode(LOOK_FOR_PHP_COMPOSED_EXPRESSION);
+
 D_SECTION : '@section'->pushMode(LOOK_FOR_BLADE_PARAMETERS);
 D_HAS_SECTION : '@hasSection'->pushMode(LOOK_FOR_BLADE_PARAMETERS);
 D_SECTION_MISSING : '@sectionMissing'->pushMode(LOOK_FOR_BLADE_PARAMETERS);
@@ -137,7 +158,7 @@ D_AWARE : '@aware'->pushMode(LOOK_FOR_PHP_COMPOSED_EXPRESSION);
 //misc
 D_SESSION : '@session'->pushMode(LOOK_FOR_PHP_COMPOSED_EXPRESSION);
 D_ENDSESSION : '@endsession';
-D_JSON  : '@json'->pushMode(LOOK_FOR_PHP_COMPOSED_EXPRESSION);
+
 D_DD : ('@dd' | '@dump')->pushMode(LOOK_FOR_PHP_COMPOSED_EXPRESSION);
 D_LANG : '@lang'->pushMode(LOOK_FOR_BLADE_PARAMETERS);
 
@@ -152,6 +173,7 @@ D_ENDVERBATIM : '@endverbatim';
 
 //known plugins
 D_LIVEWIRE : '@livewireStyles' | '@bukStyles' | '@livewireScripts' | '@bukScripts' | '@livewire';
+D_ASSET_BUNDLER : '@vite'->pushMode(LOOK_FOR_PHP_EXPRESSION);
 
 //we will decide that a custom directive has expression to avoid email matching
 D_CUSTOM : ('@' NameString {this._input.LA(1) == '(' || 
@@ -170,12 +192,17 @@ PHP_INLINE_START : ('<?php' | '<?=')->pushMode(INSIDE_PHP_INLINE);
 
 
 HTML_COMPONENT_PREFIX : '<x-' (CompomentIdentifier |  CompomentIdentifier ('::' CompomentIdentifier)+)? {this.compomentTagOpen = true;};
+HTML_L_COMPONENT : '<x-' CompomentIdentifier {this._input.LA(1) == '>'}? ->type(HTML_COMPONENT_PREFIX);
+JS_SCRIPT : ('$'? '(' StringParam | FullIdentifier ')' ('.' NameString)? |  JsFunctionStart ('.' JsFunctionStart)*) ->skip;
 HTML_TAG_START : '<' FullIdentifier;
-HTML_CLOSE_TAG : '<' '/' FullIdentifier '>' {this.compomentTagOpen = false;} ->type(HTML);
+HTML_CLOSE_TAG : ('</' FullIdentifier [\n\r ]* '>')+ ->skip;
 HTML_TAG_SELF_CLOSE : '/>' {this.compomentTagOpen = false;}->type(HTML);
 HTML_CLOSE_SYMBOL : '>' {this.compomentTagOpen = false;} ->type(HTML);
-HTML_PATH : (' ')* FullIdentifier ('/' FullIdentifier)+ ->skip;
+STRING_PATH : ('"' HTML_PATH* '"' | [\\'] HTML_PATH [\\'])->skip;
+HTML_PATH : (' ')* FullIdentifier ('/' FullIdentifier)+ ('.' NameString)? ('?' NameString (EQ NameString)*)? ->skip;
 HTML_TEXT : (' ')* FullIdentifier ((' ')+ FullIdentifier)+ ->skip;
+
+
 HTML_IDENTIFIER : FullIdentifier {this.consumeHtmlIdentifier();};
 
 EQ : '=';
@@ -348,7 +375,7 @@ BL_PARAM_EXIT_EOF : EOF->type(ERROR),popMode;
 mode BLADE_INLINE_PHP;
 
 PHP_D_BLADE_COMMENT : ('//' ~[\n\r]+)->skip;
-PHP_D_BLADE_ML_COMMENT : ('/*' .*? '*/')->skip;
+PHP_D_BLADE_ML_COMMENT : '/*' .*? '*/' [\n\r]*->skip;
 
 D_ENDPHP : '@endphp'->popMode;
 PHP_D_UNKNOWN : '@'->type(HTML),popMode;
@@ -432,7 +459,7 @@ VERBATIM_HTML : . {
         this._input.LA(5) == 'v' &&
         this._input.LA(6) == 'e' &&
         this._input.LA(7) == 'r'
-      }? ->type(HTML);
+      }? ->skip;
 
 
 EXIT_VERBATIM_MOD_EOF : EOF->type(ERROR),mode(DEFAULT_MODE);

@@ -18,6 +18,11 @@ jobs:
       with:
         java-version: '8'
         distribution: 'temurin'
+    - name : get version
+      run: echo "::set-output name=version::$(grep 'OpenIDE-Module-Specification-Version'  ./manifest.mf | cut -d':' -f 2-)"
+      id: nbm_version
+    - name: view version
+      run: echo ${{ steps.nbm_version.outputs.version }}    
     - name : prepare the files from project
       run : mkdir -p  nb-plugin-package/src/main/java
     - name : prepare the files from project  
@@ -44,3 +49,23 @@ jobs:
       with:
         name: blade-php-nbm
         path: ./nb-plugin-package/target/nbm/*.nbm
+    - name: release
+      uses: actions/create-release@v1
+      env:
+          GITHUB_TOKEN: ${{ github.token }}
+      id: create_release
+      with:
+        draft: false
+        prerelease: true
+        release_name: Netbeans Blade Php prerelease ${{ steps.nbm_version.outputs.version }}  
+        tag_name: nbpr1.0.2
+        body_path: .github/workflows/CHANGELOG.md
+    - name: upload nbm artifact
+      uses: actions/upload-release-asset@v1
+      env:
+          GITHUB_TOKEN: ${{ github.token }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./nb-plugin-package/target/nbm/php.blade-1.0.0.nbm
+        asset_name: php-blade180-${{ steps.nbm_version.outputs.version }}.nbm
+        asset_content_type: application/nbm

@@ -68,25 +68,15 @@ public interface BladeAntlrParserListener extends ParseTreeListener {
 	 */
 	void exitBlock_statement(BladeAntlrParser.Block_statementContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link BladeAntlrParser#non_blade_statement}.
+	 * Enter a parse tree produced by {@link BladeAntlrParser#identifiableType}.
 	 * @param ctx the parse tree
 	 */
-	void enterNon_blade_statement(BladeAntlrParser.Non_blade_statementContext ctx);
+	void enterIdentifiableType(BladeAntlrParser.IdentifiableTypeContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link BladeAntlrParser#non_blade_statement}.
+	 * Exit a parse tree produced by {@link BladeAntlrParser#identifiableType}.
 	 * @param ctx the parse tree
 	 */
-	void exitNon_blade_statement(BladeAntlrParser.Non_blade_statementContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link BladeAntlrParser#extends}.
-	 * @param ctx the parse tree
-	 */
-	void enterExtends(BladeAntlrParser.ExtendsContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link BladeAntlrParser#extends}.
-	 * @param ctx the parse tree
-	 */
-	void exitExtends(BladeAntlrParser.ExtendsContext ctx);
+	void exitIdentifiableType(BladeAntlrParser.IdentifiableTypeContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link BladeAntlrParser#section_inline}.
 	 * @param ctx the parse tree
@@ -168,16 +158,6 @@ public interface BladeAntlrParserListener extends ParseTreeListener {
 	 */
 	void exitIf(BladeAntlrParser.IfContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link BladeAntlrParser#elseif}.
-	 * @param ctx the parse tree
-	 */
-	void enterElseif(BladeAntlrParser.ElseifContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link BladeAntlrParser#elseif}.
-	 * @param ctx the parse tree
-	 */
-	void exitElseif(BladeAntlrParser.ElseifContext ctx);
-	/**
 	 * Enter a parse tree produced by {@link BladeAntlrParser#else}.
 	 * @param ctx the parse tree
 	 */
@@ -247,6 +227,16 @@ public interface BladeAntlrParserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitPermission(BladeAntlrParser.PermissionContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link BladeAntlrParser#simple_conditional_stm}.
+	 * @param ctx the parse tree
+	 */
+	void enterSimple_conditional_stm(BladeAntlrParser.Simple_conditional_stmContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link BladeAntlrParser#simple_conditional_stm}.
+	 * @param ctx the parse tree
+	 */
+	void exitSimple_conditional_stm(BladeAntlrParser.Simple_conditional_stmContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link BladeAntlrParser#error_block}.
 	 * @param ctx the parse tree
@@ -318,16 +308,6 @@ public interface BladeAntlrParserListener extends ParseTreeListener {
 	 */
 	void exitSession(BladeAntlrParser.SessionContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link BladeAntlrParser#yieldD}.
-	 * @param ctx the parse tree
-	 */
-	void enterYieldD(BladeAntlrParser.YieldDContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link BladeAntlrParser#yieldD}.
-	 * @param ctx the parse tree
-	 */
-	void exitYieldD(BladeAntlrParser.YieldDContext ctx);
-	/**
 	 * Enter a parse tree produced by {@link BladeAntlrParser#stack}.
 	 * @param ctx the parse tree
 	 */
@@ -337,16 +317,6 @@ public interface BladeAntlrParserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitStack(BladeAntlrParser.StackContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link BladeAntlrParser#useD}.
-	 * @param ctx the parse tree
-	 */
-	void enterUseD(BladeAntlrParser.UseDContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link BladeAntlrParser#useD}.
-	 * @param ctx the parse tree
-	 */
-	void exitUseD(BladeAntlrParser.UseDContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link BladeAntlrParser#inject}.
 	 * @param ctx the parse tree
@@ -358,26 +328,6 @@ public interface BladeAntlrParserListener extends ParseTreeListener {
 	 */
 	void exitInject(BladeAntlrParser.InjectContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link BladeAntlrParser#include}.
-	 * @param ctx the parse tree
-	 */
-	void enterInclude(BladeAntlrParser.IncludeContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link BladeAntlrParser#include}.
-	 * @param ctx the parse tree
-	 */
-	void exitInclude(BladeAntlrParser.IncludeContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link BladeAntlrParser#includeIf}.
-	 * @param ctx the parse tree
-	 */
-	void enterIncludeIf(BladeAntlrParser.IncludeIfContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link BladeAntlrParser#includeIf}.
-	 * @param ctx the parse tree
-	 */
-	void exitIncludeIf(BladeAntlrParser.IncludeIfContext ctx);
-	/**
 	 * Enter a parse tree produced by {@link BladeAntlrParser#includeCond}.
 	 * @param ctx the parse tree
 	 */
@@ -387,16 +337,6 @@ public interface BladeAntlrParserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitIncludeCond(BladeAntlrParser.IncludeCondContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link BladeAntlrParser#includeFirst}.
-	 * @param ctx the parse tree
-	 */
-	void enterIncludeFirst(BladeAntlrParser.IncludeFirstContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link BladeAntlrParser#includeFirst}.
-	 * @param ctx the parse tree
-	 */
-	void exitIncludeFirst(BladeAntlrParser.IncludeFirstContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link BladeAntlrParser#each}.
 	 * @param ctx the parse tree
@@ -418,25 +358,15 @@ public interface BladeAntlrParserListener extends ParseTreeListener {
 	 */
 	void exitOnce_block(BladeAntlrParser.Once_blockContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link BladeAntlrParser#hasSection}.
+	 * Enter a parse tree produced by {@link BladeAntlrParser#condSection}.
 	 * @param ctx the parse tree
 	 */
-	void enterHasSection(BladeAntlrParser.HasSectionContext ctx);
+	void enterCondSection(BladeAntlrParser.CondSectionContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link BladeAntlrParser#hasSection}.
+	 * Exit a parse tree produced by {@link BladeAntlrParser#condSection}.
 	 * @param ctx the parse tree
 	 */
-	void exitHasSection(BladeAntlrParser.HasSectionContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link BladeAntlrParser#sectionMissing}.
-	 * @param ctx the parse tree
-	 */
-	void enterSectionMissing(BladeAntlrParser.SectionMissingContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link BladeAntlrParser#sectionMissing}.
-	 * @param ctx the parse tree
-	 */
-	void exitSectionMissing(BladeAntlrParser.SectionMissingContext ctx);
+	void exitCondSection(BladeAntlrParser.CondSectionContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link BladeAntlrParser#custom_directive}.
 	 * @param ctx the parse tree
@@ -548,6 +478,16 @@ public interface BladeAntlrParserListener extends ParseTreeListener {
 	 */
 	void exitStatic_direct_class_access(BladeAntlrParser.Static_direct_class_accessContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link BladeAntlrParser#static_direct_namespace_class_access}.
+	 * @param ctx the parse tree
+	 */
+	void enterStatic_direct_namespace_class_access(BladeAntlrParser.Static_direct_namespace_class_accessContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link BladeAntlrParser#static_direct_namespace_class_access}.
+	 * @param ctx the parse tree
+	 */
+	void exitStatic_direct_namespace_class_access(BladeAntlrParser.Static_direct_namespace_class_accessContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link BladeAntlrParser#class_instance}.
 	 * @param ctx the parse tree
 	 */
@@ -658,55 +598,25 @@ public interface BladeAntlrParserListener extends ParseTreeListener {
 	 */
 	void exitSimple_foreach_expr(BladeAntlrParser.Simple_foreach_exprContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link BladeAntlrParser#singleArgWrapper}.
+	 * Enter a parse tree produced by {@link BladeAntlrParser#singleArgWrapperP}.
 	 * @param ctx the parse tree
 	 */
-	void enterSingleArgWrapper(BladeAntlrParser.SingleArgWrapperContext ctx);
+	void enterSingleArgWrapperP(BladeAntlrParser.SingleArgWrapperPContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link BladeAntlrParser#singleArgWrapper}.
+	 * Exit a parse tree produced by {@link BladeAntlrParser#singleArgWrapperP}.
 	 * @param ctx the parse tree
 	 */
-	void exitSingleArgWrapper(BladeAntlrParser.SingleArgWrapperContext ctx);
+	void exitSingleArgWrapperP(BladeAntlrParser.SingleArgWrapperPContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link BladeAntlrParser#singleArgWrapperNovar}.
+	 * Enter a parse tree produced by {@link BladeAntlrParser#doubleArgWrapperP}.
 	 * @param ctx the parse tree
 	 */
-	void enterSingleArgWrapperNovar(BladeAntlrParser.SingleArgWrapperNovarContext ctx);
+	void enterDoubleArgWrapperP(BladeAntlrParser.DoubleArgWrapperPContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link BladeAntlrParser#singleArgWrapperNovar}.
+	 * Exit a parse tree produced by {@link BladeAntlrParser#doubleArgWrapperP}.
 	 * @param ctx the parse tree
 	 */
-	void exitSingleArgWrapperNovar(BladeAntlrParser.SingleArgWrapperNovarContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link BladeAntlrParser#singleArgAndDefaultWrapper}.
-	 * @param ctx the parse tree
-	 */
-	void enterSingleArgAndDefaultWrapper(BladeAntlrParser.SingleArgAndDefaultWrapperContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link BladeAntlrParser#singleArgAndDefaultWrapper}.
-	 * @param ctx the parse tree
-	 */
-	void exitSingleArgAndDefaultWrapper(BladeAntlrParser.SingleArgAndDefaultWrapperContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link BladeAntlrParser#doubleArgWrapper}.
-	 * @param ctx the parse tree
-	 */
-	void enterDoubleArgWrapper(BladeAntlrParser.DoubleArgWrapperContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link BladeAntlrParser#doubleArgWrapper}.
-	 * @param ctx the parse tree
-	 */
-	void exitDoubleArgWrapper(BladeAntlrParser.DoubleArgWrapperContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link BladeAntlrParser#doubleIfArgWrapper}.
-	 * @param ctx the parse tree
-	 */
-	void enterDoubleIfArgWrapper(BladeAntlrParser.DoubleIfArgWrapperContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link BladeAntlrParser#doubleIfArgWrapper}.
-	 * @param ctx the parse tree
-	 */
-	void exitDoubleIfArgWrapper(BladeAntlrParser.DoubleIfArgWrapperContext ctx);
+	void exitDoubleArgWrapperP(BladeAntlrParser.DoubleArgWrapperPContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link BladeAntlrParser#multiArgWrapper}.
 	 * @param ctx the parse tree

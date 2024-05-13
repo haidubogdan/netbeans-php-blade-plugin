@@ -28,12 +28,16 @@ import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeListener;
 import org.antlr.v4.runtime.tree.TerminalNode;
+import org.netbeans.api.annotations.common.NonNull;
+import org.netbeans.api.annotations.common.NullAllowed;
 import org.netbeans.modules.csl.api.Severity;
+import org.netbeans.modules.csl.spi.DefaultError;
 import org.netbeans.modules.php.blade.editor.compiler.BladePhpCompiler;
 import org.netbeans.modules.php.blade.editor.navigator.BladeStructureItem;
 import org.netbeans.modules.php.blade.editor.navigator.BladeStructureItem.DirectiveBlockStructureItem;
 import org.netbeans.modules.php.blade.editor.navigator.BladeStructureItem.DirectiveInlineStructureItem;
 import org.netbeans.modules.php.blade.syntax.antlr4.v10.BladeAntlrLexer;
+import static org.netbeans.modules.php.blade.syntax.antlr4.v10.BladeAntlrLexer.*;
 import org.netbeans.modules.php.blade.syntax.antlr4.v10.BladeAntlrParser;
 import org.netbeans.modules.php.blade.syntax.antlr4.v10.BladeAntlrParserBaseListener;
 import org.netbeans.modules.php.editor.parser.PHPParseResult;
@@ -72,48 +76,11 @@ public class BladeParserResult extends ParserResult {
         TEMPLATE_PATH,
     }
 
-    public enum ParserContext {
-        EXTENDS(BladeAntlrParser.ExtendsContext.class.getSimpleName()),
-        INCLUDE(BladeAntlrParser.IncludeContext.class.getSimpleName()),
-        INCLUDE_IF(BladeAntlrParser.IncludeIfContext.class.getSimpleName()),
-        INCLUDE_COND(BladeAntlrParser.IncludeCondContext.class.getSimpleName()),
-        YIELD(BladeAntlrParser.YieldDContext.class.getSimpleName()),
-        STACK(BladeAntlrParser.StackContext.class.getSimpleName()),
-        SECTION(BladeAntlrParser.SectionContext.class.getSimpleName()),
-        SECTION_INLINE(BladeAntlrParser.Section_inlineContext.class.getSimpleName()),
-        PUSH(BladeAntlrParser.PushContext.class.getSimpleName()),
-        PUSH_IF(BladeAntlrParser.PushIfContext.class.getSimpleName()),
-        PREPEND(BladeAntlrParser.PrependContext.class.getSimpleName()),
-        HAS_SECTION(BladeAntlrParser.HasSectionContext.class.getSimpleName()),
-        SECTION_MISSING(BladeAntlrParser.SectionMissingContext.class.getSimpleName()),
-        EACH(BladeAntlrParser.EachContext.class.getSimpleName()),
-        USE(BladeAntlrParser.UseDContext.class.getSimpleName()),
-        INJECT(BladeAntlrParser.InjectContext.class.getSimpleName());
-
-        String className;
-
-        ParserContext(String className) {
-            this.className = className;
-        }
-
-        public static ParserContext getValue(String name) {
-
-            for (ParserContext c : ParserContext.values()) {
-                if (c.className.equals(name)) {
-                    return c;
-                }
-            }
-
-            return null;
-        }
-    }
-
     public BladeParserResult(Snapshot snapshot) {
         super(snapshot);
     }
 
     protected BladeAntlrParser createParser(Snapshot snapshot) {
-        LOGGER.log(Level.INFO, "Preparing to parse for {0} ", snapshot.getSource().getFileObject().getName());
         CharStream cs = CharStreams.fromString(String.valueOf(snapshot.getText()));
         BladeAntlrLexer lexer = new BladeAntlrLexer(cs);
         CommonTokenStream tokens = new CommonTokenStream(lexer);
@@ -122,47 +89,37 @@ public class BladeParserResult extends ParserResult {
         return ret;
     }
 
-    public BladeParserResult get(String taskCkass) {
+    public BladeParserResult get(String taskClass) {
         long startTime = System.currentTimeMillis();
-        LOGGER.log(Level.INFO, "PARSER TRIGGERED BY {0}", taskCkass);
+        LOGGER.log(Level.INFO, "PARSER TRIGGERED BY {0}", taskClass);
         if (!finished) {
             BladeAntlrParser parser = createParser(getSnapshot());
+            //don't need a parse tree (memory efficiency)
+            parser.setBuildParseTree(false);
             //LOGGER.info(String.format("parser created in %d ms", System.currentTimeMillis() - startTime));
             parser.addErrorListener(createErrorListener());
             //if (!taskCkass.toLowerCase().contains("completion") && !taskCkass.toLowerCase().contains("fold") && !taskCkass.toLowerCase().contains("hints")){
-                parser.addParseListener(createDeclarationReferencesListener());
+            parser.addParseListener(createDeclarationReferencesListener());
             //}
-            
+
             parser.addParseListener(createPhpElementsOccurencesListener());
 
-            if (taskCkass.toLowerCase().contains("completion")){
+            if (taskClass.toLowerCase().contains("completion")) {
                 parser.addParseListener(createVariableListener());
             }
-
-            //not implemented yet
-            //parser.addParseListener(createLayoutTreeListener());
-            if (taskCkass.toLowerCase().contains("fold")){
-                parser.addParseListener(createStructureListener());
-            }
-            if (taskCkass.toLowerCase().contains("hints")){
+            //if (taskClass.toLowerCase().contains("fold") || taskClass.contains("navigator") || taskClass.contains("semantic") || taskClass.contains("HtmlStructureItem")) {
+            parser.addParseListener(createStructureListener());
+            //}
+            if (taskClass.toLowerCase().contains("hints")) {
                 parser.addParseListener(createSemanticsListener());
             }
             evaluateParser(parser);
-            LOGGER.info(String.format("Parser evaluated in %d ms " + taskCkass, System.currentTimeMillis() - startTime));
-//            BladePhpCompiler phpCompiler = new BladePhpCompiler();
-////            PHPParseResult phpParserResult = phpCompiler.extractPhpContent(
-////                    this.getSnapshot()).getPhpParserResult();
-////
-////            if (phpParserResult != null) {
-////                //double errors for php inline
-////                this.errors.addAll(phpParserResult.getDiagnostics());
-////            }
+            LOGGER.info(String.format("Parser evaluated in %d ms " + taskClass + " | " + this.getFileObject().getNameExt(), System.currentTimeMillis() - startTime));
 
             finished = true;
-//            LOGGER.log(Level.INFO, "finished parser result for {0}", getFileObject().getName());
         }
         long time = System.currentTimeMillis() - startTime;
-        LOGGER.info(String.format("finished took %d ms", time));
+        LOGGER.info(String.format("finished parser took %d ms " + this.getFileObject().getNameExt(), time));
         return this;
     }
 
@@ -173,11 +130,84 @@ public class BladeParserResult extends ParserResult {
     protected ParseTreeListener createDeclarationReferencesListener() {
 
         return new BladeAntlrParserBaseListener() {
+            @Override
+            public void exitDoubleArgWrapperP(BladeAntlrParser.DoubleArgWrapperPContext ctx) {
+                Token directive = ctx.getParent().getStart();
+                if (directive == null) {
+                    return;
+                }
+
+                Token paramString = ctx.idString;
+
+                if (paramString == null || paramString.getText().length() < 3) {
+                    return;
+                }
+
+                addIdentifiableOccurenceForDeclaration(directive, paramString);
+            }
 
             @Override
-            public void exitIdentifiableArgument(BladeAntlrParser.IdentifiableArgumentContext ctx) {
-                // ctx.each_path.BL_PARAM_STRING();
-                addIdentifiableOccurenceForDeclaration(ctx);
+            public void exitSingleArgWrapperP(BladeAntlrParser.SingleArgWrapperPContext ctx) {
+                Token directive = ctx.getParent().getStart();
+                if (directive == null) {
+                    return;
+                }
+
+                Token paramString = ctx.idString;
+
+                if (paramString == null || paramString.getText().length() < 3) {
+                    return;
+                }
+
+                addIdentifiableOccurenceForDeclaration(directive, paramString);
+            }
+
+            @Override
+            public void exitIncludeCond(BladeAntlrParser.IncludeCondContext ctx) {
+                Token directive = ctx.d_name;
+                if (directive == null) {
+                    return;
+                }
+
+                Token paramString = ctx.idString;
+
+                if (paramString == null || paramString.getText().length() < 3) {
+                    return;
+                }
+
+                addIdentifiableOccurenceForDeclaration(directive, paramString);
+            }
+
+            @Override
+            public void exitEach(BladeAntlrParser.EachContext ctx) {
+                Token directive = ctx.getStart();
+                if (directive == null) {
+                    return;
+                }
+
+                Token paramString = ctx.idString;
+
+                if (paramString == null || paramString.getText().length() < 3) {
+                    return;
+                }
+
+                addIdentifiableOccurenceForDeclaration(directive, paramString);
+            }
+
+            @Override
+            public void exitIdentifiableType(BladeAntlrParser.IdentifiableTypeContext ctx) {
+                Token directive = ctx.d_name;
+                if (directive == null) {
+                    return;
+                }
+
+                Token paramString = ctx.idString;
+
+                if (paramString == null || paramString.getText().length() < 3) {
+                    return;
+                }
+
+                addIdentifiableOccurenceForDeclaration(directive, paramString);
             }
 
             @Override
@@ -187,38 +217,29 @@ public class BladeParserResult extends ParserResult {
                 occurancesForDeclaration.put(range, new Reference(ReferenceType.CUSTOM_DIRECTIVE, directiveName, range));
             }
 
-            /**
-             * - adds occurences for declaration - stores specific type
-             * references
-             */
-            private void addIdentifiableOccurenceForDeclaration(BladeAntlrParser.IdentifiableArgumentContext ctx) {
-                if (ctx.BL_PARAM_STRING() == null) {
-                    return;
-                }
+            private void addIdentifiableOccurenceForDeclaration(Token directive,
+                    Token paramString) {
 
-                String className = ctx.getParent().getClass().getSimpleName();
-
-                if (className.endsWith("WrapperContext")) {
-                    className = ctx.getParent().getParent().getClass().getSimpleName();
-                }
-
-                ParserContext classType = ParserContext.getValue(className);
-
-                if (classType == null) {
-                    return;
-                }
-
-                ReferenceType type = getReferenceType(classType);
-
-                if (type == null) {
-                    //not handled
-                    return;
-                }
-
-                Token paramString = ctx.BL_PARAM_STRING().getSymbol();
+                OffsetRange range = new OffsetRange(paramString.getStartIndex(), paramString.getStopIndex());
                 String bladeParamText = paramString.getText();
                 bladeParamText = bladeParamText.substring(1, bladeParamText.length() - 1);
-                OffsetRange range;
+
+                //used for indexing
+                switch (directive.getType()) {
+                    case D_STACK:
+                        addStackReference(ReferenceType.STACK, bladeParamText, range);
+                        break;
+                    case D_YIELD:
+                        addYieldReference(ReferenceType.YIELD, bladeParamText, range);
+                        break;
+                }
+
+                ReferenceType type = getReferenceType(directive.getType());
+
+                if (type == null) {
+                    return;
+                }
+
                 Reference ref;
                 if (type.equals(ReferenceType.USE) || type.equals(ReferenceType.INJECT)) {
                     int lastSlashPos = bladeParamText.lastIndexOf("\\");
@@ -229,26 +250,19 @@ public class BladeParserResult extends ParserResult {
                     //extracting the namespace and classname
                     ref = new Reference(type, bladeParamText.substring(lastSlashPos + 1), range, null, bladeParamText.substring(0, lastSlashPos - 1));
                 } else {
-                    range = new OffsetRange(paramString.getStartIndex(), paramString.getStopIndex());
                     ref = new Reference(type, bladeParamText, range);
                 }
 
-                //to add include path ??
                 occurancesForDeclaration.put(range, ref);
 
-                //adding references to be indexed
-                switch (type) {
-                    case YIELD:
-                        addYieldReference(ReferenceType.YIELD, bladeParamText, range);
-                        break;
-                    case STACK:
-                        addStackReference(ReferenceType.STACK, bladeParamText, range);
-                        break;
-                    case INCLUDE:
-                    case INCLUDE_IF:
-                    case INCLUDE_COND:
-                    case EACH:
-                        if (bladeParamText.contains("::")){
+                switch (directive.getType()) {
+                    case D_EACH:
+                    case D_INCLUDE_WHEN:
+                    case D_INCLUDE_UNLESS:
+                    case D_INCLUDE:
+                    case D_INCLUDE_IF:
+                    case D_INCLUDE_FIRST:
+                        if (bladeParamText.contains("::")) {
                             //don't include package resources
                             break;
                         }
@@ -256,6 +270,7 @@ public class BladeParserResult extends ParserResult {
                         break;
                 }
             }
+
         };
 
     }
@@ -416,27 +431,64 @@ public class BladeParserResult extends ParserResult {
                 }
             }
 
-            //this will be always static
             @Override
-            public void exitStatic_direct_class_access(BladeAntlrParser.Static_direct_class_accessContext ctx) {
-                if (ctx.class_identifier() == null || ctx.class_identifier().class_name == null) {
+            public void exitStatic_direct_namespace_class_access(BladeAntlrParser.Static_direct_namespace_class_accessContext ctx) {
+                if (ctx.class_name == null) {
                     return;
                 }
 
-                Token classIdentifier = ctx.class_identifier().class_name;
+                Token classIdentifier = ctx.class_name;
                 String className = classIdentifier.getText();
                 OffsetRange range = new OffsetRange(classIdentifier.getStartIndex(), classIdentifier.getStopIndex() + 1);
 
-                if (ctx.class_identifier().namespace != null) {
-                    occurancesForDeclaration.put(range, new Reference(
-                            ReferenceType.PHP_CLASS,
-                            className, range,
-                            null,
-                            ctx.class_identifier().namespace.getText())
-                    );
-                } else {
-                    phpClassOccurences.put(range, className);
+                occurancesForDeclaration.put(range, new Reference(
+                        ReferenceType.PHP_CLASS,
+                        className, range,
+                        null,
+                        ctx.namespace.getText())
+                );
+
+                OffsetRange callRange = null;
+                int start = ctx.PHP_STATIC_ACCESS().getSymbol().getStartIndex();
+                String fieldName = null;
+                FieldType fieldType = null;
+                if (ctx.static_property != null) {
+                    //constants
+                    callRange = new OffsetRange(start, ctx.static_property.getStopIndex() + 1);
+                    fieldName = ctx.static_property.getText();
+                    fieldType = FieldType.CONSTANT;
+                } else if (ctx.method_call() != null) {
+                    //methods
+                    callRange = new OffsetRange(start, ctx.method_call().getStop().getStopIndex() + 1);
+                    fieldName = ctx.method_call().func_name.getText();
+                    fieldType = FieldType.METHOD;
+                    OffsetRange functionRange = new OffsetRange(ctx.method_call().func_name.getStartIndex(), ctx.method_call().func_name.getStopIndex() + 1);
+                    phpMethodOccurences.put(functionRange, new Reference(ReferenceType.PHP_METHOD, fieldName, range, className));
                 }
+
+                if (callRange != null) {
+                    FieldAccessReference fieldAccess = new FieldAccessReference(
+                            ReferenceType.STATIC_FIELD_ACCESS,
+                            className,
+                            fieldName,
+                            fieldType
+                    );
+                    fieldCallType.put(callRange, fieldAccess);
+                }
+            }
+
+            //this will be always static
+            @Override
+            public void exitStatic_direct_class_access(BladeAntlrParser.Static_direct_class_accessContext ctx) {
+                if (ctx.class_name == null) {
+                    return;
+                }
+
+                Token classIdentifier = ctx.class_name;
+                String className = classIdentifier.getText();
+                OffsetRange range = new OffsetRange(classIdentifier.getStartIndex(), classIdentifier.getStopIndex() + 1);
+
+                phpClassOccurences.put(range, className);
 
                 OffsetRange callRange = null;
                 int start = ctx.PHP_STATIC_ACCESS().getSymbol().getStartIndex();
@@ -493,39 +545,42 @@ public class BladeParserResult extends ParserResult {
             }
 
             @Override
-            public void exitIdentifiableArgument(BladeAntlrParser.IdentifiableArgumentContext ctx) {
-                identifier = null;
-                if (ctx.BL_PARAM_STRING() == null) {
+            public void exitIdentifiableType(BladeAntlrParser.IdentifiableTypeContext ctx) {
+                Token directive = ctx.d_name;
+                if (directive == null) {
                     return;
                 }
-                identifier = ctx.BL_PARAM_STRING().getText();
-            }
 
+                Token paramString = ctx.idString;
+
+                if (paramString == null || paramString.getText().length() < 3) {
+                    return;
+                }
+
+                String bladeParamText = paramString.getText();
+                identifier = bladeParamText.substring(1, bladeParamText.length() - 1);
+            }
+            
             @Override
             public void exitInline_directive(BladeAntlrParser.Inline_directiveContext ctx) {
-                ParseTree rootRule = ctx.getChild(0);
-                if (rootRule instanceof ParserRuleContext) {
-                    ParseTree directive = ((ParserRuleContext) rootRule).getChild(0);
-                    if (directive instanceof TerminalNode) {
-                        Token directiveToken = ((TerminalNode) directive).getSymbol();
-                        if (directiveToken == null) {
-                            return;
-                        }
-                        DirectiveInlineStructureItem inlineElement;
-                        String directiveName = directiveToken.getText();
+                Token directiveToken = ctx.getStart();
 
-                        inlineElement = new DirectiveInlineStructureItem(directiveName, identifier,
-                                getFileObject(), directiveToken.getStartIndex(), directiveToken.getStopIndex() + 1);
-
-                        if (blockBalance > 0) {
-                            lexerStructure.add(inlineElement);
-                        } else {
-                            structure.add(inlineElement);
-                        }
-
-                    }
-
+                if (directiveToken == null) {
+                    return;
                 }
+
+                DirectiveInlineStructureItem inlineElement;
+                String directiveName = directiveToken.getText();
+
+                inlineElement = new DirectiveInlineStructureItem(directiveName, identifier,
+                        getFileObject(), directiveToken.getStartIndex(), directiveToken.getStopIndex() + 1);
+
+                if (blockBalance > 0) {
+                    lexerStructure.add(inlineElement);
+                } else {
+                    structure.add(inlineElement);
+                }
+
             }
 
             @Override
@@ -536,77 +591,65 @@ public class BladeParserResult extends ParserResult {
 
             @Override
             public void exitBlock_statement(BladeAntlrParser.Block_statementContext ctx) {
-                ParseTree rootRule = ctx.getChild(0);
                 blockBalance--;
-                if (rootRule instanceof ParserRuleContext) {
-                    ParseTree directive = ((ParserRuleContext) rootRule).getChild(0);
-                    if (directive instanceof TerminalNode) {
-                        Token directiveToken = ((TerminalNode) directive).getSymbol();
-                        if (directiveToken == null) {
-                            return;
-                        }
-                        String directiveName = directiveToken.getText();
-                        DirectiveBlockStructureItem blockItem = new DirectiveBlockStructureItem(directiveName, identifier,
-                                getFileObject(), ctx.getStart().getStartIndex(), ctx.getStop().getStopIndex() + 1);
+                Token directiveToken = ctx.getStart();
 
-                        blockItem.nestedItems.addAll(lexerStructure);
-                        lexerStructure.clear();
-                        if (blockBalance > 0 && !directiveName.startsWith("@else")) {
-                            lexerStructure.add(blockItem);
-                        } else {
-                            structure.add(blockItem);
-                        }
-                        //folds
-                        int start = ctx.getStart().getStartIndex() + 1 + directiveName.length();
-                        int end = ctx.getStop().getStartIndex();//the start of the close directive
+                if (directiveToken == null) {
+                    return;
+                }
 
-                        if (start > end) {
-                            return;
-                        }
-                        OffsetRange range = new OffsetRange(start, end);
-                        if (!folds.contains(range)) {
-                            folds.add(range);
-                        }
-                    }
+                String directiveName = directiveToken.getText();
+                DirectiveBlockStructureItem blockItem = new DirectiveBlockStructureItem(directiveName, identifier,
+                        getFileObject(), ctx.getStart().getStartIndex(), ctx.getStop().getStopIndex() + 1);
 
+                blockItem.nestedItems.addAll(lexerStructure);
+                lexerStructure.clear();
+                if (blockBalance > 0 && !directiveName.startsWith("@else")) {
+                    lexerStructure.add(blockItem);
+                } else {
+                    structure.add(blockItem);
+                }
+                //folds
+                int start = ctx.getStart().getStartIndex() + 1 + directiveName.length();
+                int end = ctx.getStop().getStartIndex();//the start of the close directive
+
+                if (start > end) {
+                    return;
+                }
+                OffsetRange range = new OffsetRange(start, end);
+                if (!folds.contains(range)) {
+                    folds.add(range);
                 }
             }
         };
     }
 
-    private ReferenceType getReferenceType(ParserContext classType) {
-        switch (classType) {
-            case EACH:
-                return ReferenceType.EACH;
-            case EXTENDS:
-                return ReferenceType.EXTENDS;
-            case INCLUDE:
+    private ReferenceType getReferenceType(int type) {
+        switch (type) {
+            case D_INCLUDE:
                 return ReferenceType.INCLUDE;
-            case INCLUDE_IF:
+            case D_INCLUDE_IF:
                 return ReferenceType.INCLUDE_IF;
-            case INCLUDE_COND:
-                return ReferenceType.INCLUDE_COND;
-            case YIELD:
-                return ReferenceType.YIELD;
-            case STACK:
-                return ReferenceType.STACK;
-            case SECTION:
-            case SECTION_INLINE:
-                return ReferenceType.SECTION;
-            case PUSH:
-                return ReferenceType.PUSH;
-            case PUSH_IF:
-                return ReferenceType.PUSH_IF;
-            case PREPEND:
-                return ReferenceType.PREPEND;
-            case HAS_SECTION:
-                return ReferenceType.HAS_SECTION;
-            case SECTION_MISSING:
-                return ReferenceType.SECTION_MISSING;
-            case USE:
+            case D_EXTENDS:
+                return ReferenceType.EXTENDS;
+            case D_USE:
                 return ReferenceType.USE;
-            case INJECT:
+            case D_INJECT:
                 return ReferenceType.INJECT;
+            case D_SECTION:
+                return ReferenceType.SECTION;
+            case D_HAS_SECTION:
+                return ReferenceType.HAS_SECTION;
+            case D_SECTION_MISSING:
+                return ReferenceType.SECTION_MISSING;
+            case D_PUSH:
+                return ReferenceType.PUSH;
+            case D_PUSH_IF:
+                return ReferenceType.PUSH_IF;
+            case D_PREPEND:
+                return ReferenceType.PREPEND;
+            case D_EACH:
+                return ReferenceType.EACH;
             default:
                 return null;
         }
@@ -770,21 +813,6 @@ public class BladeParserResult extends ParserResult {
 
             }
 
-            @Override
-            public void enterInclude(BladeAntlrParser.IncludeContext ctx) {
-                includeContext = true;
-            }
-
-            @Override
-            public void exitParamAssign(BladeAntlrParser.ParamAssignContext ctx) {
-                String variableName = ctx.BL_PARAM_STRING(0).getSymbol().getText();
-                int y = 1;
-            }
-
-            @Override
-            public void exitInclude(BladeAntlrParser.IncludeContext ctx) {
-                includeContext = false;
-            }
         };
     }
 
@@ -939,5 +967,22 @@ public class BladeParserResult extends ParserResult {
         public String arrayVariable;
         public String keyVariable;
         public String itemVariable;
+    }
+
+    /**
+     * seems that java caches only this class ? BladeError is not found in some
+     * occasions
+     */
+    public static class BladeError extends DefaultError implements org.netbeans.modules.csl.api.Error.Badging {
+
+        public BladeError(@NullAllowed String key, @NonNull String displayName, @NullAllowed String description, @NonNull FileObject file, @NonNull int start, @NonNull int end, @NonNull Severity severity) {
+            super(key, displayName, description, file, start, end, severity);
+        }
+
+        @Override
+        public boolean showExplorerBadge() {
+            return true;
+        }
+
     }
 }

@@ -87,25 +87,13 @@ public class BladeAntlrParserBaseListener implements BladeAntlrParserListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterNon_blade_statement(BladeAntlrParser.Non_blade_statementContext ctx) { }
+	@Override public void enterIdentifiableType(BladeAntlrParser.IdentifiableTypeContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitNon_blade_statement(BladeAntlrParser.Non_blade_statementContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterExtends(BladeAntlrParser.ExtendsContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitExtends(BladeAntlrParser.ExtendsContext ctx) { }
+	@Override public void exitIdentifiableType(BladeAntlrParser.IdentifiableTypeContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -207,18 +195,6 @@ public class BladeAntlrParserBaseListener implements BladeAntlrParserListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterElseif(BladeAntlrParser.ElseifContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitElseif(BladeAntlrParser.ElseifContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
 	@Override public void enterElse(BladeAntlrParser.ElseContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -298,6 +274,18 @@ public class BladeAntlrParserBaseListener implements BladeAntlrParserListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitPermission(BladeAntlrParser.PermissionContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterSimple_conditional_stm(BladeAntlrParser.Simple_conditional_stmContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitSimple_conditional_stm(BladeAntlrParser.Simple_conditional_stmContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -387,18 +375,6 @@ public class BladeAntlrParserBaseListener implements BladeAntlrParserListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterYieldD(BladeAntlrParser.YieldDContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitYieldD(BladeAntlrParser.YieldDContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
 	@Override public void enterStack(BladeAntlrParser.StackContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -406,18 +382,6 @@ public class BladeAntlrParserBaseListener implements BladeAntlrParserListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitStack(BladeAntlrParser.StackContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterUseD(BladeAntlrParser.UseDContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitUseD(BladeAntlrParser.UseDContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -435,30 +399,6 @@ public class BladeAntlrParserBaseListener implements BladeAntlrParserListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterInclude(BladeAntlrParser.IncludeContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitInclude(BladeAntlrParser.IncludeContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterIncludeIf(BladeAntlrParser.IncludeIfContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitIncludeIf(BladeAntlrParser.IncludeIfContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
 	@Override public void enterIncludeCond(BladeAntlrParser.IncludeCondContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -466,18 +406,6 @@ public class BladeAntlrParserBaseListener implements BladeAntlrParserListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitIncludeCond(BladeAntlrParser.IncludeCondContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterIncludeFirst(BladeAntlrParser.IncludeFirstContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitIncludeFirst(BladeAntlrParser.IncludeFirstContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -507,25 +435,13 @@ public class BladeAntlrParserBaseListener implements BladeAntlrParserListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterHasSection(BladeAntlrParser.HasSectionContext ctx) { }
+	@Override public void enterCondSection(BladeAntlrParser.CondSectionContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitHasSection(BladeAntlrParser.HasSectionContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterSectionMissing(BladeAntlrParser.SectionMissingContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitSectionMissing(BladeAntlrParser.SectionMissingContext ctx) { }
+	@Override public void exitCondSection(BladeAntlrParser.CondSectionContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -663,6 +579,18 @@ public class BladeAntlrParserBaseListener implements BladeAntlrParserListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterStatic_direct_namespace_class_access(BladeAntlrParser.Static_direct_namespace_class_accessContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitStatic_direct_namespace_class_access(BladeAntlrParser.Static_direct_namespace_class_accessContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterClass_instance(BladeAntlrParser.Class_instanceContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -795,61 +723,25 @@ public class BladeAntlrParserBaseListener implements BladeAntlrParserListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterSingleArgWrapper(BladeAntlrParser.SingleArgWrapperContext ctx) { }
+	@Override public void enterSingleArgWrapperP(BladeAntlrParser.SingleArgWrapperPContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitSingleArgWrapper(BladeAntlrParser.SingleArgWrapperContext ctx) { }
+	@Override public void exitSingleArgWrapperP(BladeAntlrParser.SingleArgWrapperPContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterSingleArgWrapperNovar(BladeAntlrParser.SingleArgWrapperNovarContext ctx) { }
+	@Override public void enterDoubleArgWrapperP(BladeAntlrParser.DoubleArgWrapperPContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitSingleArgWrapperNovar(BladeAntlrParser.SingleArgWrapperNovarContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterSingleArgAndDefaultWrapper(BladeAntlrParser.SingleArgAndDefaultWrapperContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitSingleArgAndDefaultWrapper(BladeAntlrParser.SingleArgAndDefaultWrapperContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterDoubleArgWrapper(BladeAntlrParser.DoubleArgWrapperContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitDoubleArgWrapper(BladeAntlrParser.DoubleArgWrapperContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterDoubleIfArgWrapper(BladeAntlrParser.DoubleIfArgWrapperContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitDoubleIfArgWrapper(BladeAntlrParser.DoubleIfArgWrapperContext ctx) { }
+	@Override public void exitDoubleArgWrapperP(BladeAntlrParser.DoubleArgWrapperPContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *

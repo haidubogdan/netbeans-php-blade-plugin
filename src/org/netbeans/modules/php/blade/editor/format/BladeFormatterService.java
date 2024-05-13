@@ -16,27 +16,31 @@ import org.netbeans.modules.php.blade.syntax.antlr4.formatter.BladeAntlrFormatte
 import org.openide.util.Exceptions;
 
 /**
- *
+ * TODO fix indentation
+ * 
  * @author bhaidu
  */
 public class BladeFormatterService {
 
-    public final Map<Integer, FormatToken> wsTokenAfterArgStm = new TreeMap<>();
     public final Map<Integer, FormatToken> formattedLineIndentList = new TreeMap<>();
+    boolean debugMode = false;
+    public boolean isIndentation;
 
     public void format(Context context, String text, int indentSize) {
+        isIndentation = context.isIndent();
         BladeAntlrFormatterLexer lexer = new BladeAntlrFormatterLexer(CharStreams.fromString(text));
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         BladeAntlrFormatterParser parser = new BladeAntlrFormatterParser(tokens);
         parser.removeErrorListener(ConsoleErrorListener.INSTANCE);
         parser.addParseListener(createFormatterListener());
+        parser.setBuildParseTree(false);
         parser.file();
 
         final int cstart = context.startOffset();
         final int cend = context.endOffset();
         int textDelta = 0;
-        System.out.println("Startng formatting :\n");
-
+        System.out.println("Starting formatting from caret " + cstart + ":\n");
+        
         for (Map.Entry<Integer, FormatToken> entry : formattedLineIndentList.entrySet()) {
             int tstart = entry.getValue().tokenStart;
             int indent = entry.getValue().indent;
@@ -50,9 +54,10 @@ public class BladeFormatterService {
                     break;
                 }
                 if (tstart > cend) {
-                    System.out.println("finished " + tstart + " > " + cend);
+                    System.out.println("exit " + tstart + " > " + cend);
                     System.out.println("line : " + entry.getKey() + " ei " + existingLineIndent);
                     System.out.println("token : " + entry.getValue());
+                    System.out.println("Finished formatting for caret " + cstart);
                     break;
                 }
             }
@@ -95,15 +100,19 @@ public class BladeFormatterService {
             int indent = 0;
             int blockBalance = 0;
             int htmlBlockBalance = 0;
+            int lastIncrementedLine = 0;
 
             @Override
             public void exitBlock_start(BladeAntlrFormatterParser.Block_startContext ctx) {
 
-                Token start = ctx.block_directive_name().getStart();
+                Token start = ctx.getStart();
                 blockBalance++;
                 if (ctx.getStop() != null && !formattedLineIndentList.containsKey(start.getLine())) {
-                    Token rArgParent = ctx.getStop();
-                    formattedLineIndentList.put(rArgParent.getLine(), new FormatToken(rArgParent.getStopIndex() + 1, indent, htmlBlockBalance, rArgParent.getText()));
+                    Token endDefinition = ctx.getStop();
+                    //hack to indent after blade block
+                    int offset = isIndentation ? 1 : 0;
+                    formattedLineIndentList.put(endDefinition.getLine(),
+                            new FormatToken(endDefinition.getStopIndex() + 1 + offset, indent+offset, htmlBlockBalance, null));
                 }
                 indent++;
             }
@@ -118,7 +127,8 @@ public class BladeFormatterService {
                     indent = 0;
                 }
                 if (!formattedLineIndentList.containsKey(line)) {
-                    formattedLineIndentList.put(line, new FormatToken(start.getStartIndex(), indent, htmlBlockBalance, start.getText()));
+                    String debugText = debugMode ? start.getText() : null;
+                    formattedLineIndentList.put(line, new FormatToken(start.getStartIndex(), indent, htmlBlockBalance, debugText));
                 } else {
                     formattedLineIndentList.remove(line);
                 }
@@ -132,7 +142,8 @@ public class BladeFormatterService {
                 blockBalance++;
                 if (ctx.getStop() != null && !formattedLineIndentList.containsKey(start.getLine())) {
                     Token rArgParent = ctx.getStop();
-                    formattedLineIndentList.put(rArgParent.getLine(), new FormatToken(rArgParent.getStopIndex() + 1, indent, htmlBlockBalance, rArgParent.getText()));
+                    String debugText = debugMode ? rArgParent.getText() : null;
+                    formattedLineIndentList.put(rArgParent.getLine(), new FormatToken(rArgParent.getStopIndex() + 1, indent, htmlBlockBalance, debugText));
                     indent++;
                 }
             }
@@ -183,13 +194,17 @@ public class BladeFormatterService {
 
             @Override
             public void exitHtml_close_tag(BladeAntlrFormatterParser.Html_close_tagContext ctx) {
-                if (htmlBlockBalance > 0) {
-                    htmlBlockBalance--;
-                } else {
-                    htmlBlockBalance = 0;
-                }
+
                 Token start = ctx.getStart();
                 int line = start.getLine();
+                if (line > 0 && lastIncrementedLine != line){
+                    if (htmlBlockBalance > 0) {
+                        htmlBlockBalance--;
+                    } else {
+                        htmlBlockBalance = 0;
+                    }
+                    lastIncrementedLine = line;
+                }
                 if (!formattedLineIndentList.containsKey(line)) {
                     formattedLineIndentList.put(line, new FormatToken(start.getStartIndex(), indent, htmlBlockBalance, start.getText()));
                 }
@@ -223,7 +238,8 @@ public class BladeFormatterService {
                 Token start = ctx.getStart();
                 int line = start.getLine();
                 if (!formattedLineIndentList.containsKey(line)) {
-                    formattedLineIndentList.put(line, new FormatToken(start.getStartIndex(), indent, htmlBlockBalance, start.getText()));
+                    String debugText = debugMode ? start.getText() : null;
+                    formattedLineIndentList.put(line, new FormatToken(start.getStartIndex(), indent, htmlBlockBalance, debugText));
                 }
                 htmlBlockBalance++;
             }

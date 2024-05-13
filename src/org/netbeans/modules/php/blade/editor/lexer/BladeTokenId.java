@@ -67,6 +67,7 @@ public enum BladeTokenId implements TokenId {
     BLADE_ECHO_DELIMITOR("blade_echo_delimiters"),
     HTML("html"),
     WS_D("html"),
+    BLADE_DIRECTIVE_UNKNOWN("at_string"),
     PHP_BLADE_EXPRESSION("blade_php"),
     PHP_BLADE_ECHO_EXPR("blade_php"),
     PHP_BLADE_INLINE_CODE("blade_php"),
