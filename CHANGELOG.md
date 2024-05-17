@@ -1,5 +1,11 @@
 # Change Log
 
+## [2.4.8.1]
+
+**completion**
+
+- autocompletion for blade tags. These can be configured from Project -> Properties -> Laravel Blade
+
 ## [2.4.7.1]
 
 **formatting**

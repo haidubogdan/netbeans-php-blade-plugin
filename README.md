@@ -2,9 +2,6 @@
 
 Netbeans Php blade editor using Antlr Lexer and Parser.
 
-> [!NOTE]
-> This is an extract of a new netbeans modules suite : [https://github.com/haidubogdan/nb-18-php-blade-plugin](https://github.com/haidubogdan/nb-18-php-blade-plugin) still in development.
-
 Installation
 ============
 
@@ -101,7 +98,7 @@ Limited completion and declaration finder
 
 **formatting**
 
-- some indentation are broken from netbeans core HTML plugin
+- some indentation are broken. This is not the plugin's "fault" but it's a netbeans core issue
 
 ex: a basic html file
 

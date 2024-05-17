@@ -2,17 +2,10 @@
 
 ## What's changed
 
-**formatting**
+**typed interceptors**
 
-- fix indentation for some html tags
+- blade tag autocmplete for "{{ }}, {!! !!}, {{-- --}}", configurable from Project Properties-> Laravel Blade -> Auto tag completion
 
-- some indentation are not plugin related but HTML
+**license**
 
-**completion**
-
-- move directive completion to ComplentionHandler trigger for better template insert
-- add version of blade laravel for some directives 
-
-**Package & releases**
-
-- using github actions to do releases
+- changed to Apache2 license

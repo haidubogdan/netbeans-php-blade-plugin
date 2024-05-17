@@ -4,6 +4,7 @@ package org.netbeans.modules.php.blade.project;
 import java.util.prefs.Preferences;
 import org.netbeans.api.editor.mimelookup.MimeLookup;
 import org.netbeans.modules.php.blade.editor.BladeLanguage;
+import static org.netbeans.modules.php.blade.project.OptionsUtils.ENABLE_AUTO_TAG_COMPLETION;
 
 /**
  *
@@ -16,5 +17,9 @@ public class ModulePreferences {
     
     public static void setPrefBoolean(String key, boolean value){
         getPreferences().putBoolean(key, value);
+    }
+    
+    public static boolean isAutoTagCompletionEnabled(){
+        return ModulePreferences.getPreferences().getBoolean(ENABLE_AUTO_TAG_COMPLETION, false);
     }
 }

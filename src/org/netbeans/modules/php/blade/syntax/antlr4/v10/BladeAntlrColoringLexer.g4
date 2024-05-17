@@ -100,6 +100,8 @@ HTML_MISC : ((' ')+ | [\r\n]+ | ('#' | '.')? ComponentTagIdentifier | SpecialCha
 
 HTML_WS : ((' ')+ | [\r\n]+)->type(HTML);
 
+INCOMPLETE_BLADE_TAG : ('{!' | '{{-') ->type(HTML);
+
 OTHER : . ->type(HTML);
 
 mode INSIDE_HTML_TAG;

@@ -79,6 +79,7 @@ public class BladeCompletionProvider implements CompletionProvider {
 
         //don't autocomplete on space, \n, )
         if (typedText.trim().isEmpty()) {
+            //TODO this stops raw tags to autocomplete
             return 0;
         }
 

@@ -38,6 +38,7 @@ import org.netbeans.modules.php.blade.editor.indexing.PhpIndexUtils;
 import org.netbeans.modules.php.blade.editor.parser.BladeParserResult;
 import org.netbeans.modules.php.blade.editor.parser.BladeParserResult.FieldAccessReference;
 import org.netbeans.modules.php.blade.editor.parser.BladeParserResult.Reference;
+import org.netbeans.modules.php.blade.project.ModulePreferences;
 import org.netbeans.modules.php.blade.project.ProjectUtils;
 import org.netbeans.modules.php.blade.syntax.TagList;
 import org.netbeans.modules.php.blade.syntax.annotation.Directive;
@@ -120,7 +121,9 @@ public class BladeCompletionHandler implements CodeCompletionHandler2 {
                     break;
                 case CONTENT_TAG_OPEN:
                 case RAW_TAG_OPEN:
-                    completeBladeTags(completionProposals, completionContext, parserResult, currentToken);
+                    if (!ModulePreferences.isAutoTagCompletionEnabled()){
+                        completeBladeTags(completionProposals, completionContext, parserResult, currentToken);
+                    }
                     break;
             }
         } else {
