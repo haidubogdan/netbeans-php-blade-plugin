@@ -13,7 +13,6 @@ public class PathElement extends NamedElement {
         super(name, file, ElementType.PATH);
     }
 
-    //for better visibility on type searcher
     @Override
     public ElementKind getKind() {
         return ElementKind.PACKAGE;

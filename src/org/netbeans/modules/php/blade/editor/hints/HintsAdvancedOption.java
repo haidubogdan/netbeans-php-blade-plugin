@@ -12,6 +12,7 @@ import org.netbeans.spi.options.AdvancedOption;
 import org.netbeans.spi.options.OptionsPanelController;
 import org.openide.util.NbBundle;
 
+//@deprecated Use {@link OptionsPanelController.SubRegistration} instead.
 //@MimeRegistration(service = AdvancedOption.class, mimeType = BladeLanguage.MIME_TYPE, position = 120)
 public final class HintsAdvancedOption extends AdvancedOption {
 

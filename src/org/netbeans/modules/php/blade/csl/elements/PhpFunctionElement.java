@@ -19,7 +19,6 @@ public class PhpFunctionElement extends NamedElement {
         this.params = params;
     }
 
-    //for better visibility on type searcher
     @Override
     public ElementKind getKind() {
         return ElementKind.METHOD;

@@ -20,7 +20,6 @@ public class TagElement implements ElementHandle {
     protected final ElementType type;
 
     public TagElement(String name) {
-        //we can add a file object from element
         this.name = name;
         this.type = ElementType.NA;
     }
