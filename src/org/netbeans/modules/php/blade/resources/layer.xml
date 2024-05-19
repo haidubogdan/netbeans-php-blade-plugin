@@ -51,6 +51,7 @@
                     <folder name="x-blade">
                         <file name="PHPBladeHints.instance">
                             <attr name="instanceOf" stringvalue="org.netbeans.spi.options.OptionsPanelController"/>
+                            <attr name="instanceCreate" methodvalue="org.netbeans.modules.php.blade.editor.hints.HintsControllerFactory.createOptions"/>
                         </file>
                     </folder>
                 </folder>
