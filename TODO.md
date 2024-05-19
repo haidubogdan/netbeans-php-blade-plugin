@@ -46,6 +46,10 @@ laravel specific
 
 - php storm block type doc
 
+**lexer**
+
+- avoid using php embedding for identifier Strings
+
 **tests**
 
 - unit tests??

@@ -3,6 +3,7 @@ package org.netbeans.modules.php.blade.editor.indexing;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.netbeans.api.editor.mimelookup.MimeRegistration;
@@ -127,7 +128,7 @@ public class BladeIndexer extends EmbeddingIndexer {
         for (FileObject root : roots) {
             String rootPath = root.getPath();
             if (filePath.startsWith(rootPath)) {
-                String bladeFormatPath = filePath.replace(rootPath, "").replace(".blade.php", "").replace("/", ".");
+                String bladeFormatPath = PathUtils.toBladeViewPath(filePath.replace(rootPath, ""));
                 if (bladeFormatPath.startsWith(".")) {
                     bladeFormatPath = bladeFormatPath.substring(1, bladeFormatPath.length());
                 }

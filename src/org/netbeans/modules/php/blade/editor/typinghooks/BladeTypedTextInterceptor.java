@@ -16,7 +16,7 @@ import org.netbeans.api.lexer.TokenHierarchy;
 import org.netbeans.api.lexer.TokenSequence;
 import org.netbeans.modules.php.blade.editor.lexer.BladeTokenId;
 import static org.netbeans.modules.php.blade.editor.lexer.BladeTokenId.PHP_BLADE_ECHO_EXPR;
-import org.netbeans.modules.php.blade.project.ModulePreferences;
+import org.netbeans.modules.php.blade.editor.preferences.ModulePreferences;
 import org.netbeans.spi.editor.typinghooks.TypedTextInterceptor;
 
 /**

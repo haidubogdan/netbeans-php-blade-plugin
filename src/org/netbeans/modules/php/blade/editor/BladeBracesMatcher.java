@@ -11,7 +11,6 @@ import org.antlr.v4.runtime.Token;
 import org.netbeans.api.annotations.common.NonNull;
 import org.netbeans.api.editor.mimelookup.MimeRegistration;
 import org.netbeans.editor.BaseDocument;
-import org.netbeans.modules.php.blade.editor.tools.MemoryHeap;
 import org.netbeans.modules.php.blade.syntax.BladeDirectivesUtils;
 import org.netbeans.modules.php.blade.syntax.BladeTagsUtils;
 import org.netbeans.modules.php.blade.syntax.antlr4.v10.BladeAntlrLexer;

@@ -1,10 +1,10 @@
 
-package org.netbeans.modules.php.blade.project;
+package org.netbeans.modules.php.blade.editor.preferences;
 
 import java.util.prefs.Preferences;
 import org.netbeans.api.editor.mimelookup.MimeLookup;
 import org.netbeans.modules.php.blade.editor.BladeLanguage;
-import static org.netbeans.modules.php.blade.project.OptionsUtils.ENABLE_AUTO_TAG_COMPLETION;
+import static org.netbeans.modules.php.blade.editor.preferences.GeneralPreferencesUtils.ENABLE_AUTO_TAG_COMPLETION;
 
 /**
  *

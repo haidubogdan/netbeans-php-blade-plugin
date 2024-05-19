@@ -18,6 +18,7 @@ public abstract class ColoringLexerAdaptor extends Lexer {
     public int squareParenBalance = 0;
     public int curlyParenBalance = 0;
     public int exitIfModePosition = 0;
+    public int phpExpressionOffset = -1;
     public boolean hasPhpExprContent = false;
 
     public ColoringLexerAdaptor(CharStream input) {
@@ -88,18 +89,6 @@ public abstract class ColoringLexerAdaptor extends Lexer {
                 && this.squareParenBalance == 0
                 && this.curlyParenBalance == 0;
     }
-    
-    public void consumeRParen(){
-        //we start from 0 balance
-        this.roundParenBalance--;
-        if (this.roundParenBalance < 0) {
-            this.roundParenBalance = 0;
-            this.setType(BladeAntlrLexer.BLADE_PARAM_RPAREN);
-            this.mode(DEFAULT_MODE);
-        } else {
-             this.setType(BladeAntlrLexer.BLADE_PARAM_EXTRA);
-        }
-    }
 
     //blade coloring lexer
     public void consumeEscapedEchoToken() {
@@ -126,5 +115,14 @@ public abstract class ColoringLexerAdaptor extends Lexer {
             this.more();
         }
     }
+   
+//    to continue when the sepparation of PHP_EXPRESSION can be implemented    
+//    public void setPhpExpressionOffset(){
+//        this.phpExpressionOffset = this.getCharIndex();
+//    }
+//    
+//    public boolean isFirstElement() {
+//        return this._tokenStartCharIndex <= this.phpExpressionOffset;
+//    }
 }
 

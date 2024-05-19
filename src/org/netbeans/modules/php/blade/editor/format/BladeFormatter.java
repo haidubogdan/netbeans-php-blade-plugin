@@ -17,11 +17,9 @@ import org.netbeans.api.editor.settings.SimpleValueNames;
 import org.netbeans.api.project.Project;
 import org.netbeans.modules.editor.NbEditorUtilities;
 import org.netbeans.modules.editor.indent.spi.CodeStylePreferences;
-import org.netbeans.modules.php.blade.project.BladeProjectProperties;
-import org.netbeans.modules.php.blade.project.OptionsUtils;
+import org.netbeans.modules.php.blade.editor.preferences.GeneralPreferencesUtils;
 import org.netbeans.spi.project.ui.support.ProjectConvertors;
 import org.openide.filesystems.FileObject;
-import org.openide.util.Exceptions;
 
 /**
  * possible strategies
@@ -85,10 +83,6 @@ public class BladeFormatter implements Formatter {
 
                 } catch (BadLocationException ex) {
                 }
-
-                //TODO
-                //move to service
-                //have two usecases context.isIndent() and format triggered
             }
 
         };
@@ -128,11 +122,11 @@ public class BladeFormatter implements Formatter {
 
     static boolean isBladeIndentEnabled(Document doc) {
         Preferences prefs = CodeStylePreferences.get(doc).getPreferences();
-        return prefs.getBoolean(OptionsUtils.ENABLE_INDENTATION, false);
+        return prefs.getBoolean(GeneralPreferencesUtils.ENABLE_INDENTATION, false);
     }
 
     static boolean isBladeFormattingEnabled(Document doc) {
         Preferences prefs = CodeStylePreferences.get(doc).getPreferences();
-        return prefs.getBoolean(OptionsUtils.ENABLE_FORMATTING, false);
+        return prefs.getBoolean(GeneralPreferencesUtils.ENABLE_FORMATTING, false);
     }
 }

@@ -188,8 +188,8 @@ public class BladeDeclarationFinder implements DeclarationFinder {
             case INCLUDE_IF:
             case EACH:
             case INCLUDE_COND:
-                String bladePath = reference.name;
-                List<FileObject> includedFiles = PathUtils.findFileObjectsForBladePath(currentFile, bladePath);
+                String viewPath = reference.name;
+                List<FileObject> includedFiles = PathUtils.findFileObjectsForBladeViewPath(currentFile, viewPath);
 
                 if (includedFiles.isEmpty()) {
                     return DeclarationLocation.NONE;

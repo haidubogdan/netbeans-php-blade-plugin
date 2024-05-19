@@ -1,7 +1,7 @@
 /*
 Licensed to the Apache Software Foundation (ASF)
  */
-package org.netbeans.modules.php.blade.project;
+package org.netbeans.modules.php.blade.editor.preferences;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.prefs.PreferenceChangeEvent;
@@ -11,11 +11,8 @@ import org.netbeans.api.editor.mimelookup.MimeLookup;
 import org.netbeans.modules.php.blade.editor.BladeLanguage;
 import org.openide.util.WeakListeners;
 
-/**
- * TODO delete
- * Based on PHP. Options for Auto Completion.
- */
-public final class OptionsUtils {
+
+public final class GeneralPreferencesUtils {
 
     private static final AtomicBoolean INITED = new AtomicBoolean(false);
 
@@ -33,14 +30,13 @@ public final class OptionsUtils {
     private static final PreferenceChangeListener PREFERENCES_TRACKER = new PreferenceChangeListener() {
         @Override
         public void preferenceChange(PreferenceChangeEvent evt) {
-            String settingName = evt == null ? null : evt.getKey();
             enableFormatting = PREFERENCES.getBoolean(ENABLE_FORMATTING, false);
             enableIndentation = PREFERENCES.getBoolean(ENABLE_INDENTATION, false);
             enableAutoTagCompletion = PREFERENCES.getBoolean(ENABLE_AUTO_TAG_COMPLETION, true);
         }
     };
 
-    private OptionsUtils() {
+    private GeneralPreferencesUtils() {
     }
 
     public static boolean isFormattingEnabled(){

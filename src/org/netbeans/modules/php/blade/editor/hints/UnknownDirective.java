@@ -11,6 +11,7 @@ import org.netbeans.modules.csl.api.HintSeverity;
 import org.netbeans.modules.csl.api.HintsProvider;
 import org.netbeans.modules.csl.api.Rule;
 import org.netbeans.modules.csl.api.RuleContext;
+import org.openide.util.NbBundle.Messages;
 
 /**
  *
@@ -66,5 +67,4 @@ public class UnknownDirective implements Rule.AstRule {
     public String getDisplayName() {
         return "Unknown Directive";
     }
-
 }

@@ -1,8 +1,8 @@
 package org.netbeans.modules.php.blade.editor.ui.customizer;
 
 import org.netbeans.api.project.Project;
-import org.netbeans.modules.php.blade.project.ModulePreferences;
-import org.netbeans.modules.php.blade.project.OptionsUtils;
+import org.netbeans.modules.php.blade.editor.preferences.ModulePreferences;
+import org.netbeans.modules.php.blade.editor.preferences.GeneralPreferencesUtils;
 /**
  *
  * @author bhaidu
@@ -18,9 +18,9 @@ public class BladeGeneralSettings extends javax.swing.JPanel {
     }
 
     private void init() {
-        this.formatting_enabled.setSelected(OptionsUtils.isFormattingEnabled());
-        this.indentation_enabled.setSelected(OptionsUtils.isIndentationEnabled());
-        this.auto_tag_completion.setSelected(OptionsUtils.isAutoTagCompletionEnabled());
+        this.formatting_enabled.setSelected(GeneralPreferencesUtils.isFormattingEnabled());
+        this.indentation_enabled.setSelected(GeneralPreferencesUtils.isIndentationEnabled());
+        this.auto_tag_completion.setSelected(GeneralPreferencesUtils.isAutoTagCompletionEnabled());
     }
     /**
      * This method is called from within the constructor to initialize the form.
@@ -89,9 +89,9 @@ public class BladeGeneralSettings extends javax.swing.JPanel {
     // End of variables declaration//GEN-END:variables
 
     public void storeData() {
-        ModulePreferences.setPrefBoolean(OptionsUtils.ENABLE_FORMATTING, this.formatting_enabled.isSelected());
-        ModulePreferences.setPrefBoolean(OptionsUtils.ENABLE_INDENTATION, this.indentation_enabled.isSelected());
-        ModulePreferences.setPrefBoolean(OptionsUtils.ENABLE_AUTO_TAG_COMPLETION, this.auto_tag_completion.isSelected());
+        ModulePreferences.setPrefBoolean(GeneralPreferencesUtils.ENABLE_FORMATTING, this.formatting_enabled.isSelected());
+        ModulePreferences.setPrefBoolean(GeneralPreferencesUtils.ENABLE_INDENTATION, this.indentation_enabled.isSelected());
+        ModulePreferences.setPrefBoolean(GeneralPreferencesUtils.ENABLE_AUTO_TAG_COMPLETION, this.auto_tag_completion.isSelected());
     }
 
 }

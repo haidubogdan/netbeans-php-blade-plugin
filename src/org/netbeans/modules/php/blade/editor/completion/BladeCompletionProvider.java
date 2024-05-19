@@ -48,8 +48,7 @@ import org.openide.util.Exceptions;
  * @author bhaidu
  */
 @MimeRegistrations(value = {
-    @MimeRegistration(mimeType = "text/html", service = CompletionProvider.class),
-})
+    @MimeRegistration(mimeType = "text/html", service = CompletionProvider.class),})
 public class BladeCompletionProvider implements CompletionProvider {
 
     private static final Logger LOGGER = Logger.getLogger(BladeCompletionProvider.class.getName());
@@ -103,9 +102,10 @@ public class BladeCompletionProvider implements CompletionProvider {
         protected void query(CompletionResultSet resultSet, Document doc, int caretOffset) {
             long startTime = System.currentTimeMillis();
 
+
             try {
                 FileObject fo = EditorDocumentUtils.getFileObject(doc);
-                
+
                 if (fo == null || !fo.getMIMEType().equals(BladeLanguage.MIME_TYPE)) {
                     return;
                 }
@@ -155,7 +155,7 @@ public class BladeCompletionProvider implements CompletionProvider {
                         break;
                     case HTML:
                         String nText = currentToken.getText();
-                         if ("livewire".startsWith(nText)) {
+                        if ("livewire".startsWith(nText)) {
                             //quick implementation
                             //??
                             addHtmlTagCompletionItem(nText, "livewire", "livewire", caretOffset, resultSet);
@@ -173,120 +173,6 @@ public class BladeCompletionProvider implements CompletionProvider {
                 resultSet.finish();
             }
         }
-    }
-
-    private void completeYieldIdFromIndex(String prefixIdentifier, FileObject fo,
-            int caretOffset, CompletionResultSet resultSet) {
-        BladeIndex bladeIndex;
-        Project project = ProjectUtils.getMainOwner(fo);
-        int insertOffset = caretOffset - prefixIdentifier.length();
-        try {
-            bladeIndex = BladeIndex.get(project);
-            List<IndexedReferenceId> indexedReferences = bladeIndex.getYieldIds(prefixIdentifier);
-            for (IndexedReferenceId indexReference : indexedReferences) {
-                addYieldIdCompletionItem(indexReference.getIdenfiier(), indexReference.getOriginFile(),
-                        insertOffset, resultSet);
-            }
-        } catch (IOException ex) {
-            Exceptions.printStackTrace(ex);
-        }
-    }
-
-    private void completeStackIdFromIndex(String prefixIdentifier, FileObject fo,
-            int caretOffset, CompletionResultSet resultSet) {
-        BladeIndex bladeIndex;
-        Project project = ProjectUtils.getMainOwner(fo);
-        int insertOffset = caretOffset - prefixIdentifier.length();
-        try {
-            bladeIndex = BladeIndex.get(project);
-            List<IndexedReferenceId> indexedReferences = bladeIndex.getStacksIndexedReferences(prefixIdentifier);
-            for (IndexedReferenceId indexReference : indexedReferences) {
-                addYieldIdCompletionItem(indexReference.getIdenfiier(), indexReference.getOriginFile(),
-                        insertOffset, resultSet);
-            }
-        } catch (IOException ex) {
-            Exceptions.printStackTrace(ex);
-        }
-    }
-
-    private void completeBladeTag(Token curlyStartToken, Document doc, String openTag, String closeTag,
-            int caretOffset, int priority, String description, CompletionResultSet resultSet) {
-        final String finalCloseTag = closeTag;
-        CompletionItem item = CompletionUtilities.newCompletionItemBuilder(closeTag)
-                .iconResource(getReferenceIcon())
-                .startOffset(caretOffset)
-                .leftHtmlText(openTag + " " + closeTag)
-                .rightHtmlText(description)
-                .sortPriority(priority)
-                .onSelect(ctx -> {
-                    try {
-                        StringBuilder sb = new StringBuilder();
-                        sb.append(openTag);
-                        sb.append(" ");
-                        sb.append("${cursor} ");
-                        sb.append(finalCloseTag);
-                        CodeTemplateManager.get(doc).createTemporary(sb.toString()).insert(ctx.getComponent());
-                        if (curlyStartToken.getStopIndex() == (caretOffset - 1)) {
-                            doc.insertString(caretOffset, " ", null);
-                        }
-                    } catch (BadLocationException ex) {
-                        Exceptions.printStackTrace(ex);
-                    }
-                })
-                .build();
-        resultSet.addItem(item);
-    }
-
-    private void completeCloseTag(Token curlyStartToken, Document doc, String closeTag,
-            int caretOffset, String type, CompletionResultSet resultSet) {
-        final String finalCloseTag = closeTag;
-        CompletionItem item = CompletionUtilities.newCompletionItemBuilder(closeTag)
-                .iconResource(getReferenceIcon())
-                .startOffset(caretOffset)
-                .leftHtmlText(closeTag)
-                .rightHtmlText(type)
-                .onSelect(ctx -> {
-                    try {
-                        StringBuilder sb = new StringBuilder();
-                        sb.append(" ");
-                        sb.append("${cursor} ");
-                        sb.append(finalCloseTag);
-                        CodeTemplateManager.get(doc).createTemporary(sb.toString()).insert(ctx.getComponent());
-                        if (curlyStartToken.getStopIndex() == (caretOffset - 1)) {
-                            doc.insertString(caretOffset, " ", null);
-                        }
-                    } catch (BadLocationException ex) {
-                        Exceptions.printStackTrace(ex);
-                    }
-                })
-                .build();
-        resultSet.addItem(item);
-    }
-
-    private void completeBladePath(String bladePath, FileObject originFile,
-            int caretOffset, CompletionResultSet resultSet) {
-
-        String filePath = originFile.getPath();
-        
-        BladeCompletionItem item = BladeCompletionItem.createViewPath(
-                bladePath, caretOffset, originFile.isFolder(), filePath);
-        resultSet.addItem(item);
-    }
-
-    private void addYieldIdCompletionItem(String identifier, FileObject fo,
-            int caretOffset, CompletionResultSet resultSet) {
-
-        String filePath = fo.getPath();
-        int viewsPos = filePath.indexOf("/views/");
-
-        CompletionItem item = CompletionUtilities.newCompletionItemBuilder(identifier)
-                .iconResource(getReferenceIcon(CompletionType.YIELD_ID))
-                .startOffset(caretOffset)
-                .leftHtmlText(identifier)
-                .rightHtmlText(filePath.substring(viewsPos, filePath.length()))
-                .sortPriority(1)
-                .build();
-        resultSet.addItem(item);
     }
 
     private void completeComponents(String prefixIdentifier, FileObject fo,
@@ -313,26 +199,17 @@ public class BladeCompletionProvider implements CompletionProvider {
         Collection<String> attributes = attributeCompletionService.queryComponents(prefix);
 
         for (String attribute : attributes) {
-            addSimplAttributeItem(prefix, attribute,insertOffset, resultSet);
+            addSimplAttributeItem(prefix, attribute, insertOffset, resultSet);
         }
     }
 
     //??
     private void addHtmlTagCompletionItem(String prefix, String tagName, String plugin,
             int caretOffset, CompletionResultSet resultSet) {
-        
+
         int insertOffset = caretOffset - prefix.length();
         BladeTag item = new BladeTag(tagName, insertOffset);
         resultSet.addItem(item);
-//        
-//        CompletionItem item = CompletionUtilities.newCompletionItemBuilder(tagName)
-//                .iconResource(getReferenceIcon(CompletionType.HTML_COMPONENT_TAG))
-//                .startOffset(insertOffset)
-//                .leftHtmlText("&lt;" + tagName + "&gt;")
-//                .rightHtmlText(plugin)
-//                .sortPriority(1)
-//                .build();
-//        resultSet.addItem(item);
     }
 
     private void addSimplAttributeItem(String prefix, String attributeName, int caretOffset, CompletionResultSet resultSet) {
@@ -361,10 +238,6 @@ public class BladeCompletionProvider implements CompletionProvider {
         resultSet.addItem(item);
     }
 
-    private static String getReferenceIcon() {
-        return ResourceUtilities.ICON_BASE + "icons/at.png"; //NOI18N
-    }
-
     private static String getReferenceIcon(CompletionType type) {
         switch (type) {
             case HTML_COMPONENT_TAG:
@@ -373,13 +246,6 @@ public class BladeCompletionProvider implements CompletionProvider {
                 return ResourceUtilities.ICON_BASE + "icons/layout.png"; //NOI18N
         }
         return ResourceUtilities.ICON_BASE + "icons/at.png";
-    }
-
-    private static String getReferenceIcon(FileObject file) {
-        if (file.isFolder()) {
-            return "org/openide/loaders/defaultFolder.gif"; //NOI18N
-        }
-        return ResourceUtilities.ICON_BASE + "icons/file.png"; //NOI18N
     }
 
 }

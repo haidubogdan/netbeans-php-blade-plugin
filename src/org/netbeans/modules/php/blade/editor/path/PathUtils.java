@@ -7,9 +7,9 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import org.apache.commons.lang3.StringUtils;
 import org.netbeans.api.project.Project;
 import org.netbeans.modules.php.blade.project.BladeProjectProperties;
 import org.netbeans.modules.php.blade.project.ProjectUtils;
@@ -24,78 +24,45 @@ import org.openide.filesystems.FileUtil;
 public class PathUtils {
 
     private static final String LARAVEL_VIEW_PATH = "resources/views"; //NOI18N
-//
-//    private static final Map<Project, PathUtils> INSTANCES = new HashMap<>();
-//    
-//    private final Project project;
-//    
-//    private PathUtils(Project project) {
-//        this.project = project;
-//    }
-//
-//    public static PathUtils getInstance(Project project) {
-//        if (INSTANCES.containsKey(project)) {
-//            return INSTANCES.get(project);
-//        }
-//        PathUtils instance = new PathUtils(project);
-//        INSTANCES.put(project, instance);
-//        return instance;
-//    }
-
-    public static FileObject extractRootPath(FileObject currentFile) {
-        String currentFilepath = currentFile.getPath();
-        int viewRootPos = currentFilepath.lastIndexOf("/views/");
-        if (viewRootPos < 0) {
-            return null;
-        }
-        String relativePath = currentFilepath.substring(viewRootPos);
-        int currentFileDeep = StringUtils.countMatches(relativePath, "/");
-        String relativeRootPath = StringUtils.repeat("../", currentFileDeep) + "views";
-        FileObject viewRoot = currentFile.getFileObject(relativeRootPath, true);
-
-        if (viewRoot == null || !viewRoot.isValid()) {
-            return null;
-        }
-
-        return viewRoot;
-    }
+    private static final String BLADE_EXT = ".blade.php"; //NOI18N
 
     /**
      * first we need to extract the root folder of view after we apply a generic
      * path sanitize for blade paths (ex "my.path" -> "my/path.blade.php")
      *
      * @param contextFile
-     * @param bladePath
+     * @param viewPath
      * @return List<FileObject>
      */
-    public static List<FileObject> findFileObjectsForBladePath(FileObject contextFile, String bladePath) {
-        List<FileObject> list = new ArrayList<>();
+    public static List<FileObject> findFileObjectsForBladeViewPath(FileObject contextFile, String viewPath) {
+        List<FileObject> fileViewAssociationList = new ArrayList<>();
         Project project = ProjectConvertors.getNonConvertorOwner(contextFile);
 
         if (project == null) {
-            return list;
+            return fileViewAssociationList;
         }
 
-        List<FileObject> viewRoots = getCustomViewsRoots(project, contextFile);
+        HashSet<FileObject> viewRoots = getDefaultRoots(project);
+        viewRoots.addAll(getCustomViewsRoots(project, contextFile));
 
-        if (viewRoots == null || viewRoots.isEmpty()) {
-            return list;
+        if (viewRoots.isEmpty()) {
+            return fileViewAssociationList;
         }
 
-        String sanitizedBladePath = bladePath.replace(".", "/") + ".blade.php"; //NOI18N
+        String sanitizedBladePath = viewPathToFilePath(viewPath); //NOI18N
 
         for (FileObject viewRoot : viewRoots) {
             FileObject includedFile = viewRoot.getFileObject(sanitizedBladePath, true);
 
             if (includedFile != null && includedFile.isValid()) {
-                list.add(includedFile);
+                fileViewAssociationList.add(includedFile);
             }
         }
 
-        return list;
+        return fileViewAssociationList;
     }
 
-    public static FileObject findFileObjectForBladePath(FileObject contextFile, String bladePath) {
+    public static FileObject findFileObjectForBladeViewPath(FileObject contextFile, String viewPath) {
         FileObject res = null;
         Project project = ProjectConvertors.getNonConvertorOwner(contextFile);
 
@@ -103,13 +70,14 @@ public class PathUtils {
             return res;
         }
 
-        List<FileObject> viewRoots = getCustomViewsRoots(project, contextFile);
+        HashSet<FileObject> viewRoots = getDefaultRoots(project);
+        viewRoots.addAll(getCustomViewsRoots(project, contextFile));
 
-        if (viewRoots == null || viewRoots.isEmpty()) {
+        if (viewRoots.isEmpty()) {
             return res;
         }
 
-        String sanitizedBladePath = bladePath.replace(".", "/") + ".blade.php"; //NOI18N
+        String sanitizedBladePath = viewPathToFilePath(viewPath);
 
         for (FileObject viewRoot : viewRoots) {
             FileObject includedFile = viewRoot.getFileObject(sanitizedBladePath, true);
@@ -126,11 +94,11 @@ public class PathUtils {
      *
      *
      * @param contextFile
-     * @param prefixPath
+     * @param prefixViewPath
      * @return List<FileObject>
      */
     public static List<FileObject> getParentChildrenFromPrefixPath(FileObject contextFile,
-            String prefixPath) {
+            String prefixViewPath) {
         List<FileObject> list = new ArrayList<>();
         //this should be a fallback
         Project project = ProjectConvertors.getNonConvertorOwner(contextFile);
@@ -139,51 +107,49 @@ public class PathUtils {
             return list;
         }
 
-        List<FileObject> viewRoots = getCustomViewsRoots(project, contextFile);
+        HashSet<FileObject> viewRoots = getDefaultRoots(project);
+        viewRoots.addAll(getCustomViewsRoots(project, contextFile));
 
-        if (viewRoots == null || viewRoots.isEmpty()) {
+        if (viewRoots.isEmpty()) {
             return list;
         }
 
-        String canonicalPath = prefixPath.replace(".", "/");
-        int lastSlash;
+        String unixPath = prefixViewPath.replace(".", "/");
+        int relativeSlash;
 
         //fix issues with lastIndexOf search
-        if (canonicalPath.endsWith("/")) {
-            lastSlash = canonicalPath.length();
-        } else {
-            lastSlash = canonicalPath.lastIndexOf("/");
-        }
+        relativeSlash = unixPath.lastIndexOf("/");
 
-        int nSlashes = StringUtils.countMatches(canonicalPath, "/");
-
-        List<FileObject> filteredViewRoots = new ArrayList<>();
+        HashSet<FileObject> filteredViewRoots = new HashSet<>();
         
         Map<String, FileObject> relativeFilePathMap = new HashMap<>();
         
-        if (lastSlash > 0) {
+        if (relativeSlash > 0) {
+            //filter only relative folders
             for (FileObject rootFolder : viewRoots) {
-                FileObject relativeViewRoot = rootFolder.getFileObject(canonicalPath.substring(0, lastSlash));
+                FileObject relativeViewRoot = rootFolder.getFileObject(unixPath.substring(0, relativeSlash));
 
                 if (relativeViewRoot != null && relativeViewRoot.isValid()) {
-                    relativeFilePathMap.put(canonicalPath, relativeViewRoot);
+                    relativeFilePathMap.put(unixPath, relativeViewRoot);
                 }
             }
-            //empty list
-            viewRoots.clear();
         } else {
+            //include all root folders
             filteredViewRoots = viewRoots;
         }
 
-        String prefixToCompare;
+        String relativePrefixToCompare;
 
-        if (lastSlash > 0) {
-            prefixToCompare = canonicalPath.substring(lastSlash, canonicalPath.length());
+        if (relativeSlash > 0) {
+            //extract the path name prefix
+            relativePrefixToCompare = unixPath.substring(relativeSlash+1, unixPath.length());
         } else {
-            prefixToCompare = canonicalPath;
+            //root reference
+            relativePrefixToCompare = unixPath;
         }
 
-        if (canonicalPath.endsWith("/")) {
+        if (unixPath.endsWith("/")) {
+            //add children
             for (FileObject rootFolder : filteredViewRoots) {
                 list.addAll(Arrays.asList(rootFolder.getChildren()));
             }
@@ -191,39 +157,32 @@ public class PathUtils {
                 list.addAll(Arrays.asList(entry.getValue().getChildren()));
             }
         } else {
+            //filter by filename in relative context
             for (FileObject rootFolder : filteredViewRoots) {
                 for (FileObject file : rootFolder.getChildren()) {
                     String filePath = file.getPath().replace(rootFolder.getPath() + "/", "");
-                    if (filePath.startsWith(prefixToCompare)) {
+                    if (filePath.startsWith(relativePrefixToCompare)) {
                         list.add(file);
                     }
                 }
             }
             
-            if (prefixToCompare.startsWith("/")){
-                prefixToCompare = prefixToCompare.substring(1, prefixToCompare.length());
-            }
-            
             for (Map.Entry<String, FileObject> entry : relativeFilePathMap.entrySet()){
                 for (FileObject file : entry.getValue().getChildren()) {
-                    if (file.getName().startsWith(prefixToCompare)){
+                    if (file.getName().startsWith(relativePrefixToCompare)){
                         list.add(file);
                     }
                 }
             }
         }
 
+        //empty list
+        viewRoots.clear();
         return list;
     }
 
     public static List<FileObject> getCustomViewsRoots(Project project, FileObject contextFile) {
         List<FileObject> list = new ArrayList<>();
-
-        FileObject defaultLaravelPath = project.getProjectDirectory().getFileObject(LARAVEL_VIEW_PATH);
-
-        if (defaultLaravelPath != null) {
-            list.add(defaultLaravelPath);
-        }
 
         String[] views = BladeProjectProperties.getInstance(project).getViewsPathList();
 
@@ -248,16 +207,10 @@ public class PathUtils {
                 list.add(FileUtil.toFileObject(viewPath));
             }
         }
-
-//        FileObject estimatedRoot = extractRootPath(contextFile);
-//
-//        if (estimatedRoot != null) {
-//            list.add(estimatedRoot);
-//        }
         return list;
     }
 
-    public static String toBladePath(FileObject file) {
+    public static String toBladeViewPath(FileObject file) {
         String path = null;
         Project project = ProjectUtils.getMainOwner(file);
 
@@ -272,7 +225,7 @@ public class PathUtils {
             //belongs to the default folder
             String viewFolderPath = defaultLaravelPath.getPath();
             if (filePath.startsWith(viewFolderPath)) {
-                String bladePath = filePath.replace(viewFolderPath, "").replace(".blade.php", "").replace("/", ".");
+                String bladePath = PathUtils.toBladeViewPath(filePath.replace(viewFolderPath, ""));
                 //starting slash
                 if (bladePath.startsWith(".")) {
                     bladePath = bladePath.substring(1, bladePath.length());
@@ -301,7 +254,7 @@ public class PathUtils {
                     //it doesn't belong to the folder
                     continue;
                 }
-                return relativePath.substring(1).replace(".blade.php", "").replace("/", ".");
+                return PathUtils.toBladeViewPath(relativePath.substring(1));
             }
         }
 
@@ -323,5 +276,24 @@ public class PathUtils {
         }
         
         return "";
+    }
+    
+    public static String toBladeViewPath(String filePath){
+        return filePath.replace(BLADE_EXT, "").replace("/", ".");
+    }
+    
+    public static String viewPathToFilePath(String viewPath){
+        return viewPath.replace(".", "/") + BLADE_EXT;
+    }
+    
+    public static HashSet<FileObject> getDefaultRoots(Project project){
+        HashSet<FileObject> defaultList = new HashSet<>();
+        FileObject defaultViewsRoot = project.getProjectDirectory().getFileObject(LARAVEL_VIEW_PATH);
+        
+        if (defaultViewsRoot != null && defaultViewsRoot.isValid()){
+            defaultList.add(defaultViewsRoot);
+        }
+        
+        return defaultList;
     }
 }

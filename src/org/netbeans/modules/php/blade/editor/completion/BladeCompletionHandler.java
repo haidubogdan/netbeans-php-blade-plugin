@@ -38,7 +38,7 @@ import org.netbeans.modules.php.blade.editor.indexing.PhpIndexUtils;
 import org.netbeans.modules.php.blade.editor.parser.BladeParserResult;
 import org.netbeans.modules.php.blade.editor.parser.BladeParserResult.FieldAccessReference;
 import org.netbeans.modules.php.blade.editor.parser.BladeParserResult.Reference;
-import org.netbeans.modules.php.blade.project.ModulePreferences;
+import org.netbeans.modules.php.blade.editor.preferences.ModulePreferences;
 import org.netbeans.modules.php.blade.project.ProjectUtils;
 import org.netbeans.modules.php.blade.syntax.TagList;
 import org.netbeans.modules.php.blade.syntax.annotation.Directive;

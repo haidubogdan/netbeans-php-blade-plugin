@@ -26,9 +26,9 @@ public final class BladeProjectProperties {
 
     private static final Map<Project, BladeProjectProperties> INSTANCES = new HashMap<>();
     private static final String BLADE_VERSION = "blade.version"; // NOI18N
-    private static final String DIRECTIVE_CUSTOMIZER_PATH_LIST = "directive_customizer.path.list";
-    private static final String VIEW_PATH_LIST = "views.path.list";
-    private static final String FORMATTING = "formatting";
+    private static final String DIRECTIVE_CUSTOMIZER_PATH_LIST = "directive_customizer.path.list"; // NOI18N
+    private static final String VIEW_PATH_LIST = "views.path.list"; // NOI18N
+    private static final String FORMATTING = "formatting"; // NOI18N
     public Project project;
 
     DefaultListModel<String> directiveCustomizerPathList = new DefaultListModel();
@@ -92,10 +92,6 @@ public final class BladeProjectProperties {
         viewsPathList.remove(index);
     }
 
-    public void updateFormattingStatus(boolean status) {
-        getPreferences().putBoolean(FORMATTING, status);
-    }
-
     public void setViewsPathList(DefaultListModel<String> list) {
         String includePath = UiOptionsUtils.encodeToStrings(list.elements());
         getPreferences().put(VIEW_PATH_LIST, includePath);
@@ -154,10 +150,6 @@ public final class BladeProjectProperties {
             return encodedCompilerPathList.split("\\|", -1);
         }
         return paths;
-    }
-
-    public boolean isFormattingEnabled() {
-        return getPreferences().getBoolean(FORMATTING, false);
     }
 
     public void addPreferenceChangeListener(PreferenceChangeListener preferenceChangeListener) {

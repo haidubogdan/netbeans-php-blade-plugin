@@ -31,7 +31,7 @@ public class FindUsage extends AbstractAction implements ActionListener {
     @Override
     public void actionPerformed(ActionEvent e) {
         FileObject fo = node.getLookup().lookup(FileObject.class);
-        String bladePath = PathUtils.toBladePath(fo);
+        String bladePath = PathUtils.toBladeViewPath(fo);
         if (bladePath == null) {
             return;
         }

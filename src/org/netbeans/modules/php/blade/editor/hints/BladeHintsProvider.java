@@ -76,7 +76,7 @@ public class BladeHintsProvider implements HintsProvider {
 
         //validate path config
         for (Map.Entry<String, List<OffsetRange>> entry : parserResult.includeBladeOccurences.entrySet()) {
-            FileObject realFile = PathUtils.findFileObjectForBladePath(parserResult.getFileObject(),
+            FileObject realFile = PathUtils.findFileObjectForBladeViewPath(parserResult.getFileObject(),
                     entry.getKey());
             if (realFile != null) {
                 continue;

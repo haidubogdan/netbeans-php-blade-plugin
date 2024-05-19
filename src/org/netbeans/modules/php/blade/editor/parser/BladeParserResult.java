@@ -12,7 +12,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.antlr.v4.runtime.ANTLRErrorListener;
 import org.antlr.v4.runtime.BaseErrorListener;
-
 import org.netbeans.modules.csl.api.Error;
 import org.netbeans.modules.csl.api.OffsetRange;
 import org.netbeans.modules.csl.spi.ParserResult;
@@ -21,18 +20,14 @@ import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.ConsoleErrorListener;
-import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.Recognizer;
 import org.antlr.v4.runtime.Token;
-import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeListener;
-import org.antlr.v4.runtime.tree.TerminalNode;
 import org.netbeans.api.annotations.common.NonNull;
 import org.netbeans.api.annotations.common.NullAllowed;
 import org.netbeans.modules.csl.api.Severity;
 import org.netbeans.modules.csl.spi.DefaultError;
-import org.netbeans.modules.php.blade.editor.compiler.BladePhpCompiler;
 import org.netbeans.modules.php.blade.editor.navigator.BladeStructureItem;
 import org.netbeans.modules.php.blade.editor.navigator.BladeStructureItem.DirectiveBlockStructureItem;
 import org.netbeans.modules.php.blade.editor.navigator.BladeStructureItem.DirectiveInlineStructureItem;
@@ -40,7 +35,6 @@ import org.netbeans.modules.php.blade.syntax.antlr4.v10.BladeAntlrLexer;
 import static org.netbeans.modules.php.blade.syntax.antlr4.v10.BladeAntlrLexer.*;
 import org.netbeans.modules.php.blade.syntax.antlr4.v10.BladeAntlrParser;
 import org.netbeans.modules.php.blade.syntax.antlr4.v10.BladeAntlrParserBaseListener;
-import org.netbeans.modules.php.editor.parser.PHPParseResult;
 import org.openide.filesystems.FileObject;
 
 /**
@@ -66,6 +60,7 @@ public class BladeParserResult extends ParserResult {
     public final List<BladeStructureItem> structure = new ArrayList<>();
     public final List<OffsetRange> folds = new ArrayList<>();
     volatile boolean finished = false;
+    volatile boolean debugMode = false;
 
     public enum ReferenceType {
         YIELD, STACK, SECTION, PUSH, PUSH_IF, PREPEND, INCLUDE, INCLUDE_IF,
@@ -94,32 +89,32 @@ public class BladeParserResult extends ParserResult {
         LOGGER.log(Level.INFO, "PARSER TRIGGERED BY {0}", taskClass);
         if (!finished) {
             BladeAntlrParser parser = createParser(getSnapshot());
-            //don't need a parse tree (memory efficiency)
             parser.setBuildParseTree(false);
             //LOGGER.info(String.format("parser created in %d ms", System.currentTimeMillis() - startTime));
             parser.addErrorListener(createErrorListener());
-            //if (!taskCkass.toLowerCase().contains("completion") && !taskCkass.toLowerCase().contains("fold") && !taskCkass.toLowerCase().contains("hints")){
             parser.addParseListener(createDeclarationReferencesListener());
-            //}
-
             parser.addParseListener(createPhpElementsOccurencesListener());
 
             if (taskClass.toLowerCase().contains("completion")) {
                 parser.addParseListener(createVariableListener());
             }
-            //if (taskClass.toLowerCase().contains("fold") || taskClass.contains("navigator") || taskClass.contains("semantic") || taskClass.contains("HtmlStructureItem")) {
+
             parser.addParseListener(createStructureListener());
-            //}
+
             if (taskClass.toLowerCase().contains("hints")) {
                 parser.addParseListener(createSemanticsListener());
             }
             evaluateParser(parser);
-            LOGGER.info(String.format("Parser evaluated in %d ms " + taskClass + " | " + this.getFileObject().getNameExt(), System.currentTimeMillis() - startTime));
-
+            if (debugMode){
+                LOGGER.info(String.format("Parser evaluated in %d ms " + taskClass + " | " + this.getFileObject().getNameExt(), System.currentTimeMillis() - startTime));
+            }
             finished = true;
         }
         long time = System.currentTimeMillis() - startTime;
-        LOGGER.info(String.format("finished parser took %d ms " + this.getFileObject().getNameExt(), time));
+        
+        if (debugMode){
+            LOGGER.info(String.format("finished parser took %d ms " + this.getFileObject().getNameExt(), time));
+        }
         return this;
     }
 

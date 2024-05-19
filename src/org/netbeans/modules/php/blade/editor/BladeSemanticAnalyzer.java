@@ -67,7 +67,7 @@ public class BladeSemanticAnalyzer extends SemanticAnalyzer<BladeParserResult> {
         }
 
         Map<OffsetRange, Set<ColoringAttributes>> highlights
-                = new HashMap<OffsetRange, Set<ColoringAttributes>>(100);
+                = new HashMap<>();
         FileObject fo = parserResult.getFileObject();
         Project project = ProjectUtils.getMainOwner(fo);
         CustomDirectives ct = CustomDirectives.getInstance(project);
