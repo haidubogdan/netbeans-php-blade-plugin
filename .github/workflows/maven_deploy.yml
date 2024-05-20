@@ -8,7 +8,7 @@ on:
 
 jobs:
   build:
-
+    environment: RELEASE180
     runs-on: ubuntu-latest
 
     steps:
