@@ -51,7 +51,7 @@ jobs:
             # Install gpg secret key
             cat <(echo -e "${{ secrets.MAVEN_GPG_PRIVATE_KEY }}") | gpg --batch --import
             # Verify gpg secret key
-            gpg --version && gpg --list-secret-keys --keyid-format LONG
+            gpg --version && gpg --list-secret-keys --keyid-format LONG && export GPG_TTY=$(tty)
 #    - name: Import GPG Key
 #      uses: crazy-max/ghaction-import-gpg@v1
 #      env:
