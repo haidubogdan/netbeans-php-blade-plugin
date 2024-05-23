@@ -3,4 +3,6 @@ AutoUpdate-Show-In-Client: true
 OpenIDE-Module: php.blade
 OpenIDE-Module-Layer: org/netbeans/modules/php/blade/resources/layer.xml
 OpenIDE-Module-Localizing-Bundle: org/netbeans/modules/php/blade/resources/Bundle.properties
+#don't enable append automatically
+OpenIDE-Module-Specification-Version: 2.4.8.7
 
