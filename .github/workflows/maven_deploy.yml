@@ -54,15 +54,16 @@ jobs:
             gpg --version && gpg --list-secret-keys --keyid-format LONG && export GPG_TTY=$(tty)
 #    - name: Import GPG Key
 #      uses: crazy-max/ghaction-import-gpg@v1
-#      env:
-#         GPG_PRIVATE_KEY: ${{ secrets.MAVEN_GPG_PRIVATE_KEY }}
-#         PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}  
+      env:
+         GPG_PRIVATE_KEY: ${{ secrets.MAVEN_GPG_PRIVATE_KEY }}
+         GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}  
     - name : Publish package  
       working-directory: ./nb-plugin-package
       env:
         MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}
         MAVEN_PASSWORD: ${{ secrets.OSSRH_TOKEN }}
         GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+        MAVEN_GPG_PRIVATE_KEY: ${{ secrets.MAVEN_GPG_PRIVATE_KEY }} # Value of the GPG private key to import
       run :  |
           mvn deploy\
             --no-transfer-progress \
