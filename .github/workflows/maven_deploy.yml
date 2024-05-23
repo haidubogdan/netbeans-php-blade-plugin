@@ -68,4 +68,5 @@ jobs:
           gpg --list-keys && \
           mvn deploy\
             --no-transfer-progress \
+            -Dgpg.passphrase=${{ secrets.MAVEN_GPG_PRIVATE_KEY }} \
             --batch-mode            
