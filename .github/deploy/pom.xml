@@ -409,11 +409,6 @@
                                 </goals>
                             </execution>
                         </executions>
-                        <activation>
-                            <property>
-                                <name>gpg.passphrase</name>
-                            </property>
-                        </activation>
                     </plugin>
 
                     <plugin>
