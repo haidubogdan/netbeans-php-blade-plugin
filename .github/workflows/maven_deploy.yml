@@ -66,7 +66,8 @@ jobs:
         MAVEN_GPG_PRIVATE_KEY: ${{ secrets.MAVEN_GPG_PRIVATE_KEY }} # Value of the GPG private key to import
       run :  |
           gpg --list-keys && \
-          mvn deploy\
+          mvn \
             --no-transfer-progress \
+            --batch-mode \
             -Dgpg.passphrase=${{ secrets.MAVEN_GPG_PRIVATE_KEY }} \
-            --batch-mode            
+            clean deploy         
