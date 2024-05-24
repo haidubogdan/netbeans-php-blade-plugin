@@ -2,11 +2,11 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>io.github.haidubogdan.netbeans.modules.php.blade.plugin</groupId>
-    <artifactId>netbeans-php-blade-plugin</artifactId>
+    <artifactId>php-blade</artifactId>
 
     <name>BladePlugin for netbeans</name>
     <description>BladePlugin for netbeans</description>
-    <url>https://github.com/haidubogdan/netbeans-php-blade-plugin</url>
+    <url>https://github.com/haidubogdan/netbeans-php-blade</url>
     
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -14,7 +14,8 @@
         <maven.compiler.source>8</maven.compiler.source>
         <maven.compiler.target>8</maven.compiler.target>
     </properties>
-    
+    <!--use snapshot when testing-->
+    <!--<version>2.4.9-SNAPSHOT</version>-->
     <version>2.4.9</version>
     <packaging>nbm</packaging>
     
@@ -408,6 +409,11 @@
                                 </goals>
                             </execution>
                         </executions>
+                        <activation>
+                            <property>
+                                <name>gpg.passphrase</name>
+                            </property>
+                        </activation>
                     </plugin>
 
                     <plugin>
