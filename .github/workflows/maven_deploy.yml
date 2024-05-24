@@ -46,28 +46,12 @@ jobs:
       run : cp ./nbproject/project.properties nb-plugin-package/project.properties
     - name : prepare the files from project  
       run : cp ./LICENSE nb-plugin-package/LICENSE
-    - name : Install gpg secret key v1
-      run : |
-            # Install gpg secret key
-            cat <(echo -e "${{ secrets.MAVEN_GPG_PRIVATE_KEY }}") | gpg --batch --import
-            # Verify gpg secret key
-            gpg --version && gpg --list-secret-keys --keyid-format LONG && export GPG_TTY=$(tty)
-#    - name: Import GPG Key
-#      uses: crazy-max/ghaction-import-gpg@v1
       env:
          GPG_PRIVATE_KEY: ${{ secrets.MAVEN_GPG_PRIVATE_KEY }}
-         GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}  
+         PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}  
     - name : Publish package  
       working-directory: ./nb-plugin-package
+      run : mvn --batch-mode deploy
       env:
         MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}
-        MAVEN_PASSWORD: ${{ secrets.OSSRH_TOKEN }}
-        GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
-        MAVEN_GPG_PRIVATE_KEY: ${{ secrets.MAVEN_GPG_PRIVATE_KEY }} # Value of the GPG private key to import
-      run :  |
-          gpg --list-keys && \
-          mvn \
-            --no-transfer-progress \
-            --batch-mode \
-            -Dgpg.passphrase=${{ secrets.MAVEN_GPG_PRIVATE_KEY }} \
-            clean deploy         
+        MAVEN_PASSWORD: ${{ secrets.OSSRH_TOKEN }}      
