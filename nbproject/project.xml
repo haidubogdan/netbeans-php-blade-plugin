@@ -388,10 +388,10 @@
                 <package>org.netbeans.modules.php.blade.editor</package>
                 <package>org.netbeans.modules.php.blade.editor.actions</package>
                 <package>org.netbeans.modules.php.blade.editor.cache</package>
-                <package>org.netbeans.modules.php.blade.editor.compiler</package>
                 <package>org.netbeans.modules.php.blade.editor.completion</package>
                 <package>org.netbeans.modules.php.blade.editor.components</package>
                 <package>org.netbeans.modules.php.blade.editor.components.annotation</package>
+                <package>org.netbeans.modules.php.blade.editor.declaration</package>
                 <package>org.netbeans.modules.php.blade.editor.directives</package>
                 <package>org.netbeans.modules.php.blade.editor.embedding</package>
                 <package>org.netbeans.modules.php.blade.editor.format</package>
@@ -402,6 +402,10 @@
                 <package>org.netbeans.modules.php.blade.editor.navigator</package>
                 <package>org.netbeans.modules.php.blade.editor.parser</package>
                 <package>org.netbeans.modules.php.blade.editor.path</package>
+                <package>org.netbeans.modules.php.blade.editor.preferences</package>
+                <package>org.netbeans.modules.php.blade.editor.refactoring</package>
+                <package>org.netbeans.modules.php.blade.editor.tools</package>
+                <package>org.netbeans.modules.php.blade.editor.typinghooks</package>
                 <package>org.netbeans.modules.php.blade.editor.ui.customizer</package>
                 <package>org.netbeans.modules.php.blade.editor.ui.wizard</package>
                 <package>org.netbeans.modules.php.blade.project</package>
