@@ -2,7 +2,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <name>BladePlugin for netbeans</name>
+    <name>PHP BladePlugin for netbeans</name>
     <description>BladePlugin for netbeans</description>
     <url>https://github.com/haidubogdan/netbeans-php-blade-plugin</url>
 
@@ -59,6 +59,25 @@
     <build>
         <plugins>
             <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>properties-maven-plugin</artifactId>
+                <version>1.0-alpha-2</version>
+                <executions>
+                    <!-- Associate the read-project-properties goal with the initialize phase, to read the properties file. -->
+                    <execution>
+                        <phase>initialize</phase>
+                        <goals>
+                            <goal>read-project-properties</goal>
+                        </goals>
+                        <configuration>
+                            <files>
+                                <file>project.properties</file>
+                            </files>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.10.1</version>
@@ -93,6 +112,7 @@
                     <licenseName>LICENSE</licenseName>
                     <licenseFile>LICENSE</licenseFile>
                     <!--not working-->
+                    <nbmNeedsRestart>true</nbmNeedsRestart>
                     <additionalArguments>
                     </additionalArguments>
                     <publicPackages>
