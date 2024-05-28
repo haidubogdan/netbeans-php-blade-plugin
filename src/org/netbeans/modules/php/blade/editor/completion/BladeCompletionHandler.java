@@ -82,6 +82,11 @@ public class BladeCompletionHandler implements CodeCompletionHandler2 {
             //no need to think of cancelled?
             LOGGER.info(String.format("complete() cancelled took %d ms", System.currentTimeMillis() - startTime));
             Token currentToken = BladeAntlrUtils.getToken(doc, completionContext.getCaretOffset() - 1);
+
+            if (currentToken == null){
+                return CodeCompletionResult.NONE;
+            }
+
             String tokenText = currentToken.getText();
             final List<CompletionProposal> completionProposals = new ArrayList<>();
             if (tokenText.startsWith("@")) {
