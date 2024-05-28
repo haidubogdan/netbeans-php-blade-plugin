@@ -2,10 +2,6 @@
 
 ## What's changed
 
-**typed interceptors**
+**syntax highlight**
 
-- blade tag autocmplete for "{{ }}, {!! !!}, {{-- --}}", configurable from Project Properties-> Laravel Blade -> Auto tag completion
-
-**license**
-
-- changed to Apache2 license
+- fix issue #61 `@endcan` breaks javascript highlight

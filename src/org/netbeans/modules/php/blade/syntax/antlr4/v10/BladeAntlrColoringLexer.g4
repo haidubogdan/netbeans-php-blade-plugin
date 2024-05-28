@@ -27,7 +27,7 @@ fragment NekudoWithelistMatch : '::' | '?:' | ' : ';
 
 fragment DirectivesWithEndTag : 'for' ('each')? | 'if' | 'while' 
    | 'section' | 'session' | 'once' | 'push' | 'PushOnce'
-   | 'switch' | 'unless' | 'can' ('any' | 'not')
+   | 'switch' | 'unless' | 'can' ('any' | 'not')?
    | 'auth' | 'guest'
    | 'error' | 'production' | 'empty';
 
