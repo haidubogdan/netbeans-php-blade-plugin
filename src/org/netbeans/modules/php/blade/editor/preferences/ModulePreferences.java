@@ -20,6 +20,6 @@ public class ModulePreferences {
     }
     
     public static boolean isAutoTagCompletionEnabled(){
-        return ModulePreferences.getPreferences().getBoolean(ENABLE_AUTO_TAG_COMPLETION, false);
+        return ModulePreferences.getPreferences().getBoolean(ENABLE_AUTO_TAG_COMPLETION, true);
     }
 }

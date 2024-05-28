@@ -32,7 +32,7 @@ public final class GeneralPreferencesUtils {
         public void preferenceChange(PreferenceChangeEvent evt) {
             enableFormatting = PREFERENCES.getBoolean(ENABLE_FORMATTING, false);
             enableIndentation = PREFERENCES.getBoolean(ENABLE_INDENTATION, false);
-            enableAutoTagCompletion = PREFERENCES.getBoolean(ENABLE_AUTO_TAG_COMPLETION, true);
+            enableAutoTagCompletion = PREFERENCES.getBoolean(ENABLE_AUTO_TAG_COMPLETION, false);
         }
     };
 

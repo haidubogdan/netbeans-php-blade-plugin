@@ -1,5 +1,15 @@
 # Change Log
 
+## [2.4.8.9]
+
+- autotag completion is true by default 
+
+## [2.4.8.8]
+
+**syntax highlight**
+
+- fix issue #61 `@endcan` breaks javascript highlight
+
 ## [2.4.8.1]
 
 **completion**
