@@ -48,10 +48,11 @@ jobs:
       run : cp ./LICENSE nb-plugin-package/LICENSE
       env:
          GPG_PRIVATE_KEY: ${{ secrets.MAVEN_GPG_PRIVATE_KEY }}
-         PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}  
+         GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}  
     - name : Publish package  
       working-directory: ./nb-plugin-package
       run : mvn --batch-mode deploy
       env:
         MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}
-        MAVEN_PASSWORD: ${{ secrets.OSSRH_TOKEN }}      
+        MAVEN_PASSWORD: ${{ secrets.OSSRH_TOKEN }}
+        GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
