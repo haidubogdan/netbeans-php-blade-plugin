@@ -2,6 +2,6 @@
 
 ## What's changed
 
-**syntax highlight**
+**completion**
 
-- fix issue #61 `@endcan` breaks javascript highlight
+- fix $cursor text typo on autocomplete for `@foreach` directive

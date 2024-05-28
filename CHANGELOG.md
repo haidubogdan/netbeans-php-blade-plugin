@@ -1,5 +1,9 @@
 # Change Log
 
+## [2.4.9.1]
+
+- fix extra `cursor` text on `@foreach` autocomplete
+
 ## [2.4.8.9]
 
 - autotag completion is true by default 

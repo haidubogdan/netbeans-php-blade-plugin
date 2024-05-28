@@ -8,7 +8,6 @@ import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.ConsoleErrorListener;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ParseTreeListener;
-import org.antlr.v4.runtime.tree.TerminalNode;
 import org.netbeans.modules.editor.indent.spi.Context;
 import org.netbeans.modules.php.blade.syntax.antlr4.formatter.BladeAntlrFormatterLexer;
 import org.netbeans.modules.php.blade.syntax.antlr4.formatter.BladeAntlrFormatterParser;
@@ -16,7 +15,7 @@ import org.netbeans.modules.php.blade.syntax.antlr4.formatter.BladeAntlrFormatte
 import org.openide.util.Exceptions;
 
 /**
- * TODO fix indentation
+ * Still not working indentation on block completion with cursor
  * 
  * @author bhaidu
  */
