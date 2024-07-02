@@ -1,15 +1,12 @@
 package org.netbeans.modules.php.blade.editor;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import javax.swing.text.Document;
 import javax.swing.text.JTextComponent;
-import javax.swing.tree.MutableTreeNode;
 import org.netbeans.api.editor.*;
 import org.netbeans.api.editor.mimelookup.MimeRegistration;
 import org.netbeans.lib.editor.hyperlink.spi.HyperlinkProviderExt;
@@ -17,17 +14,18 @@ import org.netbeans.lib.editor.hyperlink.spi.HyperlinkType;
 import org.netbeans.api.editor.document.LineDocumentUtils;
 import org.netbeans.api.lexer.Token;
 import org.netbeans.api.lexer.TokenSequence;
+import org.netbeans.api.lsp.HyperlinkLocation;
+import org.netbeans.api.project.Project;
 import org.netbeans.editor.BaseDocument;
-import org.netbeans.modules.csl.api.DeclarationFinder;
-import org.netbeans.modules.csl.editor.hyperlink.DeclarationPopup;
 import org.netbeans.modules.editor.NbEditorUtilities;
-import org.netbeans.modules.php.blade.csl.elements.PathElement;
 import org.netbeans.modules.php.blade.editor.lexer.EditorUtils;
 import org.netbeans.modules.php.blade.editor.path.PathUtils;
+import org.netbeans.modules.php.blade.project.BladeProjectProperties;
 import org.netbeans.modules.php.editor.lexer.PHPTokenId;
+import org.netbeans.spi.lsp.HyperlinkLocationProvider;
+import org.netbeans.spi.lsp.HyperlinkTypeDefLocationProvider;
 import org.openide.filesystems.FileObject;
 import org.openide.loaders.DataObject;
-import org.openide.text.DataEditorSupport;
 import org.openide.text.Line;
 import org.openide.text.NbDocument;
 import org.openide.util.Exceptions;
@@ -58,15 +56,15 @@ public class HyperlinkProviderImpl implements HyperlinkProviderExt {
 
     @Override
     public boolean isHyperlinkPoint(Document doc, int offset, HyperlinkType type) {
-//        if (!isInLaravelModule(doc)) {
-//            return false;
-//        }
+        if (!nonLaravelDeclFinderEnabled(doc)) {
+            return false;
+        }
         return getHyperlinkSpan(doc, offset, type) != null;
     }
 
     @Override
     public int[] getHyperlinkSpan(Document doc, int offset, HyperlinkType type) {
-        if (!isInLaravelModule(doc)) {
+        if (!nonLaravelDeclFinderEnabled(doc)) {
             return null;
         }
         if (!type.equals(HyperlinkType.GO_TO_DECLARATION)) {
@@ -114,7 +112,7 @@ public class HyperlinkProviderImpl implements HyperlinkProviderExt {
                     case "view":
                     case "make":
                     case "render":
-                        FileObject currentFile = getFileObjectFromDoc(doc);
+                        FileObject currentFile = EditorUtils.getFileObjectFromDoc(doc);
 
                         if (currentFile == null) {
                             return null;
@@ -128,17 +126,7 @@ public class HyperlinkProviderImpl implements HyperlinkProviderExt {
                             goToOffset = 0;
                             break;
                         }
-//                        DeclarationPopup test;
-//                        FileObject dir = module.getSourceDirectory();
-//                        if (dir != null) {
-//                            String viewPath = "resources/views/" + identifiableText.replace(".", "/") + ".blade.php";
-//                            //FileObject views = dir.getFileObject("resources/views");
-//                            FileObject viewFile = dir.getFileObject(viewPath);
-//                            goToFile = viewFile;
-//                            tooltipText = "Blade Template File : <b>" + viewPath
-//                                    + "</b><br><br><i style='margin-left:20px;'>" + identifiableText + "</i>";
-//                            goToOffset = 0;
-//                        }
+
                         return new int[]{startOffset, startOffset + currentToken.length()};
                     default:
                         return null;
@@ -148,14 +136,6 @@ public class HyperlinkProviderImpl implements HyperlinkProviderExt {
             if (id.equals(PHPTokenId.PHP_TOKEN) && text.equals("(")) {
                 prevTokenId = id;
             }
-        }
-        return null;
-    }
-
-    private FileObject getFileObjectFromDoc(Document doc) {
-        DataObject dObject = NbEditorUtilities.getDataObject(doc);
-        if (dObject != null) {
-            return dObject.getPrimaryFile().getParent();
         }
         return null;
     }
@@ -196,9 +176,14 @@ public class HyperlinkProviderImpl implements HyperlinkProviderExt {
 
     }
 
-    //TODO complete
-    private boolean isInLaravelModule(Document doc) {
-        return true;
+    private boolean nonLaravelDeclFinderEnabled(Document doc) {
+        Project projectOwner = EditorUtils.getProjectOwner(doc);
+        if (projectOwner == null){
+            return false;
+        }
+        BladeProjectProperties bladeProperties = BladeProjectProperties.getInstance(projectOwner);
+        
+        return bladeProperties.getNonLaravelDeclFinderFlag();
     }
 
     @Override
@@ -206,4 +191,22 @@ public class HyperlinkProviderImpl implements HyperlinkProviderExt {
         return "<html><body>" + tooltipText + "</body></html>";
     }
 
+    //??when does this work
+    @MimeRegistration(mimeType = "text/x-php5", service = HyperlinkLocationProvider.class)
+    public static class LocationProvider implements HyperlinkLocationProvider {
+
+        @Override
+        public CompletableFuture<HyperlinkLocation> getHyperlinkLocation(Document doc, int offset) {
+            return null;
+        }
+    }
+
+    @MimeRegistration(mimeType = "text/x-php5", service = HyperlinkTypeDefLocationProvider.class)
+    public static class TypeDefLocationProvider implements HyperlinkTypeDefLocationProvider {
+
+        @Override
+        public CompletableFuture<HyperlinkLocation> getHyperlinkTypeDefLocation(Document doc, int offset) {
+            return null;
+        }
+    }
 }

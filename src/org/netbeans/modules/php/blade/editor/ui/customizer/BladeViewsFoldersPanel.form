@@ -38,6 +38,7 @@
                           <Component id="jLabel1" alignment="0" min="-2" max="-2" attributes="0"/>
                           <Component id="reindexViewsButton" alignment="0" min="-2" max="-2" attributes="0"/>
                           <Component id="jLabel4" alignment="0" min="-2" max="-2" attributes="0"/>
+                          <Component id="nonLaravelViewDeclFinder" alignment="0" min="-2" max="-2" attributes="0"/>
                       </Group>
                       <EmptySpace min="0" pref="83" max="32767" attributes="0"/>
                   </Group>
@@ -68,7 +69,9 @@
               </Group>
               <EmptySpace max="-2" attributes="0"/>
               <Component id="reindexViewsButton" min="-2" max="-2" attributes="0"/>
-              <EmptySpace pref="182" max="32767" attributes="0"/>
+              <EmptySpace type="separate" max="-2" attributes="0"/>
+              <Component id="nonLaravelViewDeclFinder" min="-2" max="-2" attributes="0"/>
+              <EmptySpace pref="144" max="32767" attributes="0"/>
           </Group>
       </Group>
     </DimensionLayout>
@@ -154,6 +157,13 @@
       <Events>
         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="reindexViewFolderButtonActionPerformed"/>
       </Events>
+    </Component>
+    <Component class="javax.swing.JCheckBox" name="nonLaravelViewDeclFinder">
+      <Properties>
+        <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+          <ResourceString bundle="org/netbeans/modules/php/blade/editor/ui/customizer/Bundle.properties" key="BladeViewsFoldersPanel.nonLaravelViewDeclFinder.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
+        </Property>
+      </Properties>
     </Component>
   </SubComponents>
 </Form>

@@ -28,11 +28,12 @@ public final class BladeProjectProperties {
     private static final String BLADE_VERSION = "blade.version"; // NOI18N
     private static final String DIRECTIVE_CUSTOMIZER_PATH_LIST = "directive_customizer.path.list"; // NOI18N
     private static final String VIEW_PATH_LIST = "views.path.list"; // NOI18N
-    private static final String FORMATTING = "formatting"; // NOI18N
+    private static final String NON_LARAVEL_DECL_FINDER = "non_laravel.decl.finder"; // NOI18N
     public Project project;
 
     DefaultListModel<String> directiveCustomizerPathList = new DefaultListModel();
     DefaultListModel<String> viewsPathList = new DefaultListModel();
+    boolean nonLaravelDeclFinder = false;
 
     private BladeProjectProperties(Project project) {
         this.project = project;
@@ -64,6 +65,7 @@ public final class BladeProjectProperties {
     private void initModelsFromPreferences() {
         directiveCustomizerPathList = createModelForDirectiveCusomizerPathList();
         viewsPathList = createModelForViewsPathList();
+        getPreferences().getBoolean(NON_LARAVEL_DECL_FINDER, false);
     }
 
     public void storeDirectiveCustomizerPaths() {
@@ -71,9 +73,15 @@ public final class BladeProjectProperties {
         getPreferences().put(DIRECTIVE_CUSTOMIZER_PATH_LIST, includePath);
     }
     
+    
     public void storeViewsPaths() {
         String includePath = UiOptionsUtils.encodeToStrings(viewsPathList.elements());
         getPreferences().put(VIEW_PATH_LIST, includePath);
+    }
+    
+    public void storeNonLaravelDeclFinderFlag(boolean status) {
+        nonLaravelDeclFinder = status;
+        getPreferences().putBoolean(NON_LARAVEL_DECL_FINDER, status);
     }
 
     public void addDirectiveCustomizerPath(String path) {
@@ -113,6 +121,10 @@ public final class BladeProjectProperties {
         return viewsPathList;
     }
 
+    public boolean getNonLaravelDeclFinderFlag() {
+        return nonLaravelDeclFinder;
+    }
+    
     private DefaultListModel<String> creatModelFromPreferences(String pathName) {
         DefaultListModel<String> model = new DefaultListModel<>();
         String encodedCompilerPathList = getPreferences().get(pathName, null);

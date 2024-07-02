@@ -34,6 +34,6 @@ public class StringUtils {
             return false;
         }
         return (text.startsWith("'") && text.endsWith("'")) 
-                || (text.startsWith("\\\"") && text.endsWith("\\\""));
+                || (text.startsWith("\"") && text.endsWith("\""));
     }
 }
