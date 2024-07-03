@@ -58,7 +58,7 @@ jobs:
         draft: false
         prerelease: true
         release_name: Netbeans Blade Php pre-release ${{ steps.nbm_version.outputs.version }}  
-        tag_name: prenbpr1.0.1
+        tag_name: prenbpr1.0.2
         body_path: .github/workflows/CHANGELOG_PRERELEASE.md
     - name: upload nbm artifact
       uses: actions/upload-release-asset@v1
