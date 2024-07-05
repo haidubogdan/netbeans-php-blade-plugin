@@ -86,6 +86,13 @@ import org.netbeans.modules.php.blade.syntax.annotation.DirectiveRegister;
     @Directive(name = "@dd", params = true),
     @Directive(name = "@json", params = true),
     @Directive(name = "@vite", params = true, since = "11"),
+    //styles
+    @Directive(name = "@class", params = true, since = "8"),
+    @Directive(name = "@style", params = true, since = "9"),
+    @Directive(name = "@checked", params = true, since = "9"),
+    @Directive(name = "@disabled", params = true, since = "9"),
+    @Directive(name = "@readony", params = true, since = "9"),
+    @Directive(name = "@required", params = true, since = "9"),
     }
 )
 public class DirectivesList {

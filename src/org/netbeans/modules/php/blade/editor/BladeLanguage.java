@@ -145,11 +145,6 @@ public class BladeLanguage extends DefaultLanguageConfig {
     }
 
     @Override
-    public IndexSearcher getIndexSearcher() {
-        return new BladeTypeSearcher();
-    }
-
-    @Override
     public DeclarationFinder getDeclarationFinder() {
         return new BladeDeclarationFinder();
     }

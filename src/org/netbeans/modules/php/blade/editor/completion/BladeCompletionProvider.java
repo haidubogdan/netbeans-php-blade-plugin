@@ -1,10 +1,6 @@
 package org.netbeans.modules.php.blade.editor.completion;
 
-import java.io.IOException;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.List;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.JTextComponent;
@@ -15,25 +11,23 @@ import org.netbeans.api.editor.document.EditorDocumentUtils;
 import org.netbeans.api.editor.mimelookup.MimeRegistration;
 import org.netbeans.api.editor.mimelookup.MimeRegistrations;
 import org.netbeans.api.project.Project;
-import org.netbeans.lib.editor.codetemplates.api.CodeTemplateManager;
 import org.netbeans.modules.php.blade.editor.BladeLanguage;
 import org.netbeans.modules.php.blade.editor.ResourceUtilities;
 import org.netbeans.modules.php.blade.editor.completion.BladeCompletionItem.BladeTag;
 import org.netbeans.modules.php.blade.editor.components.AttributeCompletionService;
 import org.netbeans.modules.php.blade.editor.components.ComponentsCompletionService;
-import org.netbeans.modules.php.blade.editor.indexing.BladeIndex;
-import org.netbeans.modules.php.blade.editor.indexing.BladeIndex.IndexedReferenceId;
+import org.netbeans.modules.php.blade.editor.directives.CustomDirectives;
+import org.netbeans.modules.php.blade.editor.directives.CustomDirectives.CustomDirective;
 import org.netbeans.modules.php.blade.editor.indexing.PhpIndexResult;
 import org.netbeans.modules.php.blade.editor.indexing.PhpIndexUtils;
-import org.netbeans.modules.php.blade.editor.path.PathUtils;
 import org.netbeans.modules.php.blade.project.ProjectUtils;
 import org.netbeans.modules.php.blade.syntax.StringUtils;
+import org.netbeans.modules.php.blade.syntax.annotation.Directive;
 import org.netbeans.modules.php.blade.syntax.antlr4.v10.BladeAntlrLexer;
 import static org.netbeans.modules.php.blade.syntax.antlr4.v10.BladeAntlrLexer.*;
-import static org.netbeans.modules.php.blade.syntax.antlr4.v10.BladeAntlrParser.RAW_TAG_CLOSE;
-import org.netbeans.modules.php.blade.syntax.antlr4.v10.BladeAntlrUtils;
 import org.netbeans.spi.editor.completion.CompletionItem;
 import org.netbeans.spi.editor.completion.CompletionProvider;
+import static org.netbeans.spi.editor.completion.CompletionProvider.COMPLETION_QUERY_TYPE;
 import org.netbeans.spi.editor.completion.CompletionResultSet;
 import org.netbeans.spi.editor.completion.CompletionTask;
 import org.netbeans.spi.editor.completion.support.AsyncCompletionQuery;
@@ -48,7 +42,9 @@ import org.openide.util.Exceptions;
  * @author bhaidu
  */
 @MimeRegistrations(value = {
-    @MimeRegistration(mimeType = "text/html", service = CompletionProvider.class),})
+    @MimeRegistration(mimeType = "text/html", service = CompletionProvider.class),
+    @MimeRegistration(mimeType = "text/x-blade", service = CompletionProvider.class)
+})
 public class BladeCompletionProvider implements CompletionProvider {
 
     private static final Logger LOGGER = Logger.getLogger(BladeCompletionProvider.class.getName());
@@ -165,6 +161,9 @@ public class BladeCompletionProvider implements CompletionProvider {
                         String compPrefix = currentToken.getText().length() > 3 ? StringUtils.kebabToCamel(currentToken.getText().substring(3)) : "";
                         completeComponents(compPrefix, fo, caretOffset, resultSet);
                         break;
+                    case D_UNKNOWN_ATTR_ENC:
+                        completeDirectives(currentToken.getText(), doc, caretOffset, resultSet);
+                        break;
                     default:
                         break;
                 }
@@ -175,6 +174,47 @@ public class BladeCompletionProvider implements CompletionProvider {
         }
     }
 
+    private void completeDirectives(String prefix, Document doc, int carretOffset, CompletionResultSet resultSet) {
+        int startOffset = carretOffset - prefix.length();
+        DirectiveCompletionList completionList = new DirectiveCompletionList();
+
+        for (Directive directive : completionList.getDirectives()) {
+            String directiveName = directive.name();
+            if (directiveName.startsWith(prefix)) {
+                if (directive.params()) {
+                    resultSet.addItem(DirectiveCompletionBuilder.itemWithArg(
+                            startOffset, carretOffset, prefix, directiveName, directive.description(), doc));
+                    if (!directive.endtag().isEmpty()) {
+                        resultSet.addItem(DirectiveCompletionBuilder.itemWithArg(
+                                startOffset, carretOffset, prefix, directiveName, directive.endtag(), directive.description(), doc));
+                    }
+                } else {
+                    resultSet.addItem(DirectiveCompletionBuilder.simpleItem(
+                            startOffset, directiveName, directive.description()));
+                    if (!directive.endtag().isEmpty()) {
+                        resultSet.addItem(DirectiveCompletionBuilder.simpleItem(
+                                startOffset, carretOffset, prefix, directiveName, directive.endtag(), directive.description(), doc));
+                    }
+                }
+
+            }
+        }
+
+        FileObject fo = EditorDocumentUtils.getFileObject(doc);
+        Project project = ProjectUtils.getMainOwner(fo);
+
+        CustomDirectives.getInstance(project).filterAction(new CustomDirectives.FilterCallback() {
+            @Override
+            public void filterDirectiveName(CustomDirective customDirective, FileObject file) {
+                if (customDirective.name.startsWith(prefix)) {
+                    resultSet.addItem(DirectiveCompletionBuilder.itemWithArg(
+                            startOffset, carretOffset, prefix, customDirective.name,
+                            "custom directive", doc, file));
+                }
+            }
+        });
+    }
+    
     private void completeComponents(String prefixIdentifier, FileObject fo,
             int caretOffset, CompletionResultSet resultSet) {
 //        BladeIndex bladeIndex;

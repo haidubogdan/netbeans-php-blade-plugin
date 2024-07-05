@@ -179,7 +179,9 @@ D_ASSET_BUNDLER : '@vite'->pushMode(LOOK_FOR_PHP_EXPRESSION);
 D_CUSTOM : ('@' NameString {this._input.LA(1) == '(' || 
         (this._input.LA(1) == ' ' && this._input.LA(2) == '(')}? ) ->pushMode(LOOK_FOR_BLADE_PARAMETERS);
 
-D_UNKNOWN : '@' NameString;
+D_UNKNOWN_ATTR_ENC : '@' NameString {this._input.LA(1) == '"'}?;
+D_UNKNOWN : '@' NameString {this._input.LA(1) != '"'}?;
+
 //display
 CONTENT_TAG_OPEN : '{{' ->pushMode(INSIDE_REGULAR_ECHO);
 RAW_TAG_OPEN : '{!!' ->pushMode(INSIDE_RAW_ECHO);

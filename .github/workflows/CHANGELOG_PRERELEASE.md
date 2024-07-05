@@ -2,6 +2,15 @@
 
 ## What's changed
 
-**formatting**
+**cleanup**
 
-- fix issue #57 `<optgroup>` tag not aligning correctly
+- removing unused code
+
+**license**
+
+- add header to licenses
+
+**completion**
+
+- patch to enable directive completion before a attr quote ex: `attr="@a"`
+- adding `@class`, `@style`, `@required`, `@readonly`, `@checked` to blade directive list

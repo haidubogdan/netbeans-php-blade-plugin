@@ -140,7 +140,7 @@ condSection : (D_SECTION_MISSING | D_HAS_SECTION) singleArgWrapperP simple_condi
 custom_directive : D_CUSTOM ((BLADE_PARAM_LPAREN BLADE_PARAM_RPAREN) | multiArgWrapper )
 ;
 
-possibleDirective : D_UNKNOWN;
+possibleDirective : D_UNKNOWN | D_UNKNOWN_ATTR_ENC;
     
 php_blade : D_PHP composed_php_expression* D_ENDPHP | D_PHP main_php_expression;
 

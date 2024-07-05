@@ -346,7 +346,7 @@ public class BladeDeclarationFinder implements DeclarationFinder {
                 return location;
             case USE:
             case INJECT:
-            case PHP_NAMESPACE_PATH:
+            case PHP_NAMESPACE_PATH_TYPE:
                 Collection<PhpIndexResult> indexNamespaceResults;
                 if (reference.namespace != null) {
                     indexNamespaceResults = PhpIndexUtils.queryExactNamespaceClasses(

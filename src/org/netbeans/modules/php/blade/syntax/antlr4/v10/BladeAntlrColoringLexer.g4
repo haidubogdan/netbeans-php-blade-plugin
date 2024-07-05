@@ -79,7 +79,9 @@ D_CUSTOM : ('@' NameString {this._input.LA(1) == '(' ||
 
 D_UNKNOWN : '@' NameString;
 
+//TODO move all known directives to fragment?
 //hack to allow completion for directives
+//it doesn't trigger completion
 D_AT : '@' (' ' | '>' | [\n\r])?;
 
 //display
@@ -92,10 +94,10 @@ HTML_X : ('<x-' ComponentTagIdentifier | '<' ComponentTagIdentifier ('::' Compon
 
 CLOSE_TAG : ('</' FullIdentifier '>' [\n\r ]*)+->type(HTML);
 
-HTML : ((' ')+ | [\r\n]+ | ComponentTagIdentifier | SpecialChars | '"' | '\\\'' | '_' | '.' 
+HTML : ((' ')+ | [\r\n]+ | ComponentTagIdentifier | SpecialChars | '"' {this._input.LA(1) != '@'}? | '\\\'' {this._input.LA(1) != '@'}? | '_' | '.' 
 | ',' | '=' | [()-;]+ | '[' | ']' )* '<' {this._input.LA(1) != 'x' && this._input.LA(1) != '?' && this._input.LA(2) != 'p'}? ->pushMode(INSIDE_HTML_TAG),more;
 
-HTML_MISC : ((' ')+ | [\r\n]+ | ('#' | '.')? ComponentTagIdentifier | SpecialChars | '"' 
+HTML_MISC : ((' ')+ | [\r\n]+ | ('#' | '.')? ComponentTagIdentifier | SpecialChars | '"' {this._input.LA(1) != '@'}?
 | ',' | '\\\'' | '_' | '.' | '=' | [()-;]+ | '[' | ']'  )+->type(HTML);
 
 HTML_WS : ((' ')+ | [\r\n]+)->type(HTML);

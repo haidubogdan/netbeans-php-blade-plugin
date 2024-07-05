@@ -66,7 +66,7 @@ public class BladeParserResult extends ParserResult {
         YIELD, STACK, SECTION, PUSH, PUSH_IF, PREPEND, INCLUDE, INCLUDE_IF,
         INCLUDE_COND, EXTENDS, EACH, HAS_SECTION,
         SECTION_MISSING, USE, INJECT, CUSTOM_DIRECTIVE, POSSIBLE_DIRECTIVE,
-        PHP_FUNCTION, PHP_CLASS, PHP_METHOD, PHP_CONSTANT, PHP_NAMESPACE, PHP_NAMESPACE_PATH,
+        PHP_FUNCTION, PHP_CLASS, PHP_METHOD, PHP_CONSTANT, PHP_NAMESPACE, PHP_NAMESPACE_PATH_TYPE,
         STATIC_FIELD_ACCESS,
         TEMPLATE_PATH,
     }
@@ -380,7 +380,7 @@ public class BladeParserResult extends ParserResult {
                 String className = classIdentifier.getText();
                 OffsetRange classRange = new OffsetRange(classIdentifier.getStartIndex(), classIdentifier.getStopIndex() + 1);
                 OffsetRange range = new OffsetRange(ctx.getStart().getStartIndex(), ctx.getStop().getStopIndex() + 1);
-                occurancesForDeclaration.put(range, new Reference(ReferenceType.PHP_NAMESPACE_PATH, className, classRange, null, namespace));
+                occurancesForDeclaration.put(range, new Reference(ReferenceType.PHP_NAMESPACE_PATH_TYPE, className, classRange, null, namespace));
             }
 
             @Override
@@ -733,7 +733,7 @@ public class BladeParserResult extends ParserResult {
             }
 
             if (range.containsInclusive(offset)) {
-                return new Reference(ReferenceType.PHP_NAMESPACE_PATH, entry.getValue(), range);
+                return new Reference(ReferenceType.PHP_NAMESPACE_PATH_TYPE, entry.getValue(), range);
             }
         }
 

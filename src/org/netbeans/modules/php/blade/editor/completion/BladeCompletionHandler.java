@@ -1,3 +1,21 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package org.netbeans.modules.php.blade.editor.completion;
 
 import java.util.ArrayList;
@@ -13,9 +31,9 @@ import org.netbeans.editor.BaseDocument;
 import javax.swing.text.Document;
 import javax.swing.text.JTextComponent;
 import org.antlr.v4.runtime.Token;
-import org.netbeans.api.editor.document.EditorDocumentUtils;
 import org.netbeans.api.project.Project;
 import org.netbeans.modules.csl.api.CodeCompletionContext;
+import org.netbeans.modules.csl.api.CodeCompletionHandler;
 import org.netbeans.modules.csl.api.CodeCompletionHandler2;
 import org.netbeans.modules.csl.api.CodeCompletionResult;
 import org.netbeans.modules.csl.api.CompletionProposal;
@@ -38,6 +56,8 @@ import org.netbeans.modules.php.blade.editor.indexing.PhpIndexUtils;
 import org.netbeans.modules.php.blade.editor.parser.BladeParserResult;
 import org.netbeans.modules.php.blade.editor.parser.BladeParserResult.FieldAccessReference;
 import org.netbeans.modules.php.blade.editor.parser.BladeParserResult.Reference;
+import static org.netbeans.modules.php.blade.editor.parser.BladeParserResult.ReferenceType.PHP_CLASS;
+import static org.netbeans.modules.php.blade.editor.parser.BladeParserResult.ReferenceType.PHP_CONSTANT;
 import org.netbeans.modules.php.blade.editor.preferences.ModulePreferences;
 import org.netbeans.modules.php.blade.project.ProjectUtils;
 import org.netbeans.modules.php.blade.syntax.TagList;
@@ -48,6 +68,7 @@ import static org.netbeans.modules.php.blade.syntax.antlr4.v10.BladeAntlrLexer.*
 import static org.netbeans.modules.php.blade.syntax.antlr4.v10.BladeAntlrParser.CONTENT_TAG_OPEN;
 import org.netbeans.spi.project.ui.support.ProjectConvertors;
 import org.openide.filesystems.FileObject;
+import static org.netbeans.modules.php.blade.editor.parser.BladeParserResult.ReferenceType.PHP_NAMESPACE_PATH_TYPE;
 
 /**
  *
@@ -57,66 +78,52 @@ public class BladeCompletionHandler implements CodeCompletionHandler2 {
 
     private static final Logger LOGGER = Logger.getLogger(BladeCompletionHandler.class.getName());
 
-    static enum ContextType {
-        GENERIC_IDENTIFIER, PHP_FUNCTION, NONE
-    }
-
     @Override
     public CodeCompletionResult complete(CodeCompletionContext completionContext) {
+        if (CancelSupport.getDefault().isCancelled()) {
+            return CodeCompletionResult.NONE;
+        }
         long startTime = System.currentTimeMillis();
         LOGGER.log(Level.INFO, "Completion requested for {0}", completionContext.getParserResult().getSnapshot().getSource().getFileObject().getPath());
         BaseDocument doc = (BaseDocument) completionContext.getParserResult().getSnapshot().getSource().getDocument(false);
+
         if (doc == null) {
-            LOGGER.info(String.format("complete() no doc found took %d ms", System.currentTimeMillis() - startTime));
             return CodeCompletionResult.NONE;
         }
         
         if (completionContext.getCaretOffset() < 1) {
-            LOGGER.info(String.format("complete() wrong caret took %d ms", System.currentTimeMillis() - startTime));
             return CodeCompletionResult.NONE;
         }
 
         BladeParserResult parserResult = (BladeParserResult) completionContext.getParserResult();
-
-        if (CancelSupport.getDefault().isCancelled()) {
-            //no need to think of cancelled?
-            LOGGER.info(String.format("complete() cancelled took %d ms", System.currentTimeMillis() - startTime));
-            Token currentToken = BladeAntlrUtils.getToken(doc, completionContext.getCaretOffset() - 1);
-
-            if (currentToken == null){
-                return CodeCompletionResult.NONE;
-            }
-
-            String tokenText = currentToken.getText();
-            final List<CompletionProposal> completionProposals = new ArrayList<>();
-            if (tokenText.startsWith("@")) {
-                completeDirectives(completionProposals, completionContext, parserResult, currentToken);
-            }
-            if (completionProposals.isEmpty()) {
-                LOGGER.info(String.format("complete() no result took %d ms", System.currentTimeMillis() - startTime));
-                return CodeCompletionResult.NONE;
-            }
-            return new DefaultCompletionResult(completionProposals, false);
-        }
-
-
 
         final List<CompletionProposal> completionProposals = new ArrayList<>();
 
         Token currentToken = BladeAntlrUtils.getToken(doc, completionContext.getCaretOffset() - 1);
 
         if (currentToken == null) {
-            LOGGER.info(String.format("complete() no token found took %d ms", System.currentTimeMillis() - startTime));
             return CodeCompletionResult.NONE;
         }
 
+        String prefix = currentToken.getText();
+        
+        if (prefix == null) {
+            return CodeCompletionResult.NONE;
+        }
+        
         String tokenText = currentToken.getText();
 
-        if (!tokenText.startsWith("@")) {
+        //D_UNKNOWN_ATTR_ENC hack to fix completion not triggered in html embedded text
+        if (tokenText.startsWith("@") && currentToken.getType() != D_UNKNOWN_ATTR_ENC) {
+            completeDirectives(completionProposals, completionContext, parserResult, currentToken);
+        } else {
+            if (prefix.length() == 1){
+                return CodeCompletionResult.NONE;
+            }
             switch (currentToken.getType()) {
                 case PHP_IDENTIFIER:
                 case PHP_NAMESPACE_PATH:
-                    completePhpElements(completionProposals, parserResult, completionContext.getCaretOffset(), currentToken);
+                    completePhpElements(completionProposals, parserResult, completionContext.getCaretOffset(), prefix);
                     break;
                 case PHP_EXPRESSION:
                     completePhpSnippet(completionProposals, completionContext.getCaretOffset(), currentToken);
@@ -131,28 +138,20 @@ public class BladeCompletionHandler implements CodeCompletionHandler2 {
                     }
                     break;
             }
-        } else {
-            completeDirectives(completionProposals, completionContext, parserResult, currentToken);
         }
 
         if (completionProposals.isEmpty()) {
-            LOGGER.info(String.format("complete() no result took %d ms", System.currentTimeMillis() - startTime));
+            LOGGER.info(String.format("complete() no result found. Took %d ms", System.currentTimeMillis() - startTime));
             return CodeCompletionResult.NONE;
         }
-        //TODO add context
-        LOGGER.info(String.format("complete() with result took %d ms", System.currentTimeMillis() - startTime));
+
+        LOGGER.info(String.format("complete() with results took %d ms", System.currentTimeMillis() - startTime));
         return new DefaultCompletionResult(completionProposals, false);
     }
 
-    //we need a context
     private void completePhpElements(final List<CompletionProposal> completionProposals,
             BladeParserResult parserResult,
-            int offset, Token currentToken) {
-        String prefix = currentToken.getText();
-
-        if (prefix == null || prefix.length() == 1) {
-            return;
-        }
+            int offset, String prefix) {
 
         FieldAccessReference fieldAccessReference = parserResult.findFieldAccessRefrence(offset);
 
@@ -162,6 +161,8 @@ public class BladeCompletionHandler implements CodeCompletionHandler2 {
             return;
         }
 
+        //based on ParserResult implementation
+        //inside tag {{ }} and inside directive expression differences
         Reference elementReference = parserResult.findOccuredRefrence(offset);
 
         if (elementReference == null) {
@@ -179,7 +180,7 @@ public class BladeCompletionHandler implements CodeCompletionHandler2 {
                 completePhpClasses(prefix, offset, completionProposals, parserResult);
                 completeConstants(prefix, offset, completionProposals, parserResult);
                 break;
-            case PHP_NAMESPACE_PATH:
+            case PHP_NAMESPACE_PATH_TYPE:
                 completeNamespace(prefix, offset, completionProposals, parserResult);
 
                 //we are after '\'
@@ -442,22 +443,22 @@ public class BladeCompletionHandler implements CodeCompletionHandler2 {
     }
 
     @Override
-    public QueryType getAutoQuery(JTextComponent component, String typedText) {
+    public CodeCompletionHandler.QueryType getAutoQuery(JTextComponent component, String typedText) {
         if (typedText.length() == 0) {
-            return QueryType.NONE;
+            return CodeCompletionHandler.QueryType.NONE;
         }
 
         if (typedText.startsWith("@")){
-            return QueryType.ALL_COMPLETION; 
+            return CodeCompletionHandler.QueryType.ALL_COMPLETION; 
         }
 
         char lastChar = typedText.charAt(typedText.length() - 1);
 
         switch (lastChar) {
             case '\n':
-                return QueryType.STOP;
+                return CodeCompletionHandler.QueryType.STOP;
             default:
-                return QueryType.ALL_COMPLETION;
+                return CodeCompletionHandler.QueryType.ALL_COMPLETION;
         }
     }
 
