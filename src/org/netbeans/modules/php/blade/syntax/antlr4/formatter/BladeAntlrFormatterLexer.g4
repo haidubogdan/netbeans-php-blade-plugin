@@ -97,7 +97,7 @@ HTML_START_BLOCK_TAG : '<' ('div'
     | 'header' | 'h' [1-9] | 'nav'
     | 'dialog'
     | 'summary' | 'details' | 'slot'
-    | 'label' | 'select' | 'option' | 'fieldset' | 'textarea' | 'button' | 'form' | 'search'
+    | 'label' | 'select' | 'optgroup' | 'option' | 'fieldset' | 'textarea' | 'button' | 'form' | 'search'
     | 'ul' | 'ol' | 'li'
     | 'table' | 'tr' | 'td' | 'th' | 'tbody' | 'thead' | 'tfoot' | 'caption' |
     | 'time' |

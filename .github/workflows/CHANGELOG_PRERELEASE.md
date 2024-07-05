@@ -2,6 +2,6 @@
 
 ## What's changed
 
-**declaration finder**
+**formatting**
 
-- allow configurable **go to blade view path** action on methods : `view`, `render`, `make` for non-laravel projects
+- fix issue #57 `<optgroup>` tag not aligning correctly
