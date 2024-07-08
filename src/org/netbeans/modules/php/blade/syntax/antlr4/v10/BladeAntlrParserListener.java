@@ -528,16 +528,6 @@ public interface BladeAntlrParserListener extends ParseTreeListener {
 	 */
 	void exitNamespacePath(BladeAntlrParser.NamespacePathContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link BladeAntlrParser#method_call}.
-	 * @param ctx the parse tree
-	 */
-	void enterMethod_call(BladeAntlrParser.Method_callContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link BladeAntlrParser#method_call}.
-	 * @param ctx the parse tree
-	 */
-	void exitMethod_call(BladeAntlrParser.Method_callContext ctx);
-	/**
 	 * Enter a parse tree produced by {@link BladeAntlrParser#function_call}.
 	 * @param ctx the parse tree
 	 */

@@ -134,8 +134,15 @@ public class ViewAntlrFormatterTokensAction extends AbstractAction implements Ac
                             result.append(token.getText());
                             break;
                         case COMPONENT_TAG:
+                            result.append("COMP_TAG ");
+                            result.append(token.getText());
+                            break;
                         case HTML_CLOSE_TAG:
+                            result.append("CLOSE_TAG ");
+                            result.append(token.getText());
+                            break;
                         case HTML_START_BLOCK_TAG:
+                            result.append("START_TAG ");
                             result.append(token.getText());
                             break;
                         case GT_SYMBOL:

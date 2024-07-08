@@ -83,7 +83,8 @@ SG_QUOTE : '\'';
 DB_QUOTE : '"';
 
 HTML_CLOSE_TAG : ('<' (' ')* '/' (' ')*  [a-z\u0080-\ufffe][a-z0-9_.\u0080-\ufffe]* (' ')* '>') 
-| ('</' (' ')* ('x-'  CompomentIdentifier |  CompomentIdentifier ('::' CompomentIdentifier)+) (' ')* '>') 
+| ('</' (' ')* ('x-'  CompomentIdentifier |  CompomentIdentifier ('::' CompomentIdentifier)+ | 
+  'livewire:' CompomentIdentifier ('-' CompomentIdentifier)*) (' ')* '>') 
 ;
 HTML_COMMENT: '<!--' .*? '-->';
 HTML_START_BLOCK_TAG : '<' ('div'
@@ -106,7 +107,7 @@ HTML_START_BLOCK_TAG : '<' ('div'
 
 HTML_SELF_CLOSE_TAG : '<' ('img' | 'input' | 'br' | 'hr' | 'link' | 'meta');
 
-COMPONENT_TAG : '<x-' CompomentIdentifier | '<' CompomentIdentifier ('::' CompomentIdentifier)+;
+COMPONENT_TAG : '<x-' CompomentIdentifier | '<' CompomentIdentifier ('::' CompomentIdentifier)+ | '<livewire:' CompomentIdentifier;
 
 EQ : '=';
 IDENTIFIER : Identifier;

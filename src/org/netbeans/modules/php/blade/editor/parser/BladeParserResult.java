@@ -384,49 +384,6 @@ public class BladeParserResult extends ParserResult {
             }
 
             @Override
-            public void exitClass_name_reference(BladeAntlrParser.Class_name_referenceContext ctx) {
-                if (ctx.class_identifier() == null || ctx.class_identifier().class_name == null) {
-                    return;
-                }
-                Token classIdentifier = ctx.class_identifier().class_name;
-                String className = classIdentifier.getText();
-                OffsetRange range = new OffsetRange(classIdentifier.getStartIndex(), classIdentifier.getStopIndex() + 1);
-
-                if (ctx.class_identifier().namespace != null) {
-                    occurancesForDeclaration.put(range, new Reference(
-                            ReferenceType.PHP_CLASS,
-                            className, range,
-                            null,
-                            ctx.class_identifier().namespace.getText())
-                    );
-                } else {
-                    phpClassOccurences.put(range, className);
-                }
-            }
-
-            @Override
-            public void exitClass_instance(BladeAntlrParser.Class_instanceContext ctx) {
-                if (ctx.class_identifier() == null || ctx.class_identifier().class_name == null) {
-                    return;
-                }
-                Token classIdentifier = ctx.class_identifier().class_name;
-                String className = classIdentifier.getText();
-                OffsetRange range = new OffsetRange(classIdentifier.getStartIndex(), classIdentifier.getStopIndex() + 1);
-                phpClassOccurences.put(range, className);
-
-                if (ctx.class_identifier().namespace != null) {
-                    occurancesForDeclaration.put(range, new Reference(
-                            ReferenceType.PHP_CLASS,
-                            className, range,
-                            null,
-                            ctx.class_identifier().namespace.getText())
-                    );
-                } else {
-                    phpClassOccurences.put(range, className);
-                }
-            }
-
-            @Override
             public void exitStatic_direct_namespace_class_access(BladeAntlrParser.Static_direct_namespace_class_accessContext ctx) {
                 if (ctx.class_name == null) {
                     return;
@@ -452,12 +409,12 @@ public class BladeParserResult extends ParserResult {
                     callRange = new OffsetRange(start, ctx.static_property.getStopIndex() + 1);
                     fieldName = ctx.static_property.getText();
                     fieldType = FieldType.CONSTANT;
-                } else if (ctx.method_call() != null) {
+                } else if (ctx.func_name != null) {
                     //methods
-                    callRange = new OffsetRange(start, ctx.method_call().getStop().getStopIndex() + 1);
-                    fieldName = ctx.method_call().func_name.getText();
+                    callRange = new OffsetRange(start, ctx.func_name.getStopIndex() + 1);//bad
+                    fieldName = ctx.func_name.getText();
                     fieldType = FieldType.METHOD;
-                    OffsetRange functionRange = new OffsetRange(ctx.method_call().func_name.getStartIndex(), ctx.method_call().func_name.getStopIndex() + 1);
+                    OffsetRange functionRange = new OffsetRange(ctx.func_name.getStartIndex(), ctx.func_name.getStopIndex() + 1);
                     phpMethodOccurences.put(functionRange, new Reference(ReferenceType.PHP_METHOD, fieldName, range, className));
                 }
 
@@ -494,12 +451,12 @@ public class BladeParserResult extends ParserResult {
                     callRange = new OffsetRange(start, ctx.static_property.getStopIndex() + 1);
                     fieldName = ctx.static_property.getText();
                     fieldType = FieldType.CONSTANT;
-                } else if (ctx.method_call() != null) {
+                } else if (ctx.func_name != null) {
                     //methods
-                    callRange = new OffsetRange(start, ctx.method_call().getStop().getStopIndex() + 1);
-                    fieldName = ctx.method_call().func_name.getText();
+                    callRange = new OffsetRange(start, ctx.func_name.getStopIndex() + 1);
+                    fieldName = ctx.func_name.getText();
                     fieldType = FieldType.METHOD;
-                    OffsetRange functionRange = new OffsetRange(ctx.method_call().func_name.getStartIndex(), ctx.method_call().func_name.getStopIndex() + 1);
+                    OffsetRange functionRange = new OffsetRange(ctx.func_name.getStartIndex(), ctx.func_name.getStopIndex() + 1);
                     phpMethodOccurences.put(functionRange, new Reference(ReferenceType.PHP_METHOD, fieldName, range, className));
                 }
 
