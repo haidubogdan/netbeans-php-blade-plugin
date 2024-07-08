@@ -1,5 +1,20 @@
 /*
-Licensed to the Apache Software Foundation (ASF)
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 package org.netbeans.modules.php.blade.editor.completion;
 
@@ -192,8 +207,18 @@ public class BladeCompletionProposal implements CompletionProposal {
 
     public static class FunctionItem extends PhpElementItem {
 
+        protected final String namespace;
+
         public FunctionItem(ElementHandle element, CompletionRequest request, String previewValue) {
             super(element, request, previewValue);
+            this.namespace = null;
+        }
+
+        public FunctionItem(ElementHandle element, CompletionRequest request,
+                String namespace,
+                String previewValue) {
+            super(element, request, previewValue);
+            this.namespace = namespace;
         }
 
         @Override
@@ -204,6 +229,17 @@ public class BladeCompletionProposal implements CompletionProposal {
         @Override
         public int getSortPrioOverride() {
             return 20;//priority
+        }
+
+        @Override
+        public String getRhsHtml(HtmlFormatter formatter) {
+            if (namespace != null && namespace.length() > 0){
+                formatter.reset();
+                formatter.appendText(" ");
+                formatter.appendText(namespace);
+                return namespace;
+            }
+            return super.getRhsHtml(formatter);
         }
     }
 
@@ -256,7 +292,7 @@ public class BladeCompletionProposal implements CompletionProposal {
         public int carretOffset;
         public String prefix;
     }
-    
+
     public static class BladeTag extends BladeCompletionProposal {
 
         protected Tag tag;
@@ -275,21 +311,20 @@ public class BladeCompletionProposal implements CompletionProposal {
         public String getLhsHtml(HtmlFormatter formatter) {
             return tag.openTag() + " " + tag.closeTag();
         }
-        
+
         @Override
         public String getRhsHtml(HtmlFormatter formatter) {
             return tag.description();
         }
-        
+
         @Override
         public int getSortPrioOverride() {
             return 0;
         }
     }
-    
-    
+
     public static class DirectiveProposal extends BladeCompletionProposal {
-    
+
         public DirectiveProposal(ElementHandle element, CompletionRequest request, Directive directive) {
             super(element, request, directive);
         }
@@ -297,21 +332,21 @@ public class BladeCompletionProposal implements CompletionProposal {
         public DirectiveProposal(ElementHandle element, CompletionRequest request, String previewValue) {
             super(element, request, previewValue);
         }
-    
+
         @Override
         public ImageIcon getIcon() {
             String path = ResourceUtilities.ICON_BASE + "icons/at.png";//NOI18N
             return ImageUtilities.loadImageIcon(path, false);
         }
-        
+
         @Override
         public String getRhsHtml(HtmlFormatter formatter) {
-            if (this.directive == null){
+            if (this.directive == null) {
                 return null;
             }
-            
-            if (directive.description().isEmpty() && !this.directive.since().isEmpty()){
-                return "v" +  this.directive.since();
+
+            if (directive.description().isEmpty() && !this.directive.since().isEmpty()) {
+                return "v" + this.directive.since();
             }
             return this.directive.description();
         }
@@ -326,7 +361,7 @@ public class BladeCompletionProposal implements CompletionProposal {
 
         @Override
         public String getRhsHtml(HtmlFormatter formatter) {
-            if (this.getElement().getFileObject() != null){
+            if (this.getElement().getFileObject() != null) {
                 return this.getElement().getFileObject().getNameExt();
             }
             return "custom directive";

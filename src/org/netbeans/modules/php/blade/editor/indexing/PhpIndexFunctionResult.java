@@ -14,12 +14,14 @@ import org.openide.filesystems.FileObject;
 public class PhpIndexFunctionResult extends PhpIndexResult {
 
     protected final List<String> params;
+    protected final String classNamespace;
 
     public PhpIndexFunctionResult(String name, FileObject fo,
             PhpIndexFunctionResult.Type type,
-            OffsetRange range, List<String> params) {
+            OffsetRange range, String classNamespace, List<String> params) {
         super(name, fo, type, range);
         this.params = params;
+        this.classNamespace = classNamespace;
     }
 
     public String getParamsAsString() {
@@ -31,5 +33,9 @@ public class PhpIndexFunctionResult extends PhpIndexResult {
 
     public List<String> getParams(){
         return params;
+    }
+    
+    public String getClassNamespace(){
+        return classNamespace;
     }
 }

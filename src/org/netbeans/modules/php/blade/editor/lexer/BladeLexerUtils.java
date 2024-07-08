@@ -3,11 +3,13 @@ Licensed to the Apache Software Foundation (ASF)
  */
 package org.netbeans.modules.php.blade.editor.lexer;
 
+import java.util.Arrays;
 import java.util.List;
 import javax.swing.text.Document;
 import org.netbeans.api.lexer.Language;
 import org.netbeans.api.lexer.TokenHierarchy;
 import org.netbeans.api.lexer.TokenSequence;
+import static org.netbeans.modules.php.blade.syntax.antlr4.v10.BladeAntlrLexer.*;
 import org.netbeans.modules.php.editor.lexer.PHPTokenId;
 
 /**
@@ -48,5 +50,13 @@ public class BladeLexerUtils {
             }
         }
         return ts;
+    }
+
+    public static List<Integer> tokensWithIdentifiableParam() {
+        return Arrays.asList(new Integer[]{
+            D_EXTENDS, D_INCLUDE, D_INCLUDE_IF, D_INCLUDE_WHEN,
+            D_INCLUDE_UNLESS, D_EACH, D_SECTION, D_HAS_SECTION, D_SECTION_MISSING,
+            D_PUSH, D_PUSH_IF, D_PREPEND, D_USE, D_INJECT
+        });
     }
 }

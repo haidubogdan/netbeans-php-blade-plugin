@@ -156,7 +156,7 @@ public class BladeCompletionHandler implements CodeCompletionHandler2 {
         FieldAccessReference fieldAccessReference = parserResult.findFieldAccessRefrence(offset);
 
         if (fieldAccessReference != null) {
-            completeClassConstants(prefix, fieldAccessReference.ownerClass, offset, completionProposals, parserResult);
+            completeClassConstants(prefix, fieldAccessReference.ownerClass.name, offset, completionProposals, parserResult);
             completeClassMethods(prefix, fieldAccessReference, offset, completionProposals, parserResult);
             return;
         }
@@ -250,7 +250,7 @@ public class BladeCompletionHandler implements CodeCompletionHandler2 {
             final List<CompletionProposal> completionProposals,
             BladeParserResult parserResult) {
         Collection<PhpIndexFunctionResult> indexedFunctions = PhpIndexUtils.queryClassMethods(
-                parserResult.getSnapshot().getSource().getFileObject(), prefix, fieldAccessReference.ownerClass);
+                parserResult.getSnapshot().getSource().getFileObject(), prefix, fieldAccessReference.ownerClass.name);
         if (indexedFunctions.isEmpty()) {
             return;
         }
@@ -261,7 +261,8 @@ public class BladeCompletionHandler implements CodeCompletionHandler2 {
             String completion = indexResult.name + "()";
             String preview = indexResult.name + indexResult.getParamsAsString();
             NamedElement functionElement = new NamedElement(completion, indexResult.declarationFile, ElementType.PHP_FUNCTION);
-            completionProposals.add(new BladeCompletionProposal.FunctionItem(functionElement, request, preview));
+            completionProposals.add(new BladeCompletionProposal.FunctionItem(
+                    functionElement, request, indexResult.getClassNamespace(), preview));
         }
     }
 

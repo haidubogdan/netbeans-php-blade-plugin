@@ -1,3 +1,21 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package org.netbeans.modules.php.blade.editor;
 
 import java.util.Arrays;
@@ -25,6 +43,7 @@ import org.netbeans.modules.php.blade.editor.indexing.PhpIndexFunctionResult;
 import org.netbeans.modules.php.blade.editor.indexing.PhpIndexResult;
 import org.netbeans.modules.php.blade.editor.indexing.PhpIndexUtils;
 import org.netbeans.modules.php.blade.editor.indexing.QueryUtils;
+import org.netbeans.modules.php.blade.editor.lexer.BladeLexerUtils;
 import org.netbeans.modules.php.blade.editor.parser.BladeParserResult;
 import org.netbeans.modules.php.blade.editor.parser.BladeParserResult.FieldAccessReference;
 import org.netbeans.modules.php.blade.editor.parser.BladeParserResult.Reference;
@@ -92,12 +111,9 @@ public class BladeDeclarationFinder implements DeclarationFinder {
             }
 
             if (nt.getType() == BL_PARAM_STRING) {
-                List<Integer> tokensMatch = Arrays.asList(new Integer[]{
-                    D_EXTENDS, D_INCLUDE, D_INCLUDE_IF, D_INCLUDE_WHEN, D_INCLUDE_UNLESS, D_EACH, D_SECTION, D_HAS_SECTION, D_SECTION_MISSING,
-                    D_PUSH, D_PUSH_IF, D_PREPEND, D_USE, D_INJECT
-                });
+                List<Integer> tokensToMatch = BladeLexerUtils.tokensWithIdentifiableParam();
                 List<Integer> tokensStop = Arrays.asList(new Integer[]{HTML});
-                org.antlr.v4.runtime.Token matchedToken = BladeAntlrUtils.findBackward(tokens, tokensMatch, tokensStop);
+                org.antlr.v4.runtime.Token matchedToken = BladeAntlrUtils.findBackward(tokens, tokensToMatch, tokensStop);
                 int offsetCorrection = caretOffset - lineOffset;
                 if (matchedToken != null) {
                     offsetRange = new OffsetRange(nt.getStartIndex() + offsetCorrection, nt.getStopIndex() + offsetCorrection + 1);
@@ -155,7 +171,7 @@ public class BladeDeclarationFinder implements DeclarationFinder {
                     switch (fieldAccessReference.fieldType) {
                         case CONSTANT:
                             Collection<PhpIndexResult> indexConstantsResults = PhpIndexUtils.queryExactClassConstants(
-                                    currentFile, fieldAccessReference.fieldName, fieldAccessReference.ownerClass);
+                                    currentFile, fieldAccessReference.fieldName, fieldAccessReference.ownerClass.name);
                             for (PhpIndexResult indexResult : indexConstantsResults) {
                                 NamedElement resultHandle = new NamedElement(fieldAccessReference.fieldName, indexResult.declarationFile, ElementType.PHP_CONSTANT);
                                 DeclarationLocation constantLocation = new DeclarationFinder.DeclarationLocation(indexResult.declarationFile, indexResult.getStartOffset(), resultHandle);
@@ -297,13 +313,18 @@ public class BladeDeclarationFinder implements DeclarationFinder {
                 if (reference.ownerClass == null) {
                     return location;
                 }
+                String refnamespace = reference.namespace;
+
                 Collection<PhpIndexFunctionResult> indexMethodResults = PhpIndexUtils.queryExactClassMethods(sourceFolder,
                         reference.name, reference.ownerClass);
+                
+                
                 for (PhpIndexFunctionResult indexResult : indexMethodResults) {
                     PhpFunctionElement resultHandle = new PhpFunctionElement(
                             reference.name,
                             indexResult.declarationFile,
                             ElementType.PHP_FUNCTION,
+                            indexResult.getClassNamespace(),
                             indexResult.getParams()
                     );
                     DeclarationLocation functionLocation = new DeclarationFinder.DeclarationLocation(indexResult.declarationFile, indexResult.getStartOffset(), resultHandle);

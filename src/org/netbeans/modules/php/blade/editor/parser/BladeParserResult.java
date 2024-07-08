@@ -1,3 +1,21 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package org.netbeans.modules.php.blade.editor.parser;
 
 import java.util.ArrayList;
@@ -393,12 +411,13 @@ public class BladeParserResult extends ParserResult {
                 String className = classIdentifier.getText();
                 OffsetRange range = new OffsetRange(classIdentifier.getStartIndex(), classIdentifier.getStopIndex() + 1);
 
-                occurancesForDeclaration.put(range, new Reference(
+                Reference classReference = new Reference(
                         ReferenceType.PHP_CLASS,
                         className, range,
                         null,
-                        ctx.namespace.getText())
+                        ctx.namespace.getText()
                 );
+                occurancesForDeclaration.put(range, classReference);
 
                 OffsetRange callRange = null;
                 int start = ctx.PHP_STATIC_ACCESS().getSymbol().getStartIndex();
@@ -415,13 +434,19 @@ public class BladeParserResult extends ParserResult {
                     fieldName = ctx.func_name.getText();
                     fieldType = FieldType.METHOD;
                     OffsetRange functionRange = new OffsetRange(ctx.func_name.getStartIndex(), ctx.func_name.getStopIndex() + 1);
-                    phpMethodOccurences.put(functionRange, new Reference(ReferenceType.PHP_METHOD, fieldName, range, className));
+
+                    phpMethodOccurences.put(functionRange,
+                            new Reference(ReferenceType.PHP_METHOD,
+                                    fieldName, range, className,
+                                    ctx.namespace.getText())
+                    );
+
                 }
 
                 if (callRange != null) {
                     FieldAccessReference fieldAccess = new FieldAccessReference(
                             ReferenceType.STATIC_FIELD_ACCESS,
-                            className,
+                            classReference,
                             fieldName,
                             fieldType
                     );
@@ -461,9 +486,15 @@ public class BladeParserResult extends ParserResult {
                 }
 
                 if (callRange != null) {
+                     Reference classReference = new Reference(
+                            ReferenceType.PHP_CLASS,
+                            className, range,
+                            null,
+                            null
+                    );
                     FieldAccessReference fieldAccess = new FieldAccessReference(
                             ReferenceType.STATIC_FIELD_ACCESS,
-                            className,
+                            classReference,
                             fieldName,
                             fieldType
                     );
@@ -750,24 +781,6 @@ public class BladeParserResult extends ParserResult {
         return variableList;
     }
 
-    /**
-     * to be implemented in the future
-     *
-     * @return
-     */
-    protected ParseTreeListener createLayoutTreeListener() {
-
-        return new BladeAntlrParserBaseListener() {
-            boolean includeContext = true;
-
-            @Override
-            public void enterFile(BladeAntlrParser.FileContext ctx) {
-
-            }
-
-        };
-    }
-
     private ParseTreeListener createSemanticsListener() {
         return new BladeAntlrParserBaseListener() {
             int ifBalance = 0;
@@ -902,11 +915,12 @@ public class BladeParserResult extends ParserResult {
     public static class FieldAccessReference {
 
         public final ReferenceType type;
-        public final String ownerClass;
+        public final Reference ownerClass;
         public final String fieldName;
         public final FieldType fieldType;
 
-        public FieldAccessReference(ReferenceType type, String ownerClass, String fieldName, FieldType fieldType) {
+        public FieldAccessReference(ReferenceType type, Reference ownerClass,
+                String fieldName, FieldType fieldType) {
             this.type = type;
             this.ownerClass = ownerClass;
             this.fieldName = fieldName;
