@@ -1503,7 +1503,6 @@ public class BladeAntlrParser extends Parser {
 
 	@SuppressWarnings("CheckReturnValue")
 	public static class FragmentDContext extends ParserRuleContext {
-		public String version = "10";
 		public TerminalNode D_FRAGMENT() { return getToken(BladeAntlrParser.D_FRAGMENT, 0); }
 		public Composed_php_expressionContext composed_php_expression() {
 			return getRuleContext(Composed_php_expressionContext.class,0);

@@ -84,7 +84,7 @@ push : D_PUSH singleArgWrapperP general_statement* D_ENDPUSH;
 pushOnce : D_PUSH_ONCE singleArgWrapperP general_statement* D_ENDPUSH_ONCE;
 pushIf : D_PUSH_IF singleArgWrapperP general_statement* D_ENDPUSH_IF;
 prepend : D_PREPEND singleArgWrapperP general_statement* D_ENDPREPEND;
-fragmentD locals [String version = "10"] : D_FRAGMENT composed_php_expression general_statement* D_ENDFRAGMENT;
+fragmentD : D_FRAGMENT composed_php_expression general_statement* D_ENDFRAGMENT;
 
 if : D_IF main_php_expression general_statement*  (D_ELSEIF main_php_expression general_statement*)* else?  endif;
 else : D_ELSE general_statement*;
