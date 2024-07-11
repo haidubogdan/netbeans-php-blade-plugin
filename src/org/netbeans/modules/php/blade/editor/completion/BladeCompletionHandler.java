@@ -19,7 +19,6 @@
 package org.netbeans.modules.php.blade.editor.completion;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -50,14 +49,7 @@ import org.netbeans.modules.php.blade.csl.elements.PhpFunctionElement;
 import org.netbeans.modules.php.blade.csl.elements.TagElement;
 import org.netbeans.modules.php.blade.editor.completion.BladeCompletionProposal.CompletionRequest;
 import org.netbeans.modules.php.blade.editor.directives.CustomDirectives;
-import org.netbeans.modules.php.blade.editor.indexing.PhpIndexFunctionResult;
-import org.netbeans.modules.php.blade.editor.indexing.PhpIndexResult;
-import org.netbeans.modules.php.blade.editor.indexing.PhpIndexUtils;
 import org.netbeans.modules.php.blade.editor.parser.BladeParserResult;
-import org.netbeans.modules.php.blade.editor.parser.BladeParserResult.FieldAccessReference;
-import org.netbeans.modules.php.blade.editor.parser.BladeParserResult.Reference;
-import static org.netbeans.modules.php.blade.editor.parser.BladeParserResult.ReferenceType.PHP_CLASS;
-import static org.netbeans.modules.php.blade.editor.parser.BladeParserResult.ReferenceType.PHP_CONSTANT;
 import org.netbeans.modules.php.blade.editor.preferences.ModulePreferences;
 import org.netbeans.modules.php.blade.project.ProjectUtils;
 import org.netbeans.modules.php.blade.syntax.TagList;
@@ -66,9 +58,7 @@ import org.netbeans.modules.php.blade.syntax.annotation.Tag;
 import org.netbeans.modules.php.blade.syntax.antlr4.v10.BladeAntlrUtils;
 import static org.netbeans.modules.php.blade.syntax.antlr4.v10.BladeAntlrLexer.*;
 import static org.netbeans.modules.php.blade.syntax.antlr4.v10.BladeAntlrParser.CONTENT_TAG_OPEN;
-import org.netbeans.spi.project.ui.support.ProjectConvertors;
 import org.openide.filesystems.FileObject;
-import static org.netbeans.modules.php.blade.editor.parser.BladeParserResult.ReferenceType.PHP_NAMESPACE_PATH_TYPE;
 
 /**
  *
@@ -91,7 +81,9 @@ public class BladeCompletionHandler implements CodeCompletionHandler2 {
             return CodeCompletionResult.NONE;
         }
 
-        if (completionContext.getCaretOffset() < 1) {
+        int offset = completionContext.getCaretOffset();
+
+        if (offset < 1) {
             return CodeCompletionResult.NONE;
         }
 
@@ -99,7 +91,7 @@ public class BladeCompletionHandler implements CodeCompletionHandler2 {
 
         final List<CompletionProposal> completionProposals = new ArrayList<>();
 
-        Token currentToken = BladeAntlrUtils.getToken(doc, completionContext.getCaretOffset() - 1);
+        Token currentToken = BladeAntlrUtils.getToken(doc, offset - 1);
 
         if (currentToken == null) {
             return CodeCompletionResult.NONE;
@@ -123,16 +115,17 @@ public class BladeCompletionHandler implements CodeCompletionHandler2 {
             switch (currentToken.getType()) {
                 case PHP_IDENTIFIER:
                 case PHP_NAMESPACE_PATH:
-                    completePhpElements(completionProposals, parserResult, completionContext.getCaretOffset(), prefix);
+                    PhpCodeCompletionService.completePhpCode(completionProposals, parserResult, offset, prefix);
                     break;
                 case PHP_EXPRESSION:
-                    completePhpSnippet(completionProposals, completionContext.getCaretOffset(), currentToken);
+                    completePhpSnippet(completionProposals, offset, currentToken);
                     break;
                 case PHP_VARIABLE:
                     completeScopedVariables(completionProposals, completionContext, parserResult, currentToken);
                     break;
                 case CONTENT_TAG_OPEN:
                 case RAW_TAG_OPEN:
+                    //{{ | {!!
                     if (!ModulePreferences.isAutoTagCompletionEnabled()) {
                         completeBladeTags(completionProposals, completionContext, parserResult, currentToken);
                     }
@@ -149,183 +142,6 @@ public class BladeCompletionHandler implements CodeCompletionHandler2 {
         return new DefaultCompletionResult(completionProposals, false);
     }
 
-    private void completePhpElements(final List<CompletionProposal> completionProposals,
-            BladeParserResult parserResult,
-            int offset, String prefix) {
-
-        FieldAccessReference fieldAccessReference = parserResult.findFieldAccessRefrence(offset);
-
-        if (fieldAccessReference != null) {
-            completeClassConstants(prefix, fieldAccessReference.ownerClass.name, offset, completionProposals, parserResult);
-            completeClassMethods(prefix, fieldAccessReference, offset, completionProposals, parserResult);
-            return;
-        }
-
-        //based on ParserResult implementation
-        //inside tag {{ }} and inside directive expression differences
-        Reference elementReference = parserResult.findOccuredRefrence(offset);
-
-        if (elementReference == null) {
-            completeNamespace(prefix, offset, completionProposals, parserResult);
-            completePhpClasses(prefix, offset, completionProposals, parserResult);
-            completePhpFunctions(prefix, offset, completionProposals, parserResult);
-            completeConstants(prefix, offset, completionProposals, parserResult);
-            return;
-        }
-
-        switch (elementReference.type) {
-            case PHP_CONSTANT:
-            case PHP_CLASS:
-                completeNamespace(prefix, offset, completionProposals, parserResult);
-                completePhpClasses(prefix, offset, completionProposals, parserResult);
-                completeConstants(prefix, offset, completionProposals, parserResult);
-                break;
-            case PHP_NAMESPACE_PATH_TYPE:
-                String prefixNamespace = elementReference.namespace != null ? elementReference.namespace + prefix : prefix;
-                completeNamespace(prefixNamespace, offset, completionProposals, parserResult);
-
-                //we are after '\'
-                if (elementReference.namespace != null) {
-                    String classQuery = prefix;
-                    String namespace = elementReference.namespace;
-                    namespace = namespace.substring(0, namespace.length() - 1);
-                    //completion offset : subtract prefix length + last slash
-                    int offsetNamespace = offset - (prefix.length() + 1);
-                    completeNamespacedPhpClasses(classQuery, namespace, offsetNamespace, completionProposals, parserResult);
-                } else if (prefix.endsWith("\\")) {
-                    //the name is the namespace
-                    int substringOffset = elementReference.name.startsWith("\\") ? 1 : 0;
-                    String namespacePath = elementReference.name.substring(substringOffset, elementReference.name.length() - 1);
-                    Collection<PhpIndexResult> indexClassResults = PhpIndexUtils.queryAllNamespaceClasses(
-                            parserResult.getSnapshot().getSource().getFileObject(), namespacePath
-                    );
-                    CompletionRequest request = completionRequest(namespacePath, offset + namespacePath.length());
-                    for (PhpIndexResult indexResult : indexClassResults) {
-                        NamedElement classElement = new NamedElement(indexResult.name, indexResult.declarationFile, ElementType.PHP_CLASS);
-                        completionProposals.add(new BladeCompletionProposal.ClassItem(classElement, request, indexResult.name));
-                    }
-                    //completeNamespacedPhpClasses("", namespace, offset, completionProposals, parserResult);
-                }
-                break;
-        }
-    }
-
-    private void completePhpClasses(String prefix, int offset,
-            final List<CompletionProposal> completionProposals,
-            BladeParserResult parserResult) {
-        Collection<PhpIndexResult> indexClassResults = PhpIndexUtils.queryClass(
-                parserResult.getSnapshot().getSource().getFileObject(), prefix);
-        if (indexClassResults.isEmpty()) {
-            return;
-        }
-        CompletionRequest request = completionRequest(prefix, offset);
-        for (PhpIndexResult indexResult : indexClassResults) {
-            NamedElement classElement = new NamedElement(indexResult.name, indexResult.declarationFile, ElementType.PHP_CLASS);
-            completionProposals.add(new BladeCompletionProposal.ClassItem(classElement, request, indexResult.name));
-        }
-    }
-
-    private void completeNamespacedPhpClasses(String prefix, String namespace,
-            int offset, final List<CompletionProposal> completionProposals,
-            BladeParserResult parserResult) {
-        Collection<PhpIndexResult> indexClassResults = PhpIndexUtils.queryNamespaceClasses(
-                prefix, namespace, parserResult.getSnapshot().getSource().getFileObject());
-        CompletionRequest request = completionRequest(namespace, offset);
-        for (PhpIndexResult indexResult : indexClassResults) {
-            NamedElement classElement = new NamedElement(indexResult.name, indexResult.declarationFile, ElementType.PHP_CLASS);
-            completionProposals.add(new BladeCompletionProposal.ClassItem(classElement, request, indexResult.name));
-        }
-    }
-
-    private void completePhpFunctions(String prefix, int offset,
-            final List<CompletionProposal> completionProposals,
-            BladeParserResult parserResult) {
-        Collection<PhpIndexFunctionResult> indexedFunctions = PhpIndexUtils.queryFunctions(
-                parserResult.getSnapshot().getSource().getFileObject(), prefix);
-        if (indexedFunctions.isEmpty()) {
-            return;
-        }
-        CompletionRequest request = completionRequest(prefix, offset);
-        for (PhpIndexFunctionResult indexResult : indexedFunctions) {
-            //to be completed
-            //might add syntax completion cursor
-            String completion = indexResult.name + "()";
-            String preview = indexResult.name + indexResult.getParamsAsString();
-            NamedElement functionElement = new NamedElement(completion, indexResult.declarationFile, ElementType.PHP_FUNCTION);
-            completionProposals.add(new BladeCompletionProposal.FunctionItem(functionElement, request, preview));
-        }
-    }
-
-    private void completeClassMethods(String prefix, FieldAccessReference fieldAccessReference,
-            int offset,
-            final List<CompletionProposal> completionProposals,
-            BladeParserResult parserResult) {
-        Collection<PhpIndexFunctionResult> indexedFunctions = PhpIndexUtils.queryClassMethods(
-                parserResult.getSnapshot().getSource().getFileObject(), prefix, fieldAccessReference.ownerClass.name);
-        if (indexedFunctions.isEmpty()) {
-            return;
-        }
-        CompletionRequest request = completionRequest(prefix, offset);
-        for (PhpIndexFunctionResult indexResult : indexedFunctions) {
-            //to be completed
-            //might add syntax completion cursor
-            String completion = indexResult.name + "()";
-            String preview = indexResult.name + indexResult.getParamsAsString();
-            NamedElement functionElement = new NamedElement(completion, indexResult.declarationFile, ElementType.PHP_FUNCTION);
-            completionProposals.add(new BladeCompletionProposal.FunctionItem(
-                    functionElement, request, indexResult.getClassNamespace(), preview));
-        }
-    }
-
-    private void completeNamespace(String prefix, int offset,
-            final List<CompletionProposal> completionProposals,
-            BladeParserResult parserResult) {
-        Project projectOwner = ProjectConvertors.getNonConvertorOwner(parserResult.getSnapshot().getSource().getFileObject());
-        if (projectOwner == null) {
-            return;
-        }
-        int substringOffset = prefix.startsWith("\\") ? 1 : 0;
-        Collection<PhpIndexResult> indexClassResults = PhpIndexUtils.queryNamespace(
-                projectOwner.getProjectDirectory(), prefix.substring(substringOffset));
-        if (indexClassResults.isEmpty()) {
-            return;
-        }
-        CompletionRequest request = completionRequest(prefix, offset + substringOffset);
-        for (PhpIndexResult indexResult : indexClassResults) {
-            NamedElement constantElement = new NamedElement(indexResult.name, indexResult.declarationFile, ElementType.PHP_CONSTANT);
-            completionProposals.add(new BladeCompletionProposal.NamespaceItem(constantElement, request, indexResult.name));
-        }
-    }
-
-    private void completeConstants(String prefix, int offset,
-            final List<CompletionProposal> completionProposals,
-            BladeParserResult parserResult) {
-        Collection<PhpIndexResult> indexClassResults = PhpIndexUtils.queryConstants(
-                parserResult.getSnapshot().getSource().getFileObject(), prefix);
-        if (indexClassResults.isEmpty()) {
-            return;
-        }
-        CompletionRequest request = completionRequest(prefix, offset);
-        for (PhpIndexResult indexResult : indexClassResults) {
-            NamedElement constantElement = new NamedElement(indexResult.name, indexResult.declarationFile, ElementType.PHP_CONSTANT);
-            completionProposals.add(new BladeCompletionProposal.ConstantItem(constantElement, request, indexResult.name));
-        }
-    }
-
-    private void completeClassConstants(String prefix, String ownerClass, int offset,
-            final List<CompletionProposal> completionProposals,
-            BladeParserResult parserResult) {
-        Collection<PhpIndexResult> indexClassResults = PhpIndexUtils.queryClassConstants(
-                parserResult.getSnapshot().getSource().getFileObject(), prefix, ownerClass);
-        if (indexClassResults.isEmpty()) {
-            return;
-        }
-        CompletionRequest request = completionRequest(prefix, offset);
-        for (PhpIndexResult indexResult : indexClassResults) {
-            NamedElement constantElement = new NamedElement(indexResult.name, indexResult.declarationFile, ElementType.PHP_CONSTANT);
-            completionProposals.add(new BladeCompletionProposal.ConstantItem(constantElement, request, indexResult.name));
-        }
-    }
 
     /**
      * proxy completion using the original php code completion service

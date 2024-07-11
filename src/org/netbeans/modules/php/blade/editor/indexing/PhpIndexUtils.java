@@ -422,8 +422,69 @@ public class PhpIndexUtils {
         }
         return results;
     }
-
+    
     public static Collection<PhpIndexResult> queryNamespace(FileObject fo, String prefix) {
+        QuerySupport phpindex = QuerySupportFactory.get(fo);
+        Collection<PhpIndexResult> results = new ArrayList<>();
+        Collection<String> namespaces = new ArrayList<>();
+        //subfolders with lowercase ; rootFolder
+        //third signature namespace
+        //the first el is the folder
+        String originalPrefix = prefix;
+        
+        if (prefix.endsWith("\\\\")) {
+            return results;
+        }
+        
+        String[] queryItems = prefix.split("\\\\");
+
+        if (queryItems.length == 0) {
+            return results;
+        }
+
+        String queryPrefix = prefix.toLowerCase();
+
+        try {
+            Collection<? extends IndexResult> indexResults = phpindex.query(
+                    PHPIndexer.FIELD_TOP_LEVEL, queryPrefix + "\\", QuerySupport.Kind.PREFIX, new String[]{
+                        PHPIndexer.FIELD_NAMESPACE, PHPIndexer.FIELD_TOP_LEVEL});
+            for (IndexResult indexResult : indexResults) {
+                FileObject indexFile = indexResult.getFile();
+                String topFieldValue = indexResult.getValue(PHPIndexer.FIELD_TOP_LEVEL);
+                //internal php index
+                if (topFieldValue.startsWith(prefix.toLowerCase())) {
+                    String firstValue = indexResult.getValue(PHPIndexer.FIELD_NAMESPACE);
+                    if (firstValue == null || firstValue.isEmpty()) {
+                        continue;
+                    }
+                    Signature sig = Signature.get(firstValue);
+
+                    String name = sig.string(1);
+                    String namespace = sig.string(2);
+
+                    String fullNamespace = "";
+
+                    if (!namespace.isEmpty()) {
+                        fullNamespace = namespace + "\\";
+                    }
+
+                    fullNamespace += name;
+
+                    //just one namespace is enough
+                    if (fullNamespace.startsWith(originalPrefix) && !namespaces.contains(fullNamespace)) {
+                        namespaces.add(fullNamespace);
+                        results.add(new PhpIndexResult(fullNamespace, indexFile, PhpIndexResult.Type.NAMESPACE, new OffsetRange(0, 1)));
+                    }
+                }
+            }
+        } catch (IOException ex) {
+            Exceptions.printStackTrace(ex);
+        }
+        return results;
+    }
+
+    //debug mode
+    public static Collection<PhpIndexResult> queryNamespace2(FileObject fo, String prefix) {
         QuerySupport phpindex = QuerySupportFactory.get(fo);
         Collection<PhpIndexResult> results = new ArrayList<>();
         Collection<String> namespaces = new ArrayList<>();

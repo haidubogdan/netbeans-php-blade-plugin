@@ -108,4 +108,5 @@ public class NamedElement implements ElementHandle {
     public ElementType getType() {
         return type;
     }
+    
 }
