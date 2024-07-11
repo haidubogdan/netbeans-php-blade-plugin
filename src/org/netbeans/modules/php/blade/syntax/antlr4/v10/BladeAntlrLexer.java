@@ -580,7 +580,7 @@ public class BladeAntlrLexer extends LexerAdaptor {
 	private boolean D_PHP_sempred(RuleContext _localctx, int predIndex) {
 		switch (predIndex) {
 		case 2:
-			return this._input.LA(1) == ' ' || this._input.LA(1) == '\n';
+			return this._input.LA(1) == ' ' || this._input.LA(1) == '\r' || this._input.LA(1) == '\n';
 		}
 		return true;
 	}

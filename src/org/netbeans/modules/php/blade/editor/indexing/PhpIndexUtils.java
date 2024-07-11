@@ -487,6 +487,41 @@ public class PhpIndexUtils {
         return results;
     }
 
+    /**
+     * a optimized hack solution
+     * assuming that the name of the class is the same with the file
+     * 
+     * @param fo
+     * @param namespace
+     * @return 
+     */
+    public static Collection<PhpIndexResult> queryAllNamespaceClasses(FileObject fo, String namespace) {
+        QuerySupport phpindex = QuerySupportFactory.get(fo);
+        Collection<PhpIndexResult> results = new ArrayList<>();
+        String queryPrefix = namespace.toLowerCase();
+
+        try {
+            Collection<? extends IndexResult> indexResults = phpindex.query(
+                        PHPIndexer.FIELD_TOP_LEVEL, queryPrefix, QuerySupport.Kind.EXACT,
+                    new String[]{
+                        PHPIndexer.FIELD_NAMESPACE,
+                        PHPIndexer.FIELD_TOP_LEVEL
+                    });
+            for (IndexResult indexResult : indexResults) {
+                FileObject indexFile = indexResult.getFile();
+                String namespaceValue = indexResult.getValue(PHPIndexer.FIELD_NAMESPACE);
+                //no namespace found
+                if (namespaceValue == null){
+                    continue;
+                }
+                results.add(new PhpIndexResult(indexFile.getName(), indexFile, PhpIndexResult.Type.CLASS, new OffsetRange(0, 1)));
+            }
+        } catch (IOException ex) {
+            Exceptions.printStackTrace(ex);
+        }
+        return results;
+    }
+
     public static Collection<PhpIndexResult> queryClassConstants(FileObject fo, String prefix, String ownerClass) {
         QuerySupport phpindex = QuerySupportFactory.get(fo);
         Collection<PhpIndexResult> results = new ArrayList<>();

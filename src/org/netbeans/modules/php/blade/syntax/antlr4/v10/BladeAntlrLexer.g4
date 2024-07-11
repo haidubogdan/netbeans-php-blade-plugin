@@ -166,7 +166,7 @@ D_LANG : '@lang'->pushMode(LOOK_FOR_BLADE_PARAMETERS);
 D_USE : '@use'->pushMode(LOOK_FOR_BLADE_PARAMETERS);
 D_INJECT : '@inject'->pushMode(LOOK_FOR_BLADE_PARAMETERS);
 D_PHP_SHORT : '@php' (' ')? {this._input.LA(1) == '('}? ->type(D_PHP),pushMode(LOOK_FOR_PHP_COMPOSED_EXPRESSION);
-D_PHP : '@php' {this._input.LA(1) == ' ' || this._input.LA(1) == '\n'}?->pushMode(BLADE_INLINE_PHP);
+D_PHP : '@php' {this._input.LA(1) == ' ' || this._input.LA(1) == '\r' || this._input.LA(1) == '\n'}?->pushMode(BLADE_INLINE_PHP);
 
 D_VERBATIM : '@verbatim' ->pushMode(VERBATIM_MODE);
 D_ENDVERBATIM : '@endverbatim';
@@ -191,6 +191,7 @@ AT : '@'->type(HTML);
 RAW_TAG_START : '{!'->type(HTML);
 
 PHP_INLINE_START : ('<?php' | '<?=')->pushMode(INSIDE_PHP_INLINE);
+
 
 
 HTML_COMPONENT_PREFIX : '<x-' (CompomentIdentifier |  CompomentIdentifier ('::' CompomentIdentifier)+)? {this.compomentTagOpen = true;};

@@ -1,5 +1,30 @@
 # Change Log
 
+
+## [2.4.9.8] 
+
+- fix comment highlight issue (#62) in directive php expression, improvements on php namespace completion<br>
+
+## [2.4.9.7] 
+
+- fix livewire component formatting, display namespace path on class method completion<br>
+
+## [2.4.9.6] 
+
+- detect namespace path on directives php expression
+
+## [2.4.9.5] 
+
+- fix directive completion before double quote html, add attr directive to completion list<br>
+
+## [2.4.9.4] 
+
+- fix issue 57 formatting with optgroup<br>
+
+## [2.4.9.3] 
+
+- configurable declaration finder for view paths<br>
+
 ## [2.4.9.1]
 
 - fix extra `cursor` text on `@foreach` autocomplete

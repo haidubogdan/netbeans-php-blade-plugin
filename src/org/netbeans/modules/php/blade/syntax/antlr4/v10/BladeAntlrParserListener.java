@@ -508,16 +508,6 @@ public interface BladeAntlrParserListener extends ParseTreeListener {
 	 */
 	void exitClass_name_reference(BladeAntlrParser.Class_name_referenceContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link BladeAntlrParser#class_identifier}.
-	 * @param ctx the parse tree
-	 */
-	void enterClass_identifier(BladeAntlrParser.Class_identifierContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link BladeAntlrParser#class_identifier}.
-	 * @param ctx the parse tree
-	 */
-	void exitClass_identifier(BladeAntlrParser.Class_identifierContext ctx);
-	/**
 	 * Enter a parse tree produced by {@link BladeAntlrParser#namespacePath}.
 	 * @param ctx the parse tree
 	 */

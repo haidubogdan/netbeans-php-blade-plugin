@@ -2,14 +2,10 @@
 
 ## What's changed
 
-**formatting**
+**lexer**
 
-- fixes for livewire tag formatting
-
-**license**
-
-- add header to licenses
+- fix comment highlight in directive php expression (#62)
 
 **completion**
 
-- display class namespace on method completion
+- improvements on php namespace

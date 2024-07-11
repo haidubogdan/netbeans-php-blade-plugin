@@ -176,6 +176,8 @@ FREEZE_NEKUDO_GREEDY : ':' {this._input.LA(1) != ':'}?->skip;
 
 FREEZE_NEKUDO : ':'->skip;
 
+PHP_EXPRESSION_COMMENT : ('/*' .*? '*/')->skip;
+
 PHP_EXPRESSION_MORE : . {this.consumeExprToken();};
 
 EXIT_EOF : EOF->type(ERROR),mode(DEFAULT_MODE);

@@ -169,10 +169,9 @@ static_direct_namespace_class_access : namespace=PHP_NAMESPACE_PATH? class_name=
     | namespace=PHP_NAMESPACE_PATH? class_name=PHP_IDENTIFIER PHP_STATIC_ACCESS static_property=PHP_IDENTIFIER
     ;
 
-class_instance : PHP_NEW (class_identifier | namespacePath) BLADE_EXPR_LPAREN composed_php_expression* BLADE_EXPR_RPAREN;
-class_name_reference : class_identifier PHP_STATIC_ACCESS PHP_CLASS_KEYWORD;
+class_instance : PHP_NEW (namespace=PHP_NAMESPACE_PATH? class_name=PHP_IDENTIFIER) BLADE_EXPR_LPAREN composed_php_expression* BLADE_EXPR_RPAREN;
+class_name_reference : namespace=PHP_NAMESPACE_PATH? class_name=PHP_IDENTIFIER PHP_STATIC_ACCESS PHP_CLASS_KEYWORD;
 
-class_identifier : namespace=PHP_NAMESPACE_PATH? class_name=PHP_IDENTIFIER;
 namespacePath : namespace=PHP_NAMESPACE_PATH? class_name=PHP_IDENTIFIER;
 
 function_call : func_name=PHP_IDENTIFIER BLADE_EXPR_LPAREN composed_php_expression* BLADE_EXPR_RPAREN;

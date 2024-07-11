@@ -423,6 +423,7 @@ public class BladeParserResult extends ParserResult {
                 int start = ctx.PHP_STATIC_ACCESS().getSymbol().getStartIndex();
                 String fieldName = null;
                 FieldType fieldType = null;
+
                 if (ctx.static_property != null) {
                     //constants
                     callRange = new OffsetRange(start, ctx.static_property.getStopIndex() + 1);
