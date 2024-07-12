@@ -236,10 +236,10 @@ public class BladeIndex {
                 String[] values = indexResult.getValues(BladeIndexer.INCLUDE_PATH);
                 for (String value : values) {
                     Reference templatePathRef = BladeIndexer.extractTemplatePathDataFromIndex(value);
-                    if (!templatePathRef.name.equals(prefix)){
+                    if (!templatePathRef.identifier.equals(prefix)){
                         continue;
                     }
-                    references.add(new IndexedOffsetReference(templatePathRef.name, indexResult.getFile(), templatePathRef.defOffset));
+                    references.add(new IndexedOffsetReference(templatePathRef.identifier, indexResult.getFile(), templatePathRef.defOffset));
                 }
             }
         } catch (IOException ex) {

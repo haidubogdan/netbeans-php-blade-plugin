@@ -2,10 +2,14 @@
 
 ## What's changed
 
-**lexer**
+**go to file**
 
-- fix comment highlight in directive php expression (#62)
+- limited `@vite` asset go to file
 
 **completion**
 
-- improvements on php namespace
+- limited `@vite` asset completion
+
+**php code**
+
+- declaration finder fixes + refactor

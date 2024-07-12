@@ -18,22 +18,34 @@
  */
 package org.netbeans.modules.php.blade.csl.elements;
 
+import org.netbeans.modules.csl.api.ElementKind;
+import org.openide.filesystems.FileObject;
+
 /**
  *
- * @author bogdan
+ * @author bhaidu
  */
-public enum ElementType {
-    NA,
-    CUSTOM_DIRECTIVE,
-    PATH,
-    DIRECTIVE,
-    VARIABLE,
-    PHP_CLASS,
-    PHP_NAMESPACE,
-    PHP_FUNCTION,
-    PHP_CONSTANT,
-    LARAVEL_COMPONENT,
-    STACK_ID,
-    YIELD_ID,
-    ASSET_FILE
+public class ClassElement extends NamedElement {
+
+    protected final String namespace;
+
+    public ClassElement(String name, FileObject file) {
+        super(name, file, ElementType.PHP_CLASS);
+        this.namespace = null;
+    }
+
+    public ClassElement(String name, String namespace,
+            FileObject file) {
+        super(name, file, ElementType.PHP_CLASS);
+        this.namespace = namespace;
+    }
+
+    @Override
+    public ElementKind getKind() {
+        return ElementKind.CLASS;
+    }
+
+    public String getNamespace() {
+        return namespace;
+    }
 }

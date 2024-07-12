@@ -71,7 +71,7 @@ public class BladeCompletionProvider implements CompletionProvider {
         BLADE_PATH,
         YIELD_ID,
         DIRECTIVE,
-        HTML_COMPONENT_TAG,
+        HTML_COMPONENT_TAG
     }
 
     @Override
@@ -289,7 +289,7 @@ public class BladeCompletionProvider implements CompletionProvider {
                 .iconResource(getReferenceIcon(CompletionType.HTML_COMPONENT_TAG))
                 .startOffset(caretOffset)
                 .leftHtmlText(tagName)
-                .rightHtmlText(indexReference.qualifiedName)
+                .rightHtmlText(indexReference.namespace)
                 .sortPriority(1)
                 .build();
         resultSet.addItem(item);

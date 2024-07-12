@@ -26,6 +26,7 @@ import org.netbeans.modules.csl.api.ElementHandle;
 import org.netbeans.modules.csl.api.ElementKind;
 import org.netbeans.modules.csl.api.HtmlFormatter;
 import org.netbeans.modules.csl.api.Modifier;
+import org.netbeans.modules.php.blade.csl.elements.ClassElement;
 import org.netbeans.modules.php.blade.editor.ResourceUtilities;
 import org.netbeans.modules.php.blade.syntax.annotation.Directive;
 import org.netbeans.modules.php.blade.syntax.annotation.Tag;
@@ -41,7 +42,7 @@ public class BladeCompletionProposal implements CompletionProposal {
 
     //@StaticResource
     final CompletionRequest request;
-    private final ElementHandle element;
+    protected final ElementHandle element;
     final String previewValue;
     protected Directive directive;
 
@@ -190,8 +191,11 @@ public class BladeCompletionProposal implements CompletionProposal {
 
     public static class ClassItem extends PhpElementItem {
 
-        public ClassItem(ElementHandle element, CompletionRequest request, String previewValue) {
+        protected String namespace = null;
+        
+        public ClassItem(ClassElement element, CompletionRequest request, String previewValue) {
             super(element, request, previewValue);
+            this.namespace = element.getNamespace();
         }
 
         @Override
@@ -200,8 +204,24 @@ public class BladeCompletionProposal implements CompletionProposal {
         }
 
         @Override
+        public String getRhsHtml(HtmlFormatter formatter) {
+            if (namespace != null && namespace.length() > 0) {
+                return namespace;
+            }
+            return super.getRhsHtml(formatter);
+        }
+
+        @Override
         public int getSortPrioOverride() {
             return 10;//priority
+        }
+
+        @Override
+        public String getCustomInsertTemplate() {
+            if (namespace != null && namespace.length() > 0) {
+                return "\\" + namespace + "\\" + element.getName();
+            }
+            return element.getName();
         }
     }
 
@@ -233,14 +253,12 @@ public class BladeCompletionProposal implements CompletionProposal {
 
         @Override
         public String getRhsHtml(HtmlFormatter formatter) {
-            if (namespace != null && namespace.length() > 0){
-                formatter.reset();
-                formatter.appendText(" ");
-                formatter.appendText(namespace);
+            if (namespace != null && namespace.length() > 0) {
                 return namespace;
             }
             return super.getRhsHtml(formatter);
         }
+
     }
 
     public static class ConstantItem extends PhpElementItem {

@@ -25,7 +25,7 @@ import org.openide.util.Parameters;
  *
  * @author bhaidu
  */
-public class StringUtils {
+public class EditorStringUtils {
 
     public static String implode(Collection<String> items, String delimiter) {
         Parameters.notNull("items", items);
@@ -53,5 +53,12 @@ public class StringUtils {
         }
         return (text.startsWith("'") && text.endsWith("'")) 
                 || (text.startsWith("\"") && text.endsWith("\""));
+    }
+
+    public static String stripSurroundingQuotes(String text){
+        if (!isQuotedString(text)){
+            return text;
+        }
+        return text.substring(1, text.length()-1);
     }
 }

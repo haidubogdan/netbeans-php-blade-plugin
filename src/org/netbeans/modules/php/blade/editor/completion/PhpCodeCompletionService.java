@@ -10,6 +10,8 @@ import org.netbeans.modules.csl.api.CodeCompletionHandler;
 import org.netbeans.modules.csl.api.CodeCompletionResult;
 import org.netbeans.modules.csl.api.CompletionProposal;
 import org.netbeans.modules.csl.spi.ParserResult;
+import org.netbeans.modules.parsing.spi.indexing.support.QuerySupport;
+import org.netbeans.modules.php.blade.csl.elements.ClassElement;
 import org.netbeans.modules.php.blade.csl.elements.ElementType;
 import org.netbeans.modules.php.blade.csl.elements.NamedElement;
 import static org.netbeans.modules.php.blade.editor.completion.BladeCompletionHandler.completionRequest;
@@ -81,7 +83,7 @@ public class PhpCodeCompletionService {
         FileObject fo = parserResult.getSnapshot().getSource().getFileObject();
         
         if (fieldAccessReference != null) {
-            completeClassConstants(prefix, fieldAccessReference.ownerClass.name, offset, completionProposals, fo);
+            completeClassConstants(prefix, fieldAccessReference.ownerClass.identifier, offset, completionProposals, fo);
             completeClassMethods(prefix, fieldAccessReference, offset, completionProposals, fo);
             return;
         }
@@ -109,21 +111,26 @@ public class PhpCodeCompletionService {
                 String prefixNamespace = elementReference.namespace != null ? elementReference.namespace + prefix : prefix;
                 completeNamespace(prefixNamespace, offset, completionProposals, fo);
 
-                //we are after '\'
+                //we are after '\[a-z]'
                 if (elementReference.namespace != null) {
                     String classQuery = prefix;
                     String namespace = elementReference.namespace;
-                    namespace = namespace.substring(0, namespace.length() - 1);
-                    //completion offset : subtract prefix length + last slash
-                    int offsetNamespace = offset - (prefix.length() + 1);
-                    completeNamespacedPhpClasses(classQuery, namespace, offsetNamespace, completionProposals, fo);
-                } else if (prefix.endsWith("\\")) {
-                    //the name is the namespace
-                    int substringOffset = elementReference.name.startsWith("\\") ? 1 : 0;
-                    String namespacePath = elementReference.name.substring(substringOffset, elementReference.name.length() - 1);
-                    Collection<PhpIndexResult> indexClassResults = PhpIndexUtils.queryAllNamespaceClasses(
-                            parserResult.getSnapshot().getSource().getFileObject(), namespacePath
+                    int substringStartOffset = namespace.startsWith("\\") ? 1 : 0;
+                    String namespacePath = namespace.substring(substringStartOffset) + classQuery;
+                    Collection<PhpIndexResult> indexedNamespaces = PhpIndexUtils.queryNamespaces(
+                            fo, namespacePath, QuerySupport.Kind.PREFIX
                     );
+                    BladeCompletionProposal.CompletionRequest request = completionRequest(prefix, offset);
+
+                    for (PhpIndexResult indexResult : indexedNamespaces) {
+                        completionProposals.add(new BladeCompletionProposal.NamespaceItem(
+                                namespaceElement(indexResult), request, indexResult.name));
+                    }
+                } else if (prefix.endsWith("\\")) {
+                    //the identifier is the namespace
+                    int substringOffset = elementReference.identifier.startsWith("\\") ? 1 : 0;
+                    String namespacePath = elementReference.identifier.substring(substringOffset, elementReference.identifier.length() - 1);
+                    Collection<PhpIndexResult> indexClassResults = PhpIndexUtils.queryAllNamespaceClasses(fo, namespacePath);
                     BladeCompletionProposal.CompletionRequest request = completionRequest(namespacePath, offset + namespacePath.length());
                     for (PhpIndexResult indexResult : indexClassResults) {
                         completionProposals.add(new BladeCompletionProposal.ClassItem(classElement(indexResult), request, indexResult.name));
@@ -149,21 +156,6 @@ public class PhpCodeCompletionService {
         for (PhpIndexResult indexResult : indexClassResults) {
             completionProposals.add(new BladeCompletionProposal.ClassItem(
                     classElement(indexResult), request, indexResult.name));
-        }
-    }
-
-    private static void completeNamespacedPhpClasses(String prefix, String namespace,
-            int offset, final List<CompletionProposal> completionProposals,
-            FileObject fo) {
-
-        Collection<PhpIndexResult> indexClassResults = PhpIndexUtils.queryNamespaceClasses(
-                prefix, namespace, fo);
-        BladeCompletionProposal.CompletionRequest request = completionRequest(namespace, offset);
-
-        for (PhpIndexResult indexResult : indexClassResults) {
-            completionProposals.add(new BladeCompletionProposal.ClassItem(
-                    classElement(indexResult), request, indexResult.name)
-            );
         }
     }
 
@@ -201,8 +193,7 @@ public class PhpCodeCompletionService {
             int offset,
             final List<CompletionProposal> completionProposals,
             FileObject fo) {
-        Collection<PhpIndexFunctionResult> indexedFunctions = PhpIndexUtils.queryClassMethods(
-                fo, prefix, fieldAccessReference.ownerClass.name);
+        Collection<PhpIndexFunctionResult> indexedFunctions = PhpIndexUtils.queryClassMethods(fo, prefix, fieldAccessReference.ownerClass.identifier);
         if (indexedFunctions.isEmpty()) {
             return;
         }
@@ -238,7 +229,8 @@ public class PhpCodeCompletionService {
         }
         int substringOffset = prefix.startsWith("\\") ? 1 : 0;
         Collection<PhpIndexResult> indexClassResults = PhpIndexUtils.queryNamespace(
-                projectOwner.getProjectDirectory(), prefix.substring(substringOffset));
+                projectOwner.getProjectDirectory(), prefix.substring(substringOffset)
+        );
         if (indexClassResults.isEmpty()) {
             return;
         }
@@ -300,8 +292,10 @@ public class PhpCodeCompletionService {
 
     //TODO might move in a factory for NamedElement
 
-    private static NamedElement classElement(PhpIndexResult indexResult) {
-        return namedElement(indexResult, ElementType.PHP_CLASS);
+    private static ClassElement classElement(PhpIndexResult indexResult) {
+        return new ClassElement(indexResult.name,
+                indexResult.namespace,
+                indexResult.declarationFile);
     }
     
     private static NamedElement namespaceElement(PhpIndexResult indexResult) {

@@ -42,10 +42,12 @@ import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.Recognizer;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ParseTreeListener;
+import org.antlr.v4.runtime.tree.TerminalNode;
 import org.netbeans.api.annotations.common.NonNull;
 import org.netbeans.api.annotations.common.NullAllowed;
 import org.netbeans.modules.csl.api.Severity;
 import org.netbeans.modules.csl.spi.DefaultError;
+import org.netbeans.modules.php.blade.editor.EditorStringUtils;
 import org.netbeans.modules.php.blade.editor.navigator.BladeStructureItem;
 import org.netbeans.modules.php.blade.editor.navigator.BladeStructureItem.DirectiveBlockStructureItem;
 import org.netbeans.modules.php.blade.editor.navigator.BladeStructureItem.DirectiveInlineStructureItem;
@@ -85,7 +87,7 @@ public class BladeParserResult extends ParserResult {
         INCLUDE_COND, EXTENDS, EACH, HAS_SECTION,
         SECTION_MISSING, USE, INJECT, CUSTOM_DIRECTIVE, POSSIBLE_DIRECTIVE,
         PHP_FUNCTION, PHP_CLASS, PHP_METHOD, PHP_CONSTANT, PHP_NAMESPACE, PHP_NAMESPACE_PATH_TYPE,
-        STATIC_FIELD_ACCESS,
+        STATIC_FIELD_ACCESS, VITE_PATH,
         TEMPLATE_PATH,
     }
 
@@ -230,12 +232,14 @@ public class BladeParserResult extends ParserResult {
                 occurancesForDeclaration.put(range, new Reference(ReferenceType.CUSTOM_DIRECTIVE, directiveName, range));
             }
 
+            /**
+             * for @stack, @yield, @each, @include()
+             */
             private void addIdentifiableOccurenceForDeclaration(Token directive,
                     Token paramString) {
 
                 OffsetRange range = new OffsetRange(paramString.getStartIndex(), paramString.getStopIndex());
-                String bladeParamText = paramString.getText();
-                bladeParamText = bladeParamText.substring(1, bladeParamText.length() - 1);
+                String bladeParamText = EditorStringUtils.stripSurroundingQuotes(paramString.getText());
 
                 //used for indexing
                 switch (directive.getType()) {
@@ -261,7 +265,7 @@ public class BladeParserResult extends ParserResult {
                     }
                     range = new OffsetRange(paramString.getStartIndex(), paramString.getStopIndex());
                     //extracting the namespace and classname
-                    ref = new Reference(type, bladeParamText.substring(lastSlashPos + 1), range, null, bladeParamText.substring(0, lastSlashPos - 1));
+                    ref = new Reference(type, bladeParamText.substring(lastSlashPos + 1), range, null, bladeParamText.substring(0, lastSlashPos));
                 } else {
                     ref = new Reference(type, bladeParamText, range);
                 }
@@ -281,6 +285,40 @@ public class BladeParserResult extends ParserResult {
                         }
                         markIncludeBladeOccurrence(bladeParamText, range);
                         break;
+                }
+            }
+            
+            @Override
+            public void exitAsset_bundler(BladeAntlrParser.Asset_bundlerContext ctx) {
+                if (ctx.id_string != null){
+                    Token idToken = ctx.id_string;
+                    String path = idToken.getText();
+                    path = EditorStringUtils.stripSurroundingQuotes(path);
+                    OffsetRange range = new OffsetRange(idToken.getStartIndex(), idToken.getStopIndex());
+                    Reference ref = new Reference(ReferenceType.VITE_PATH, path, range);
+                    occurancesForDeclaration.put(range, ref);
+                    return;
+                }
+                Token dirToken = ctx.dir;
+                String dir = "";
+                if (dirToken != null){
+                    dir = dirToken.getText();
+                }
+
+                for (TerminalNode node : ctx.EXPR_STRING()){
+                    Token symbolNode = node.getSymbol();
+                    if (symbolNode == null){
+                        continue;
+                    }
+                    String path = node.getText();
+                    if (path.equals(dir)){
+                        //skipping last parameter
+                        continue;
+                    }
+                    path = EditorStringUtils.stripSurroundingQuotes(path);
+                    OffsetRange range = new OffsetRange(symbolNode.getStartIndex(), symbolNode.getStopIndex());
+                    Reference ref = new Reference(ReferenceType.VITE_PATH, path, range);
+                    occurancesForDeclaration.put(range, ref);
                 }
             }
 
@@ -542,7 +580,7 @@ public class BladeParserResult extends ParserResult {
                 }
 
                 String bladeParamText = paramString.getText();
-                identifier = bladeParamText.substring(1, bladeParamText.length() - 1);
+                identifier = EditorStringUtils.stripSurroundingQuotes(bladeParamText);
             }
             
             @Override
@@ -824,12 +862,12 @@ public class BladeParserResult extends ParserResult {
 
     public void addYieldReference(ReferenceType type, String yieldId, OffsetRange range) {
         Reference ref = new Reference(type, yieldId, range);
-        yieldReferences.put(ref.name, ref);
+        yieldReferences.put(ref.identifier, ref);
     }
 
     public void addStackReference(ReferenceType type, String stackId, OffsetRange range) {
         Reference ref = new Reference(type, stackId, range);
-        stackReferences.put(ref.name, ref);
+        stackReferences.put(ref.identifier, ref);
     }
 
     @Override
@@ -877,14 +915,14 @@ public class BladeParserResult extends ParserResult {
     public static class Reference {
 
         public final ReferenceType type;
-        public final String name;
+        public final String identifier;
         public final String ownerClass;
         public final String namespace;
         public final OffsetRange defOffset;
 
         public Reference(ReferenceType type, String name, OffsetRange defOffset, String ownerClass) {
             this.type = type;
-            this.name = name;
+            this.identifier = name;
             this.defOffset = defOffset;
             this.ownerClass = ownerClass;
             this.namespace = null;
@@ -892,7 +930,7 @@ public class BladeParserResult extends ParserResult {
 
         public Reference(ReferenceType type, String name, OffsetRange defOffset, String ownerClass, String namespace) {
             this.type = type;
-            this.name = name;
+            this.identifier = name;
             this.defOffset = defOffset;
             this.ownerClass = ownerClass;
             this.namespace = namespace;
@@ -900,7 +938,7 @@ public class BladeParserResult extends ParserResult {
 
         public Reference(ReferenceType type, String name, OffsetRange defOffset) {
             this.type = type;
-            this.name = name;
+            this.identifier = name;
             this.defOffset = defOffset;
             this.ownerClass = null;
             this.namespace = null;

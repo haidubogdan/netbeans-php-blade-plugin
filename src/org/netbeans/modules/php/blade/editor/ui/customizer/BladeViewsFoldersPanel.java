@@ -10,7 +10,7 @@ import javax.swing.event.ChangeListener;
 import org.netbeans.api.project.Project;
 import org.netbeans.modules.parsing.api.indexing.IndexingManager;
 import org.netbeans.modules.php.blade.editor.indexing.BladeIndex;
-import org.netbeans.modules.php.blade.editor.path.PathUtils;
+import org.netbeans.modules.php.blade.editor.path.BladePathUtils;
 import org.netbeans.modules.php.blade.project.BladeProjectProperties;
 import org.netbeans.spi.options.OptionsPanelController;
 import org.openide.filesystems.*;

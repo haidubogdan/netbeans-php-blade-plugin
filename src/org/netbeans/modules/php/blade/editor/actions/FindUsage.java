@@ -22,7 +22,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import javax.swing.AbstractAction;
 import javax.swing.text.JTextComponent;
-import org.netbeans.modules.php.blade.editor.path.PathUtils;
+import org.netbeans.modules.php.blade.editor.path.BladePathUtils;
 import org.netbeans.modules.php.blade.editor.refactoring.BladePathInfo;
 import org.netbeans.modules.php.blade.editor.refactoring.WhereBladePathUsedRefactoringUIImpl;
 import org.netbeans.modules.refactoring.spi.ui.UI;
@@ -49,7 +49,7 @@ public class FindUsage extends AbstractAction implements ActionListener {
     @Override
     public void actionPerformed(ActionEvent e) {
         FileObject fo = node.getLookup().lookup(FileObject.class);
-        String bladePath = PathUtils.toBladeViewPath(fo);
+        String bladePath = BladePathUtils.toBladeViewPath(fo);
         if (bladePath == null) {
             return;
         }

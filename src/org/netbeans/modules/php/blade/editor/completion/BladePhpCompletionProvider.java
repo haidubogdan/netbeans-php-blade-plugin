@@ -17,6 +17,7 @@ import org.netbeans.api.editor.mimelookup.MimeRegistrations;
 import org.netbeans.api.project.Project;
 import org.netbeans.lib.editor.codetemplates.api.CodeTemplateManager;
 import org.netbeans.modules.php.blade.editor.BladeLanguage;
+import org.netbeans.modules.php.blade.editor.EditorStringUtils;
 import org.netbeans.modules.php.blade.editor.ResourceUtilities;
 import org.netbeans.modules.php.blade.editor.completion.BladeCompletionItem.BladeTag;
 import org.netbeans.modules.php.blade.editor.components.AttributeCompletionService;
@@ -25,7 +26,7 @@ import org.netbeans.modules.php.blade.editor.indexing.BladeIndex;
 import org.netbeans.modules.php.blade.editor.indexing.BladeIndex.IndexedReferenceId;
 import org.netbeans.modules.php.blade.editor.indexing.PhpIndexResult;
 import org.netbeans.modules.php.blade.editor.indexing.PhpIndexUtils;
-import org.netbeans.modules.php.blade.editor.path.PathUtils;
+import org.netbeans.modules.php.blade.editor.path.BladePathUtils;
 import org.netbeans.modules.php.blade.project.ProjectUtils;
 import org.netbeans.modules.php.blade.syntax.StringUtils;
 import org.netbeans.modules.php.blade.syntax.antlr4.v10.BladeAntlrLexer;
@@ -60,6 +61,9 @@ public class BladePhpCompletionProvider implements CompletionProvider {
         YIELD_ID,
         DIRECTIVE,
         HTML_COMPONENT_TAG,
+        FOLDER,
+        CSS_FILE,
+        JS_FILE
     }
 
     @Override
@@ -155,7 +159,7 @@ public class BladePhpCompletionProvider implements CompletionProvider {
 
         switch (currentToken.getType()) {
             case BL_PARAM_STRING: {
-                String pathName = currentToken.getText().substring(1, currentToken.getText().length() - 1);
+                String pathName = EditorStringUtils.stripSurroundingQuotes(currentToken.getText());
                 List<Integer> tokensMatch = Arrays.asList(new Integer[]{
                     D_EXTENDS, D_INCLUDE, D_SECTION, D_HAS_SECTION,
                     D_INCLUDE_IF, D_INCLUDE_WHEN, D_INCLUDE_UNLESS, D_INCLUDE_FIRST,
@@ -189,7 +193,7 @@ public class BladePhpCompletionProvider implements CompletionProvider {
                         } else {
                             pathOffset = caretOffset - pathName.length();
                         }
-                        List<FileObject> childrenFiles = PathUtils.getParentChildrenFromPrefixPath(fo, pathName);
+                        List<FileObject> childrenFiles = BladePathUtils.getParentChildrenFromPrefixPath(fo, pathName);
                         for (FileObject file : childrenFiles) {
                             String pathFileName = file.getName();
                             if (!file.isFolder()) {
@@ -207,6 +211,66 @@ public class BladePhpCompletionProvider implements CompletionProvider {
                     case D_PREPEND:
                         completeStackIdFromIndex(pathName, fo, caretOffset, resultSet);
                         break;
+                }
+                break;
+            }
+            case EXPR_STRING: {
+                String pathName = EditorStringUtils.stripSurroundingQuotes(currentToken.getText());
+
+                if (!pathName.contains("resources")){
+                    if (!"resources".startsWith(pathName)){
+                        break;
+                    }
+                }
+                
+                int lastSlash = pathName.lastIndexOf("/");
+                
+                FileObject projectDir = ProjectUtils.getProjectDirectory(fo);
+                
+                if (projectDir == null){
+                    break;
+                }
+                
+                int pathOffset = caretOffset - pathName.length();
+                //laravel framework
+                if (lastSlash < 0){
+                    String jsDirRoot = "resources/js";
+                    FileObject jsFolder = projectDir.getFileObject("resources/js");
+                    addFolderCompletionItem(jsDirRoot, jsFolder.getPath(), pathOffset,resultSet, CompletionType.FOLDER);
+                    String cssDirRoot = "resources/css";
+                    FileObject cssFolder = projectDir.getFileObject("resources/css");
+                    addFolderCompletionItem(cssDirRoot, cssFolder.getPath(), pathOffset,resultSet, CompletionType.FOLDER);
+                    break;
+                }
+
+                boolean isJsPath = "resources/js".startsWith(pathName) || pathName.startsWith("resources/js");
+                boolean isCssPath = "resources/css".startsWith(pathName)|| pathName.startsWith("resources/css");
+                
+                if (isJsPath){
+                    FileObject jsFolder = projectDir.getFileObject("resources/js");
+                    if (jsFolder == null || !jsFolder.isValid()){
+                        break;
+                    }
+                    for(FileObject file : jsFolder.getChildren()){
+                        String jsPath = "resources/js/" + file.getNameExt();
+                        if (jsPath.startsWith(pathName)){
+                            addFolderCompletionItem(jsPath, file.getPath(), pathOffset,resultSet, CompletionType.JS_FILE);
+                        }
+                    }
+                    break;
+                }
+                if (isCssPath){
+                    FileObject cssFolder = projectDir.getFileObject("resources/css");
+                    if (cssFolder == null || !cssFolder.isValid()){
+                        break;
+                    }
+                    for(FileObject file : cssFolder.getChildren()){
+                        String jsPath = "resources/css/" + file.getNameExt();
+                        if (jsPath.startsWith(pathName)){
+                            addFolderCompletionItem(jsPath, file.getPath(), pathOffset,resultSet, CompletionType.CSS_FILE);
+                        }
+                    }
+                    break;
                 }
                 break;
             }
@@ -274,9 +338,29 @@ public class BladePhpCompletionProvider implements CompletionProvider {
                 .build();
         resultSet.addItem(item);
     }
+    
+    private void addFolderCompletionItem(String preview, String info,
+            int caretOffset, CompletionResultSet resultSet, CompletionType type) {
+        CompletionItem item = CompletionUtilities.newCompletionItemBuilder(preview)
+                .iconResource(getReferenceIcon(type))
+                .startOffset(caretOffset)
+                .leftHtmlText(preview)
+                .rightHtmlText(info)
+                .sortPriority(1)
+                .build();
+        resultSet.addItem(item);
+    }
 
     private static String getReferenceIcon(CompletionType type) {
 
+        switch(type){
+            case FOLDER:
+                return "org/openide/loaders/defaultFolder.gif";
+            case CSS_FILE:
+               return "org/netbeans/modules/css/visual/resources/style_sheet_16.png";
+            case JS_FILE:
+               return "org/netbeans/modules/javascript2/editor/resources/javascript.png";
+        }
         return ResourceUtilities.ICON_BASE + "icons/layout.png"; //NOI18N
 
     }

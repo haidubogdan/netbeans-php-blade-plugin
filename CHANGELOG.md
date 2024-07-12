@@ -1,5 +1,8 @@
 # Change Log
 
+## [2.4.9.9] 
+
+- limited go to file + completion for vite assets (#64), decl finder fixes + refactor for Php<br>
 
 ## [2.4.9.8] 
 

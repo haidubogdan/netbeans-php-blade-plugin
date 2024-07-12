@@ -52,7 +52,7 @@ D_GENERIC_INLINE_DIRECTIVES : ('@elseif' |  Include | '@extends' | '@each' | '@y
 
 D_GENERIC_INLINE_MIXED_DIRECTIVES : ('@break' | '@continue')->type(DIRECTIVE);
 
-D_GENERIC_END_TAGS : ('@stop' | '@show' | '@overwrite' | '@end' DirectivesWithEndTag)->type(DIRECTIVE);
+D_GENERIC_END_TAGS : ('@stop' | '@show' | '@overwrite' | '@viteReactRefresh' | '@end' DirectivesWithEndTag)->type(DIRECTIVE);
 
 //verbatim has special blade escape logic
 D_VERBATIM : '@verbatim' ->pushMode(VERBATIM_MODE), type(DIRECTIVE);

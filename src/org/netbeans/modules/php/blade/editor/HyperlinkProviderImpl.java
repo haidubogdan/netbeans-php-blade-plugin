@@ -36,7 +36,7 @@ import org.netbeans.api.lsp.HyperlinkLocation;
 import org.netbeans.api.project.Project;
 import org.netbeans.editor.BaseDocument;
 import org.netbeans.modules.php.blade.editor.lexer.EditorUtils;
-import org.netbeans.modules.php.blade.editor.path.PathUtils;
+import org.netbeans.modules.php.blade.editor.path.BladePathUtils;
 import org.netbeans.modules.php.blade.project.BladeProjectProperties;
 import org.netbeans.modules.php.editor.lexer.PHPTokenId;
 import org.netbeans.spi.lsp.HyperlinkLocationProvider;
@@ -107,7 +107,7 @@ public class HyperlinkProviderImpl implements HyperlinkProviderExt {
         String focusedText = currentToken.text().toString();
 
         //2 char config are not that relevant
-        if (focusedText.length() < 5 || !StringUtils.isQuotedString(focusedText)) {
+        if (focusedText.length() < 5 || !EditorStringUtils.isQuotedString(focusedText)) {
             return null;
         }
 
@@ -134,8 +134,9 @@ public class HyperlinkProviderImpl implements HyperlinkProviderExt {
                         if (currentFile == null) {
                             return null;
                         }
-                        List<FileObject> includedFiles = PathUtils.findFileObjectsForBladeViewPath(currentFile, identifiableText);
-                        String viewPath = "resources/views/" + identifiableText.replace(".", "/") + ".blade.php";
+                        List<FileObject> includedFiles = BladePathUtils.findFileObjectsForBladeViewPath(currentFile, identifiableText);
+                        String viewPath = BladePathUtils.toBladeToProjectFilePath(identifiableText);
+
                         for (FileObject includedFile : includedFiles) {
                             goToFile = includedFile;
                             tooltipText = "Blade Template File : <b>" + viewPath

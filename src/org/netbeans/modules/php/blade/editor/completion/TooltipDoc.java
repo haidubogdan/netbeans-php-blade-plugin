@@ -6,7 +6,7 @@ package org.netbeans.modules.php.blade.editor.completion;
 import org.netbeans.modules.csl.api.Documentation;
 import org.netbeans.modules.php.blade.csl.elements.NamedElement;
 import org.netbeans.modules.php.blade.csl.elements.PhpFunctionElement;
-import org.netbeans.modules.php.blade.editor.path.PathUtils;
+import org.netbeans.modules.php.blade.editor.path.BladePathUtils;
 
 /**
  * @TODO update doc representation
@@ -21,7 +21,7 @@ public class TooltipDoc {
             case PATH:
                 String filePath = "";
                 if (elementHandle.getFileObject() != null){
-                    filePath = PathUtils.getRelativeProjectPath(elementHandle.getFileObject());
+                    filePath = BladePathUtils.getRelativeProjectPath(elementHandle.getFileObject());
                 }
                 return Documentation.create(String.format("<div align=\"right\"><font size=-1>%s</font></div>", "blade path")
                         + "<div><b>" + filePath + "</b></div>", null);

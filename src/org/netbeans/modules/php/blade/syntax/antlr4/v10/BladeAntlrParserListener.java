@@ -318,6 +318,16 @@ public interface BladeAntlrParserListener extends ParseTreeListener {
 	 */
 	void exitStack(BladeAntlrParser.StackContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link BladeAntlrParser#asset_bundler}.
+	 * @param ctx the parse tree
+	 */
+	void enterAsset_bundler(BladeAntlrParser.Asset_bundlerContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link BladeAntlrParser#asset_bundler}.
+	 * @param ctx the parse tree
+	 */
+	void exitAsset_bundler(BladeAntlrParser.Asset_bundlerContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link BladeAntlrParser#inject}.
 	 * @param ctx the parse tree
 	 */

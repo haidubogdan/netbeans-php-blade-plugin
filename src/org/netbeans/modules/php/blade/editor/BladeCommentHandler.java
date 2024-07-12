@@ -81,13 +81,14 @@ public class BladeCommentHandler extends CommentHandler.DefaultCommentHandler {
                             break;
                         case BLADE_DIRECTIVE:
                             bounds[0] = ts.offset();
-                            //not working
+
                             ts.moveNext();
                             if (ts.token().id() == BladeTokenId.PHP_BLADE_EXPRESSION) {
                                 bounds[1] =  ts.offset() + ts.token().length();
                             }
-                            //as it contains embedd language
+                            
                             try {
+                                //manually inserting the delimiters
                                 doc.insertString(bounds[0], COMMENT_START_DELIMITER, null);
                                 doc.insertString(Math.max(bounds[1], to) + COMMENT_END_DELIMITER.length(), COMMENT_END_DELIMITER, null);
                                 bounds[0] = 0;

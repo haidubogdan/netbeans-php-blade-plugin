@@ -104,10 +104,10 @@ public class BladeCompletionHandler implements CodeCompletionHandler2 {
         }
 
         String tokenText = currentToken.getText();
-
+        FileObject fo = completionContext.getParserResult().getSnapshot().getSource().getFileObject();
         //D_UNKNOWN_ATTR_ENC hack to fix completion not triggered in html embedded text
         if (tokenText.startsWith("@") && currentToken.getType() != D_UNKNOWN_ATTR_ENC) {
-            completeDirectives(completionProposals, completionContext, parserResult, currentToken);
+            completeDirectives(completionProposals, completionContext, fo, currentToken);
         } else {
             if (prefix.length() == 1) {
                 return CodeCompletionResult.NONE;
@@ -127,7 +127,7 @@ public class BladeCompletionHandler implements CodeCompletionHandler2 {
                 case RAW_TAG_OPEN:
                     //{{ | {!!
                     if (!ModulePreferences.isAutoTagCompletionEnabled()) {
-                        completeBladeTags(completionProposals, completionContext, parserResult, currentToken);
+                        completeBladeTags(completionProposals, completionContext, currentToken);
                     }
                     break;
             }
@@ -166,6 +166,7 @@ public class BladeCompletionHandler implements CodeCompletionHandler2 {
         String variablePrefix = currentToken.getText();
         Set<String> scopedVariables = parserResult.findLoopVariablesForScope(completionContext.getCaretOffset());
         FileObject fo = completionContext.getParserResult().getSnapshot().getSource().getFileObject();
+
         if (scopedVariables != null && !scopedVariables.isEmpty()) {
             CompletionRequest request = new CompletionRequest();
             request.anchorOffset = completionContext.getCaretOffset() - variablePrefix.length();
@@ -194,7 +195,7 @@ public class BladeCompletionHandler implements CodeCompletionHandler2 {
      * @param currentToken
      */
     private void completeBladeTags(final List<CompletionProposal> completionProposals,
-            CodeCompletionContext completionContext, BladeParserResult parserResult, Token currentToken) {
+            CodeCompletionContext completionContext, Token currentToken) {
         String tagStart = currentToken.getText();
 
         CompletionRequest request = completionRequest(tagStart, completionContext.getCaretOffset());
@@ -209,11 +210,10 @@ public class BladeCompletionHandler implements CodeCompletionHandler2 {
     }
 
     private void completeDirectives(final List<CompletionProposal> completionProposals,
-            CodeCompletionContext completionContext, BladeParserResult parserResult, Token currentToken) {
+            CodeCompletionContext completionContext, FileObject fo, Token currentToken) {
         String prefix = currentToken.getText();
         DirectiveCompletionList completionList = new DirectiveCompletionList();
 
-        FileObject fo = parserResult.getSnapshot().getSource().getFileObject();
         CompletionRequest request = completionRequest(prefix, completionContext.getCaretOffset());
         for (Directive directive : completionList.getDirectives()) {
             String directiveName = directive.name();

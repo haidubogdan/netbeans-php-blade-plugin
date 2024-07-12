@@ -19,4 +19,14 @@ public class ProjectUtils {
         
         return project;
     }
+    
+    public static FileObject getProjectDirectory(FileObject file) {
+        Project project = getMainOwner(file);
+
+        if (project == null){
+            return null;
+        }
+        
+        return project.getProjectDirectory();
+    }
 }

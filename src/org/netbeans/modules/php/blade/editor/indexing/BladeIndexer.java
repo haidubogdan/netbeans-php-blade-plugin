@@ -21,7 +21,7 @@ import org.netbeans.modules.php.blade.editor.BladeLanguage;
 import org.netbeans.modules.php.blade.editor.parser.BladeParserResult;
 import org.netbeans.modules.php.blade.editor.parser.BladeParserResult.Reference;
 import org.netbeans.modules.php.blade.editor.parser.BladeParserResult.ReferenceType;
-import org.netbeans.modules.php.blade.editor.path.PathUtils;
+import org.netbeans.modules.php.blade.editor.path.BladePathUtils;
 import org.netbeans.modules.php.blade.project.ProjectUtils;
 import org.openide.filesystems.FileObject;
 import org.openide.util.Exceptions;
@@ -122,13 +122,13 @@ public class BladeIndexer extends EmbeddingIndexer {
         if (project == null) {
             return;
         }
-        List<FileObject> roots = PathUtils.getCustomViewsRoots(project, fo);
+        List<FileObject> roots = BladePathUtils.getCustomViewsRoots(project, fo);
         String filePath = fo.getPath();
 
         for (FileObject root : roots) {
             String rootPath = root.getPath();
             if (filePath.startsWith(rootPath)) {
-                String bladeFormatPath = PathUtils.toBladeViewPath(filePath.replace(rootPath, ""));
+                String bladeFormatPath = BladePathUtils.toBladeViewPath(filePath.replace(rootPath, ""));
                 if (bladeFormatPath.startsWith(".")) {
                     bladeFormatPath = bladeFormatPath.substring(1, bladeFormatPath.length());
                 }

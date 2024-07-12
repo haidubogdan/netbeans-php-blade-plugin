@@ -16,24 +16,23 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.netbeans.modules.php.blade.csl.elements;
+package org.netbeans.modules.php.blade.editor.declaration;
+
+import org.openide.filesystems.FileObject;
 
 /**
  *
  * @author bogdan
  */
-public enum ElementType {
-    NA,
-    CUSTOM_DIRECTIVE,
-    PATH,
-    DIRECTIVE,
-    VARIABLE,
-    PHP_CLASS,
-    PHP_NAMESPACE,
-    PHP_FUNCTION,
-    PHP_CONSTANT,
-    LARAVEL_COMPONENT,
-    STACK_ID,
-    YIELD_ID,
-    ASSET_FILE
+public class VitePathDeclarationService {
+
+    private final FileObject sourceFolder;
+
+    public VitePathDeclarationService(FileObject sourceFolder) {
+        this.sourceFolder = sourceFolder;
+    }
+
+    public FileObject findFileObject(String path) {
+        return sourceFolder.getFileObject(path);
+    }
 }

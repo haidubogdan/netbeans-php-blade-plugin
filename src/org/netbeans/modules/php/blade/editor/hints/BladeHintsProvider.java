@@ -18,7 +18,7 @@ import org.netbeans.modules.csl.api.HintsProvider;
 import org.netbeans.modules.php.blade.editor.directives.CustomDirectives;
 import static org.netbeans.modules.php.blade.editor.indexing.BladeIndexer.INCLUDE_PATH;
 import org.netbeans.modules.php.blade.editor.parser.BladeParserResult;
-import org.netbeans.modules.php.blade.editor.path.PathUtils;
+import org.netbeans.modules.php.blade.editor.path.BladePathUtils;
 import org.netbeans.modules.php.blade.project.ProjectUtils;
 import org.openide.filesystems.FileObject;
 
@@ -60,7 +60,7 @@ public class BladeHintsProvider implements HintsProvider {
                             continue;
                         }
 
-                        if (ct.customDirectiveConfigured(entry.getValue().name)) {
+                        if (ct.customDirectiveConfigured(entry.getValue().identifier)) {
                             continue;
                         }
                         hints.add(new Hint(astRule,
@@ -76,7 +76,7 @@ public class BladeHintsProvider implements HintsProvider {
 
         //validate path config
         for (Map.Entry<String, List<OffsetRange>> entry : parserResult.includeBladeOccurences.entrySet()) {
-            FileObject realFile = PathUtils.findFileObjectForBladeViewPath(parserResult.getFileObject(),
+            FileObject realFile = BladePathUtils.findFileObjectForBladeViewPath(parserResult.getFileObject(),
                     entry.getKey());
             if (realFile != null) {
                 continue;

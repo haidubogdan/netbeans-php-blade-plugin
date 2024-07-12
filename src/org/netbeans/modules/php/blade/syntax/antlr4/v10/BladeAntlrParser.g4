@@ -38,14 +38,15 @@ inline_directive:
     | includeCond
     | each
     | (D_INCLUDE_FIRST | D_CLASS | D_STYLE | D_METHOD | D_PROPS 
-           | D_DD | D_JS | D_JS | D_AWARE | D_ASSET_BUNDLER 
-           | D_HTML_ATTR_EXPR | D_CASE | D_JSON) composed_php_expression
+           | D_DD | D_JS | D_JS | D_AWARE | D_HTML_ATTR_EXPR | D_CASE | D_JSON) composed_php_expression
     | (D_CSRF | D_LOOP_ACTION | D_BREAK | D_LIVEWIRE | D_DEFAULT)
+    | asset_bundler
     | inject
     //using basic inline case statement to not add complexity to parser
     | D_PERMISSION_ELSE composed_php_expression
     | loop_action
     | D_ELSE //custom block directives?
+    | D_MISC
     | custom_directive
     ;
 
@@ -115,6 +116,7 @@ session : D_SESSION composed_php_expression general_statement* D_ENDSESSION;
 
 //layout
 stack : D_STACK singleArgWrapperP;
+asset_bundler : d_name=D_ASSET_BUNDLER BLADE_EXPR_LPAREN (BL_SQ_LPAREN id_strings=EXPR_STRING+ BL_SQ_RPAREN dir=EXPR_STRING? | id_string=EXPR_STRING | composed_php_expression+) BLADE_EXPR_RPAREN;
 inject : D_INJECT BLADE_PARAM_LPAREN composedArgument BL_COMMA (identifiableArgument | composedArgument) BLADE_PARAM_RPAREN;
 
 includeCond : d_name=(D_INCLUDE_WHEN | D_INCLUDE_UNLESS) BLADE_PARAM_LPAREN
@@ -155,7 +157,8 @@ echo_expr : composed_php_expression;
 class_expr_usage: class_name_reference 
 | object_alias_static_access 
 | object_alias_direct_access
-| static_direct_class_access 
+| static_direct_class_access
+| static_direct_namespace_class_access
 | class_instance;
 
 object_alias_static_access : alias_name=PHP_VARIABLE PHP_STATIC_ACCESS static_property=PHP_IDENTIFIER;
@@ -186,7 +189,7 @@ main_php_expression : BLADE_EXPR_LPAREN composed_php_expression+ BLADE_EXPR_RPAR
 composed_php_expression : class_expr_usage | function_call | PHP_IDENTIFIER | namespacePath | PHP_VARIABLE 
 | PHP_NAMESPACE_PATH | EXPR_STRING |
  PHP_KEYWORD | PHP_EXPRESSION+ | PHP_STATIC_ACCESS | PHP_CLASS_KEYWORD
-| PHP_INSTANCE_ACCESS | BLADE_EXPR_LPAREN composed_php_expression* BLADE_EXPR_RPAREN | PHP_EXPR_STRING;
+| PHP_INSTANCE_ACCESS | BL_SQ_LPAREN composed_php_expression* BL_SQ_RPAREN |  BLADE_EXPR_LPAREN composed_php_expression* BLADE_EXPR_RPAREN | PHP_EXPR_STRING;
 
 simple_foreach_expr: loop_array=PHP_VARIABLE FOREACH_AS key=PHP_VARIABLE (FOREACH_PARAM_ASSIGN item=PHP_VARIABLE)?;
 

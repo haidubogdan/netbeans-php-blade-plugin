@@ -387,6 +387,18 @@ public class BladeAntlrParserBaseListener implements BladeAntlrParserListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterAsset_bundler(BladeAntlrParser.Asset_bundlerContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitAsset_bundler(BladeAntlrParser.Asset_bundlerContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterInject(BladeAntlrParser.InjectContext ctx) { }
 	/**
 	 * {@inheritDoc}

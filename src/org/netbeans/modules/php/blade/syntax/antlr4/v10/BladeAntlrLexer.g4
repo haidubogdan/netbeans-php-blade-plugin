@@ -173,7 +173,9 @@ D_ENDVERBATIM : '@endverbatim';
 
 //known plugins
 D_LIVEWIRE : '@livewireStyles' | '@bukStyles' | '@livewireScripts' | '@bukScripts' | '@livewire';
-D_ASSET_BUNDLER : '@vite'->pushMode(LOOK_FOR_PHP_EXPRESSION);
+D_ASSET_BUNDLER : '@vite'->pushMode(LOOK_FOR_PHP_COMPOSED_EXPRESSION);
+
+D_MISC : '@viteReactRefresh';
 
 //we will decide that a custom directive has expression to avoid email matching
 D_CUSTOM : ('@' NameString {this._input.LA(1) == '(' || 
@@ -289,8 +291,8 @@ L_COMPOSED_EXPR_OTHER : . ->type(HTML), popMode;
 //{{}}, @if, @foreach
 mode INSIDE_PHP_COMPOSED_EXPRESSION;
 
-EXPR_SQ_LPAREN : '[' {this.squareParenBalance++;}->type(PHP_EXPRESSION);
-EXPR_SQ_RPAREN : ']' {this.squareParenBalance--;}->type(PHP_EXPRESSION);
+EXPR_SQ_LPAREN : '[' {this.squareParenBalance++;}->type(BL_SQ_LPAREN);
+EXPR_SQ_RPAREN : ']' {this.squareParenBalance--;}->type(BL_SQ_RPAREN);
 
 EXPR_CURLY_LPAREN : '{' {this.curlyParenBalance++;}->type(PHP_EXPRESSION);
 EXPR_CURLY_RPAREN : '}' {this.curlyParenBalance--;}->type(PHP_EXPRESSION);
