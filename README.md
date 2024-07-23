@@ -67,11 +67,18 @@ Project -> Properties -> Laravel Blade -> Custom Directives
 
 Just add the php file where you added the custom directive implementation as in [https://laravel.com/docs/10.x/blade#extending-blade](https://laravel.com/docs/10.x/blade#extending-blade).
 
-**VIews folder**
+**Views folder**
 
 If you use **blade templates** outside of the generic laravel framework or have custom templates folders you can configure them for a project.
 
-This will help the yielid and view path completion
+This will help the yield and view path completion
+
+**Global declaration finder for views paths**
+
+Possiblity to go to declaration finder for string parameters inside `render`, `make`, `view` methods.
+
+![image](https://github.com/user-attachments/assets/d3f872dc-e786-40f3-ae6c-cf83ba239c23)
+![image](https://github.com/user-attachments/assets/e102a7df-b74a-442e-96ce-6a585d57d046)
 
 **Reformat and indentation**
 
@@ -80,6 +87,7 @@ Experimental formatting and indenting
 **blade components**
 
 Limited completion and declaration finder
+
 
 ---
 
