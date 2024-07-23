@@ -65,7 +65,7 @@ public final class BladeProjectProperties {
     private void initModelsFromPreferences() {
         directiveCustomizerPathList = createModelForDirectiveCusomizerPathList();
         viewsPathList = createModelForViewsPathList();
-        getPreferences().getBoolean(NON_LARAVEL_DECL_FINDER, false);
+        nonLaravelDeclFinder = getPreferences().getBoolean(NON_LARAVEL_DECL_FINDER, false);
     }
 
     public void storeDirectiveCustomizerPaths() {

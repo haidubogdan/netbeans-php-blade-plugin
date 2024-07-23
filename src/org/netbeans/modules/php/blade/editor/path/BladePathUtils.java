@@ -298,6 +298,6 @@ public class BladePathUtils {
     }
     
     public static String toBladeToProjectFilePath(String path){
-        return LARAVEL_VIEW_PATH + viewPathToFilePath(path);
+        return LARAVEL_VIEW_PATH + "/" + viewPathToFilePath(path);
     }
 }
