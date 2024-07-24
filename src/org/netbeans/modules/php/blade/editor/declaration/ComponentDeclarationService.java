@@ -50,8 +50,6 @@ public class ComponentDeclarationService {
         }
 
         for (Map.Entry<FileObject, Namespace> namespace : componentSupport.getInstalledComponentNamespace().entrySet()) {
-            //namespace.Key not used for the moment
-            //results.addAll(PhpIndexUtils.queryExactNamespaceClasses(prefix, namespace.getValue().path(), fo));
             results.addAll(PhpIndexUtils.queryComponentClass(prefix, namespace.getValue().path(), fo));
         }
 

@@ -226,7 +226,7 @@ public class BladeDeclarationFinder implements DeclarationFinder {
             case HAS_SECTION:
             case SECTION_MISSING:
                 String yieldId = referenceIdentifier;
-                List<BladeIndex.IndexedReference> yields = QueryUtils.getYieldReferences(yieldId, currentFile);
+                List<BladeIndex.IndexedReference> yields = QueryUtils.findYieldReferences(yieldId, currentFile);
                 if (yields == null) {
                     return DeclarationLocation.NONE;
                 }
@@ -248,7 +248,7 @@ public class BladeDeclarationFinder implements DeclarationFinder {
             case PUSH_IF:
             case PREPEND:
                 String stackId = referenceIdentifier;
-                List<BladeIndex.IndexedReference> stacks = QueryUtils.getStacksReferences(stackId, currentFile);
+                List<BladeIndex.IndexedReference> stacks = QueryUtils.queryStacksReferences(stackId, currentFile);
 
                 if (stacks == null) {
                     return DeclarationLocation.NONE;

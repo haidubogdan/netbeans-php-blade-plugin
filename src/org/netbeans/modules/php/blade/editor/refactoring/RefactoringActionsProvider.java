@@ -1,9 +1,24 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package org.netbeans.modules.php.blade.editor.refactoring;
 
 import java.io.IOException;
-import java.util.Collection;
-import java.util.HashSet;
-import javax.swing.Action;
 import javax.swing.JEditorPane;
 import javax.swing.SwingUtilities;
 import javax.swing.text.AbstractDocument;
@@ -11,7 +26,6 @@ import javax.swing.text.Document;
 import org.netbeans.api.lexer.TokenHierarchy;
 import org.netbeans.api.lexer.TokenSequence;
 import org.netbeans.modules.editor.NbEditorUtilities;
-import org.netbeans.modules.php.blade.editor.BladeLanguage;
 import org.netbeans.modules.refactoring.api.ui.ExplorerContext;
 import org.netbeans.modules.refactoring.spi.ui.ActionsImplementationProvider;
 import org.netbeans.modules.refactoring.spi.ui.UI;
@@ -49,7 +63,7 @@ public class RefactoringActionsProvider extends ActionsImplementationProvider {
                 FileObject file = NbEditorUtilities.getFileObject(doc);
                 int caretPos = c.getCaretPosition();
 
-                String name = Bundle.NM_Unknown();
+                String name = "Unknown";
 
                 if (abstractDoc != null) {
                     abstractDoc.readLock();
@@ -89,14 +103,6 @@ public class RefactoringActionsProvider extends ActionsImplementationProvider {
     public void doCopy(final Lookup lookup) {
         
         final FileObject dir = getTarget(lookup);
-
-        
-        //snippet code for multiple file
-        //Collection<? extends Node> nodes = new HashSet<Node>(lookup.lookupAll(Node.class));
-//        for (Node n : nodes) {
-//            DataObject dob = n.getLookup().lookup(DataObject.class);
-//            int x = 1;
-//        }
         
         //should treat multiple files
         Runnable start = () -> {
@@ -120,7 +126,6 @@ public class RefactoringActionsProvider extends ActionsImplementationProvider {
             } catch (IOException ex) {
                 Exceptions.printStackTrace(ex);
             }
-            System.out.println("Copy lookup " + lookup);
         };
         SwingUtilities.invokeLater(start);
     }

@@ -16,7 +16,6 @@ import org.netbeans.modules.csl.api.Rule.ErrorRule;
 import org.netbeans.modules.csl.api.RuleContext;
 import org.netbeans.modules.csl.api.HintsProvider;
 import org.netbeans.modules.php.blade.editor.directives.CustomDirectives;
-import static org.netbeans.modules.php.blade.editor.indexing.BladeIndexer.INCLUDE_PATH;
 import org.netbeans.modules.php.blade.editor.parser.BladeParserResult;
 import org.netbeans.modules.php.blade.editor.path.BladePathUtils;
 import org.netbeans.modules.php.blade.project.ProjectUtils;

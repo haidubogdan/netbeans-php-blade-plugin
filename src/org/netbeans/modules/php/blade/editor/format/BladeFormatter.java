@@ -22,13 +22,6 @@ import org.netbeans.spi.project.ui.support.ProjectConvertors;
 import org.openide.filesystems.FileObject;
 
 /**
- * possible strategies
- *
- * separate the WS identation of HTML and DIRECTIVES
- *
- * build the identation on parser listener ??
- */
-/**
  *
  * @author bhaidu
  */

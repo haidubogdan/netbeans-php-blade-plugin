@@ -16,25 +16,24 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.netbeans.modules.php.blade.editor.ui.customizer;
+package org.netbeans.modules.php.blade.syntax;
 
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.List;
-
+import org.netbeans.modules.php.blade.syntax.annotation.Tag;
+import org.netbeans.modules.php.blade.syntax.annotation.TagRegister;
 
 /**
  *
  * @author bhaidu
  */
-public class UiOptionsUtils {
-    
-    public static String encodeToStrings(Enumeration<String> list) {
-        List<String> result = new ArrayList<>();
-        while (list.hasMoreElements()) {
-            result.add(list.nextElement());
-        }
+@TagRegister({
+    @Tag(openTag = "{{", closeTag = "}}", description = "regular echo", position=0),
+    @Tag(openTag = "{!!", closeTag = "!!}", description = "raw echo", position=1),
+    @Tag(openTag = "{{--", closeTag = "--}}", description = "comment", position=2)
+})
+public class BladeTags {
 
-        return String.join("|", result);
+    public Tag[] getTags() {
+        TagRegister tagRegister = this.getClass().getAnnotation(TagRegister.class);
+        return tagRegister.value();
     }
 }

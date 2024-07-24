@@ -26,8 +26,6 @@ import org.openide.filesystems.FileObject;
 })
 public class ComponentsCompletionService {
 
-    private static Set<String> cachedElements;
-
     public Collection<PhpIndexResult> queryComponents(String prefix, FileObject fo) {
         Collection<PhpIndexResult> results = new ArrayList<>();
         Project project = ProjectUtils.getMainOwner(fo);

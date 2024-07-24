@@ -1,27 +1,40 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package org.netbeans.modules.php.blade.editor.indexing;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Enumeration;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.WeakHashMap;
 import java.util.concurrent.ExecutionException;
 import org.netbeans.api.project.Project;
 import org.netbeans.api.project.ui.OpenProjects;
 import org.netbeans.modules.csl.api.OffsetRange;
-import org.netbeans.modules.parsing.api.indexing.IndexingManager;
 import org.netbeans.modules.parsing.spi.indexing.support.IndexResult;
 import org.netbeans.modules.parsing.spi.indexing.support.QuerySupport;
+import org.netbeans.modules.php.blade.editor.directives.CustomDirectives;
+import static org.netbeans.modules.php.blade.editor.indexing.BladeIndexer.YIELD_REFERENCE;
 import org.netbeans.modules.php.blade.editor.parser.BladeParserResult.Reference;
-import org.netbeans.modules.php.blade.project.BladeProjectProperties;
 import org.openide.filesystems.FileObject;
-import org.openide.filesystems.FileUtil;
 import org.openide.util.Exceptions;
 
 /**
@@ -37,8 +50,8 @@ public class BladeIndex {
     private BladeIndex(QuerySupport querySupport) throws IOException {
         this.querySupport = querySupport;
     }
-    
-    public QuerySupport getQuerySupport(){
+
+    public QuerySupport getQuerySupport() {
         return querySupport;
     }
 
@@ -73,17 +86,26 @@ public class BladeIndex {
         }
     }
 
-    public List<IndexedReferenceId> getYieldIndexedReferencesIds(String prefix) {
+    public List<IndexedReferenceId> queryYieldIds(String prefix) {
+        return queryIndexedReferenceId(prefix, BladeIndexer.YIELD_ID);
+    }
+
+    public List<IndexedReferenceId> queryStacksIndexedReferences(String prefix) {
+        return queryIndexedReferenceId(prefix, BladeIndexer.STACK_ID);
+    }
+
+    private List<IndexedReferenceId> queryIndexedReferenceId(String prefix, String indexKey) {
         List<IndexedReferenceId> indexedReferences = new ArrayList<>();
+
         try {
-            Collection<? extends IndexResult> result = querySupport.query(BladeIndexer.YIELD_REFERENCE, prefix, QuerySupport.Kind.PREFIX, BladeIndexer.YIELD_REFERENCE);
+            Collection<? extends IndexResult> result = querySupport.query(indexKey, prefix, QuerySupport.Kind.PREFIX, indexKey);
 
             if (result == null || result.isEmpty()) {
                 return indexedReferences;
             }
 
             for (IndexResult indexResult : result) {
-                String[] values = indexResult.getValues(BladeIndexer.YIELD_REFERENCE);
+                String[] values = indexResult.getValues(indexKey);
                 for (String value : values) {
                     if (value.startsWith(prefix)) {
                         indexedReferences.add(new IndexedReferenceId(value, indexResult.getFile()));
@@ -97,26 +119,45 @@ public class BladeIndex {
         return indexedReferences;
     }
 
-    /**
-     * todo add qualifier for search result
-     *
-     * @param prefix
-     * @return
-     */
-    public List<IndexedReference> getYieldIndexedReferences(String prefix) {
+    public List<IndexedReference> queryYieldIndexedReferences(String prefix) {
+        return queryIndexedReferences(prefix,
+                BladeIndexer.YIELD_REFERENCE,
+                new IndexReferenceCallback() {
+            @Override
+            public Reference createIndexReference(String value) {
+                return BladeIndexer.extractYieldDataFromIndex(value);
+            }
+        }
+        );
+    }
+
+    public List<IndexedReference> queryStacksIdsReference(String prefix) {
+        return queryIndexedReferences(prefix,
+                BladeIndexer.STACK_REFERENCE,
+                new IndexReferenceCallback() {
+            @Override
+            public Reference createIndexReference(String value) {
+                return BladeIndexer.extractStackDataFromIndex(value);
+            }
+        }
+        );
+    }
+
+    private List<IndexedReference> queryIndexedReferences(String prefix, String indexKey, IndexReferenceCallback callback) {
         List<IndexedReference> references = new ArrayList<>();
         try {
-            Collection<? extends IndexResult> result = querySupport.query(BladeIndexer.YIELD_REFERENCE, prefix, QuerySupport.Kind.PREFIX, BladeIndexer.YIELD_REFERENCE);
+            Collection<? extends IndexResult> result = querySupport.query(indexKey,
+                    prefix, QuerySupport.Kind.PREFIX, indexKey);
 
             if (result == null || result.isEmpty()) {
                 return references;
             }
 
             for (IndexResult indexResult : result) {
-                String[] values = indexResult.getValues(BladeIndexer.YIELD_REFERENCE);
+                String[] values = indexResult.getValues(indexKey);
                 for (String value : values) {
                     if (value.startsWith(prefix)) {
-                        references.add(new IndexedReference(BladeIndexer.extractYieldDataFromIndex(value), indexResult.getFile()));
+                        references.add(new IndexedReference(callback.createIndexReference(value), indexResult.getFile()));
                     }
                 }
             }
@@ -127,44 +168,40 @@ public class BladeIndex {
         return references;
     }
 
-    public List<IndexedReferenceId> getStacksIndexedReferences(String prefix) {
-        List<IndexedReferenceId> references = new ArrayList<>();
-        try {
-            Collection<? extends IndexResult> result = querySupport.query(BladeIndexer.STACK_ID, prefix, QuerySupport.Kind.PREFIX, BladeIndexer.STACK_ID);
-
-            if (result == null || result.isEmpty()) {
-                return references;
+    public List<IndexedReference> findYieldIndexedReferences(String prefix) {
+        return findIndexedReferences(prefix,
+                BladeIndexer.YIELD_ID,
+                new String[]{BladeIndexer.YIELD_ID, BladeIndexer.YIELD_REFERENCE},
+                BladeIndexer.YIELD_REFERENCE,
+                new IndexReferenceCallback() {
+            @Override
+            public Reference createIndexReference(String value) {
+                return BladeIndexer.extractYieldDataFromIndex(value);
             }
-
-            for (IndexResult indexResult : result) {
-                String[] values = indexResult.getValues(BladeIndexer.STACK_ID);
-                for (String value : values) {
-                    if (value.startsWith(prefix)) {
-                        references.add(new IndexedReferenceId(value, indexResult.getFile()));
-                    }
-                }
-            }
-        } catch (IOException ex) {
-            Exceptions.printStackTrace(ex);
         }
-
-        return references;
+        );
     }
 
-    public List<IndexedReference> getExactStacksIndexedReferences(String prefix) {
+    private List<IndexedReference> findIndexedReferences(String prefix,
+            String indexKey, String[] valuesKeys, String valueKey,
+            IndexReferenceCallback callback) {
         List<IndexedReference> references = new ArrayList<>();
         try {
-            Collection<? extends IndexResult> result = querySupport.query(BladeIndexer.STACK_REFERENCE, prefix, QuerySupport.Kind.PREFIX, BladeIndexer.STACK_REFERENCE);
+            Collection<? extends IndexResult> result = querySupport.query(indexKey,
+                    prefix, QuerySupport.Kind.EXACT, valuesKeys);
 
             if (result == null || result.isEmpty()) {
                 return references;
             }
 
             for (IndexResult indexResult : result) {
-                String[] values = indexResult.getValues(BladeIndexer.STACK_REFERENCE);
+                String[] values = indexResult.getValues(valueKey);
                 for (String value : values) {
-                    if (value.startsWith(prefix)) {
-                        references.add(new IndexedReference(BladeIndexer.extractStackDataFromIndex(value), indexResult.getFile()));
+                    String name = BladeIndexer.getIdFromSignature(value);
+                    if (name != null && name.equals(prefix)) {
+                        references.add(
+                                new IndexedReference(callback.createIndexReference(value),
+                                indexResult.getFile()));
                     }
                 }
             }
@@ -172,53 +209,6 @@ public class BladeIndex {
             Exceptions.printStackTrace(ex);
         }
 
-        return references;
-    }
-    
-    public List<IndexedReferenceId> getYieldIds(String prefix) {
-        List<IndexedReferenceId> indexedReferences = new ArrayList<>();
-        try {
-            Collection<? extends IndexResult> result = querySupport.query(BladeIndexer.YIELD_ID,
-                    prefix, QuerySupport.Kind.PREFIX, BladeIndexer.YIELD_ID);
-
-            if (result == null || result.isEmpty()) {
-                return indexedReferences;
-            }
-
-            for (IndexResult indexResult : result) {
-                String[] values = indexResult.getValues(BladeIndexer.YIELD_ID);
-                for (String value : values) {
-                    if (value.startsWith(prefix)) {
-                        indexedReferences.add(new IndexedReferenceId(value, indexResult.getFile()));
-                    }
-                }
-            }
-        } catch (IOException ex) {
-            Exceptions.printStackTrace(ex);
-        }
-
-        return indexedReferences;
-    }
-
-    public List<IndexedReferenceId> getBladePaths(String prefix) {
-        List<IndexedReferenceId> references = new ArrayList<>();
-        Collection<? extends IndexResult> result;
-        try {
-            result = querySupport.query(BladeIndexer.BLADE_PATH, prefix, QuerySupport.Kind.PREFIX, BladeIndexer.BLADE_PATH);
-
-            if (result == null || result.isEmpty()) {
-                return references;
-            }
-
-            for (IndexResult indexResult : result) {
-                String[] values = indexResult.getValues(BladeIndexer.BLADE_PATH);
-                for (String value : values) {
-                    references.add(new IndexedReferenceId(value, indexResult.getFile()));
-                }
-            }
-        } catch (IOException ex) {
-            Exceptions.printStackTrace(ex);
-        }
         return references;
     }
 
@@ -236,7 +226,7 @@ public class BladeIndex {
                 String[] values = indexResult.getValues(BladeIndexer.INCLUDE_PATH);
                 for (String value : values) {
                     Reference templatePathRef = BladeIndexer.extractTemplatePathDataFromIndex(value);
-                    if (!templatePathRef.identifier.equals(prefix)){
+                    if (!templatePathRef.identifier.equals(prefix)) {
                         continue;
                     }
                     references.add(new IndexedOffsetReference(templatePathRef.identifier, indexResult.getFile(), templatePathRef.defOffset));
@@ -248,117 +238,11 @@ public class BladeIndex {
         return references;
     }
 
-    /**
-     * could be use for tree path layout
-     *
-     * @param prefix
-     */
-    public void getPathReferences(String prefix) {
-        Collection<? extends IndexResult> result = null;
-        try {
-            result = querySupport.query(BladeIndexer.INCLUDE_PATH, prefix, QuerySupport.Kind.PREFIX, BladeIndexer.INCLUDE_PATH);
+    public static interface IndexReferenceCallback {
 
-            if (result == null || result.isEmpty()) {
-                return;
-            }
-
-            for (IndexResult indexResult : result) {
-                String[] values = indexResult.getValues(BladeIndexer.INCLUDE_PATH);
-            }
-            int x = 1;
-        } catch (IOException ex) {
-            Exceptions.printStackTrace(ex);
-        }
+        public Reference createIndexReference(String value);
     }
 
-    public Set<FileObject> getFileObjectPathOccurences(String prefix) {
-        Collection<? extends IndexResult> result;
-        Set<FileObject> fileObjectPathOccurences = new LinkedHashSet<>();
-        try {
-            result = querySupport.query(BladeIndexer.INCLUDE_PATH, prefix, QuerySupport.Kind.PREFIX, BladeIndexer.INCLUDE_PATH);
-
-            if (result == null || result.isEmpty()) {
-                return fileObjectPathOccurences;
-            }
-
-            for (IndexResult indexResult : result) {
-                fileObjectPathOccurences.add(indexResult.getFile());
-            }
-            int x = 1;
-        } catch (IOException ex) {
-            Exceptions.printStackTrace(ex);
-        }
-
-        return fileObjectPathOccurences;
-    }
-
-    public static void reindexProjectViews(Project project) {
-        String[] views = BladeProjectProperties.getInstance(project).getViewsPathList();
-
-        if (views.length > 0) {
-            for (String view : views) {
-                if (view.length() == 0) {
-                    continue;
-                }
-                File viewPath = new File(view);
-                if (viewPath.exists()) {
-                    FileObject fileObj = FileUtil.toFileObject(viewPath);
-                    Enumeration<? extends FileObject> children = fileObj.getChildren(true);
-                    while (children.hasMoreElements()) {
-                        FileObject file = children.nextElement();
-                        String fileName = file.getName();
-                        if (file.isFolder()) {
-                            continue;
-                        }
-                        IndexingManager.getDefault().refreshAllIndices(file);
-                        //IndexingManager.getDefault().refreshIndex(file.toURL(), null);
-                    }
-                }
-            }
-        } else {
-            //falback
-            String projectDir = project.getProjectDirectory().getPath().toString();
-            File viewPath = new File(projectDir + "/views");
-            if (viewPath.exists()) {
-                FileObject fileObj = FileUtil.toFileObject(viewPath);
-                Enumeration<? extends FileObject> children = fileObj.getChildren(true);
-                while (children.hasMoreElements()) {
-                    FileObject file = children.nextElement();
-                    IndexingManager.getDefault().refreshAllIndices(file);
-                    //IndexingManager.getDefault().refreshIndex(file.toURL(), null);
-                }
-                //it should be a recursive loop
-
-            }
-        }
-    }
-
-    public static void reindexFolder(File viewPath, Project project) {
-        FileObject fileObj = FileUtil.toFileObject(viewPath);
-        Enumeration<? extends FileObject> children = fileObj.getChildren(true);
-        while (children.hasMoreElements()) {
-            FileObject file = children.nextElement();
-            String fileName = file.getName();
-            if (file.isFolder()) {
-                continue;
-            }
-            IndexingManager.getDefault().refreshAllIndices(file);
-            //IndexingManager.getDefault().refreshIndex(file.toURL(), null);
-        }
-    }
-
-    public static void reindexFolder(FileObject folder) {
-        Enumeration<? extends FileObject> children = folder.getChildren(true);
-        while (children.hasMoreElements()) {
-            FileObject file = children.nextElement();
-
-            if (file.isFolder()) {
-                continue;
-            }
-            IndexingManager.getDefault().refreshAllIndices(file);
-        }
-    }
-    
     public static class IndexedReferenceId {
 
         private final String identifier;

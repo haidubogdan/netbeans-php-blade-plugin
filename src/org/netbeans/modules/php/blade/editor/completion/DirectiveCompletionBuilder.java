@@ -7,7 +7,6 @@ import java.net.URL;
 import java.util.function.Supplier;
 import javax.swing.Action;
 import javax.swing.text.Document;
-import org.netbeans.modules.php.blade.editor.ResourceUtilities;
 import org.netbeans.spi.editor.completion.CompletionDocumentation;
 import org.netbeans.spi.editor.completion.CompletionItem;
 import org.netbeans.spi.editor.completion.CompletionResultSet;

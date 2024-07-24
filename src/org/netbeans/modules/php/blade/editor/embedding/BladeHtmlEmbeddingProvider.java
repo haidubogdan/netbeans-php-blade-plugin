@@ -14,7 +14,6 @@ import org.netbeans.modules.parsing.api.Snapshot;
 import org.netbeans.modules.parsing.spi.EmbeddingProvider;
 import org.netbeans.modules.php.blade.editor.BladeLanguage;
 import org.netbeans.modules.php.blade.editor.lexer.BladeTokenId;
-import org.openide.util.Exceptions;
 
 /**
  * this will enable braces matches of html elements
@@ -25,7 +24,7 @@ import org.openide.util.Exceptions;
         mimeType = BladeLanguage.MIME_TYPE,
         targetMimeType = "text/html")
 public class BladeHtmlEmbeddingProvider extends EmbeddingProvider {
-    private static final Logger LOGGER = Logger.getLogger(BladeHtmlEmbeddingProvider.class.getSimpleName());
+//    private static final Logger LOGGER = Logger.getLogger(BladeHtmlEmbeddingProvider.class.getSimpleName());
     public static final String FILLER = " ";
     public static final String TARGET_MIME_TYPE = "text/html"; //NOI18N
 
@@ -33,7 +32,6 @@ public class BladeHtmlEmbeddingProvider extends EmbeddingProvider {
     public List<Embedding> getEmbeddings(final Snapshot snapshot) {
         long startTime = System.currentTimeMillis();
         //LOGGER.log(Level.INFO, "html ebedding started {0}", snapshot.getSource().getFileObject().getName());
-        //TODO look for java.lang.IndexOutOfBoundsException: Cannot backup 1 characters. Maximum: 0.
         TokenHierarchy<?> tokenHierarchy = snapshot.getTokenHierarchy();
         TokenSequence<?> sequence = tokenHierarchy.tokenSequence();
         

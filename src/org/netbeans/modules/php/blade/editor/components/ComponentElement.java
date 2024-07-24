@@ -1,7 +1,6 @@
 package org.netbeans.modules.php.blade.editor.components;
 
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.Set;
 
 /**

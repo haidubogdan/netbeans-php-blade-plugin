@@ -52,7 +52,7 @@ import org.netbeans.modules.php.blade.editor.directives.CustomDirectives;
 import org.netbeans.modules.php.blade.editor.parser.BladeParserResult;
 import org.netbeans.modules.php.blade.editor.preferences.ModulePreferences;
 import org.netbeans.modules.php.blade.project.ProjectUtils;
-import org.netbeans.modules.php.blade.syntax.TagList;
+import org.netbeans.modules.php.blade.syntax.BladeTags;
 import org.netbeans.modules.php.blade.syntax.annotation.Directive;
 import org.netbeans.modules.php.blade.syntax.annotation.Tag;
 import org.netbeans.modules.php.blade.syntax.antlr4.v10.BladeAntlrUtils;
@@ -199,7 +199,7 @@ public class BladeCompletionHandler implements CodeCompletionHandler2 {
         String tagStart = currentToken.getText();
 
         CompletionRequest request = completionRequest(tagStart, completionContext.getCaretOffset());
-        TagList tagsContainer = new TagList();
+        BladeTags tagsContainer = new BladeTags();
         Tag[] tags = tagsContainer.getTags();
         for (Tag tag : tags) {
             if (tag.openTag().startsWith(tagStart)) {

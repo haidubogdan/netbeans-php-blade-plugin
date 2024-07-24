@@ -1,18 +1,14 @@
 package org.netbeans.modules.php.blade.editor.components;
 
-import java.util.Collection;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.WeakHashMap;
 import org.netbeans.api.project.Project;
-import org.netbeans.modules.php.blade.editor.cache.QueryCache;
-import org.netbeans.modules.php.blade.editor.indexing.PhpIndexResult;
-import org.netbeans.modules.php.blade.editor.indexing.PhpIndexUtils;
 import org.netbeans.spi.project.ui.support.ProjectConvertors;
 import org.openide.filesystems.FileObject;
 
 /**
- *
+ * TO BE CONTINUED
+ * 
  * @author bhaidu
  */
 public class ComponentModel {

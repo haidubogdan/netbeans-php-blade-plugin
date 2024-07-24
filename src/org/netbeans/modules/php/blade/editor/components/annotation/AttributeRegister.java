@@ -1,6 +1,5 @@
 package org.netbeans.modules.php.blade.editor.components.annotation;
 
-import org.netbeans.modules.php.blade.syntax.annotation.*;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;

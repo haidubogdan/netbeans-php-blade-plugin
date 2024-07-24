@@ -234,8 +234,7 @@ public class BladeCompletionProvider implements CompletionProvider {
     
     private void completeComponents(String prefixIdentifier, FileObject fo,
             int caretOffset, CompletionResultSet resultSet) {
-//        BladeIndex bladeIndex;
-//        Project project = ProjectUtils.getMainOwner(fo);
+
         int insertOffset = caretOffset - prefixIdentifier.length();
         ComponentsCompletionService componentComplervice = new ComponentsCompletionService();
         Collection<PhpIndexResult> indexedReferences = componentComplervice.queryComponents(prefixIdentifier, fo);
@@ -245,7 +244,7 @@ public class BladeCompletionProvider implements CompletionProvider {
                     insertOffset, resultSet);
             //debuging class properties
             //to move from here
-            PhpIndexUtils.queryClassProperties(fo, "type", indexReference.name);
+            //PhpIndexUtils.queryClassProperties(fo, "type", indexReference.name);
         }
 
     }
@@ -272,10 +271,8 @@ public class BladeCompletionProvider implements CompletionProvider {
     private void addSimplAttributeItem(String prefix, String attributeName, int caretOffset, CompletionResultSet resultSet) {
         int insertOffset = caretOffset - prefix.length();
         CompletionItem item = CompletionUtilities.newCompletionItemBuilder(attributeName)
-                //.iconResource(getReferenceIcon(CompletionType.HTML_COMPONENT_TAG))
                 .startOffset(insertOffset)
                 .leftHtmlText(attributeName)
-                //.rightHtmlText(plugin)
                 .sortPriority(1)
                 .build();
         resultSet.addItem(item);

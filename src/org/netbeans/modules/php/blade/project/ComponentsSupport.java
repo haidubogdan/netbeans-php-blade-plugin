@@ -63,10 +63,7 @@ public class ComponentsSupport {
             if (namespace.from_app()) {
                 //check if folder exists
                 fo = project.getProjectDirectory().getFileObject(namespace.relativeFilePath());
-
             } else {
-                //from vendor
-                //TODO check if it works
                 fo = project.getProjectDirectory().getFileObject("vendor/" + namespace.relativeFilePath());
 
             }

@@ -2,12 +2,8 @@ package org.netbeans.modules.php.blade.editor.components;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import org.netbeans.api.project.Project;
 import org.netbeans.modules.php.blade.editor.components.annotation.Attribute;
 import org.netbeans.modules.php.blade.editor.components.annotation.AttributeRegister;
-import org.netbeans.modules.php.blade.editor.components.annotation.Namespace;
-import org.netbeans.modules.php.blade.project.ProjectUtils;
-import org.openide.filesystems.FileObject;
 
 /**
  *

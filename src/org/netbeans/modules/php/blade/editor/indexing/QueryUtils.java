@@ -16,20 +16,28 @@ import org.openide.util.Exceptions;
  */
 public class QueryUtils {
 
-    public static List<BladeIndex.IndexedReference> getYieldReferences(String prefix, FileObject fo) {
+    public static List<BladeIndex.IndexedReference> queryYieldReferences(String prefix, FileObject fo) {
         BladeIndex bladeIndex = getIndex(fo);
         if (bladeIndex == null) {
             return null;
         }
-        return bladeIndex.getYieldIndexedReferences(prefix);
+        return bladeIndex.queryYieldIndexedReferences(prefix);
+    }
+    
+    public static List<BladeIndex.IndexedReference> findYieldReferences(String prefix, FileObject fo) {
+        BladeIndex bladeIndex = getIndex(fo);
+        if (bladeIndex == null) {
+            return null;
+        }
+        return bladeIndex.findYieldIndexedReferences(prefix);
     }
 
-    public static List<BladeIndex.IndexedReference> getStacksReferences(String prefix, FileObject fo) {
+    public static List<BladeIndex.IndexedReference> queryStacksReferences(String prefix, FileObject fo) {
         BladeIndex bladeIndex = getIndex(fo);
         if (bladeIndex == null) {
             return null;
         }
-        return bladeIndex.getExactStacksIndexedReferences(prefix);
+        return bladeIndex.queryStacksIdsReference(prefix);
     }
     
     public static List<BladeIndex.IndexedOffsetReference> getIncludePathReferences(String prefix, FileObject fo) {
