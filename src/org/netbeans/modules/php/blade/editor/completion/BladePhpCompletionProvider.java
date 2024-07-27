@@ -1,8 +1,27 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package org.netbeans.modules.php.blade.editor.completion;
 
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.JTextComponent;
@@ -100,6 +119,10 @@ public class BladePhpCompletionProvider implements CompletionProvider {
         protected void query(CompletionResultSet resultSet, Document doc, int caretOffset) {
             long startTime = System.currentTimeMillis();
             doQuery(resultSet, doc, caretOffset);
+            long time = System.currentTimeMillis() - startTime;
+            if (time > 2000) {
+                LOGGER.log(Level.INFO, "Slow completion time detected. {0}ms", time);
+            }
             resultSet.finish();
         }
     }
@@ -209,57 +232,57 @@ public class BladePhpCompletionProvider implements CompletionProvider {
             case EXPR_STRING: {
                 String pathName = EditorStringUtils.stripSurroundingQuotes(currentToken.getText());
 
-                if (!pathName.contains("resources")){
-                    if (!"resources".startsWith(pathName)){
+                if (!pathName.contains("resources")) {
+                    if (!"resources".startsWith(pathName)) {
                         break;
                     }
                 }
-                
+
                 int lastSlash = pathName.lastIndexOf("/");
-                
+
                 FileObject projectDir = ProjectUtils.getProjectDirectory(fo);
-                
-                if (projectDir == null){
+
+                if (projectDir == null) {
                     break;
                 }
-                
+
                 int pathOffset = caretOffset - pathName.length();
                 //laravel framework
-                if (lastSlash < 0){
+                if (lastSlash < 0) {
                     String jsDirRoot = JS_ASSET_FOLDER;
                     FileObject jsFolder = projectDir.getFileObject(JS_ASSET_FOLDER);
-                    addAssetPathCompletionItem(jsDirRoot, jsFolder.getPath(), pathOffset,resultSet, CompletionType.FOLDER);
+                    addAssetPathCompletionItem(jsDirRoot, jsFolder.getPath(), pathOffset, resultSet, CompletionType.FOLDER);
                     String cssDirRoot = CSS_ASSET_FOLDER;
                     FileObject cssFolder = projectDir.getFileObject(CSS_ASSET_FOLDER);
-                    addAssetPathCompletionItem(cssDirRoot, cssFolder.getPath(), pathOffset,resultSet, CompletionType.FOLDER);
+                    addAssetPathCompletionItem(cssDirRoot, cssFolder.getPath(), pathOffset, resultSet, CompletionType.FOLDER);
                     break;
                 }
 
                 boolean isJsPath = JS_ASSET_FOLDER.startsWith(pathName) || pathName.startsWith(JS_ASSET_FOLDER);
-                boolean isCssPath = CSS_ASSET_FOLDER.startsWith(pathName)|| pathName.startsWith(CSS_ASSET_FOLDER);
-                
-                if (isJsPath){
+                boolean isCssPath = CSS_ASSET_FOLDER.startsWith(pathName) || pathName.startsWith(CSS_ASSET_FOLDER);
+
+                if (isJsPath) {
                     FileObject jsFolder = projectDir.getFileObject(JS_ASSET_FOLDER);
-                    if (jsFolder == null || !jsFolder.isValid()){
+                    if (jsFolder == null || !jsFolder.isValid()) {
                         break;
                     }
-                    for(FileObject file : jsFolder.getChildren()){
+                    for (FileObject file : jsFolder.getChildren()) {
                         String jsPath = JS_ASSET_FOLDER + "/" + file.getNameExt();
-                        if (jsPath.startsWith(pathName)){
-                            addAssetPathCompletionItem(jsPath, file.getPath(), pathOffset,resultSet, CompletionType.JS_FILE);
+                        if (jsPath.startsWith(pathName)) {
+                            addAssetPathCompletionItem(jsPath, file.getPath(), pathOffset, resultSet, CompletionType.JS_FILE);
                         }
                     }
                     break;
                 }
-                if (isCssPath){
+                if (isCssPath) {
                     FileObject cssFolder = projectDir.getFileObject(CSS_ASSET_FOLDER);
-                    if (cssFolder == null || !cssFolder.isValid()){
+                    if (cssFolder == null || !cssFolder.isValid()) {
                         break;
                     }
-                    for(FileObject file : cssFolder.getChildren()){
+                    for (FileObject file : cssFolder.getChildren()) {
                         String jsPath = CSS_ASSET_FOLDER + "/" + file.getNameExt();
-                        if (jsPath.startsWith(pathName)){
-                            addAssetPathCompletionItem(jsPath, file.getPath(), pathOffset,resultSet, CompletionType.CSS_FILE);
+                        if (jsPath.startsWith(pathName)) {
+                            addAssetPathCompletionItem(jsPath, file.getPath(), pathOffset, resultSet, CompletionType.CSS_FILE);
                         }
                     }
                     break;
@@ -330,7 +353,7 @@ public class BladePhpCompletionProvider implements CompletionProvider {
                 .build();
         resultSet.addItem(item);
     }
-    
+
     private void addAssetPathCompletionItem(String preview, String info,
             int caretOffset, CompletionResultSet resultSet, CompletionType type) {
         CompletionItem item = CompletionUtilities.newCompletionItemBuilder(preview)
@@ -345,13 +368,13 @@ public class BladePhpCompletionProvider implements CompletionProvider {
 
     private static String getReferenceIcon(CompletionType type) {
 
-        switch(type){
+        switch (type) {
             case FOLDER:
                 return "org/openide/loaders/defaultFolder.gif";
             case CSS_FILE:
-               return "org/netbeans/modules/css/visual/resources/style_sheet_16.png";
+                return "org/netbeans/modules/css/visual/resources/style_sheet_16.png";
             case JS_FILE:
-               return "org/netbeans/modules/javascript2/editor/resources/javascript.png";
+                return "org/netbeans/modules/javascript2/editor/resources/javascript.png";
         }
         return ResourceUtilities.ICON_BASE + "icons/layout.png"; //NOI18N
 

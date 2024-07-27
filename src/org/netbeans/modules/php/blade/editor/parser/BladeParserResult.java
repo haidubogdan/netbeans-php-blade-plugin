@@ -106,7 +106,9 @@ public class BladeParserResult extends ParserResult {
 
     public BladeParserResult get(String taskClass) {
         long startTime = System.currentTimeMillis();
-        LOGGER.log(Level.INFO, "PARSER TRIGGERED BY {0}", taskClass);
+        if (debugMode){
+            LOGGER.log(Level.INFO, "PARSER TRIGGERED BY {0}", taskClass);
+        }
         if (!finished) {
             BladeAntlrParser parser = createParser(getSnapshot());
             parser.setBuildParseTree(false);

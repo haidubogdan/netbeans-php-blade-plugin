@@ -19,6 +19,7 @@
 package org.netbeans.modules.php.blade.editor.completion;
 
 import java.util.Collection;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.JTextComponent;
@@ -37,7 +38,6 @@ import org.netbeans.modules.php.blade.editor.components.ComponentsCompletionServ
 import org.netbeans.modules.php.blade.editor.directives.CustomDirectives;
 import org.netbeans.modules.php.blade.editor.directives.CustomDirectives.CustomDirective;
 import org.netbeans.modules.php.blade.editor.indexing.PhpIndexResult;
-import org.netbeans.modules.php.blade.editor.indexing.PhpIndexUtils;
 import org.netbeans.modules.php.blade.project.ProjectUtils;
 import org.netbeans.modules.php.blade.syntax.StringUtils;
 import org.netbeans.modules.php.blade.syntax.annotation.Directive;
@@ -185,7 +185,10 @@ public class BladeCompletionProvider implements CompletionProvider {
                         break;
                 }
             } finally {
-//                long time = System.currentTimeMillis() - startTime;
+                long time = System.currentTimeMillis() - startTime;
+                if (time > 2000){
+                    LOGGER.log(Level.INFO, "Slow completion time detected. {0}ms", time);
+                }
                 resultSet.finish();
             }
         }
@@ -242,9 +245,6 @@ public class BladeCompletionProvider implements CompletionProvider {
         for (PhpIndexResult indexReference : indexedReferences) {
             addComponentIdCompletionItem(indexReference,
                     insertOffset, resultSet);
-            //debuging class properties
-            //to move from here
-            //PhpIndexUtils.queryClassProperties(fo, "type", indexReference.name);
         }
 
     }

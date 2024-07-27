@@ -31,8 +31,6 @@ import org.netbeans.api.project.ui.OpenProjects;
 import org.netbeans.modules.csl.api.OffsetRange;
 import org.netbeans.modules.parsing.spi.indexing.support.IndexResult;
 import org.netbeans.modules.parsing.spi.indexing.support.QuerySupport;
-import org.netbeans.modules.php.blade.editor.directives.CustomDirectives;
-import static org.netbeans.modules.php.blade.editor.indexing.BladeIndexer.YIELD_REFERENCE;
 import org.netbeans.modules.php.blade.editor.parser.BladeParserResult.Reference;
 import org.openide.filesystems.FileObject;
 import org.openide.util.Exceptions;

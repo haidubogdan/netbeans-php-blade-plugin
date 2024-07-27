@@ -11,6 +11,8 @@ import org.netbeans.spi.editor.highlighting.ZOrder;
 
 /**
  * hack to fix the highlighting issue on javascript properties vs blade paths
+ * "@include('my.path') - my.path should be fully selected on double click
+ * window.test - should not be fully selected on double click
  * 
  * @author bhaidu
  */

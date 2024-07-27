@@ -74,7 +74,6 @@ public class BladeCompletionHandler implements CodeCompletionHandler2 {
             return CodeCompletionResult.NONE;
         }
         long startTime = System.currentTimeMillis();
-        LOGGER.log(Level.INFO, "Completion requested for {0}", completionContext.getParserResult().getSnapshot().getSource().getFileObject().getPath());
         BaseDocument doc = (BaseDocument) completionContext.getParserResult().getSnapshot().getSource().getDocument(false);
 
         if (doc == null) {
@@ -134,11 +133,13 @@ public class BladeCompletionHandler implements CodeCompletionHandler2 {
         }
 
         if (completionProposals.isEmpty()) {
-            LOGGER.info(String.format("complete() no result found. Took %d ms", System.currentTimeMillis() - startTime));
             return CodeCompletionResult.NONE;
         }
 
-        LOGGER.info(String.format("complete() with results took %d ms", System.currentTimeMillis() - startTime));
+        long time = System.currentTimeMillis() - startTime;
+        if (time > 2000){
+            LOGGER.info(String.format("complete() with results took %d ms", time));
+        }
         return new DefaultCompletionResult(completionProposals, false);
     }
 
@@ -215,6 +216,7 @@ public class BladeCompletionHandler implements CodeCompletionHandler2 {
         DirectiveCompletionList completionList = new DirectiveCompletionList();
 
         CompletionRequest request = completionRequest(prefix, completionContext.getCaretOffset());
+
         for (Directive directive : completionList.getDirectives()) {
             String directiveName = directive.name();
             if (directiveName.startsWith(prefix)) {
@@ -235,7 +237,6 @@ public class BladeCompletionHandler implements CodeCompletionHandler2 {
             }
         }
 
-        //if (completionProposals.isEmpty()){
         Project project = ProjectUtils.getMainOwner(fo);
         CustomDirectives.getInstance(project).filterAction(new CustomDirectives.FilterCallback() {
             @Override
@@ -252,7 +253,6 @@ public class BladeCompletionHandler implements CodeCompletionHandler2 {
                 }
             }
         });
-        //}
     }
 
     @Override

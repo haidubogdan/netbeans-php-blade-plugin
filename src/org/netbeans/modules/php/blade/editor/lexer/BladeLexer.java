@@ -29,10 +29,9 @@ import org.netbeans.spi.lexer.antlr4.AbstractAntlrLexerBridge;
  * @author bogdan
  */
 public class BladeLexer extends AbstractAntlrLexerBridge<BladeAntlrColoringLexer, BladeTokenId> {
-   // private static final Logger LOGGER = Logger.getLogger(BladeLexer.class.getName());
+
     public BladeLexer(LexerRestartInfo<BladeTokenId> info) {
         super(info, BladeAntlrColoringLexer::new);
-        //LOGGER.log(Level.INFO, "Restarting lexer{0}", info.state());
     }
 
     @Override
@@ -53,7 +52,7 @@ public class BladeLexer extends AbstractAntlrLexerBridge<BladeAntlrColoringLexer
                 return token(BLADE_COMMENT);
             case BladeAntlrColoringLexer.BLADE_COMMENT_END:
                 return token(BLADE_COMMENT_END);
-            case BladeAntlrColoringLexer.HTML_TAG:  
+            case BladeAntlrColoringLexer.HTML_TAG:
             case BladeAntlrColoringLexer.HTML:
                 return token(HTML);
             case BladeAntlrColoringLexer.PHP_INLINE:

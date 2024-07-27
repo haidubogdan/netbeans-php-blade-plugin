@@ -33,6 +33,7 @@ import org.openide.filesystems.FileUtil;
 public class IndexManager {
 
     public static void reindexProjectViews(Project project) {
+        assert project != null;
         String[] views = BladeProjectProperties.getInstance(project).getViewsPathList();
 
         if (views.length > 0) {
@@ -55,7 +56,7 @@ public class IndexManager {
             }
         } else {
             //falback
-            String projectDir = project.getProjectDirectory().getPath().toString();
+            String projectDir = project.getProjectDirectory().getPath();
             File viewPath = new File(projectDir + "/views");
             if (viewPath.exists()) {
                 FileObject fileObj = FileUtil.toFileObject(viewPath);
@@ -68,7 +69,7 @@ public class IndexManager {
         }
     }
 
-    public static void reindexFolder(File viewPath, Project project) {
+    public static void reindexFolder(File viewPath) {
         FileObject fileObj = FileUtil.toFileObject(viewPath);
         Enumeration<? extends FileObject> children = fileObj.getChildren(true);
         while (children.hasMoreElements()) {

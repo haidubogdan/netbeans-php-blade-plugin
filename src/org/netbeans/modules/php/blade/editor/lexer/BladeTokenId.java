@@ -82,12 +82,12 @@ public enum BladeTokenId implements TokenId {
                 case PHP_BLADE_EXPRESSION:
                 case PHP_BLADE_ECHO_EXPR:
                 case PHP_BLADE_INLINE_CODE:
-                    if (1==1){
-                        //return null;
-                    }
+                    /**
+                     * troubleshooting php embedding freeze (?:, ::)
+                     * force a return null;
+                     */
                     Language<? extends TokenId> phpLanguage = PHPTokenId.languageInPHP();
                     return phpLanguage != null ? LanguageEmbedding.create(phpLanguage, 0, 0, false) : null;
-//                    return null;
                 case HTML:
                     LanguageEmbedding<?> lang;
 

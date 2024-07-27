@@ -211,7 +211,7 @@ public final class BladeViewsFoldersPanel extends javax.swing.JPanel {
         if (path != null && path.length() > 0) {
             File viewPath = new File(path);
             if (viewPath.exists()) {
-                IndexManager.reindexFolder(viewPath, project);
+                IndexManager.reindexFolder(viewPath);
             }
         }
     }//GEN-LAST:event_reindexViewFolderButtonActionPerformed

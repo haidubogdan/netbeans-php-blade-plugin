@@ -1,18 +1,25 @@
 /*
-Licensed to the Apache Software Foundation (ASF)
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 package org.netbeans.modules.php.blade.editor.completion;
 
-import java.net.URL;
-import java.util.function.Supplier;
-import javax.swing.Action;
 import javax.swing.text.Document;
-import org.netbeans.spi.editor.completion.CompletionDocumentation;
 import org.netbeans.spi.editor.completion.CompletionItem;
-import org.netbeans.spi.editor.completion.CompletionResultSet;
-import org.netbeans.spi.editor.completion.CompletionTask;
-import org.netbeans.spi.editor.completion.support.AsyncCompletionQuery;
-import org.netbeans.spi.editor.completion.support.AsyncCompletionTask;
 import org.openide.filesystems.FileObject;
 
 /**
@@ -56,39 +63,4 @@ public class DirectiveCompletionBuilder {
             FileObject file) {
         return BladeCompletionItem.createDirectiveWithArg(directive, startOffset, description);
     }
-
-    private static Supplier<CompletionTask> getDocTask(FileObject fo) {
-        return () -> {
-            return new AsyncCompletionTask(new AsyncCompletionQuery() {
-                @Override
-                protected void query(CompletionResultSet resultSet, Document doc, int caretOffset) {
-                    CompletionDocumentation docInfo = new CompletionDocumentation() {
-                        @Override
-                        public String getText() {
-                            return "From " + fo.getNameExt();
-                        }
-
-                        @Override
-                        public URL getURL() {
-                            return null;
-                        }
-
-                        @Override
-                        public CompletionDocumentation resolveLink(String string) {
-                            return null;
-                        }
-
-                        @Override
-                        public Action getGotoSourceAction() {
-                            return null;
-                        }
-
-                    };
-                    resultSet.setDocumentation(docInfo);
-                    resultSet.finish();
-                }
-            });
-        };
-    }
-
 }
