@@ -193,7 +193,9 @@ public class PhpCodeCompletionService {
             int offset,
             final List<CompletionProposal> completionProposals,
             FileObject fo) {
-        Collection<PhpIndexFunctionResult> indexedFunctions = PhpIndexUtils.queryClassMethods(fo, prefix, fieldAccessReference.ownerClass.identifier);
+        Collection<PhpIndexFunctionResult> indexedFunctions = PhpIndexUtils.queryClassMethods(
+                fo, prefix, fieldAccessReference.ownerClass.identifier,
+                fieldAccessReference.ownerClass.namespace);
         if (indexedFunctions.isEmpty()) {
             return;
         }

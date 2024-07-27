@@ -115,6 +115,16 @@ public abstract class ColoringLexerAdaptor extends Lexer {
             this.more();
         }
     }
+    
+    public void testForFreezeCombination(){
+        if (this.roundParenBalance <= 1 && 
+                (this._input.LA(1) == ')' 
+                ||  this._input.LA(1) == ']')){
+            this.setType(BladeAntlrColoringLexer.ERROR);
+        } else {
+            this.consumeExprToken();
+        }
+    }
    
 //    to continue when the sepparation of PHP_EXPRESSION can be implemented    
 //    public void setPhpExpressionOffset(){

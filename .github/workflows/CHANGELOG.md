@@ -2,14 +2,10 @@
 
 ## What's changed
 
-**go to file**
+**syntax highlight**
 
-- limited `@vite` asset go to file
+- fix IDE freeze (#65) on ternary operator, short if expr
 
-**completion**
+**code completion**
 
-- limited `@vite` asset completion
-
-**php code**
-
-- declaration finder fixes + refactor
+- fix static method completion with namespace context

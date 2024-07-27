@@ -303,7 +303,10 @@ public class PhpIndexUtils {
                     String name = sig.string(1);
                     String namespace = sig.string(4);
                     if (name.length() > 0 && name.equals(className) 
-                            && namespace.equals(queryNamespace)) {
+                            ) {
+                        if (queryNamespace != null && !namespace.equals(queryNamespace)){
+                            continue;
+                        }
                         classSignature = sig;
                         
                         if (namespace.length() > 0){
@@ -345,11 +348,19 @@ public class PhpIndexUtils {
      * @param fo
      * @param method
      * @param className
+     * @param queryNamespace
      * @return
      */
-    public static Collection<PhpIndexFunctionResult> queryClassMethods(FileObject fo, String method, String className) {
+    public static Collection<PhpIndexFunctionResult> queryClassMethods(FileObject fo,
+            String method, String className, String queryNamespace) {
         QuerySupport phpindex = QuerySupportFactory.get(fo);
         Collection<PhpIndexFunctionResult> results = new ArrayList<>();
+
+        if (queryNamespace != null && queryNamespace.length() > 3){
+            int startOffset = queryNamespace.startsWith("\\") ? 1 : 0;
+            int endOffset = queryNamespace.endsWith("\\") ? 1 : 0;
+             queryNamespace = queryNamespace.substring(startOffset, queryNamespace.length() - endOffset);
+        }
         //should query the class befoe
         //for the moment a quick hack
         //maybe send the classNamePath directly?
@@ -370,6 +381,12 @@ public class PhpIndexUtils {
                     if (name.length() > 0 && name.equals(className)) {
                         classSignature = sig;
                         String namespace = sig.string(4);
+                        
+                        if (queryNamespace != null && !namespace.equals(queryNamespace) ){
+                            classSignature = null;
+                            continue;
+                        }
+                        
                         if (namespace.length() > 0){
                             classNamespace = namespace + "\\" + className;
                         }

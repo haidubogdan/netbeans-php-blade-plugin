@@ -164,9 +164,11 @@ EXIT_RPAREN : ')' {this.roundParenBalance == 0}?->type(PHP_EXPRESSION),mode(DEFA
 
 DB_STRING_OPEN : '"' ->more,pushMode(DB_STRING_MODE);
 //hack due to a netbeans php embedding issue when adding or deleting ':' chars
-DOUBLE_NEKODU : ('::' | '?:') {this.consumeExprToken();};
-//no string interpolation for the moment
-//freeze issue
+
+SHORT_IF_EXPR_ERR : ('?:') {this.testForFreezeCombination();};
+
+DOUBLE_NEKODU : ('::') {this.consumeExprToken();};
+
 
 EXPR_STRING_LITERAL : (SINGLE_QUOTED_STRING_FRAGMENT (' ')*) {this.consumeExprToken();};
 

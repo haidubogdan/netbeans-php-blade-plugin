@@ -1,5 +1,15 @@
 # Change Log
 
+## [2.4.5.0] 
+
+**syntax highlight**
+
+- fix IDE freeze (#65) on ternary operator, short if expr
+
+**code completion**
+
+- fix static method completion with namespace context
+
 ## [2.4.9.9] 
 
 - limited go to file + completion for vite assets (#64), decl finder fixes + refactor for Php<br>
