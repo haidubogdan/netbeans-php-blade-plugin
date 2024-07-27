@@ -1,6 +1,6 @@
 # Change Log
 
-## [2.4.5.0] 
+## [2.5.0.0] 
 
 **syntax highlight**
 
