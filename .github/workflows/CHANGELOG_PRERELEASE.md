@@ -2,14 +2,6 @@
 
 ## What's changed
 
-**go to file**
+**syntax highlighting**
 
-- limited `@vite` asset go to file
-
-**completion**
-
-- limited `@vite` asset completion
-
-**php code**
-
-- declaration finder fixes + refactor
+- fix issue #66 bad highlighting inside blade echo tags
