@@ -111,7 +111,6 @@ public class ViewAntlrColoringTokensAction extends AbstractAction implements Act
                 doc.remove(0, doc.getLength());
                 StringBuilder result = new StringBuilder();
 
-                int lastLine = 0;
                 for (Token token : tokens.getTokens()) {
                     int tokenId = token.getType();
                     String text = token.getText();
