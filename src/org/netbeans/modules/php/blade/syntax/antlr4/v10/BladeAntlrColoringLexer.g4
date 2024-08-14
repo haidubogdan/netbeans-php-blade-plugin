@@ -48,7 +48,7 @@ PHP_INLINE : '<?=' .*? '?>' | '<?php' .*? ('?>' | EOF);
 D_GENERIC_BLOCK_DIRECTIVES : ('@' DirectivesWithEndTag | '@sectionMissing' | '@hasSection')->pushMode(LOOK_FOR_PHP_EXPRESSION),type(DIRECTIVE);
 
 D_GENERIC_INLINE_DIRECTIVES : ('@elseif' |  Include | '@extends' | '@each' | '@yield' | '@props' | '@method' 
-   | '@class' | '@style' | '@aware' | '@break' | '@continue' | '@selected' | '@disabled' | '@readonly' | '@required') (' ')+ {this._input.LA(1) == '('}? ->pushMode(LOOK_FOR_PHP_EXPRESSION),type(DIRECTIVE);
+   | '@class' | '@style' | '@aware' | '@break' | '@continue' | '@selected' | '@disabled' | '@readonly' | '@required') (' ')* {this._input.LA(1) == '('}? ->pushMode(LOOK_FOR_PHP_EXPRESSION),type(DIRECTIVE);
 
 D_GENERIC_INLINE_MIXED_DIRECTIVES : ('@break' | '@continue')->type(DIRECTIVE);
 
