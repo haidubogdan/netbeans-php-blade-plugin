@@ -26,6 +26,7 @@ import org.antlr.v4.runtime.Token;
 import org.netbeans.api.annotations.common.NonNull;
 import org.netbeans.api.editor.mimelookup.MimeRegistration;
 import org.netbeans.editor.BaseDocument;
+import org.netbeans.modules.php.blade.editor.lexer.BladeLexerUtils;
 import org.netbeans.modules.php.blade.syntax.BladeDirectivesUtils;
 import org.netbeans.modules.php.blade.syntax.BladeTagsUtils;
 import org.netbeans.modules.php.blade.syntax.antlr4.v10.BladeAntlrLexer;
@@ -44,7 +45,8 @@ import org.netbeans.spi.editor.bracesmatching.MatcherContext;
 public class BladeBracesMatcher implements BracesMatcher {
 
     public enum BraceDirectionType {
-        END_TO_START, START_TO_END, CUSTOM_START_TO_END, CURLY_END_TO_START, CURLY_START_TO_END, STOP
+        END_TO_START, START_TO_END, CUSTOM_START_TO_END, CUSTOM_END_TO_START,
+        CURLY_END_TO_START, CURLY_START_TO_END, STOP
     }
     private final MatcherContext context;
     private Token originToken;
@@ -76,7 +78,7 @@ public class BladeBracesMatcher implements BracesMatcher {
             int end = currentToken.getStopIndex();
 
             String tokenText = originToken.getText();
-            
+
             if (!tokenText.startsWith("@")
                     && !tokenText.startsWith("{")
                     && !tokenText.endsWith("}")) {
@@ -115,6 +117,8 @@ public class BladeBracesMatcher implements BracesMatcher {
                 return findCustomDirectiveEnd(tokenText);
             case END_TO_START:
                 return findOriginForDirectiveEnd(tokenText);
+            case CUSTOM_END_TO_START:
+                return findCustomDirectiveStart(tokenText);
         }
 
         return result;
@@ -145,8 +149,11 @@ public class BladeBracesMatcher implements BracesMatcher {
         if (isStartTag) {
             return BraceDirectionType.CURLY_START_TO_END;
         }
-        
+
         if (tokenText.startsWith("@end") || tokenText.equals("@show")) {
+            if (BladeLexerUtils.isUndefinedDirective(token)) {
+                return BraceDirectionType.CUSTOM_END_TO_START;
+            }
             return BraceDirectionType.END_TO_START;
         }
 
@@ -154,9 +161,7 @@ public class BladeBracesMatcher implements BracesMatcher {
             return BraceDirectionType.START_TO_END;
         }
 
-        //TODO get more directive context
-        if (token.getType() == BladeAntlrLexer.D_CUSTOM
-                || token.getType() == BladeAntlrLexer.D_UNKNOWN) {
+        if (BladeLexerUtils.isUndefinedDirective(token)) {
             return BraceDirectionType.CUSTOM_START_TO_END;
         }
 
@@ -201,7 +206,7 @@ public class BladeBracesMatcher implements BracesMatcher {
 
     public int[] findDirectiveEnd(String directive) {
         String[] pair = BladeDirectivesUtils.directiveStart2EndPair(directive);
-        if (pair == null){
+        if (pair == null) {
             return null;
         }
         List<String> startDirectiveForBalance = new ArrayList<>();
@@ -219,7 +224,7 @@ public class BladeBracesMatcher implements BracesMatcher {
                 originToken,
                 stopDirectives,
                 startDirectiveForBalance);
-        
+
         if (endToken != null) {
             //String text = endToken.getText();
             int start = endToken.getStartIndex();
@@ -236,6 +241,25 @@ public class BladeBracesMatcher implements BracesMatcher {
         List<String> startDirectiveForBalance = Arrays.asList(new String[]{directive});
 
         Token endToken = BladeAntlrUtils.findForward(context.getDocument(),
+                originToken,
+                stopDirectives,
+                startDirectiveForBalance);
+
+        if (endToken != null) {
+            int start = endToken.getStartIndex();
+            int end = endToken.getStopIndex();
+            return new int[]{start, end + 1};
+        }
+
+        return null;
+    }
+    
+    public int[] findCustomDirectiveStart(String directive) {
+        String[] pair = new String[]{"@" + directive.substring(4)};
+        List<String> stopDirectives = Arrays.asList(pair);
+        List<String> startDirectiveForBalance = Arrays.asList(new String[]{directive});
+
+        Token endToken = BladeAntlrUtils.findBackward(context.getDocument(),
                 originToken,
                 stopDirectives,
                 startDirectiveForBalance);

@@ -21,9 +21,11 @@ package org.netbeans.modules.php.blade.editor.lexer;
 import java.util.Arrays;
 import java.util.List;
 import javax.swing.text.Document;
+import org.antlr.v4.runtime.Token;
 import org.netbeans.api.lexer.Language;
 import org.netbeans.api.lexer.TokenHierarchy;
 import org.netbeans.api.lexer.TokenSequence;
+import org.netbeans.modules.php.blade.syntax.antlr4.v10.BladeAntlrLexer;
 import static org.netbeans.modules.php.blade.syntax.antlr4.v10.BladeAntlrLexer.*;
 import org.netbeans.modules.php.editor.lexer.PHPTokenId;
 
@@ -31,7 +33,11 @@ import org.netbeans.modules.php.editor.lexer.PHPTokenId;
  *
  * @author bogdan
  */
-public class BladeLexerUtils {
+public final class BladeLexerUtils {
+    
+    private BladeLexerUtils(){
+        
+    }
 
     public static TokenSequence<? extends PHPTokenId> getPhpTokenSequence(TokenHierarchy<Document> th, final int offset) {
         return getTokenSequence(th, offset, PHPTokenId.language());
@@ -73,5 +79,10 @@ public class BladeLexerUtils {
             D_INCLUDE_UNLESS, D_EACH, D_SECTION, D_HAS_SECTION, D_SECTION_MISSING,
             D_PUSH, D_PUSH_IF, D_PREPEND, D_USE, D_INJECT, D_ASSET_BUNDLER
         });
+    }
+    
+    public static boolean isUndefinedDirective(Token token){
+        return token.getType() == BladeAntlrLexer.D_CUSTOM
+                || token.getType() == BladeAntlrLexer.D_UNKNOWN;
     }
 }
