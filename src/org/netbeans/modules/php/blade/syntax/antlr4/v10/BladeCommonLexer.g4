@@ -48,11 +48,12 @@ D_ESCAPES
       '{{{'
     |  '@@' '@'?
     | '@{' '{'?
-    | '@media' [ ]* '('?
+    | '@media' [ ]+ ('screen' [ ]+ 'and'?)?
     | ( '@charset' | '@import' | '@namespace' | '@document' | '@font-face'
        | '@page' | '@layer' | '@supports' | '@tailwind' | '@apply' | '@-webkit-keyframes' 
        | '@keyframes' | '@counter-style' | '@font-feature-values' | '@property'
        | '@scope' | '@starting-style' | '@supports' | '@view-transition'
+       | '@container' | '@color-profile' | '@styleset' | '@font-palette-values' | '@media'
       ) [ ]*
     )->type(HTML);
 
