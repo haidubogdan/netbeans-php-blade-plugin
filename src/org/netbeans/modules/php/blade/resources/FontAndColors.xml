@@ -28,7 +28,14 @@
     </fontcolor>
     <fontcolor name="blade_echo_delimiters" foreColor="ff966738">
     </fontcolor>
+    <fontcolor name="php_variable" foreColor="93C2FC" />
+    <fontcolor name="php_number" default="number" foreColor="ff00ff" />
+    <fontcolor name="php_keyword" default="keyword" />
+    <fontcolor name="php_comment" default="comment" />
+    <fontcolor name="php_operator" default="operator" />
+    <fontcolor name="php_string" default="string" />
     <!--"semantic" highlighting:-->
     <fontcolor name="mod-undefined" waveUnderlined="999999"/>
     <fontcolor name="mod-declaration" default="blade_directive"/>
+
 </fontscolors>

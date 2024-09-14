@@ -20,7 +20,7 @@ fragment ESC_DOUBLE_QUOTED_STRING
 fragment DOUBLE_QUOTED_STRING_FRAGMENT 
     : '"' (ESC_DOUBLE_QUOTED_STRING | . )*? '"';
 
-fragment SINGLE_QUOTED_STRING_FRAGMENT 
+fragment SingleQuotedString 
     : '\'' (~('\'' | '\\') | '\\' . )* '\'';
 
 fragment LineComment
@@ -31,7 +31,13 @@ fragment PhpVariable
     : '$' NameString;
 
 fragment PhpKeyword
-    : 'array' | 'class' | 'empty' | 'use';
+    : 'array' | 'as' | 'break' | 'callable' | 'class' [ ]+ | 'const' | 'continue' 
+    | 'clone' | 'declare' | 'die' | 'do' | 'echo' | 'else' | 'elseif' | 'empty' 
+    | 'eval' | 'exit' | 'extends' | 'final' | 'fn' | 'for' | 'foreach' | 'function'
+    | 'global' | 'goto' | 'if' | 'implements' | 'include' | 'instanceof' | 'insteadof'
+    | 'interface' | 'isset' | 'list' | 'match' | 'namespace' | 'new' | 'or' | 'print'
+    | 'private' | 'protected' | 'public' | 'require' | 'require_once' | 'return' 
+    | 'static' | 'trait' | 'unset' | 'use' | 'var' | 'xor' | 'yield';
 
 fragment Digit
     : ('0'..'9');

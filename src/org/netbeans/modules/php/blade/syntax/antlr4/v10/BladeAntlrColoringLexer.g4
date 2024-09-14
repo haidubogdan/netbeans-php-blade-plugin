@@ -13,13 +13,21 @@ options {
 channels {PHP_CODE}
 
 tokens {
- DIRECTIVE,
+ DIRECTIVE, 
+ D_UNKNOWN,
  PHP_EXPRESSION,
  BLADE_PHP_ECHO_EXPR,
  RAW_TAG,
  CONTENT_TAG,
  HTML,
- HTML_TAG,   
+ HTML_TAG,
+ PHP_TOKEN,
+ PHP_KEYWORD,
+ PHP_STRING,
+ PHP_VARIABLE,
+ PHP_NUMBER,
+ PHP_COMMENT,
+ PHP_WS,
  ERROR
 }
 
@@ -45,10 +53,10 @@ fragment SpecialChars : '°';
 
 PHP_INLINE : '<?=' .*? '?>' | '<?php' .*? ('?>' | EOF);
 
-D_GENERIC_BLOCK_DIRECTIVES : ('@' DirectivesWithEndTag | '@sectionMissing' | '@hasSection')->pushMode(LOOK_FOR_PHP_EXPRESSION),type(DIRECTIVE);
+D_GENERIC_BLOCK_DIRECTIVES : ('@' DirectivesWithEndTag | '@sectionMissing' | '@hasSection') (' ')* {this.lookForDirectiveArg(BladeAntlrColoringLexer.DIRECTIVE);};
 
 D_GENERIC_INLINE_DIRECTIVES : ('@elseif' |  Include | '@extends' | '@each' | '@yield' | '@props' | '@method' 
-   | '@class' | '@style' | '@aware' | '@break' | '@continue' | '@selected' | '@disabled' | '@readonly' | '@required') (' ')* {this._input.LA(1) == '('}? ->pushMode(LOOK_FOR_PHP_EXPRESSION),type(DIRECTIVE);
+   | '@class' | '@style' | '@aware' | '@break' | '@continue' | '@selected' | '@disabled' | '@readonly' | '@required') (' ')* {this.lookForDirectiveArg(BladeAntlrColoringLexer.DIRECTIVE);};
 
 D_GENERIC_INLINE_MIXED_DIRECTIVES : ('@break' | '@continue')->type(DIRECTIVE);
 
@@ -58,26 +66,25 @@ D_GENERIC_END_TAGS : ('@stop' | '@show' | '@overwrite' | '@viteReactRefresh' | '
 D_VERBATIM : '@verbatim' ->pushMode(VERBATIM_MODE), type(DIRECTIVE);
 D_ENDVERBATIM : '@endverbatim'->type(DIRECTIVE);
 
-D_MISC : ('@dd' | '@dump' | '@js' | '@json' | '@inject')->pushMode(LOOK_FOR_PHP_EXPRESSION),type(DIRECTIVE);
+D_MISC : ('@dd' | '@dump' | '@js' | '@json' | '@inject') (' ')* {this.lookForDirectiveArg(BladeAntlrColoringLexer.DIRECTIVE);};
 
 D_SIMPLE : ('@else' | '@csrf' | '@default' | '@append' | '@parent')->type(DIRECTIVE);
 
 //php emebeddings
-D_PHP_SHORT : '@php' (' ')? {this._input.LA(1) == '('}? ->type(D_PHP),pushMode(LOOK_FOR_PHP_EXPRESSION);
+D_PHP_SHORT : '@php' (' ')? {this._input.LA(1) == '('}? ->type(D_PHP),pushMode(INSIDE_PHP_EXPRESSION);
 D_PHP : '@php'->pushMode(BLADE_INLINE_PHP);
 
 //allow php expression highlight for custom directives which start with 'end' also
-D_END : ('@end' NameString)->pushMode(LOOK_FOR_PHP_EXPRESSION),type(DIRECTIVE);
+D_END : ('@end' NameString)(' ')* {this.lookForDirectiveArg(BladeAntlrColoringLexer.D_UNKNOWN);};
 
 //known plugins
 D_LIVEWIRE : ('@livewireStyles' | '@bukStyles' | '@livewireScripts' | '@bukScripts' | '@click' ('.away')? '=')->type(DIRECTIVE);
-D_ASSET_BUNDLER : '@vite'->pushMode(LOOK_FOR_PHP_EXPRESSION),type(DIRECTIVE);
+D_ASSET_BUNDLER : '@vite' (' ')* {this.lookForDirectiveArg(BladeAntlrColoringLexer.DIRECTIVE);};
 
 //we will decide that a custom directive has expression to avoid email matching
-D_CUSTOM : ('@' NameString {this._input.LA(1) == '(' || 
-        (this._input.LA(1) == ' ' && this._input.LA(2) == '(')}? ) ->pushMode(LOOK_FOR_PHP_EXPRESSION);
+D_CUSTOM : '@' NameString (' ')* {this.lookForDirectiveArg(BladeAntlrColoringLexer.D_UNKNOWN);};
 
-D_UNKNOWN : '@' NameString;
+D_EMAIL : (FullIdentifier '@' FullIdentifier '.' ('com' |  NameString))->type(HTML);
 
 //TODO move all known directives to fragment?
 //hack to allow completion for directives
@@ -120,7 +127,7 @@ mode INSIDE_REGULAR_ECHO;
 CONTENT_TAG_CLOSE : ('}}')->popMode,type(CONTENT_TAG);
 //hack due to a netbeans php embedding issue when adding or deleting ':' chars
 ECHO_DOUBLE_NEKODU : NekudoWithelistMatch {this.consumeEscapedEchoToken();};
-ECHO_STRING_LITERAL : (SINGLE_QUOTED_STRING_FRAGMENT | DOUBLE_QUOTED_STRING_FRAGMENT_WITH_PHP) {this.consumeEscapedEchoToken();};
+ECHO_STRING_LITERAL : (SingleQuotedString | DOUBLE_QUOTED_STRING_FRAGMENT_WITH_PHP) {this.consumeEscapedEchoToken();};
 ECHO_PHP_FREEZE_SYNTAX : (':)' | ':') ->skip;
 GREEDY_REGULAR_ECHO_EXPR : ~[ "':{}]+ {this.consumeEscapedEchoToken();};
 
@@ -133,53 +140,37 @@ mode INSIDE_RAW_ECHO;
 RAW_TAG_CLOSE : ('!!}')->popMode, type(RAW_TAG);
 //hack due to a netbeans php embedding issue when adding or deleting ':' chars
 RAW_ECHO_DOUBLE_NEKODU : NekudoWithelistMatch {this.consumeNotEscapedEchoToken();};
-RAW_ECHO_STRING_LITERAL : (SINGLE_QUOTED_STRING_FRAGMENT | DOUBLE_QUOTED_STRING_FRAGMENT_WITH_PHP) {this.consumeNotEscapedEchoToken();};
+RAW_ECHO_STRING_LITERAL : (SingleQuotedString | DOUBLE_QUOTED_STRING_FRAGMENT_WITH_PHP) {this.consumeNotEscapedEchoToken();};
 RAW_ECHO_PHP_FREEZE_SYNTAX : (':)' | ':') ->skip;
 RAW_ECHO_EXPR : ~[ "':!{}]+ {this.consumeNotEscapedEchoToken();};
 RAW_ECHO_EXPR_MORE : . [ ]* {this.consumeNotEscapedEchoToken();};
 EXIT_RAW_ECHO_EOF : EOF->type(ERROR),popMode;
 
-// @directive ()?
-mode LOOK_FOR_PHP_EXPRESSION;
-
-WS_EXPR : [ ]+ {this._input.LA(1) == '('}? ->pushMode(INSIDE_PHP_EXPRESSION);
-OPEN_EXPR_PAREN_MORE : '(' {this.increaseRoundParenBalance();} ->more,pushMode(INSIDE_PHP_EXPRESSION);
-
-AFTER_DIRECTIVE : NameString->type(ERROR), popMode;
-L_OTHER : . ->type(ERROR), popMode;
-
 // @directive (?)
 mode INSIDE_PHP_EXPRESSION;
 
-OPEN_EXPR_PAREN : {this.roundParenBalance == 0}? '(' {this.increaseRoundParenBalance();} {this.consumeExprToken();};
-CLOSE_EXPR_PAREN : {this.roundParenBalance == 1}? ')' 
-    {this.decreaseRoundParenBalance();}->type(PHP_EXPRESSION),mode(DEFAULT_MODE);
+LPAREN : '(' {this.handleOpenRoundParen();};
 
-LPAREN : {this.roundParenBalance > 0}? '(' {this.increaseRoundParenBalance();} {this.consumeExprToken();};
-RPAREN : {this.roundParenBalance > 0}? ')' {this.decreaseRoundParenBalance();} {this.consumeExprToken();};
-
-//in case of lexer restart context
-EXIT_RPAREN : ')' {this.roundParenBalance == 0}?->type(PHP_EXPRESSION),mode(DEFAULT_MODE);
+RPAREN : ')' {this.handleEndRoundParen();};
 
 DB_STRING_OPEN : '"' ->more,pushMode(DB_STRING_MODE);
 //hack due to a netbeans php embedding issue when adding or deleting ':' chars
 
-SHORT_IF_EXPR_ERR : ('?:') {this.testForFreezeCombination();};
+EXPR_STRING_LITERAL : (SingleQuotedString)->type(PHP_STRING);
 
-DOUBLE_NEKODU : ('::') {this.consumeExprToken();};
+PHP_EXPRESSION_COMMENT : ('/*' .*? '*/')->type(PHP_COMMENT);
 
+EXPR_PHP_VARIABLE : PhpVariable->type(PHP_VARIABLE);
 
-EXPR_STRING_LITERAL : (SINGLE_QUOTED_STRING_FRAGMENT (' ')*) {this.consumeExprToken();};
+EXPR_KEYWORD : PhpKeyword->type(PHP_KEYWORD);
 
-//STATIC_STRING : //check if start of token ... check if bracket and 
+EXP_NUMBER : [0-9]+ ('.' [0-9]+)? -> type(PHP_NUMBER);
 
-FREEZE_NEKUDO_GREEDY : ':' {this._input.LA(1) != ':'}?->skip;
+EXPR_PHP_TOKEN_NAME : FullIdentifier ->type(PHP_TOKEN);
 
-FREEZE_NEKUDO : ':'->skip;
+EXPR_WS : ((' ')+ | [\r\n]+)->type(PHP_WS);
 
-PHP_EXPRESSION_COMMENT : ('/*' .*? '*/')->skip;
-
-PHP_EXPRESSION_MORE : . {this.consumeExprToken();};
+EXPR_PHP_TOKEN : . ->type(PHP_TOKEN);
 
 EXIT_EOF : EOF->type(ERROR),mode(DEFAULT_MODE);
 
@@ -197,7 +188,7 @@ BLADE_PHP_INLINE : . {
         this._input.LA(5) == 'p' &&
         this._input.LA(6) == 'h' &&
         this._input.LA(7) == 'p'
-      }?->channel(PHP_CODE) ;
+      }?;
 BLADE_PHP_INLINE_MORE : . ->more;
 
 EXIT_INLINE_PHP_EOF : EOF->type(ERROR),popMode;
@@ -244,20 +235,26 @@ EXIT_COMPONENT_PHP_EXPRESSION_EOF : EOF->type(ERROR),popMode;
 
 mode DB_STRING_MODE;
 
-DB_STRING_NEKUDO_GREEDY : NekudoWithelistMatch '$'? FullIdentifier '}' ->more;
+DB_CURLY : '{' {this._input.LA(1) == '$'}? ->type(PHP_TOKEN),pushMode(STRING_VAR_EXPR);
 
-DB_STRING_NEKUDO : NekudoWithelistMatch ->more;
-//TODO numeric
-DB_JSON_PAIR : '{' [\\']?  FullIdentifier [\\']? ':'+ [\\']?  FullIdentifier?  [\\']?  (',' ( [\\']?  FullIdentifier [\\']?  ':'+ [\\']?   FullIdentifier [\\']? ))* ','? '}' ->more;
-
-PHP_INTERCALATED : '{' '$' FullIdentifier ('[' [\\'] FullIdentifier  [\\'] ']')* '::' FullIdentifier '}'->more;
-
-DB_POINT : ('{' '$' FullIdentifier ('[' [\\'] FullIdentifier?  [\\'] ']')* (('::'+ FullIdentifier)? (':' FullIdentifier?)+ ) '}' | ':$')->type(ERROR);
+DB_PHP_VARIABLE : PhpVariable->type(PHP_VARIABLE);
 
 DB_QUOTE_MORE : '\\"'->more;
 
-DB_QUOTE_EXIT : '"'->more, popMode;
+DB_QUOTE_EXIT : '"'->type(PHP_STRING), popMode;
+
+DB_STRING_BEFORE_VAR_EXPR : . {this._input.LA(1) == '{' || this._input.LA(1) == '$'}?->type(PHP_STRING);
 
 DB_QUOTE_ANY : . ->more;
 
 DB_QUOTE_EOF : EOF->type(ERROR),popMode;
+
+mode STRING_VAR_EXPR;
+
+STRING_VAR_EXPR_VARIABLE : PhpVariable->type(PHP_VARIABLE);
+STRING_VAR_EXPR_NUMBER : [0-9]+ -> type(PHP_NUMBER);
+STRING_VAR_EXPR_VARIABLE_ARR : (('->' FullIdentifier)+ | '[' | ']' | ('[' [ ]+ ']'))->type(PHP_TOKEN);
+STRING_VAR_EXPR_ARR_KEY : SingleQuotedString->type(PHP_STRING);
+STRING_VAR_EXPR_EXIT : '}'->type(PHP_TOKEN), popMode;
+
+STRING_VAR_EXP_EOF : EOF->type(ERROR),popMode;

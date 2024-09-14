@@ -66,6 +66,30 @@ public abstract class ColoringLexerAdaptor extends Lexer {
         return true;
     }
 
+    public void lookForDirectiveArg(int type) {
+        this.setType(type);
+        if (this._input.LA(1) == '(') {
+            this.roundParenBalance = 0;
+            this.mode(BladeAntlrColoringLexer.INSIDE_PHP_EXPRESSION);
+        }
+    }
+
+    public void handleOpenRoundParen() {
+        this.setType(BladeAntlrColoringLexer.PHP_TOKEN);
+        this.roundParenBalance++;
+    }
+
+    public void handleEndRoundParen() {
+        this.setType(BladeAntlrColoringLexer.PHP_TOKEN);
+        this.roundParenBalance--;
+        if (this.roundParenBalance < 0) {
+            this.roundParenBalance = 0;
+        }
+        if (this.roundParenBalance == 0) {
+            this.mode(DEFAULT_MODE);
+        }
+    }
+
     public void increaseRoundParenBalance() {
         this.roundParenBalance++;
     }
@@ -107,32 +131,23 @@ public abstract class ColoringLexerAdaptor extends Lexer {
             this.more();
         }
     }
-    
-    public void consumeExprToken(){
-        if (this._input.LA(1) == ':' && this._input.LA(2) != ':'){
+
+    public void consumeExprToken() {
+        if (this._input.LA(1) == ':' && this._input.LA(2) != ':') {
             this.setType(BladeAntlrColoringLexer.PHP_EXPRESSION);
         } else {
             this.more();
         }
     }
-    
-    public void testForFreezeCombination(){
-        if (this.roundParenBalance <= 1 && 
-                (this._input.LA(1) == ')' 
-                ||  this._input.LA(1) == ']')){
+
+    public void testForFreezeCombination() {
+        if (this.roundParenBalance <= 1
+                && (this._input.LA(1) == ')'
+                || this._input.LA(1) == ']')) {
             this.setType(BladeAntlrColoringLexer.ERROR);
         } else {
             this.consumeExprToken();
         }
     }
-   
-//    to continue when the sepparation of PHP_EXPRESSION can be implemented    
-//    public void setPhpExpressionOffset(){
-//        this.phpExpressionOffset = this.getCharIndex();
-//    }
-//    
-//    public boolean isFirstElement() {
-//        return this._tokenStartCharIndex <= this.phpExpressionOffset;
-//    }
-}
 
+}
