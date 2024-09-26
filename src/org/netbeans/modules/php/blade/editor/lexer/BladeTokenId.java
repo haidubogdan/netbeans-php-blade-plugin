@@ -76,18 +76,31 @@ public enum BladeTokenId implements TokenId {
                 LanguagePath languagePath, InputAttributes inputAttributes) {
             boolean joinHtml = true;
             switch (token.id()) {
-                case PHP_INLINE:
-                    Language<? extends TokenId> phpLanguageCode = PHPTokenId.language();
-                    return phpLanguageCode != null ? LanguageEmbedding.create(phpLanguageCode, 0, 0, false) : null;
-                case PHP_BLADE_EXPRESSION:
+
+                case PHP_BLADE_EXPRESSION: {
+                    Language<? extends TokenId> phpLanguage = PHPTokenId.languageInPHP();
+                    String tokenText = token.text().toString();
+                    int startOffset = 1;
+                    int endOffset = 1;
+
+                    //temprary corner case
+                    if (tokenText.startsWith("((") && tokenText.endsWith("))")){
+                        startOffset = 2;
+                        endOffset = 2;
+                    }
+                    return phpLanguage != null ? LanguageEmbedding.create(phpLanguage, startOffset, endOffset, false) : null;
+                }
                 case PHP_BLADE_ECHO_EXPR:
                 case PHP_BLADE_INLINE_CODE:
                     /**
-                     * troubleshooting php embedding freeze (?:, ::)
-                     * force a return null;
+                     * troubleshooting php embedding freeze (?:, ::) force a
+                     * return null;
                      */
                     Language<? extends TokenId> phpLanguage = PHPTokenId.languageInPHP();
                     return phpLanguage != null ? LanguageEmbedding.create(phpLanguage, 0, 0, false) : null;
+                case PHP_INLINE:
+                    Language<? extends TokenId> phpLanguageCode = PHPTokenId.language();
+                    return phpLanguageCode != null ? LanguageEmbedding.create(phpLanguageCode, 0, 0, false) : null;
                 case HTML:
                     LanguageEmbedding<?> lang;
 
