@@ -23,8 +23,6 @@ tokens {
  ERROR
 }
 
-fragment NekudoWithelistMatch : '::' | '?:' | ' : ';
-
 fragment DirectivesWithEndTag : 'for' ('each')? | 'if' | 'while' 
    | 'section' | 'session' | 'once' | 'push' | 'PushOnce'
    | 'switch' | 'unless' | 'can' ('any' | 'not')?
@@ -32,10 +30,6 @@ fragment DirectivesWithEndTag : 'for' ('each')? | 'if' | 'while'
    | 'error' | 'production' | 'empty';
 
 fragment Include : '@include' ('If' | 'When' | 'First' | 'Unless')?;
-
-//to remove
-fragment DOUBLE_QUOTED_STRING_FRAGMENT_WITH_PHP 
-    : '"' (ESC_DOUBLE_QUOTED_STRING | '{' PhpVariable '}' | . | ~[:])*?  '"';
 
 fragment ComponentTagIdentifier 
     : [a-z_\u0080-\ufffe][a-z0-9.:\u0080-\ufffe-]*;   
@@ -118,11 +112,8 @@ HTML_EOF : EOF->type(HTML_TAG),popMode;
 mode INSIDE_REGULAR_ECHO;
 
 CONTENT_TAG_CLOSE : ('}}')->popMode,type(CONTENT_TAG);
-//hack due to a netbeans php embedding issue when adding or deleting ':' chars
-ECHO_DOUBLE_NEKODU : NekudoWithelistMatch {this.consumeEscapedEchoToken();};
-ECHO_STRING_LITERAL : (SINGLE_QUOTED_STRING_FRAGMENT | DOUBLE_QUOTED_STRING_FRAGMENT_WITH_PHP) {this.consumeEscapedEchoToken();};
-ECHO_PHP_FREEZE_SYNTAX : (':)' | ':') ->skip;
-GREEDY_REGULAR_ECHO_EXPR : ~[ "':{}]+ {this.consumeEscapedEchoToken();};
+
+GREEDY_REGULAR_ECHO_EXPR : ~[ {}]+ {this.consumeEscapedEchoToken();};
 
 ESCAPED_ECHO_EXPR : . [ ]* {this.consumeEscapedEchoToken();};
 EXIT_ECHO_EOF : EOF->type(ERROR),popMode;
@@ -131,11 +122,8 @@ EXIT_ECHO_EOF : EOF->type(ERROR),popMode;
 mode INSIDE_RAW_ECHO;
 
 RAW_TAG_CLOSE : ('!!}')->popMode, type(RAW_TAG);
-//hack due to a netbeans php embedding issue when adding or deleting ':' chars
-RAW_ECHO_DOUBLE_NEKODU : NekudoWithelistMatch {this.consumeNotEscapedEchoToken();};
-RAW_ECHO_STRING_LITERAL : (SINGLE_QUOTED_STRING_FRAGMENT | DOUBLE_QUOTED_STRING_FRAGMENT_WITH_PHP) {this.consumeNotEscapedEchoToken();};
-RAW_ECHO_PHP_FREEZE_SYNTAX : (':)' | ':') ->skip;
-RAW_ECHO_EXPR : ~[ "':!{}]+ {this.consumeNotEscapedEchoToken();};
+
+RAW_ECHO_EXPR : ~[ !{}]+ {this.consumeNotEscapedEchoToken();};
 RAW_ECHO_EXPR_MORE : . [ ]* {this.consumeNotEscapedEchoToken();};
 EXIT_RAW_ECHO_EOF : EOF->type(ERROR),popMode;
 
@@ -160,22 +148,6 @@ RPAREN : {this.roundParenBalance > 0}? ')' {this.decreaseRoundParenBalance();} {
 
 //in case of lexer restart context
 EXIT_RPAREN : ')' {this.roundParenBalance == 0}?->type(PHP_EXPRESSION),mode(DEFAULT_MODE);
-
-DB_STRING_OPEN : '"' ->more,pushMode(DB_STRING_MODE);
-//hack due to a netbeans php embedding issue when adding or deleting ':' chars
-
-SHORT_IF_EXPR_ERR : ('?:') {this.testForFreezeCombination();};
-
-DOUBLE_NEKODU : ('::') {this.consumeExprToken();};
-
-
-EXPR_STRING_LITERAL : (SINGLE_QUOTED_STRING_FRAGMENT (' ')*) {this.consumeExprToken();};
-
-//STATIC_STRING : //check if start of token ... check if bracket and 
-
-FREEZE_NEKUDO_GREEDY : ':' {this._input.LA(1) != ':'}?->skip;
-
-FREEZE_NEKUDO : ':'->skip;
 
 PHP_EXPRESSION_COMMENT : ('/*' .*? '*/')->skip;
 
@@ -242,11 +214,6 @@ COMPONENT_PHP_EXPRESSION : . ->more;
 
 EXIT_COMPONENT_PHP_EXPRESSION_EOF : EOF->type(ERROR),popMode;
 
-mode DB_STRING_MODE;
-
-DB_STRING_NEKUDO_GREEDY : NekudoWithelistMatch '$'? FullIdentifier '}' ->more;
-
-DB_STRING_NEKUDO : NekudoWithelistMatch ->more;
 //TODO numeric
 DB_JSON_PAIR : '{' [\\']?  FullIdentifier [\\']? ':'+ [\\']?  FullIdentifier?  [\\']?  (',' ( [\\']?  FullIdentifier [\\']?  ':'+ [\\']?   FullIdentifier [\\']? ))* ','? '}' ->more;
 

@@ -69,7 +69,7 @@ public class BladePhpEmbeddingProvider extends EmbeddingProvider {
             if (id.equals(BladeTokenId.PHP_INLINE)) {
                 embeddings.add(snapshot.create(offset, t.length(), TARGET_MIME_TYPE));
             } else {
-                fake = new String(new char[tText.length()]).replace("\0", "@");
+                fake = new String(new char[tText.length()]).replace("\0", "@"); //NOI18N
                 embeddings.add(snapshot.create(fake, TARGET_MIME_TYPE));
             }
         }

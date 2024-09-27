@@ -2,6 +2,7 @@
 
 ## What's changed
 
-**syntax highlight**
+**syntax highlighting**
 
-- add more css `@at` rules
+- simplifying freeze patch for php lexer embedding
+- creating a issue for Netbeans https://github.com/apache/netbeans/issues/7803

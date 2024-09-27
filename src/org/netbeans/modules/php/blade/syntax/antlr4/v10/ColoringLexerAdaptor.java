@@ -74,16 +74,6 @@ public abstract class ColoringLexerAdaptor extends Lexer {
         this.roundParenBalance--;
     }
 
-    public boolean endsWith(char ch1, char ch2) {
-        return this._input.LA(1) == ch1 && this._input.LA(2) == ch2;
-    }
-
-    public boolean endsWith(char ch1, char ch2, char ch3) {
-        return this._input.LA(1) == ch1
-                && this._input.LA(2) == ch2
-                && this._input.LA(3) == ch3;
-    }
-
     public boolean hasNoBladeParamOpenBracket() {
         return this.roundParenBalance > 0
                 && this.squareParenBalance == 0
@@ -107,25 +97,21 @@ public abstract class ColoringLexerAdaptor extends Lexer {
             this.more();
         }
     }
-    
-    public void consumeExprToken(){
-        if (this._input.LA(1) == ':' && this._input.LA(2) != ':'){
-            this.setType(BladeAntlrColoringLexer.PHP_EXPRESSION);
-        } else {
-            this.more();
-        }
+
+    public void consumeExprToken() {
+        this.more();
     }
-    
-    public void testForFreezeCombination(){
-        if (this.roundParenBalance <= 1 && 
-                (this._input.LA(1) == ')' 
-                ||  this._input.LA(1) == ']')){
+
+    public void testForFreezeCombination() {
+        if (this.roundParenBalance <= 1
+                && (this._input.LA(1) == ')'
+                || this._input.LA(1) == ']')) {
             this.setType(BladeAntlrColoringLexer.ERROR);
         } else {
             this.consumeExprToken();
         }
     }
-   
+
 //    to continue when the sepparation of PHP_EXPRESSION can be implemented    
 //    public void setPhpExpressionOffset(){
 //        this.phpExpressionOffset = this.getCharIndex();
@@ -135,4 +121,3 @@ public abstract class ColoringLexerAdaptor extends Lexer {
 //        return this._tokenStartCharIndex <= this.phpExpressionOffset;
 //    }
 }
-
