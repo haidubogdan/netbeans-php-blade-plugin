@@ -154,6 +154,8 @@ D_CLASS : '@class'->pushMode(LOOK_FOR_PHP_EXPRESSION);
 D_STYLE : '@style'->pushMode(LOOK_FOR_PHP_EXPRESSION);
 D_HTML_ATTR_EXPR : ('@checked' | '@disabled' | '@readonly' | '@required' | '@selected')->pushMode(LOOK_FOR_PHP_COMPOSED_EXPRESSION);
 D_AWARE : '@aware'->pushMode(LOOK_FOR_PHP_COMPOSED_EXPRESSION);
+D_BOOL : '@bool'->pushMode(LOOK_FOR_BLADE_PARAMETERS);
+D_WHEN : '@when'->pushMode(LOOK_FOR_BLADE_PARAMETERS);
 
 //misc
 D_SESSION : '@session'->pushMode(LOOK_FOR_PHP_COMPOSED_EXPRESSION);

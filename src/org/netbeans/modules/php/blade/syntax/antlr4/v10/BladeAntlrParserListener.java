@@ -1,4 +1,4 @@
-// Generated from java-escape by ANTLR 4.11.1
+// Generated from BladeAntlrParser.g4 by ANTLR 4.13.0
 
   /**
    * Parser generated for netbeans blade editor
@@ -607,6 +607,16 @@ public interface BladeAntlrParserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitDoubleArgWrapperP(BladeAntlrParser.DoubleArgWrapperPContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link BladeAntlrParser#doubleArgWrapperPwithFallback}.
+	 * @param ctx the parse tree
+	 */
+	void enterDoubleArgWrapperPwithFallback(BladeAntlrParser.DoubleArgWrapperPwithFallbackContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link BladeAntlrParser#doubleArgWrapperPwithFallback}.
+	 * @param ctx the parse tree
+	 */
+	void exitDoubleArgWrapperPwithFallback(BladeAntlrParser.DoubleArgWrapperPwithFallbackContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link BladeAntlrParser#multiArgWrapper}.
 	 * @param ctx the parse tree

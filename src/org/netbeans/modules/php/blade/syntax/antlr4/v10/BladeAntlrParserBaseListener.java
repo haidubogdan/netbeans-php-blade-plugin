@@ -1,4 +1,4 @@
-// Generated from java-escape by ANTLR 4.11.1
+// Generated from BladeAntlrParser.g4 by ANTLR 4.13.0
 
   /**
    * Parser generated for netbeans blade editor
@@ -730,6 +730,18 @@ public class BladeAntlrParserBaseListener implements BladeAntlrParserListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitDoubleArgWrapperP(BladeAntlrParser.DoubleArgWrapperPContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterDoubleArgWrapperPwithFallback(BladeAntlrParser.DoubleArgWrapperPwithFallbackContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitDoubleArgWrapperPwithFallback(BladeAntlrParser.DoubleArgWrapperPwithFallbackContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *

@@ -42,6 +42,7 @@ public enum BladeTokenId implements TokenId {
     BLADE_COMMENT_END("blade_comment"),
     BLADE_DIRECTIVE("blade_directive"),
     BLADE_ECHO_DELIMITOR("blade_echo_delimiters"),
+    BLADE_PAREN(""),
     HTML("html"),
     WS_D("html"),
     BLADE_DIRECTIVE_UNKNOWN("at_string"),
@@ -85,34 +86,13 @@ public enum BladeTokenId implements TokenId {
 
                     //php brace matcher freeze issue patch
                     String tokenText = token.text().toString();
-                    int startOffset = 1;
-                    int endOffset = 1;
-
-                    if (tokenText.startsWith("((") && tokenText.endsWith("))")){ //NOI18N
-                        startOffset = 2;
-                        endOffset = 2;
-                    } else if (tokenText.startsWith("([") && tokenText.endsWith("])")){ //NOI18N
-                        startOffset = 2;
-                        endOffset = 2;
-                    } else if (tokenText.startsWith("([")){ //NOI18N
-                        startOffset = 2;
-                    }
-                    return LanguageEmbedding.create(phpLanguage, startOffset, endOffset, false);
-                }
-                case PHP_BLADE_ECHO_EXPR:
-                    Language<? extends TokenId> phpLanguage = PHPTokenId.languageInPHP();
-                    if (phpLanguage == null || token.text() == null){
-                        return null;
-                    }
-                    
-                    String tokenText = token.text().toString();
                     int startOffset = 0;
                     int endOffset = 0;
-                    
+
                     if (!tokenText.startsWith("(") && !tokenText.startsWith("[")){
                         return LanguageEmbedding.create(phpLanguage, startOffset, endOffset, false);
                     }
-
+                                      
                     //php brace matcher freeze issue patch
                     if (tokenText.startsWith("((") && tokenText.endsWith("))")){ //NOI18N
                         startOffset = 2;
@@ -137,12 +117,52 @@ public enum BladeTokenId implements TokenId {
                     }  else if (tokenText.startsWith("(") || tokenText.startsWith("[")){ //NOI18N
                         startOffset = 1;
                     }
-                    
                     return LanguageEmbedding.create(phpLanguage, startOffset, endOffset, false);
-                case PHP_INLINE:
+                }
+                case PHP_BLADE_ECHO_EXPR:  {
+                    Language<? extends TokenId> phpLanguage = PHPTokenId.languageInPHP();
+                    if (phpLanguage == null || token.text() == null){
+                        return null;
+                    }
+                    String tokenText = token.text().toString();
+                    int startOffset = 0;
+                    int endOffset = 0;
+                    
+                    if (!tokenText.startsWith("(") && !tokenText.startsWith("[")){
+                        return LanguageEmbedding.create(phpLanguage, startOffset, endOffset, false);
+                    }
+                                      
+                    //php brace matcher freeze issue patch
+                    if (tokenText.startsWith("((") && tokenText.endsWith("))")){ //NOI18N
+                        startOffset = 2;
+                        endOffset = 2;
+                    } else if (tokenText.startsWith("[[") && tokenText.endsWith("]]")){ //NOI18N
+                        startOffset = 2;
+                        endOffset = 2;
+                    } else if (tokenText.startsWith("([") && tokenText.endsWith("])")){ //NOI18N
+                        startOffset = 2;
+                        endOffset = 2;
+                    } else if (tokenText.startsWith("[(") && tokenText.endsWith(")]")){ //NOI18N
+                        startOffset = 2;
+                        endOffset = 2;
+                    } else if (tokenText.startsWith("([") || tokenText.startsWith("[(")){ //NOI18N
+                        startOffset = 2;
+                    } else if (tokenText.startsWith("(") && tokenText.endsWith(")")){ //NOI18N
+                        startOffset = 1;
+                        endOffset = 1;
+                    } else if (tokenText.startsWith("[") && tokenText.endsWith("]")){ //NOI18N
+                        startOffset = 1;
+                        endOffset = 1;
+                    }  else if (tokenText.startsWith("(") || tokenText.startsWith("[")){ //NOI18N
+                        startOffset = 1;
+                    }
+                    return LanguageEmbedding.create(phpLanguage, startOffset, endOffset, false);
+                }
+                case PHP_INLINE: {
                     Language<? extends TokenId> phpLanguageCode = PHPTokenId.language();
                     return phpLanguageCode != null ? LanguageEmbedding.create(phpLanguageCode, 0, 0, false) : null;
-                case HTML:
+                }
+                case HTML: {
                     LanguageEmbedding<?> lang;
 
                     if (tokenLangCache.containsKey(token.id())) {
@@ -151,7 +171,7 @@ public enum BladeTokenId implements TokenId {
                         Language<? extends TokenId> htmlLanguage = null;
 
                         @SuppressWarnings("unchecked")
-                        Collection<LanguageProvider> providers = (Collection<LanguageProvider>) Lookup.getDefault().lookupAll(LanguageProvider.class);
+                                Collection<LanguageProvider> providers = (Collection<LanguageProvider>) Lookup.getDefault().lookupAll(LanguageProvider.class);
                         for (LanguageProvider provider : providers) {
                             htmlLanguage = (Language<? extends TokenId>) provider.findLanguage("text/html"); //NOI18N
                             if (htmlLanguage != null) {
@@ -164,8 +184,10 @@ public enum BladeTokenId implements TokenId {
                     }
 
                     return lang;
-                default:
+                }
+                default: {
                     return null;
+                }
             }
         }
     }

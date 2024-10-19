@@ -47,6 +47,8 @@ inline_directive:
     | loop_action
     | D_ELSE //custom block directives?
     | D_MISC
+    | D_WHEN doubleArgWrapperPwithFallback
+    | D_BOOL singleArgWrapperP
     | custom_directive
     ;
 
@@ -195,6 +197,7 @@ simple_foreach_expr: loop_array=PHP_VARIABLE FOREACH_AS key=PHP_VARIABLE (FOREAC
 
 singleArgWrapperP:  BLADE_PARAM_LPAREN (idString=BL_PARAM_STRING | composedArgument) BLADE_PARAM_RPAREN;
 doubleArgWrapperP:  BLADE_PARAM_LPAREN (idString=BL_PARAM_STRING | composedArgument) BL_COMMA composedArgument BLADE_PARAM_RPAREN;
+doubleArgWrapperPwithFallback:  BLADE_PARAM_LPAREN composedArgument BL_COMMA composedArgument (BL_COMMA composedArgument)? BLADE_PARAM_RPAREN;
 multiArgWrapper :  BLADE_PARAM_LPAREN (composedArgument) (BL_COMMA composedArgument)* BLADE_PARAM_RPAREN;
 
 identifiableArgument : BL_PARAM_STRING;

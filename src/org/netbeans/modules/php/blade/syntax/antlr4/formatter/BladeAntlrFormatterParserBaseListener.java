@@ -1,4 +1,4 @@
-// Generated from java-escape by ANTLR 4.11.1
+// Generated from BladeAntlrFormatterParser.g4 by ANTLR 4.13.0
 
   package org.netbeans.modules.php.blade.syntax.antlr4.formatter;
 

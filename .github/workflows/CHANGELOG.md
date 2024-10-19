@@ -2,7 +2,14 @@
 
 ## What's changed
 
-**syntax highlighting**
+**directives**
 
-- simplifying freeze patch for php lexer embedding
-- creating a issue for Netbeans https://github.com/apache/netbeans/issues/7803
+- issue #72 include `@when`, `@bool` directives
+
+**coloring lexer**
+
+- directive wrapper parenteshis are no longer php embedded to fix php embedding from trying to automatically close quotes
+
+```
+@test('my_text')\new line
+```

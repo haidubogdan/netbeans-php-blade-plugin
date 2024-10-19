@@ -14,12 +14,7 @@ import org.antlr.v4.runtime.Token;
 public abstract class ColoringLexerAdaptor extends Lexer {
 
     private int _currentRuleType = Token.INVALID_TYPE;
-    public int roundParenBalance = 0;
-    public int squareParenBalance = 0;
-    public int curlyParenBalance = 0;
-    public int exitIfModePosition = 0;
-    public int phpExpressionOffset = -1;
-    public boolean hasPhpExprContent = false;
+    private int roundParenBalance = 0;
 
     public ColoringLexerAdaptor(CharStream input) {
         super(input);
@@ -31,6 +26,10 @@ public abstract class ColoringLexerAdaptor extends Lexer {
 
     public void setCurrentRuleType(int ruleType) {
         this._currentRuleType = ruleType;
+    }
+    
+    public int getRoundParenBalance(){
+        return this.roundParenBalance;
     }
 
     @Override
@@ -69,15 +68,24 @@ public abstract class ColoringLexerAdaptor extends Lexer {
     public void increaseRoundParenBalance() {
         this.roundParenBalance++;
     }
+    
 
     public void decreaseRoundParenBalance() {
         this.roundParenBalance--;
     }
+    
+    public void resetRoundParenBalance() {
+        this.roundParenBalance = 0;
+    }
 
-    public boolean hasNoBladeParamOpenBracket() {
-        return this.roundParenBalance > 0
-                && this.squareParenBalance == 0
-                && this.curlyParenBalance == 0;
+    public boolean endsWith(char ch1, char ch2) {
+        return this._input.LA(1) == ch1 && this._input.LA(2) == ch2;
+    }
+
+    public boolean endsWith(char ch1, char ch2, char ch3) {
+        return this._input.LA(1) == ch1
+                && this._input.LA(2) == ch2
+                && this._input.LA(3) == ch3;
     }
 
     //blade coloring lexer
@@ -97,27 +105,8 @@ public abstract class ColoringLexerAdaptor extends Lexer {
             this.more();
         }
     }
-
-    public void consumeExprToken() {
+    
+    public void consumeExprToken(){
         this.more();
     }
-
-    public void testForFreezeCombination() {
-        if (this.roundParenBalance <= 1
-                && (this._input.LA(1) == ')'
-                || this._input.LA(1) == ']')) {
-            this.setType(BladeAntlrColoringLexer.ERROR);
-        } else {
-            this.consumeExprToken();
-        }
-    }
-
-//    to continue when the sepparation of PHP_EXPRESSION can be implemented    
-//    public void setPhpExpressionOffset(){
-//        this.phpExpressionOffset = this.getCharIndex();
-//    }
-//    
-//    public boolean isFirstElement() {
-//        return this._tokenStartCharIndex <= this.phpExpressionOffset;
-//    }
 }

@@ -52,8 +52,8 @@ D_ESCAPES
     | ( '@charset' | '@import' | '@namespace' | '@document' | '@font-face'
        | '@page' | '@layer' | '@supports' | '@tailwind' | '@apply' | '@-webkit-keyframes' 
        | '@keyframes' | '@counter-style' | '@font-feature-values' | '@property'
-       | '@scope' | '@starting-style' | '@supports' | '@view-transition'
-       | '@container' | '@color-profile' | '@styleset' | '@font-palette-values' | '@media'
+       | '@scope' | '@starting-style' | '@view-transition' | '@container'
+       | '@color-profile' | '@styleset' | '@font-palette-values' | '@media'
       ) [ ]*
     )->type(HTML);
 
