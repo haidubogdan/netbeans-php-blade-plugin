@@ -132,9 +132,11 @@ EXIT_RAW_ECHO_EOF : EOF->type(ERROR),popMode;
 mode INSIDE_PHP_EXPRESSION;
 
 OPEN_PAREN : '(' {this.consumeOpenParen();};
-CLOSE_PAREN : [ ]* ')' {this.consumeCloseParen();};
+CLOSE_PAREN : ')' {this.consumeCloseParen();};
 
 PHP_EXPRESSION_COMMENT : ('/*' .*? '*/')->skip;
+
+WS_EXPRESSION_MORE : [ ]+ {this.consumeExprToken();};
 
 PHP_EXPRESSION_MORE : . {this.consumeExprToken();};
 

@@ -13,7 +13,7 @@
 @endif
 
 @foreach ($users as $user)
-    @include('default-navigation', ['x' => $var])
+    @include('default-navigation')
 @endforeach
     
 <input
