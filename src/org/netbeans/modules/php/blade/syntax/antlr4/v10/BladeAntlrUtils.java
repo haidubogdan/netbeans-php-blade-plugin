@@ -4,6 +4,7 @@ Licensed to the Apache Software Foundation (ASF)
 package org.netbeans.modules.php.blade.syntax.antlr4.v10;
 
 import java.util.List;
+import java.util.Set;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 import org.antlr.v4.runtime.CharStreams;
@@ -51,7 +52,7 @@ public class BladeAntlrUtils {
     }
 
     public static Token findForward(Document doc, Token start,
-            List<String> stopTokenText, List<String> openTokensText) {
+            Set<String> stopTokenText, Set<String> openTokensText) {
 
         AntlrTokenSequence tokens = getTokens(doc);
 
@@ -88,7 +89,7 @@ public class BladeAntlrUtils {
     }
 
     public static Token findForward(AntlrTokenSequence tokens,
-            List<Integer> tokensMatch, List<Integer> tokensStop) {
+            Set<Integer> tokensMatch, Set<Integer> tokensStop) {
 
         while (tokens.hasNext()) {
             Token pt = tokens.next().get();
@@ -109,7 +110,7 @@ public class BladeAntlrUtils {
     }
 
     public static Token findBackward(Document doc, Token start,
-            List<String> stopTokenText, List<String> openTokensText) {
+            Set<String> stopTokenText, Set<String> openTokensText) {
 
         AntlrTokenSequence tokens = getTokens(doc);
 

@@ -60,6 +60,9 @@ public class BladeLexerTest extends BladeLexerTestBase {
         performTest("include_01");
     }
     
+    public void testMultiDirectives_01() throws Exception {
+        performTest("multi_directives_01");
+    }
     
     public void testCssAtRules_01() throws Exception {
         performTest("css_at_rules");
