@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import org.antlr.v4.runtime.Token;
+import org.netbeans.api.annotations.common.NonNull;
 import org.netbeans.api.project.Project;
 import org.netbeans.modules.csl.api.CodeCompletionContext;
 import org.netbeans.modules.csl.api.CodeCompletionHandler;
@@ -14,7 +15,7 @@ import org.netbeans.modules.parsing.spi.indexing.support.QuerySupport;
 import org.netbeans.modules.php.blade.csl.elements.ClassElement;
 import org.netbeans.modules.php.blade.csl.elements.ElementType;
 import org.netbeans.modules.php.blade.csl.elements.NamedElement;
-import static org.netbeans.modules.php.blade.editor.completion.BladeCompletionHandler.completionRequest;
+import org.netbeans.modules.php.blade.csl.elements.PhpKeywordElement;
 import org.netbeans.modules.php.blade.editor.indexing.PhpIndexFunctionResult;
 import org.netbeans.modules.php.blade.editor.indexing.PhpIndexResult;
 import org.netbeans.modules.php.blade.editor.indexing.PhpIndexUtils;
@@ -23,6 +24,12 @@ import static org.netbeans.modules.php.blade.editor.parser.BladeParserResult.Ref
 import static org.netbeans.modules.php.blade.editor.parser.BladeParserResult.ReferenceType.PHP_CONSTANT;
 import static org.netbeans.modules.php.blade.editor.parser.BladeParserResult.ReferenceType.PHP_NAMESPACE_PATH_TYPE;
 import org.netbeans.modules.php.blade.editor.parser.ParsingUtils;
+import org.netbeans.modules.php.blade.syntax.annotation.PhpKeyword;
+import org.netbeans.modules.php.blade.syntax.antlr4.php.BladePhpAntlrLexer;
+import org.netbeans.modules.php.blade.syntax.antlr4.php.BladePhpAntlrParser;
+import org.netbeans.modules.php.blade.syntax.antlr4.php.BladePhpAntlrUtils;
+import org.netbeans.modules.php.blade.syntax.antlr4.php.BladePhpSnippetParser;
+import org.netbeans.modules.php.blade.syntax.php.PhpKeywordList;
 import org.netbeans.modules.php.editor.csl.PHPLanguage;
 import org.netbeans.spi.project.ui.support.ProjectConvertors;
 import org.openide.filesystems.FileObject;
@@ -75,6 +82,54 @@ public class PhpCodeCompletionService {
         return completionResult.getItems();
     }
 
+    public static void completePhpCode(final List<CompletionProposal> completionProposals,
+            String snapshotExpr, int exprStart, int offset, FileObject fo) {
+        int referencedOffset = offset - exprStart - 1;
+
+        org.antlr.v4.runtime.Token targetetToken = BladePhpAntlrUtils.getToken(snapshotExpr, referencedOffset);
+        if (targetetToken != null) {
+            //filter toke types?
+            int completionOffset = exprStart + targetetToken.getStartIndex();
+
+            String phpPrefix = "";
+            if (targetetToken.getType() != BladePhpAntlrLexer.DOUBLE_COLON){
+                phpPrefix = targetetToken.getText();
+            } else {
+                //double colon offset
+                completionOffset += targetetToken.getText().length();
+            }
+            BladePhpSnippetParser phpSnippetParser = new BladePhpSnippetParser(snapshotExpr);
+            phpSnippetParser.parse();
+            BladePhpSnippetParser.PhpReference phpRef = phpSnippetParser.findIdentifierReference(referencedOffset);
+            BladePhpSnippetParser.FieldAcces fieldAccess = phpSnippetParser.findFieldAccessReference(referencedOffset);
+            if (fieldAccess != null) {
+                if (fieldAccess.owner.namespace == null) {
+                    completeClassConstants(completionProposals, phpPrefix, fieldAccess.owner.identifier, completionOffset, fo);
+                }
+                completeClassMethods(completionProposals, phpPrefix, fieldAccess, completionOffset, fo);
+            } else if (phpRef != null) {
+            } else if (targetetToken.getType() == BladePhpAntlrLexer.IDENTIFIER) {
+                completePhpKeywords(completionProposals, phpPrefix, completionOffset);
+                completePhpFunctions(completionProposals, phpPrefix, completionOffset, fo);
+                completePhpClasses(completionProposals, phpPrefix, completionOffset, fo);
+            }
+            //add variable flow
+
+        }
+    }
+
+    private static void completePhpKeywords(final List<CompletionProposal> completionProposals,
+            String prefix, int caretOffset) {
+        PhpKeywordList keywordList = new PhpKeywordList();
+        for (PhpKeyword keyword : keywordList.getKeywords()) {
+            if (keyword.name().startsWith(prefix)) {
+                PhpKeywordElement keywordEl = new PhpKeywordElement(keyword.name(), null);
+                completionProposals.add(new PhpCompletionProposal.PhpKeywordProposal(keywordEl, caretOffset, prefix));
+            }
+        }
+    }
+
+    /*
     public static void completePhpCode(final List<CompletionProposal> completionProposals,
             BladeParserResult parserResult,
             int offset, String prefix) {
@@ -140,67 +195,29 @@ public class PhpCodeCompletionService {
                 break;
         }
     }
-
-    private static void completePhpClasses(String prefix, int offset, 
-            final List<CompletionProposal> completionProposals,
-            FileObject fo) 
-    {
+     */
+    private static void completePhpClasses(final List<CompletionProposal> completionProposals,
+            String prefix, int offset, FileObject fo) {
 
         Collection<PhpIndexResult> indexClassResults = PhpIndexUtils.queryClass(fo, prefix);
 
         if (indexClassResults.isEmpty()) {
             return;
         }
-        BladeCompletionProposal.CompletionRequest request = completionRequest(prefix, offset);
 
         for (PhpIndexResult indexResult : indexClassResults) {
             completionProposals.add(new BladeCompletionProposal.ClassItem(
-                    classElement(indexResult), request, indexResult.name));
+                    classElement(indexResult), offset, indexResult.name));
         }
     }
 
-    private static void completePhpFunctions(String prefix, int offset,
-            final List<CompletionProposal> completionProposals,
-            FileObject fo) {
+    private static void completePhpFunctions(final List<CompletionProposal> completionProposals,
+            String prefix, int offset, FileObject fo) {
         Collection<PhpIndexFunctionResult> indexedFunctions = PhpIndexUtils.queryFunctions(
                 fo, prefix);
         if (indexedFunctions.isEmpty()) {
             return;
         }
-        BladeCompletionProposal.CompletionRequest request = completionRequest(prefix, offset);
-        for (PhpIndexFunctionResult indexResult : indexedFunctions) {
-            //to be completed
-            //might add syntax completion cursor
-            String preview = indexResult.name + indexResult.getParamsAsString();
-            completionProposals.add(new BladeCompletionProposal.FunctionItem(
-                    functionElement(indexResult),
-                    request,
-                    preview)
-            );
-        }
-    }
-
-    /**
-     * Warning this doesn't check access permission (private, protected)
-     *
-     * @param prefix
-     * @param fieldAccessReference
-     * @param offset
-     * @param completionProposals
-     * @param fo
-     */
-    private static void completeClassMethods(String prefix, BladeParserResult.FieldAccessReference fieldAccessReference,
-            int offset,
-            final List<CompletionProposal> completionProposals,
-            FileObject fo) {
-        Collection<PhpIndexFunctionResult> indexedFunctions = PhpIndexUtils.queryClassMethods(
-                fo, prefix, fieldAccessReference.ownerClass.identifier,
-                fieldAccessReference.ownerClass.namespace);
-        if (indexedFunctions.isEmpty()) {
-            return;
-        }
-
-        BladeCompletionProposal.CompletionRequest request = completionRequest(prefix, offset);
 
         for (PhpIndexFunctionResult indexResult : indexedFunctions) {
             //to be completed
@@ -208,12 +225,13 @@ public class PhpCodeCompletionService {
             String preview = indexResult.name + indexResult.getParamsAsString();
             completionProposals.add(new BladeCompletionProposal.FunctionItem(
                     functionElement(indexResult),
-                    request,
-                    indexResult.getClassNamespace(),
+                    offset,
                     preview)
             );
         }
     }
+
+    
 
     private static void completeNamespace(String prefix, int offset,
             final List<CompletionProposal> completionProposals,
@@ -237,69 +255,97 @@ public class PhpCodeCompletionService {
             return;
         }
 
-        BladeCompletionProposal.CompletionRequest request = completionRequest(prefix, offset + substringOffset);
+        int anchorOffset = computeAnchorOffset(prefix, offset + substringOffset);
 
         for (PhpIndexResult indexResult : indexClassResults) {
             completionProposals.add(new BladeCompletionProposal.NamespaceItem(
-                    namespaceElement(indexResult), request, indexResult.name));
+                    namespaceElement(indexResult), anchorOffset, indexResult.name));
         }
     }
 
     private static void completeConstants(String prefix, int offset,
             final List<CompletionProposal> completionProposals,
-            FileObject fo) 
-    {
+            FileObject fo) {
         Collection<PhpIndexResult> indexClassResults = PhpIndexUtils.queryConstants(fo, prefix);
 
         //treat only uppercase strings
-        if (!Character.isUpperCase(prefix.charAt(0))){
+        if (!Character.isUpperCase(prefix.charAt(0))) {
             return;
         }
-        
+
         if (indexClassResults.isEmpty()) {
             return;
         }
 
-        BladeCompletionProposal.CompletionRequest request = completionRequest(prefix, offset);
+        int anchorOffset = computeAnchorOffset(prefix, offset);
 
         for (PhpIndexResult indexResult : indexClassResults) {
             completionProposals.add(new BladeCompletionProposal.ConstantItem(
-                    constantElement(indexResult), request, indexResult.name));
+                    constantElement(indexResult), anchorOffset, indexResult.name));
         }
     }
 
-    private static void completeClassConstants(String prefix, String ownerClass, int offset,
-            final List<CompletionProposal> completionProposals,
-            FileObject fo) {
+    private static void completeClassConstants(final List<CompletionProposal> completionProposals,
+            String prefix, String ownerClass, int offset, FileObject fo) {
 
         Collection<PhpIndexResult> indexClassResults = PhpIndexUtils.queryClassConstants(
                 fo, prefix, ownerClass);
 
         //treat only uppercase strings
-        if (!Character.isUpperCase(prefix.charAt(0))){
+        if (prefix.length() > 0 && !Character.isUpperCase(prefix.charAt(0))) {
             return;
         }
-        
+
         if (indexClassResults.isEmpty()) {
             return;
         }
 
-        BladeCompletionProposal.CompletionRequest request = completionRequest(prefix, offset);
-
         for (PhpIndexResult indexResult : indexClassResults) {
             completionProposals.add(new BladeCompletionProposal.ConstantItem(
-                    constantElement(indexResult), request, indexResult.name));
+                    constantElement(indexResult), offset, indexResult.name));
+        }
+    }
+    
+    /**
+     * warning this doesn't check permission
+     * 
+     * @param completionProposals
+     * @param prefix
+     * @param fieldAccessReference
+     * @param offset
+     * @param fo 
+     */
+    private static void completeClassMethods(final List<CompletionProposal> completionProposals, 
+            String prefix, BladePhpSnippetParser.FieldAcces fieldAccessReference,
+            int offset, FileObject fo) {
+        Collection<PhpIndexFunctionResult> indexedFunctions = PhpIndexUtils.queryClassMethods(
+                fo, prefix, fieldAccessReference.owner.identifier,
+                fieldAccessReference.owner.namespace, fieldAccessReference.type);
+        
+        if (indexedFunctions.isEmpty()) {
+            return;
+        }
+
+        for (PhpIndexFunctionResult indexResult : indexedFunctions) {
+            //to be completed
+            //might add syntax completion cursor
+            String preview = indexResult.name + indexResult.getParamsAsString();
+            completionProposals.add(new BladeCompletionProposal.FunctionItem(
+                    functionElement(indexResult),
+                    offset,
+                    indexResult.getClassNamespace(),
+                    preview)
+            );
         }
     }
 
     //TODO might move in a factory for NamedElement
-
     private static ClassElement classElement(PhpIndexResult indexResult) {
         return new ClassElement(indexResult.name,
                 indexResult.namespace,
                 indexResult.declarationFile);
     }
-    
+
     private static NamedElement namespaceElement(PhpIndexResult indexResult) {
         return namedElement(indexResult, ElementType.PHP_NAMESPACE);
     }
@@ -312,12 +358,16 @@ public class PhpCodeCompletionService {
     private static NamedElement constantElement(PhpIndexResult indexResult) {
         return namedElement(indexResult, ElementType.PHP_CONSTANT);
     }
-    
+
     private static NamedElement namedElement(PhpIndexResult indexResult, ElementType type) {
         return new NamedElement(indexResult.name, indexResult.declarationFile, type);
     }
-    
+
     private static NamedElement namedElement(String preview, PhpIndexResult indexResult, ElementType type) {
         return new NamedElement(preview, indexResult.declarationFile, type);
+    }
+
+    public static int computeAnchorOffset(@NonNull String prefix, int offset) {
+        return offset - prefix.length();
     }
 }
