@@ -106,9 +106,7 @@ public class BladeParserResult extends ParserResult {
 
     public BladeParserResult get(String taskClass) {
         long startTime = System.currentTimeMillis();
-        if (debugMode){
-            LOGGER.log(Level.INFO, "PARSER TRIGGERED BY {0}", taskClass);
-        }
+
         if (!finished) {
             BladeAntlrParser parser = createParser(getSnapshot());
             parser.setBuildParseTree(false);
@@ -127,16 +125,10 @@ public class BladeParserResult extends ParserResult {
                 parser.addParseListener(createSemanticsListener());
             }
             evaluateParser(parser);
-            if (debugMode){
-                LOGGER.info(String.format("Parser evaluated in %d ms " + taskClass + " | " + this.getFileObject().getNameExt(), System.currentTimeMillis() - startTime));
-            }
+
             finished = true;
         }
-        long time = System.currentTimeMillis() - startTime;
-        
-        if (debugMode){
-            LOGGER.info(String.format("finished parser took %d ms " + this.getFileObject().getNameExt(), time));
-        }
+
         return this;
     }
 
@@ -902,6 +894,7 @@ public class BladeParserResult extends ParserResult {
                 int errorPosition = 0;
                 if (offendingSymbol instanceof Token) {
                     Token offendingToken = (Token) offendingSymbol;
+                    String tokenText = offendingToken.getText();
                     errorPosition = offendingToken.getStartIndex();
                 }
                 errors.add(new BladeError(null, msg, null, getFileObject(), errorPosition, errorPosition, Severity.ERROR));
