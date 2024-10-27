@@ -22,7 +22,14 @@ package org.netbeans.modules.php.blade.syntax;
  *
  * @author bhaidu
  */
-public class StringUtils {
+public final class StringUtils {
+
+    public static final String DOT = "."; //NOI18N
+    public static final String FORWARD_SLASH = "/"; //NOI18N
+
+    private StringUtils() {
+
+    }
 
     public static boolean isUpperCase(String s) {
         for (char c : s.toCharArray()) {

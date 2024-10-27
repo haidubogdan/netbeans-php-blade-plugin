@@ -4,6 +4,7 @@ import BladeColoringCommonLexer;
 @header{
   package org.netbeans.modules.php.blade.syntax.antlr4.v10;
 }
+
 options { 
     superClass = ColoringLexerAdaptor;
     caseInsensitive = true;
@@ -27,7 +28,9 @@ fragment DirectivesWithEndTag : 'for' ('each')? | 'if' | 'while'
    | 'section' | 'session' | 'once' | 'push' | 'PushOnce'
    | 'switch' | 'unless' | 'can' ('any' | 'not')?
    | 'auth' | 'guest'
-   | 'error' | 'production' | 'empty';
+   | 'error' | 'empty'
+   //11.x
+   | 'fragment';
 
 fragment Include : '@include' ('If' | 'When' | 'First' | 'Unless')?;
 
@@ -40,6 +43,8 @@ fragment SpecialChars : '°';
 PHP_INLINE : '<?=' .*? '?>' | '<?php' .*? ('?>' | EOF);
 
 D_GENERIC_BLOCK_DIRECTIVES : ('@' DirectivesWithEndTag | '@sectionMissing' | '@hasSection') (' ')* {this._input.LA(1) == '('}? ->pushMode(INSIDE_PHP_EXPRESSION),type(DIRECTIVE);
+
+D_SIMPLE_BLOCK_DIRECTIVES : '@' 'end'? ('empty' | 'production' | 'once') ->type(DIRECTIVE);
 
 D_GENERIC_INLINE_DIRECTIVES : ('@elseif' |  Include | '@extends' | '@each' | '@yield' | '@props' | '@method' 
    | '@class' | '@style' | '@aware' | '@break' | '@continue' | '@selected' | '@disabled' 
@@ -55,7 +60,7 @@ D_ENDVERBATIM : '@endverbatim'->type(DIRECTIVE);
 
 D_MISC : ('@dd' | '@dump' | '@js' | '@json' | '@inject') (' ')* {this._input.LA(1) == '('}? ->pushMode(INSIDE_PHP_EXPRESSION),type(DIRECTIVE);
 
-D_SIMPLE : ('@else' | '@csrf' | '@default' | '@append' | '@parent')->type(DIRECTIVE);
+D_SIMPLE : ('@else' 'guest'? | '@csrf' | '@default' | '@append' | '@parent')->type(DIRECTIVE);
 
 //php emebeddings
 D_PHP_SHORT : '@php' (' ')? {this._input.LA(1) == '('}? ->type(D_PHP),pushMode(INSIDE_PHP_EXPRESSION);
@@ -73,7 +78,7 @@ D_CSS_AT_RULE : ('@supports' | '@container' | '@scope' | '@media') (' ')* {this.
 //we will decide that a custom directive has expression to avoid email matching
 D_CUSTOM : ('@' NameString (' ')* {this._input.LA(1) == '('}? ) ->pushMode(INSIDE_PHP_EXPRESSION);
 
-D_UNKNOWN : '@' NameString;
+D_UNKNOWN : '@' NameString->pushMode(ADIACENT_DIRECTIVE_TOKENS);
 
 //hack to allow completion for directives
 //it doesn't trigger completion
@@ -131,14 +136,16 @@ EXIT_RAW_ECHO_EOF : EOF->type(ERROR),popMode;
 // @directive (?)
 mode INSIDE_PHP_EXPRESSION;
 
-OPEN_PAREN : '(' {this.consumeOpenParen();};
-CLOSE_PAREN : ')' {this.consumeCloseParen();};
+OPEN_PAREN : '(' {this.rParenBalance == 0}? {this.rParenBalance++;}->type(BLADE_PAREN);
+OPEN_E_PAREN : '(' {this.rParenBalance++;}->type(PHP_EXPRESSION);
+CLOSE_PAREN : ')' {this.rParenBalance <= 1}? {this.rParenBalance = 0;}->type(BLADE_PAREN),mode(DEFAULT_MODE);
+CLOSE_E_PAREN : ')' {this.rParenBalance--;}->type(PHP_EXPRESSION);
 
 PHP_EXPRESSION_COMMENT : ('/*' .*? '*/')->skip;
 
-WS_EXPRESSION_MORE : [ ]+ {this.consumeExprToken();};
+PHP_EXPRESSION_GREEDY : ~[()]+ ->type(PHP_EXPRESSION);
 
-PHP_EXPRESSION_MORE : . {this.consumeExprToken();};
+PHP_EXPRESSION_MORE : . ->type(PHP_EXPRESSION);
 
 EXIT_EOF : EOF->type(ERROR),mode(DEFAULT_MODE);
 
@@ -148,16 +155,8 @@ mode BLADE_INLINE_PHP;
 D_ENDPHP : '@endphp'->popMode;
 
 //hack to merge all php inputs into one token
-BLADE_PHP_INLINE : . {
-        this._input.LA(1) == '@' &&
-        this._input.LA(2) == 'e' &&
-        this._input.LA(3) == 'n' &&
-        this._input.LA(4) == 'd' &&
-        this._input.LA(5) == 'p' &&
-        this._input.LA(6) == 'h' &&
-        this._input.LA(7) == 'p'
-      }?->channel(PHP_CODE) ;
-BLADE_PHP_INLINE_MORE : . ->more;
+BLADE_PHP_INLINE : ~[@]+ ->channel(PHP_CODE) ;
+BLADE_PHP_INLINE_MORE : . ->channel(PHP_CODE);
 
 EXIT_INLINE_PHP_EOF : EOF->type(ERROR),popMode;
 
@@ -167,16 +166,8 @@ mode VERBATIM_MODE;
 D_ENDVERBATIM_IN_MODE : '@endverbatim'->type(DIRECTIVE), popMode;
 
 //hack to merge all php inputs into one token
-VERBATIM_HTML : . {
-        this._input.LA(1) == '@' &&
-        this._input.LA(2) == 'e' &&
-        this._input.LA(3) == 'n' &&
-        this._input.LA(4) == 'd' &&
-        this._input.LA(5) == 'v' &&
-        this._input.LA(6) == 'e' &&
-        this._input.LA(7) == 'r'
-      }? ->type(HTML);
-VERBATIM_HTML_MORE : . ->more;
+VERBATIM_HTML : ~[@]+ ->type(HTML);
+VERBATIM_HTML_MORE : . ->type(HTML);
 
 EXIT_VERBATIM_MOD_EOF : EOF->type(ERROR),popMode;
 
@@ -201,17 +192,9 @@ COMPONENT_PHP_EXPRESSION : . ->more;
 
 EXIT_COMPONENT_PHP_EXPRESSION_EOF : EOF->type(ERROR),popMode;
 
-//TODO numeric
-DB_JSON_PAIR : '{' [\\']?  FullIdentifier [\\']? ':'+ [\\']?  FullIdentifier?  [\\']?  (',' ( [\\']?  FullIdentifier [\\']?  ':'+ [\\']?   FullIdentifier [\\']? ))* ','? '}' ->more;
+mode ADIACENT_DIRECTIVE_TOKENS;
 
-PHP_INTERCALATED : '{' '$' FullIdentifier ('[' [\\'] FullIdentifier  [\\'] ']')* '::' FullIdentifier '}'->more;
+TOKEN_ADIACENT_DIRECTIVE : (' ' | '>' | [\n\r])->type(D_UNKNOWN),popMode;
 
-DB_POINT : ('{' '$' FullIdentifier ('[' [\\'] FullIdentifier?  [\\'] ']')* (('::'+ FullIdentifier)? (':' FullIdentifier?)+ ) '}' | ':$')->type(ERROR);
-
-DB_QUOTE_MORE : '\\"'->more;
-
-DB_QUOTE_EXIT : '"'->more, popMode;
-
-DB_QUOTE_ANY : . ->more;
-
-DB_QUOTE_EOF : EOF->type(ERROR),popMode;
+TOKEN_ADIACENT_DIRECTIVE_OTHER : . ->type(HTML),popMode;
+TOKEN_ADIACENT_DIRECTIVE_EOF : EOF->type(ERROR),popMode;
