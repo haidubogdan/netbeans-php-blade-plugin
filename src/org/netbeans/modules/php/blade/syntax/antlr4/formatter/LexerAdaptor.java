@@ -55,7 +55,7 @@ public abstract class LexerAdaptor extends Lexer {
     public void consumeDirectiveArgRParen() {
         //we start from 0 balance
         this.roundParenBalance--;
-        System.out.println("balance " + this.roundParenBalance);
+
         if (this.roundParenBalance <= 0) {
             this.setType(BladeAntlrFormatterLexer.D_ARG_RPAREN);
             this.roundParenBalance = 0;

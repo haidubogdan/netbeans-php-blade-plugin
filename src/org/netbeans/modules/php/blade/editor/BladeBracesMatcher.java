@@ -78,15 +78,15 @@ public class BladeBracesMatcher implements BracesMatcher {
             int start = currentToken.getStartIndex();
             int end = currentToken.getStopIndex();
 
-            String tokenText = originToken.getText();
+            String tokenText = originToken.getText().trim();
 
-            if (!tokenText.startsWith("@")
-                    && !tokenText.startsWith("{")
-                    && !tokenText.endsWith("}")) {
+            if (!tokenText.startsWith("@") //NOI18N
+                    && !tokenText.startsWith("{") //NOI18N
+                    && !tokenText.endsWith("}")) { //NOI18N
                 return result;
             }
 
-            currentDirection = findBraceDirectionType(tokenText, currentToken);
+            currentDirection = findBraceDirectionType(tokenText);
 
             if (currentDirection.equals(BraceDirectionType.STOP)) {
                 return result;
@@ -105,7 +105,7 @@ public class BladeBracesMatcher implements BracesMatcher {
         if (originToken == null) {
             return result;
         }
-        String tokenText = originToken.getText();
+        String tokenText = originToken.getText().trim();
 
         switch (currentDirection) {
             case CURLY_START_TO_END:
@@ -127,18 +127,14 @@ public class BladeBracesMatcher implements BracesMatcher {
 
     private static boolean shouldLookForBraceMatch(@NonNull Token currentToken) {
         switch (currentToken.getType()) {
-            case HTML:
-            case PHP_EXPRESSION:
             case AT:
-            case BLADE_COMMENT:
-            case ERROR:
                 return false;
         }
 
         return true;
     }
 
-    public BraceDirectionType findBraceDirectionType(String tokenText, Token token) {
+    public BraceDirectionType findBraceDirectionType(String tokenText) {
         boolean isCloseTag = Arrays.asList(BladeTagsUtils.outputCloseTags()).indexOf(tokenText) >= 0;
 
         if (isCloseTag) {
@@ -151,8 +147,8 @@ public class BladeBracesMatcher implements BracesMatcher {
             return BraceDirectionType.CURLY_START_TO_END;
         }
 
-        if (tokenText.startsWith("@end") || tokenText.equals("@show")) {
-            if (BladeLexerUtils.isUndefinedDirective(token)) {
+        if (tokenText.startsWith("@end") || tokenText.equals("@show")) { //NOI18N
+            if (BladeLexerUtils.isUndefinedDirective(tokenText)) {
                 return BraceDirectionType.CUSTOM_END_TO_START;
             }
             return BraceDirectionType.END_TO_START;
@@ -162,7 +158,7 @@ public class BladeBracesMatcher implements BracesMatcher {
             return BraceDirectionType.START_TO_END;
         }
 
-        if (BladeLexerUtils.isUndefinedDirective(token)) {
+        if (BladeLexerUtils.isUndefinedDirective(tokenText)) {
             return BraceDirectionType.CUSTOM_START_TO_END;
         }
 
@@ -172,7 +168,6 @@ public class BladeBracesMatcher implements BracesMatcher {
     public int[] findOpenTag() {
         int matchTokenType = BladeAntlrUtils.getTagPairTokenType(originToken.getType());
         List<Integer> skipableTokenTypes = new ArrayList<>();
-        skipableTokenTypes.add(HTML);
         Token startToken = BladeAntlrUtils.findBackwardWithStop(context.getDocument(),
                 originToken,
                 matchTokenType,
@@ -190,7 +185,6 @@ public class BladeBracesMatcher implements BracesMatcher {
     public int[] findCloseTag() {
         int matchTokenType = BladeAntlrUtils.getTagPairTokenType(originToken.getType());
         List<Integer> skipableTokenTypes = new ArrayList<>();
-        skipableTokenTypes.add(HTML);
         Token endToken = BladeAntlrUtils.findForwardWithStop(context.getDocument(),
                 originToken,
                 matchTokenType,
@@ -237,7 +231,7 @@ public class BladeBracesMatcher implements BracesMatcher {
     }
 
     public int[] findCustomDirectiveEnd(String directive) {
-        String[] pair = new String[]{"@end" + directive.substring(1)};
+        String[] pair = new String[]{"@end" + directive.substring(1)}; //NOI18N
         Set<String> stopDirectives = new HashSet<>( Arrays.asList(pair));
         Set<String> startDirectiveForBalance = new HashSet<>();
         startDirectiveForBalance.add(directive);
@@ -257,7 +251,7 @@ public class BladeBracesMatcher implements BracesMatcher {
     }
     
     public int[] findCustomDirectiveStart(String directive) {
-        String[] pair = new String[]{"@" + directive.substring(4)};
+        String[] pair = new String[]{"@" + directive.substring(4)}; //NOI18N
         Set<String> stopDirectives = new HashSet<>(Arrays.asList(pair));
         Set<String> startDirectiveForBalance = new HashSet<>();
         startDirectiveForBalance.add(directive);

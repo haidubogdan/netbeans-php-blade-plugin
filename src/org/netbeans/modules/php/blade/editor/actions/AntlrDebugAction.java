@@ -111,6 +111,7 @@ public class AntlrDebugAction extends AbstractAction implements ContextAwareActi
             arr.add(new ViewAntlrLexerTokensAction(node));
             arr.add(new ViewAntlrColoringTokensAction(node));
             arr.add(new ViewAntlrFormatterTokensAction(node));
+            arr.add(new ViewLexerColoringTokens(node));
         }
 //        List<? extends Action> actions = Utilities.actionsForPath("Actions/AntlrDebugActions");
 //        arr.addAll(actions);

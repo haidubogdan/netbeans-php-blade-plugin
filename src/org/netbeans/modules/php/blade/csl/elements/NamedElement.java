@@ -86,6 +86,8 @@ public class NamedElement implements ElementHandle {
                 return ElementKind.METHOD;
             case PHP_CLASS:
                 return ElementKind.CLASS;
+            case PHP_CONSTANT:
+                return ElementKind.CONSTANT;
         }
         return ElementKind.FILE;
     }

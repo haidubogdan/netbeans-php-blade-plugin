@@ -44,18 +44,17 @@ public class BladeParser extends org.netbeans.modules.parsing.spi.Parser {
         if (snapshot == null) {
             return;
         }
-        LOGGER.info(String.format("Parsing request for for " + task.getClass().getName() + " event changed : " + event.sourceChanged()));
+
         if (task.getClass().getName().contains("HtmlCssIndexContributor")){
             LOGGER.log(Level.INFO, "Skipped parsing for {0}", task.getClass().getName());
             return;
         }
-        long startTime = System.currentTimeMillis();
+
         BladeParserResult parserResult = createParserResult(snapshot);
 
         BladeParserResult parsed = parserResult.get(task.getClass().getName());
-        //cacheResult(snapshot.getSource().getFileObject(), parsed);
+        cacheResult(snapshot.getSource().getFileObject(), parsed);
         lastResult = parsed;
-        //LOGGER.info(String.format("Finished parsing for " + task.getClass().getName() + ". Time : %d ms", System.currentTimeMillis() - startTime));
     }
     
     private static void cacheResult(FileObject fo, BladeParserResult result) {

@@ -72,12 +72,8 @@ public class BladeHintsProvider implements HintsProvider {
                     continue;
                 }
                 if (astRule instanceof UnknownDirective) {
-                    for (Map.Entry<OffsetRange, BladeParserResult.Reference> entry : parserResult.customDirectivesReferences.entrySet()) {
-                        if (entry.getValue().type == BladeParserResult.ReferenceType.POSSIBLE_DIRECTIVE) {
-                            continue;
-                        }
-
-                        if (ct.customDirectiveConfigured(entry.getValue().identifier)) {
+                    for (Map.Entry<OffsetRange, String> entry : parserResult.getBladeCustomDirectiveOccurences().getAll().entrySet()) {
+                        if (ct.customDirectiveConfigured(entry.getValue())) {
                             continue;
                         }
                         hints.add(new Hint(astRule,
@@ -92,7 +88,7 @@ public class BladeHintsProvider implements HintsProvider {
         }
 
         //validate path config
-        for (Map.Entry<String, List<OffsetRange>> entry : parserResult.includeBladeOccurences.entrySet()) {
+        for (Map.Entry<String, List<OffsetRange>> entry : parserResult.getBladeReferenceIdsCollection().getIncludePathsOccurences().entrySet()) {
             FileObject realFile = BladePathUtils.findFileObjectForBladeViewPath(parserResult.getFileObject(),
                     entry.getKey());
             if (realFile != null) {

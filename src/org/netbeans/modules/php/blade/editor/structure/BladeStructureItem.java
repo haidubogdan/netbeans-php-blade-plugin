@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.netbeans.modules.php.blade.editor.navigator;
+package org.netbeans.modules.php.blade.editor.structure;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -43,6 +43,7 @@ public abstract class BladeStructureItem implements ElementHandle, StructureItem
     final FileObject source;
     final int startOffset;
     final int stopOffset;
+    private int depth;
 
     public BladeStructureItem(String name, FileObject source, int startOffset, int stopOffset) {
         this.name = name;
@@ -117,6 +118,14 @@ public abstract class BladeStructureItem implements ElementHandle, StructureItem
         return new OffsetRange(startOffset, stopOffset);
     }
 
+    public void setDepth(int depth) {
+        this.depth = depth;
+    }
+
+    public int getDepth() {
+        return depth;
+    }
+
     public static final class DirectiveBlockStructureItem extends BladeStructureItem {
 
         private String identifier;
@@ -165,6 +174,7 @@ public abstract class BladeStructureItem implements ElementHandle, StructureItem
         public ImageIcon getCustomIcon() {
             return ResourceUtilities.loadResourceIcon("icons/layout.png");
         }
+
     }
 
     public static class DirectiveInlineStructureItem extends BladeStructureItem {

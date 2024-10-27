@@ -2,6 +2,6 @@
 
 ## What's changed
 
-**syntax highlighting**
+**Don't install this**
 
-- fix issue #67 broken highlighting for `@continue, @break, ...` directives
+checking compatiblity with older IDE versions

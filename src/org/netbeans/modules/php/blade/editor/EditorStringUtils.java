@@ -18,47 +18,36 @@
  */
 package org.netbeans.modules.php.blade.editor;
 
-import java.util.Collection;
-import org.openide.util.Parameters;
-
 /**
  *
  * @author bhaidu
  */
-public class EditorStringUtils {
+public final class EditorStringUtils {
 
-    public static String implode(Collection<String> items, String delimiter) {
-        Parameters.notNull("items", items);
-        Parameters.notNull("delimiter", delimiter);
+    public static final String NAMESPACE_SEPARATOR = "\\"; // NOI18N
 
-        if (items.isEmpty()) {
-            return ""; // NOI18N
-        }
-
-        StringBuilder buffer = new StringBuilder(200);
-        boolean first = true;
-        for (String s : items) {
-            if (!first) {
-                buffer.append(delimiter);
-            }
-            buffer.append(s);
-            first = false;
-        }
-        return buffer.toString();
+    private EditorStringUtils() {
     }
-    
-    public static boolean isQuotedString(String text){
-        if (text.length() < 2){
+
+    public static boolean isQuotedString(String text) {
+        if (text.length() < 2) {
             return false;
         }
-        return (text.startsWith("'") && text.endsWith("'")) 
-                || (text.startsWith("\"") && text.endsWith("\""));
+        return (text.startsWith("'") && text.endsWith("'")) // NOI18N
+                || (text.startsWith("\"") && text.endsWith("\"")); // NOI18N
     }
 
-    public static String stripSurroundingQuotes(String text){
-        if (!isQuotedString(text)){
+    public static String stripSurroundingQuotes(String text) {
+        if (!isQuotedString(text)) {
             return text;
         }
-        return text.substring(1, text.length()-1);
+        return text.substring(1, text.length() - 1);
+    }
+
+    public static String trimNamespace(String namespace) {
+        assert namespace.length() > 2;
+        int subOffset = namespace.startsWith(NAMESPACE_SEPARATOR) ? 1 : 0;
+        int endOffset = namespace.endsWith(NAMESPACE_SEPARATOR) ? 1 : 0;
+        return namespace.substring(subOffset, namespace.length() - endOffset);
     }
 }

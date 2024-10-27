@@ -14,11 +14,6 @@
 - selection actions ??
 - variable include completion
 
-**mess detection**
-
-- navigator
-    - if block
-
 **code duplication**
 
 - directive completion and brace matcher
@@ -46,10 +41,11 @@ laravel specific
 
 - php storm block type doc
 
-**lexer**
+---
 
-- avoid using php embedding for identifier Strings
+erros to display
 
-**tests**
+```
+@if() should notify error
+```
 
-- unit tests??

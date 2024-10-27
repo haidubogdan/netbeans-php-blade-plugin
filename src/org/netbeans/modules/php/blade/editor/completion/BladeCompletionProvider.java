@@ -162,28 +162,7 @@ public class BladeCompletionProvider implements CompletionProvider {
                     return;
                 }
 
-                switch (currentToken.getType()) {
-                    case HTML_IDENTIFIER:
-                        completeAttributes(currentToken.getText(), caretOffset, resultSet);
-                        break;
-                    case HTML:
-                        String nText = currentToken.getText();
-                        if ("livewire".startsWith(nText)) {
-                            //quick implementation
-                            //??
-                            addHtmlTagCompletionItem(nText, "livewire", "livewire", caretOffset, resultSet);
-                        }
-                        break;
-                    case HTML_COMPONENT_PREFIX:
-                        String compPrefix = currentToken.getText().length() > 3 ? StringUtils.kebabToCamel(currentToken.getText().substring(3)) : "";
-                        completeComponents(compPrefix, fo, caretOffset, resultSet);
-                        break;
-                    case D_UNKNOWN_ATTR_ENC:
-                        completeDirectives(currentToken.getText(), doc, caretOffset, resultSet);
-                        break;
-                    default:
-                        break;
-                }
+                
             } finally {
                 long time = System.currentTimeMillis() - startTime;
                 if (time > 2000){
@@ -194,47 +173,6 @@ public class BladeCompletionProvider implements CompletionProvider {
         }
     }
 
-    private void completeDirectives(String prefix, Document doc, int carretOffset, CompletionResultSet resultSet) {
-        int startOffset = carretOffset - prefix.length();
-        DirectiveCompletionList completionList = new DirectiveCompletionList();
-
-        for (Directive directive : completionList.getDirectives()) {
-            String directiveName = directive.name();
-            if (directiveName.startsWith(prefix)) {
-                if (directive.params()) {
-                    resultSet.addItem(DirectiveCompletionBuilder.itemWithArg(
-                            startOffset, carretOffset, prefix, directiveName, directive.description(), doc));
-                    if (!directive.endtag().isEmpty()) {
-                        resultSet.addItem(DirectiveCompletionBuilder.itemWithArg(
-                                startOffset, carretOffset, prefix, directiveName, directive.endtag(), directive.description(), doc));
-                    }
-                } else {
-                    resultSet.addItem(DirectiveCompletionBuilder.simpleItem(
-                            startOffset, directiveName, directive.description()));
-                    if (!directive.endtag().isEmpty()) {
-                        resultSet.addItem(DirectiveCompletionBuilder.simpleItem(
-                                startOffset, carretOffset, prefix, directiveName, directive.endtag(), directive.description(), doc));
-                    }
-                }
-
-            }
-        }
-
-        FileObject fo = EditorDocumentUtils.getFileObject(doc);
-        Project project = ProjectUtils.getMainOwner(fo);
-
-        CustomDirectives.getInstance(project).filterAction(new CustomDirectives.FilterCallback() {
-            @Override
-            public void filterDirectiveName(CustomDirective customDirective, FileObject file) {
-                if (customDirective.name.startsWith(prefix)) {
-                    resultSet.addItem(DirectiveCompletionBuilder.itemWithArg(
-                            startOffset, carretOffset, prefix, customDirective.name,
-                            "custom directive", doc, file));
-                }
-            }
-        });
-    }
-    
     private void completeComponents(String prefixIdentifier, FileObject fo,
             int caretOffset, CompletionResultSet resultSet) {
 

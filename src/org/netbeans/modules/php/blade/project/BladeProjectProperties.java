@@ -44,8 +44,10 @@ public final class BladeProjectProperties {
 
     DefaultListModel<String> directiveCustomizerPathList = new DefaultListModel();
     DefaultListModel<String> viewsPathList = new DefaultListModel();
-        // enable declaration finder outside of framework plugin
+    // enable declaration finder outside of framework plugin
     private final AtomicBoolean nonLaravelDeclFinder = new AtomicBoolean(false);
+    // the pipe "|" char needs to be escaped
+    public static final String ESCAPED_VIEW_PATH_SEPARATOR = "\\|"; // NOI18N
 
     private BladeProjectProperties(Project project) {
         this.project = project;
@@ -168,11 +170,11 @@ public final class BladeProjectProperties {
         return paths;
     }
 
-    public String[] getViewsPathList() {
-        String encodedCompilerPathList = getPreferences().get(VIEW_PATH_LIST, null);
+    public String[] getViewsFolderPathList() {
+        String encodedViewsFolderPathList = getPreferences().get(VIEW_PATH_LIST, null);
         String[] paths = new String[]{};
-        if (encodedCompilerPathList != null) {
-            return encodedCompilerPathList.split("\\|", -1);
+        if (encodedViewsFolderPathList != null) {
+            return encodedViewsFolderPathList.split(ESCAPED_VIEW_PATH_SEPARATOR, -1);
         }
         return paths;
     }
