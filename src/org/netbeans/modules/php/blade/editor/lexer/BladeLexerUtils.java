@@ -25,7 +25,8 @@ import org.antlr.v4.runtime.Token;
 import org.netbeans.api.lexer.Language;
 import org.netbeans.api.lexer.TokenHierarchy;
 import org.netbeans.api.lexer.TokenSequence;
-import org.netbeans.modules.php.blade.syntax.antlr4.v10.BladeAntlrLexer;
+import org.netbeans.editor.BaseDocument;
+import org.netbeans.modules.php.blade.editor.BladeLanguage;
 import static org.netbeans.modules.php.blade.syntax.antlr4.v10.BladeAntlrLexer.*;
 import org.netbeans.modules.php.editor.lexer.PHPTokenId;
 
@@ -34,9 +35,9 @@ import org.netbeans.modules.php.editor.lexer.PHPTokenId;
  * @author bogdan
  */
 public final class BladeLexerUtils {
-    
-    private BladeLexerUtils(){
-        
+
+    private BladeLexerUtils() {
+
     }
 
     public static TokenSequence<? extends PHPTokenId> getPhpTokenSequence(TokenHierarchy<Document> th, final int offset) {
@@ -46,6 +47,27 @@ public final class BladeLexerUtils {
     public static TokenSequence<? extends PHPTokenId> getPhpTokenSequence(final Document document, final int offset) {
         TokenHierarchy<Document> th = TokenHierarchy.get(document);
         return getTokenSequence(th, offset, PHPTokenId.language());
+    }
+
+    public static TokenSequence<BladeTokenId> getTokenSequence(final Document document, final int offset) {
+        final BaseDocument baseDocument = document instanceof BaseDocument ? (BaseDocument) document : null;
+        try {
+            if (baseDocument != null) {
+                baseDocument.readLock();
+            }
+            return getBladeTokenSequence(TokenHierarchy.get(document), offset);
+        } finally {
+            if (baseDocument != null) {
+                baseDocument.readUnlock();
+            }
+        }
+    }
+
+    public static TokenSequence<BladeTokenId> getBladeTokenSequence(TokenHierarchy<Document> th, int offset) {
+        BladeLanguage lang = new BladeLanguage();
+        TokenSequence<BladeTokenId> ts = th.tokenSequence(lang.getLexerLanguage());
+
+        return ts;
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
@@ -74,15 +96,10 @@ public final class BladeLexerUtils {
     }
 
     public static List<Integer> tokensWithIdentifiableParam() {
-        return Arrays.asList(new Integer[]{
-            D_EXTENDS, D_INCLUDE, D_INCLUDE_IF, D_INCLUDE_WHEN,
-            D_INCLUDE_UNLESS, D_EACH, D_SECTION, D_HAS_SECTION, D_SECTION_MISSING,
-            D_PUSH, D_PUSH_IF, D_PREPEND, D_USE, D_INJECT, D_ASSET_BUNDLER
-        });
+        return Arrays.asList(new Integer[]{D_EXTENDS, D_INCLUDE, D_SECTION, D_YIELD});
     }
-    
-    public static boolean isUndefinedDirective(Token token){
-        return token.getType() == BladeAntlrLexer.D_CUSTOM
-                || token.getType() == BladeAntlrLexer.D_UNKNOWN;
+
+    public static boolean isUndefinedDirective(Token token) {
+        return false;
     }
 }

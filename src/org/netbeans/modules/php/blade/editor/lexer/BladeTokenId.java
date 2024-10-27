@@ -76,6 +76,7 @@ public enum BladeTokenId implements TokenId {
         protected LanguageEmbedding<? extends TokenId> embedding(Token<BladeTokenId> token,
                 LanguagePath languagePath, InputAttributes inputAttributes) {
             boolean joinHtml = true;
+
             switch (token.id()) {
                 case PHP_BLADE_INLINE_CODE:
                 case PHP_BLADE_EXPRESSION: {

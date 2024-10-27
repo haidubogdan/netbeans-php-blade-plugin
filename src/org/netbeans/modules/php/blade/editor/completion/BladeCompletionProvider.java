@@ -162,28 +162,7 @@ public class BladeCompletionProvider implements CompletionProvider {
                     return;
                 }
 
-                switch (currentToken.getType()) {
-                    case HTML_IDENTIFIER:
-                        completeAttributes(currentToken.getText(), caretOffset, resultSet);
-                        break;
-                    case HTML:
-                        String nText = currentToken.getText();
-                        if ("livewire".startsWith(nText)) {
-                            //quick implementation
-                            //??
-                            addHtmlTagCompletionItem(nText, "livewire", "livewire", caretOffset, resultSet);
-                        }
-                        break;
-                    case HTML_COMPONENT_PREFIX:
-                        String compPrefix = currentToken.getText().length() > 3 ? StringUtils.kebabToCamel(currentToken.getText().substring(3)) : "";
-                        completeComponents(compPrefix, fo, caretOffset, resultSet);
-                        break;
-                    case D_UNKNOWN_ATTR_ENC:
-                        completeDirectives(currentToken.getText(), doc, caretOffset, resultSet);
-                        break;
-                    default:
-                        break;
-                }
+                
             } finally {
                 long time = System.currentTimeMillis() - startTime;
                 if (time > 2000){

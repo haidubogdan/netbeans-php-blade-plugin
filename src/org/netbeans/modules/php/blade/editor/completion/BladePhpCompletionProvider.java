@@ -57,10 +57,10 @@ import org.openide.util.Exceptions;
  *
  * @author bhaidu
  */
-@MimeRegistrations(value = {
-    @MimeRegistration(mimeType = "text/x-php5", service = CompletionProvider.class, position = 102), //    @MimeRegistration(mimeType = "text/x-blade", service = CompletionProvider.class, position = 105),
-}
-)
+//@MimeRegistrations(value = {
+//    @MimeRegistration(mimeType = "text/x-php5", service = CompletionProvider.class, position = 102), //    @MimeRegistration(mimeType = "text/x-blade", service = CompletionProvider.class, position = 105),
+//}
+//)
 public class BladePhpCompletionProvider implements CompletionProvider {
 
     private static final Logger LOGGER = Logger.getLogger(BladePhpCompletionProvider.class.getName());
@@ -173,122 +173,7 @@ public class BladePhpCompletionProvider implements CompletionProvider {
         }
 
         switch (currentToken.getType()) {
-            case BL_PARAM_STRING: {
-                String pathName = EditorStringUtils.stripSurroundingQuotes(currentToken.getText());
-                List<Integer> tokensMatch = Arrays.asList(new Integer[]{
-                    D_EXTENDS, D_INCLUDE, D_SECTION, D_HAS_SECTION,
-                    D_INCLUDE_IF, D_INCLUDE_WHEN, D_INCLUDE_UNLESS, D_INCLUDE_FIRST,
-                    D_EACH, D_PUSH, D_PUSH_IF, D_PREPEND
-                });
-
-                List<Integer> tokensStop = Arrays.asList(new Integer[]{HTML, BL_COMMA, BL_PARAM_CONCAT_OPERATOR});
-                Token directiveToken = BladeAntlrUtils.findBackward(tokens, tokensMatch, tokensStop);
-                if (directiveToken == null) {
-                    break;
-                }
-                switch (directiveToken.getType()) {
-                    case D_EXTENDS:
-                    case D_INCLUDE:
-                    case D_INCLUDE_IF:
-                    case D_INCLUDE_WHEN:
-                    case D_INCLUDE_UNLESS:
-                    case D_EACH:
-                        int lastDotPos;
-
-                        if (pathName.endsWith(".")) {
-                            lastDotPos = pathName.length();
-                        } else {
-                            lastDotPos = pathName.lastIndexOf(".");
-                        }
-                        int pathOffset;
-
-                        if (lastDotPos > 0) {
-                            int dotFix = pathName.endsWith(".") ? 0 : 1;
-                            pathOffset = caretOffset - pathName.length() + lastDotPos + dotFix;
-                        } else {
-                            pathOffset = caretOffset - pathName.length();
-                        }
-                        List<FileObject> childrenFiles = BladePathUtils.getParentChildrenFromPrefixPath(fo, pathName);
-                        for (FileObject file : childrenFiles) {
-                            String pathFileName = file.getName();
-                            if (!file.isFolder()) {
-                                pathFileName = pathFileName.replace(".blade", "");
-                            }
-                            completeBladePath(pathFileName, file, pathOffset, resultSet);
-                        }
-                        return;
-                    case D_SECTION:
-                    case D_HAS_SECTION:
-                        completeYieldIdFromIndex(pathName, fo, caretOffset, resultSet);
-                        break;
-                    case D_PUSH:
-                    case D_PUSH_IF:
-                    case D_PREPEND:
-                        completeStackIdFromIndex(pathName, fo, caretOffset, resultSet);
-                        break;
-                }
-                break;
-            }
-            case EXPR_STRING: {
-                String pathName = EditorStringUtils.stripSurroundingQuotes(currentToken.getText());
-
-                if (!pathName.contains("resources")) {
-                    if (!"resources".startsWith(pathName)) {
-                        break;
-                    }
-                }
-
-                int lastSlash = pathName.lastIndexOf("/");
-
-                FileObject projectDir = ProjectUtils.getProjectDirectory(fo);
-
-                if (projectDir == null) {
-                    break;
-                }
-
-                int pathOffset = caretOffset - pathName.length();
-                //laravel framework
-                if (lastSlash < 0) {
-                    String jsDirRoot = JS_ASSET_FOLDER;
-                    FileObject jsFolder = projectDir.getFileObject(JS_ASSET_FOLDER);
-                    addAssetPathCompletionItem(jsDirRoot, jsFolder.getPath(), pathOffset, resultSet, CompletionType.FOLDER);
-                    String cssDirRoot = CSS_ASSET_FOLDER;
-                    FileObject cssFolder = projectDir.getFileObject(CSS_ASSET_FOLDER);
-                    addAssetPathCompletionItem(cssDirRoot, cssFolder.getPath(), pathOffset, resultSet, CompletionType.FOLDER);
-                    break;
-                }
-
-                boolean isJsPath = JS_ASSET_FOLDER.startsWith(pathName) || pathName.startsWith(JS_ASSET_FOLDER);
-                boolean isCssPath = CSS_ASSET_FOLDER.startsWith(pathName) || pathName.startsWith(CSS_ASSET_FOLDER);
-
-                if (isJsPath) {
-                    FileObject jsFolder = projectDir.getFileObject(JS_ASSET_FOLDER);
-                    if (jsFolder == null || !jsFolder.isValid()) {
-                        break;
-                    }
-                    for (FileObject file : jsFolder.getChildren()) {
-                        String jsPath = JS_ASSET_FOLDER + "/" + file.getNameExt();
-                        if (jsPath.startsWith(pathName)) {
-                            addAssetPathCompletionItem(jsPath, file.getPath(), pathOffset, resultSet, CompletionType.JS_FILE);
-                        }
-                    }
-                    break;
-                }
-                if (isCssPath) {
-                    FileObject cssFolder = projectDir.getFileObject(CSS_ASSET_FOLDER);
-                    if (cssFolder == null || !cssFolder.isValid()) {
-                        break;
-                    }
-                    for (FileObject file : cssFolder.getChildren()) {
-                        String jsPath = CSS_ASSET_FOLDER + "/" + file.getNameExt();
-                        if (jsPath.startsWith(pathName)) {
-                            addAssetPathCompletionItem(jsPath, file.getPath(), pathOffset, resultSet, CompletionType.CSS_FILE);
-                        }
-                    }
-                    break;
-                }
-                break;
-            }
+            
             default:
                 break;
         }

@@ -127,11 +127,7 @@ public class BladeBracesMatcher implements BracesMatcher {
 
     private static boolean shouldLookForBraceMatch(@NonNull Token currentToken) {
         switch (currentToken.getType()) {
-            case HTML:
-            case PHP_EXPRESSION:
             case AT:
-            case BLADE_COMMENT:
-            case ERROR:
                 return false;
         }
 
@@ -172,7 +168,6 @@ public class BladeBracesMatcher implements BracesMatcher {
     public int[] findOpenTag() {
         int matchTokenType = BladeAntlrUtils.getTagPairTokenType(originToken.getType());
         List<Integer> skipableTokenTypes = new ArrayList<>();
-        skipableTokenTypes.add(HTML);
         Token startToken = BladeAntlrUtils.findBackwardWithStop(context.getDocument(),
                 originToken,
                 matchTokenType,
@@ -190,7 +185,6 @@ public class BladeBracesMatcher implements BracesMatcher {
     public int[] findCloseTag() {
         int matchTokenType = BladeAntlrUtils.getTagPairTokenType(originToken.getType());
         List<Integer> skipableTokenTypes = new ArrayList<>();
-        skipableTokenTypes.add(HTML);
         Token endToken = BladeAntlrUtils.findForwardWithStop(context.getDocument(),
                 originToken,
                 matchTokenType,
