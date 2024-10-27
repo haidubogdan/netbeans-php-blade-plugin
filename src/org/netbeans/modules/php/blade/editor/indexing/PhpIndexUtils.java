@@ -48,6 +48,10 @@ public class PhpIndexUtils {
 
     private static final Map<Integer, PhpIndexUtils> QUERY_SUPPORT_INSTANCES = new WeakHashMap<>();
 
+    public enum FieldAccessType {
+        STATIC,
+        DIRECT
+    }
     /**
      * class query without namespace
      *
@@ -191,7 +195,7 @@ public class PhpIndexUtils {
         return results;
     }
 
-    public static Collection<PhpIndexResult> queryExactClass(FileObject fo, String identifier) {
+    public static Collection<PhpIndexResult> queryExactClass(String identifier, FileObject fo) {
         QuerySupport phpindex = QuerySupportFactory.get(fo);
         QueryCache<String, Collection<PhpIndexResult>> selfCache = getCache(fo, identifier);
         if (selfCache != null && selfCache.containsKey(identifier)) {
@@ -370,7 +374,7 @@ public class PhpIndexUtils {
      * @return
      */
     public static Collection<PhpIndexFunctionResult> queryClassMethods(FileObject fo,
-            String method, String className, String queryNamespace) {
+            String method, String className, String queryNamespace, FieldAccessType accessType) {
         QuerySupport phpindex = QuerySupportFactory.get(fo);
         Collection<PhpIndexFunctionResult> results = new ArrayList<>();
 
@@ -420,6 +424,13 @@ public class PhpIndexUtils {
                     Signature sig = Signature.get(value);
                     String name = sig.string(1);
 
+                    Integer funcAccessType = sig.integer(5);
+                    //todo find where does the value 9 come from
+                    if (accessType.equals(FieldAccessType.STATIC) && funcAccessType != 9){
+                        //only public static methods
+                        continue;
+                    }
+                        
                     if (name.length() > 0 && name.startsWith(method)) {
                         Integer offset = sig.integer(2);
                         String params = sig.string(3);
@@ -660,7 +671,7 @@ public class PhpIndexUtils {
         return results;
     }
 
-    public static Collection<PhpIndexResult> queryExactClassConstants(FileObject fo, String prefix, String ownerClass) {
+    public static Collection<PhpIndexResult> queryExactClassConstants(String prefix, String ownerClass, FileObject fo) {
         QuerySupport phpindex = QuerySupportFactory.get(fo);
         Collection<PhpIndexResult> results = new ArrayList<>();
         String queryPrefix = prefix.toLowerCase();

@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.WeakHashMap;
 import java.util.concurrent.ExecutionException;
+import javax.swing.event.ChangeListener;
 import org.netbeans.api.project.Project;
 import org.netbeans.api.project.ui.OpenProjects;
 import org.netbeans.modules.csl.api.OffsetRange;
@@ -33,6 +34,7 @@ import org.netbeans.modules.parsing.spi.indexing.support.IndexResult;
 import org.netbeans.modules.parsing.spi.indexing.support.QuerySupport;
 import org.netbeans.modules.php.blade.editor.parser.BladeParserResult.Reference;
 import org.openide.filesystems.FileObject;
+import org.openide.util.ChangeSupport;
 import org.openide.util.Exceptions;
 
 /**
@@ -44,9 +46,11 @@ public class BladeIndex {
     private final QuerySupport querySupport;
     private static final Map<Project, BladeIndex> INDEXES = new WeakHashMap<>();
     private static boolean areProjectsOpen = false;
+    private final ChangeSupport changeSupport;
 
     private BladeIndex(QuerySupport querySupport) throws IOException {
         this.querySupport = querySupport;
+        this.changeSupport = new ChangeSupport(this);
     }
 
     public QuerySupport getQuerySupport() {
@@ -83,6 +87,18 @@ public class BladeIndex {
             return index;
         }
     }
+    
+    public void addChangeListener(ChangeListener changeListener) {
+        changeSupport.addChangeListener(changeListener);
+    }
+    
+    public void removeChangeListener(ChangeListener changeListener) {
+        changeSupport.removeChangeListener(changeListener);
+    }
+    
+    public void notifyChange() {
+        changeSupport.fireChange();
+    }
 
     public List<IndexedReferenceId> queryYieldIds(String prefix) {
         return queryIndexedReferenceId(prefix, BladeIndexer.YIELD_ID);
@@ -92,6 +108,7 @@ public class BladeIndex {
         return queryIndexedReferenceId(prefix, BladeIndexer.STACK_ID);
     }
 
+    //generic query method
     private List<IndexedReferenceId> queryIndexedReferenceId(String prefix, String indexKey) {
         List<IndexedReferenceId> indexedReferences = new ArrayList<>();
 
@@ -117,55 +134,6 @@ public class BladeIndex {
         return indexedReferences;
     }
 
-    public List<IndexedReference> queryYieldIndexedReferences(String prefix) {
-        return queryIndexedReferences(prefix,
-                BladeIndexer.YIELD_REFERENCE,
-                new IndexReferenceCallback() {
-            @Override
-            public Reference createIndexReference(String value) {
-                return BladeIndexer.extractYieldDataFromIndex(value);
-            }
-        }
-        );
-    }
-
-    public List<IndexedReference> queryStacksIdsReference(String prefix) {
-        return queryIndexedReferences(prefix,
-                BladeIndexer.STACK_REFERENCE,
-                new IndexReferenceCallback() {
-            @Override
-            public Reference createIndexReference(String value) {
-                return BladeIndexer.extractStackDataFromIndex(value);
-            }
-        }
-        );
-    }
-
-    private List<IndexedReference> queryIndexedReferences(String prefix, String indexKey, IndexReferenceCallback callback) {
-        List<IndexedReference> references = new ArrayList<>();
-        try {
-            Collection<? extends IndexResult> result = querySupport.query(indexKey,
-                    prefix, QuerySupport.Kind.PREFIX, indexKey);
-
-            if (result == null || result.isEmpty()) {
-                return references;
-            }
-
-            for (IndexResult indexResult : result) {
-                String[] values = indexResult.getValues(indexKey);
-                for (String value : values) {
-                    if (value.startsWith(prefix)) {
-                        references.add(new IndexedReference(callback.createIndexReference(value), indexResult.getFile()));
-                    }
-                }
-            }
-        } catch (IOException ex) {
-            Exceptions.printStackTrace(ex);
-        }
-
-        return references;
-    }
-
     public List<IndexedReference> findYieldIndexedReferences(String prefix) {
         return findIndexedReferences(prefix,
                 BladeIndexer.YIELD_ID,
@@ -175,6 +143,20 @@ public class BladeIndex {
             @Override
             public Reference createIndexReference(String value) {
                 return BladeIndexer.extractYieldDataFromIndex(value);
+            }
+        }
+        );
+    }
+
+    public List<IndexedReference> findStackIdIndexedReferences(String prefix) {
+        return findIndexedReferences(prefix,
+                BladeIndexer.STACK_ID,
+                new String[]{BladeIndexer.STACK_ID, BladeIndexer.STACK_REFERENCE},
+                BladeIndexer.STACK_REFERENCE,
+                new IndexReferenceCallback() {
+            @Override
+            public Reference createIndexReference(String value) {
+                return BladeIndexer.extractStackDataFromIndex(value);
             }
         }
         );
@@ -199,7 +181,7 @@ public class BladeIndex {
                     if (name != null && name.equals(prefix)) {
                         references.add(
                                 new IndexedReference(callback.createIndexReference(value),
-                                indexResult.getFile()));
+                                        indexResult.getFile()));
                     }
                 }
             }

@@ -112,15 +112,15 @@ public class BladeTypedTextInterceptor implements TypedTextInterceptor {
         
         BladeTokenId bladeToken = (BladeTokenId) token.id();
         
-        String tokenText = token.text().toString();
+        String tokenText = token.text().toString().trim();
         
         switch (bladeToken) {
             case HTML:
-                if (tokenText.equals("{") && tagType == TagType.CONTENT){
+                if (tokenText.equals("{") && tagType.equals(TagType.CONTENT)){
                     context.setText("{ }}", 1);
-                } else if (tokenText.equals("{!")  && tagType == TagType.RAW ){
+                } else if (tokenText.equals("{!")  && tagType.equals(TagType.RAW )){
                     context.setText("! !!}", 1);
-                } else if (tokenText.equals("{{-")  && tagType == TagType.COMMENT ){
+                } else if (tokenText.equals("{{-")  && tagType.equals(TagType.COMMENT)){
                     context.setText("- --}}", 1);
                 }
                 break;
