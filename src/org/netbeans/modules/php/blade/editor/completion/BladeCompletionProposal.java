@@ -27,7 +27,9 @@ import org.netbeans.modules.csl.api.ElementKind;
 import org.netbeans.modules.csl.api.HtmlFormatter;
 import org.netbeans.modules.csl.api.Modifier;
 import org.netbeans.modules.php.blade.csl.elements.ClassElement;
+import org.netbeans.modules.php.blade.editor.EditorStringUtils;
 import org.netbeans.modules.php.blade.editor.ResourceUtilities;
+import org.netbeans.modules.php.blade.syntax.BladeDirectivesUtils;
 import org.netbeans.modules.php.blade.syntax.annotation.Directive;
 import org.netbeans.modules.php.blade.syntax.annotation.Tag;
 
@@ -40,28 +42,27 @@ import org.openide.util.ImageUtilities;
  */
 public class BladeCompletionProposal implements CompletionProposal {
 
-    //@StaticResource
-    final CompletionRequest request;
-    protected final ElementHandle element;
-    final String previewValue;
-    protected Directive directive;
+    private final ElementHandle element;
+    private final String previewValue;
+    private int anchorOffset;
+    private Directive directive;
 
-    public BladeCompletionProposal(ElementHandle element, CompletionRequest request, String previewValue) {
+    public BladeCompletionProposal(ElementHandle element, int anchorOffset, String previewValue) {
         this.element = element;
-        this.request = request;
+        this.anchorOffset = anchorOffset;
         this.previewValue = previewValue;
     }
 
-    public BladeCompletionProposal(ElementHandle element, CompletionRequest request, Directive directive) {
+    public BladeCompletionProposal(ElementHandle element, int anchorOffset, Directive directive) {
         this.element = element;
-        this.request = request;
+        this.anchorOffset = anchorOffset;
         this.previewValue = directive.name();
         this.directive = directive;
     }
 
     @Override
     public int getAnchorOffset() {
-        return request.anchorOffset;
+        return anchorOffset;
     }
 
     @Override
@@ -87,12 +88,12 @@ public class BladeCompletionProposal implements CompletionProposal {
     @Override
     public String getLhsHtml(HtmlFormatter formatter) {
         formatter.name(getKind(), true);
-        formatter.appendHtml("<font>");
-        formatter.appendHtml("<b>");
+        formatter.appendHtml("<font>"); // NOI18N
+        formatter.appendHtml("<b>"); // NOI18N
         formatter.appendText(previewValue);
-        formatter.appendHtml("</b>");
-        formatter.appendHtml("</font>");
-        formatter.name(getKind(), false);
+        formatter.appendHtml("</b>"); // NOI18N
+        formatter.appendHtml("</font>"); // NOI18N
+        formatter.name(getKind(), false); // NOI18N
         return formatter.getText();
     }
 
@@ -127,7 +128,7 @@ public class BladeCompletionProposal implements CompletionProposal {
         }
         if (file != null) {
             formatter.reset();
-            formatter.appendText(" ");
+            formatter.appendText(" "); // NOI18N
             formatter.appendText(file.getName());
         }
         return formatter.getText();
@@ -143,10 +144,14 @@ public class BladeCompletionProposal implements CompletionProposal {
         return true;
     }
 
+    public Directive getDirective() {
+        return directive;
+    }
+
     public static class PhpElementItem extends BladeCompletionProposal {
 
-        public PhpElementItem(ElementHandle element, CompletionRequest request, String previewValue) {
-            super(element, request, previewValue);
+        public PhpElementItem(ElementHandle element, int anchorOffset, String previewValue) {
+            super(element, anchorOffset, previewValue);
         }
 
         @Override
@@ -157,7 +162,7 @@ public class BladeCompletionProposal implements CompletionProposal {
             }
             if (file != null) {
                 formatter.reset();
-                formatter.appendText(" ");
+                formatter.appendText(" "); // NOI18N
                 formatter.appendText(file.getNameExt());
             }
             return formatter.getText();
@@ -166,8 +171,8 @@ public class BladeCompletionProposal implements CompletionProposal {
 
     public static class NamespaceItem extends PhpElementItem {
 
-        public NamespaceItem(ElementHandle element, CompletionRequest request, String previewValue) {
-            super(element, request, previewValue);
+        public NamespaceItem(ElementHandle element, int anchorOffset, String previewValue) {
+            super(element, anchorOffset, previewValue);
         }
 
         @Override
@@ -183,18 +188,18 @@ public class BladeCompletionProposal implements CompletionProposal {
 
     public static class DirectiveItem extends BladeCompletionProposal {
 
-        public DirectiveItem(ElementHandle element, CompletionRequest request, String previewValue) {
-            super(element, request, previewValue);
+        public DirectiveItem(ElementHandle element, int anchorOffset, String previewValue) {
+            super(element, anchorOffset, previewValue);
         }
 
     }
 
     public static class ClassItem extends PhpElementItem {
 
-        protected String namespace = null;
-        
-        public ClassItem(ClassElement element, CompletionRequest request, String previewValue) {
-            super(element, request, previewValue);
+        private String namespace = null;
+
+        public ClassItem(ClassElement element, int anchorOffset, String previewValue) {
+            super(element, anchorOffset, previewValue);
             this.namespace = element.getNamespace();
         }
 
@@ -219,9 +224,9 @@ public class BladeCompletionProposal implements CompletionProposal {
         @Override
         public String getCustomInsertTemplate() {
             if (namespace != null && namespace.length() > 0) {
-                return "\\" + namespace + "\\" + element.getName();
+                return EditorStringUtils.NAMESPACE_SEPARATOR + namespace + EditorStringUtils.NAMESPACE_SEPARATOR + getElement().getName(); // NOI18N
             }
-            return element.getName();
+            return getElement().getName();
         }
     }
 
@@ -229,15 +234,15 @@ public class BladeCompletionProposal implements CompletionProposal {
 
         protected final String namespace;
 
-        public FunctionItem(ElementHandle element, CompletionRequest request, String previewValue) {
-            super(element, request, previewValue);
+        public FunctionItem(ElementHandle element, int anchorOffset, String previewValue) {
+            super(element, anchorOffset, previewValue);
             this.namespace = null;
         }
 
-        public FunctionItem(ElementHandle element, CompletionRequest request,
+        public FunctionItem(ElementHandle element, int anchorOffset,
                 String namespace,
                 String previewValue) {
-            super(element, request, previewValue);
+            super(element, anchorOffset, previewValue);
             this.namespace = namespace;
         }
 
@@ -263,8 +268,8 @@ public class BladeCompletionProposal implements CompletionProposal {
 
     public static class ConstantItem extends PhpElementItem {
 
-        public ConstantItem(ElementHandle element, CompletionRequest request, String previewValue) {
-            super(element, request, previewValue);
+        public ConstantItem(ElementHandle element, int anchorOffset, String previewValue) {
+            super(element, anchorOffset, previewValue);
         }
 
         @Override
@@ -276,8 +281,8 @@ public class BladeCompletionProposal implements CompletionProposal {
 
     public static class VariableItem extends BladeCompletionProposal {
 
-        public VariableItem(ElementHandle element, CompletionRequest request, String previewValue) {
-            super(element, request, previewValue);
+        public VariableItem(ElementHandle element, int anchorOffset, String previewValue) {
+            super(element, anchorOffset, previewValue);
         }
 
         @Override
@@ -289,8 +294,8 @@ public class BladeCompletionProposal implements CompletionProposal {
 
     public static class BladeVariableItem extends BladeCompletionProposal {
 
-        public BladeVariableItem(ElementHandle element, CompletionRequest request, String previewValue) {
-            super(element, request, previewValue);
+        public BladeVariableItem(ElementHandle element, int anchorOffset, String previewValue) {
+            super(element, anchorOffset, previewValue);
         }
 
         @Override
@@ -300,29 +305,22 @@ public class BladeCompletionProposal implements CompletionProposal {
 
         @Override
         public String getRhsHtml(HtmlFormatter formatter) {
-            return "blade";
+            return "blade"; // NOI18N
         }
-    }
-
-    public static class CompletionRequest {
-
-        public int anchorOffset;
-        public int carretOffset;
-        public String prefix;
     }
 
     public static class BladeTag extends BladeCompletionProposal {
 
-        protected Tag tag;
+        private Tag tag;
 
-        public BladeTag(ElementHandle element, CompletionRequest request, Tag tag) {
-            super(element, request, "");
+        public BladeTag(ElementHandle element, int anchorOffset, Tag tag) {
+            super(element, anchorOffset, ""); // NOI18N
             this.tag = tag;
         }
 
         @Override
         public String getCustomInsertTemplate() {
-            return tag.openTag() + " ${cursor} " + tag.closeTag();
+            return tag.openTag() + " ${cursor} " + tag.closeTag(); // NOI18N
         }
 
         @Override
@@ -340,41 +338,73 @@ public class BladeCompletionProposal implements CompletionProposal {
             return 0;
         }
     }
+    
+    public static class LayoutIdentifierProposal extends BladeCompletionProposal {
 
-    public static class DirectiveProposal extends BladeCompletionProposal {
-
-        public DirectiveProposal(ElementHandle element, CompletionRequest request, Directive directive) {
-            super(element, request, directive);
-        }
-
-        public DirectiveProposal(ElementHandle element, CompletionRequest request, String previewValue) {
-            super(element, request, previewValue);
+        public LayoutIdentifierProposal(ElementHandle element, int anchorOffset, String previewValue) {
+            super(element, anchorOffset, previewValue);
         }
 
         @Override
         public ImageIcon getIcon() {
-            String path = ResourceUtilities.ICON_BASE + "icons/at.png";//NOI18N
+            String path = ResourceUtilities.ICON_BASE + "icons/layout.png";
+            return ImageUtilities.loadImageIcon(path, false);
+        }
+    }
+
+    public static class ViewPathProposal extends BladeCompletionProposal {
+
+        private final boolean isFolder;
+
+        public ViewPathProposal(ElementHandle element, int anchorOffset, String previewValue, boolean isFolder) {
+            super(element, anchorOffset, previewValue);
+            this.isFolder = isFolder;
+        }
+
+        @Override
+        public ImageIcon getIcon() {
+            String path = ResourceUtilities.BLADE_VIEW;
+            if (isFolder) {
+                path = ResourceUtilities.FOLDER;
+            }
+            return ImageUtilities.loadImageIcon(path, false);
+        }
+    }
+
+    public static class DirectiveProposal extends BladeCompletionProposal {
+
+        public DirectiveProposal(ElementHandle element, int anchorOffset, Directive directive) {
+            super(element, anchorOffset, directive);
+        }
+
+        public DirectiveProposal(ElementHandle element, int anchorOffset, String previewValue) {
+            super(element, anchorOffset, previewValue);
+        }
+
+        @Override
+        public ImageIcon getIcon() {
+            String path = ResourceUtilities.DIRECTIVE_ICON;
             return ImageUtilities.loadImageIcon(path, false);
         }
 
         @Override
         public String getRhsHtml(HtmlFormatter formatter) {
-            if (this.directive == null) {
+            if (this.getDirective() == null) {
                 return null;
             }
 
-            if (directive.description().isEmpty() && !this.directive.since().isEmpty()) {
-                return "v" + this.directive.since();
+            if (getDirective().description().isEmpty() && !getDirective().since().isEmpty()) {
+                return "v" + getDirective().since(); // NOI18N
             }
-            return this.directive.description();
+            return getDirective().description();
         }
 
     }
 
     public static class CustomDirective extends DirectiveProposal {
 
-        public CustomDirective(ElementHandle element, CompletionRequest request, String preview) {
-            super(element, request, preview);
+        public CustomDirective(ElementHandle element, int anchorOffset, String preview) {
+            super(element, anchorOffset, preview);
         }
 
         @Override
@@ -382,87 +412,87 @@ public class BladeCompletionProposal implements CompletionProposal {
             if (this.getElement().getFileObject() != null) {
                 return this.getElement().getFileObject().getNameExt();
             }
-            return "custom directive";
+            return "custom directive"; // NOI18N
         }
 
     }
 
     public static class InlineDirective extends DirectiveProposal {
 
-        public InlineDirective(ElementHandle element, CompletionRequest request, Directive directive) {
-            super(element, request, directive);
+        public InlineDirective(ElementHandle element, int anchorOffset, Directive directive) {
+            super(element, anchorOffset, directive);
         }
 
     }
 
     public static class DirectiveWithArg extends InlineDirective {
 
-        public DirectiveWithArg(ElementHandle element, CompletionRequest request, Directive directive) {
-            super(element, request, directive);
+        public DirectiveWithArg(ElementHandle element, int anchorOffset, Directive directive) {
+            super(element, anchorOffset, directive);
         }
 
         @Override
         public String getCustomInsertTemplate() {
-            String template = getName() + "($$${arg})";
             switch (getName()) {
-                case "@include":
-                case "@extends":
-                    template = getName() + "('${path}')";
-                    break;
+                case BladeDirectivesUtils.DIRECTIVE_INCLUDE:
+                case BladeDirectivesUtils.DIRECTIVE_EXTENDS: {
+                    return getName() + "('${path}')"; // NOI18N
+                }
+                default: {
+                    return getName() + "($$${arg})"; // NOI18N
+                }
             }
-            return template;
         }
 
         @Override
         public String getLhsHtml(HtmlFormatter formatter) {
-            return getName() + "()";
+            return getName() + "()"; // NOI18N
         }
     }
 
     public static class BlockDirective extends DirectiveProposal {
 
-        public BlockDirective(ElementHandle element, CompletionRequest request, Directive directive) {
-            super(element, request, directive);
+        public BlockDirective(ElementHandle element, int anchorOffset, Directive directive) {
+            super(element, anchorOffset, directive);
         }
 
         @Override
         public String getLhsHtml(HtmlFormatter formatter) {
-            return getName() + " ... " + directive.endtag();
+            return getName() + " ... " + getDirective().endtag(); // NOI18N
         }
 
         @Override
         public String getCustomInsertTemplate() {
-            return getName() + "\n    ${selection} ${cursor}\n" + directive.endtag();
+            return getName() + "\n    ${selection} ${cursor}\n" + getDirective().endtag(); // NOI18N
         }
 
     }
 
     public static class BlockDirectiveWithArg extends DirectiveProposal {
 
-        public BlockDirectiveWithArg(ElementHandle element, CompletionRequest request, Directive directive) {
-            super(element, request, directive);
+        public BlockDirectiveWithArg(ElementHandle element, int anchorOffset, Directive directive) {
+            super(element, anchorOffset, directive);
         }
 
         @Override
         public String getLhsHtml(HtmlFormatter formatter) {
-            return getName() + "() ... " + directive.endtag();
+            return getName() + "() ... " + getDirective().endtag(); // NOI18N
         }
 
         @Override
         public String getCustomInsertTemplate() {
-            String template = getName() + "($$${arg})\n    ${cursor}\n" + directive.endtag();
-
             switch (getName()) {
-                case "@foreach":
-                    template = getName() + "($$${array} as $$${item})\n    ${selection}${cursor}\n" + directive.endtag();
-                    break;
-                case "@section":
-                case "@session":
-                    template = getName() + "('${id}')\n    ${cursor}\n" + directive.endtag();
-                    break;
+                case BladeDirectivesUtils.DIRECTIVE_FOREACH: {
+                    return getName() + "($$${array} as $$${item})\n    ${selection}${cursor}\n" + getDirective().endtag(); // NOI18N
+                }
+                case BladeDirectivesUtils.DIRECTIVE_SECTION:
+                case BladeDirectivesUtils.DIRECTIVE_SESSION: {
+                    return getName() + "('${id}')\n    ${cursor}\n" + getDirective().endtag(); // NOI18N
+                }
+                default: {
+                    return getName() + "($$${arg})\n    ${cursor}\n" + getDirective().endtag(); // NOI18N
+                } // NOI18N
             }
-
-            return template;
         }
 
     }

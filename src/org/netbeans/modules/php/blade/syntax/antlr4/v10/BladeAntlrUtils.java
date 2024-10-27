@@ -7,7 +7,9 @@ import java.util.List;
 import java.util.Set;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
+import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
+import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.Token;
 import static org.netbeans.modules.php.blade.syntax.antlr4.v10.BladeAntlrParser.*;
 import org.netbeans.spi.lexer.antlr4.AntlrTokenSequence;
@@ -44,10 +46,10 @@ public class BladeAntlrUtils {
         Token token = tokens.next().get();
 
         //need to move back
-        if ( token != null && tokens.hasPrevious() && token.getStartIndex() > offset && token.getStopIndex() > offset){
+        if (token != null && tokens.hasPrevious() && token.getStartIndex() > offset && token.getStopIndex() > offset) {
             token = tokens.previous().get();
         }
-        
+
         return token;
     }
 
@@ -197,7 +199,7 @@ public class BladeAntlrUtils {
         return null;
 
     }
-    
+
     public static Token findForwardWithStop(Document doc, Token start,
             int tokensMatch, List<Integer> stopTokens) {
         AntlrTokenSequence tokens = getTokens(doc);
@@ -257,7 +259,7 @@ public class BladeAntlrUtils {
         return null;
 
     }
-    
+
     public static Token findBackwardWithStop(Document doc, Token start,
             int tokensMatch, List<Integer> stopTokens) {
         AntlrTokenSequence tokens = getTokens(doc);
@@ -289,16 +291,26 @@ public class BladeAntlrUtils {
 
     public static int getTagPairTokenType(int tokenType) {
         switch (tokenType) {
-            case CONTENT_TAG_OPEN:
-                return CONTENT_TAG_CLOSE;
-            case CONTENT_TAG_CLOSE:
-                return CONTENT_TAG_OPEN;
-            case RAW_TAG_OPEN:
-                return RAW_TAG_CLOSE;
-            case RAW_TAG_CLOSE:
-                return RAW_TAG_OPEN;
             default:
                 return -1;
         }
+    }
+
+    public static AntlrTokenSequence lexerStringScan(String text) {
+        CharStream cs = CharStreams.fromString(text);
+        BladeAntlrLexer lexer = new BladeAntlrLexer(cs);
+        AntlrTokenSequence tokens = new AntlrTokenSequence(lexer);
+        return tokens;
+    }
+
+    public static Token getToken(String text, int offset) {
+        AntlrTokenSequence tokens = lexerStringScan(text);
+        if (offset > text.length()){
+            return null;
+        }
+        tokens.seekTo(offset);
+
+        Token token = tokens.next().get();
+        return token;
     }
 }

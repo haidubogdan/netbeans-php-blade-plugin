@@ -191,7 +191,7 @@ public class PhpIndexUtils {
         return results;
     }
 
-    public static Collection<PhpIndexResult> queryExactClass(FileObject fo, String identifier) {
+    public static Collection<PhpIndexResult> queryExactClass(String identifier, FileObject fo) {
         QuerySupport phpindex = QuerySupportFactory.get(fo);
         QueryCache<String, Collection<PhpIndexResult>> selfCache = getCache(fo, identifier);
         if (selfCache != null && selfCache.containsKey(identifier)) {

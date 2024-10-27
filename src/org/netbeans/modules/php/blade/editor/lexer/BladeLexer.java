@@ -42,7 +42,7 @@ public class BladeLexer extends AbstractAntlrLexerBridge<BladeAntlrColoringLexer
     @Override
     protected Token<BladeTokenId> mapToken(org.antlr.v4.runtime.Token antlrToken) {
         //debug text
-        //String text = antlrToken.getText();
+        String text = antlrToken.getText();
         int type = antlrToken.getType();
         //System.out.println(text + " " + type);
         switch (type) {
@@ -51,19 +51,18 @@ public class BladeLexer extends AbstractAntlrLexerBridge<BladeAntlrColoringLexer
             case BladeAntlrColoringLexer.BLADE_COMMENT_START:
                 return token(BLADE_COMMENT_START);
             case BladeAntlrColoringLexer.BLADE_COMMENT:
-                return token(BLADE_COMMENT);
+                return groupToken(BLADE_COMMENT, BladeAntlrColoringLexer.BLADE_COMMENT);
             case BladeAntlrColoringLexer.BLADE_COMMENT_END:
                 return token(BLADE_COMMENT_END);
             case BladeAntlrColoringLexer.HTML_TAG:
             case BladeAntlrColoringLexer.HTML:
-                return token(HTML);
+                return groupToken(HTML, BladeAntlrColoringLexer.HTML);
             case BladeAntlrColoringLexer.PHP_INLINE:
                 return token(PHP_INLINE);
             case BladeAntlrColoringLexer.PHP_EXPRESSION:
-                //System.out.println(antlrToken.getText());
-                return token(PHP_BLADE_EXPRESSION);
+                return groupToken(PHP_BLADE_EXPRESSION, BladeAntlrColoringLexer.PHP_EXPRESSION);
             case BladeAntlrColoringLexer.BLADE_PHP_INLINE:
-                return token(PHP_BLADE_INLINE_CODE);
+                return groupToken(PHP_BLADE_INLINE_CODE, BladeAntlrColoringLexer.BLADE_PHP_INLINE);
             case BladeAntlrColoringLexer.DIRECTIVE:
             case BladeAntlrColoringLexer.D_PHP:
             case BladeAntlrColoringLexer.D_ENDPHP:
@@ -76,7 +75,7 @@ public class BladeLexer extends AbstractAntlrLexerBridge<BladeAntlrColoringLexer
                 return token(PHP_BLADE_ECHO_EXPR);
             case BladeAntlrColoringLexer.D_UNKNOWN:
             case BladeAntlrColoringLexer.D_AT:
-                return token(BLADE_DIRECTIVE_UNKNOWN);
+                return groupToken(BLADE_DIRECTIVE_UNKNOWN, BladeAntlrColoringLexer.D_UNKNOWN);
             case BladeAntlrColoringLexer.ERROR:
                 return token(WS_D);
             default:
@@ -86,17 +85,13 @@ public class BladeLexer extends AbstractAntlrLexerBridge<BladeAntlrColoringLexer
 
     private static class State extends AbstractAntlrLexerBridge.LexerState<BladeAntlrColoringLexer> {
 
-        final int currentRuleType;
-
         public State(BladeAntlrColoringLexer lexer) {
             super(lexer);
-            this.currentRuleType = lexer.getCurrentRuleType();
         }
 
         @Override
         public void restore(BladeAntlrColoringLexer lexer) {
             super.restore(lexer);
-            lexer.setCurrentRuleType(currentRuleType);
         }
 
     }

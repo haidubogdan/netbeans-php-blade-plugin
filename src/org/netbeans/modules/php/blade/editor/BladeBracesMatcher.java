@@ -80,9 +80,9 @@ public class BladeBracesMatcher implements BracesMatcher {
 
             String tokenText = originToken.getText();
 
-            if (!tokenText.startsWith("@")
-                    && !tokenText.startsWith("{")
-                    && !tokenText.endsWith("}")) {
+            if (!tokenText.startsWith("@") //NOI18N
+                    && !tokenText.startsWith("{") //NOI18N
+                    && !tokenText.endsWith("}")) { //NOI18N
                 return result;
             }
 
@@ -127,11 +127,7 @@ public class BladeBracesMatcher implements BracesMatcher {
 
     private static boolean shouldLookForBraceMatch(@NonNull Token currentToken) {
         switch (currentToken.getType()) {
-            case HTML:
-            case PHP_EXPRESSION:
             case AT:
-            case BLADE_COMMENT:
-            case ERROR:
                 return false;
         }
 
@@ -151,7 +147,7 @@ public class BladeBracesMatcher implements BracesMatcher {
             return BraceDirectionType.CURLY_START_TO_END;
         }
 
-        if (tokenText.startsWith("@end") || tokenText.equals("@show")) {
+        if (tokenText.startsWith("@end") || tokenText.equals("@show")) { //NOI18N
             if (BladeLexerUtils.isUndefinedDirective(token)) {
                 return BraceDirectionType.CUSTOM_END_TO_START;
             }
@@ -172,7 +168,6 @@ public class BladeBracesMatcher implements BracesMatcher {
     public int[] findOpenTag() {
         int matchTokenType = BladeAntlrUtils.getTagPairTokenType(originToken.getType());
         List<Integer> skipableTokenTypes = new ArrayList<>();
-        skipableTokenTypes.add(HTML);
         Token startToken = BladeAntlrUtils.findBackwardWithStop(context.getDocument(),
                 originToken,
                 matchTokenType,
@@ -190,7 +185,6 @@ public class BladeBracesMatcher implements BracesMatcher {
     public int[] findCloseTag() {
         int matchTokenType = BladeAntlrUtils.getTagPairTokenType(originToken.getType());
         List<Integer> skipableTokenTypes = new ArrayList<>();
-        skipableTokenTypes.add(HTML);
         Token endToken = BladeAntlrUtils.findForwardWithStop(context.getDocument(),
                 originToken,
                 matchTokenType,
@@ -237,7 +231,7 @@ public class BladeBracesMatcher implements BracesMatcher {
     }
 
     public int[] findCustomDirectiveEnd(String directive) {
-        String[] pair = new String[]{"@end" + directive.substring(1)};
+        String[] pair = new String[]{"@end" + directive.substring(1)}; //NOI18N
         Set<String> stopDirectives = new HashSet<>( Arrays.asList(pair));
         Set<String> startDirectiveForBalance = new HashSet<>();
         startDirectiveForBalance.add(directive);
@@ -257,7 +251,7 @@ public class BladeBracesMatcher implements BracesMatcher {
     }
     
     public int[] findCustomDirectiveStart(String directive) {
-        String[] pair = new String[]{"@" + directive.substring(4)};
+        String[] pair = new String[]{"@" + directive.substring(4)}; //NOI18N
         Set<String> stopDirectives = new HashSet<>(Arrays.asList(pair));
         Set<String> startDirectiveForBalance = new HashSet<>();
         startDirectiveForBalance.add(directive);
