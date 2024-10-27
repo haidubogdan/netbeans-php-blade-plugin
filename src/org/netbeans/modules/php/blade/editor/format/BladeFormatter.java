@@ -27,7 +27,6 @@ import javax.swing.text.Document;
 import org.netbeans.modules.csl.api.Formatter;
 import org.netbeans.modules.csl.spi.ParserResult;
 import org.netbeans.modules.editor.indent.spi.Context;
-
 import org.netbeans.api.editor.document.LineDocument;
 import org.netbeans.api.editor.document.LineDocumentUtils;
 import org.netbeans.api.editor.settings.SimpleValueNames;
@@ -35,6 +34,7 @@ import org.netbeans.api.project.Project;
 import org.netbeans.modules.editor.NbEditorUtilities;
 import org.netbeans.modules.editor.indent.spi.CodeStylePreferences;
 import org.netbeans.modules.php.blade.editor.preferences.GeneralPreferencesUtils;
+import org.netbeans.modules.php.blade.syntax.StringUtils;
 import org.netbeans.spi.project.ui.support.ProjectConvertors;
 import org.openide.filesystems.FileObject;
 
@@ -60,8 +60,7 @@ public class BladeFormatter implements Formatter {
         } else if (!isBladeFormattingEnabled(doc)) {
             return;
         }
-        //todo
-        //check tab context
+
         FileObject file = NbEditorUtilities.getFileObject(doc);
         Project projectOwner = ProjectConvertors.getNonConvertorOwner(file);
         if (projectOwner == null) {
@@ -85,7 +84,7 @@ public class BladeFormatter implements Formatter {
                     if (context.isIndent()) {
                         int lineStart = context.lineStartOffset(context.caretOffset());
                         String lineText = doc.getText(lineStart, context.caretOffset() - lineStart);
-                        if (!lineText.isEmpty() && lineText.replaceAll(" ", "").isEmpty()) {
+                        if (!lineText.isEmpty() && StringUtils.isWhitespace(lineText)) { 
                             return;
                         }
                     }

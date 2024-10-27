@@ -35,11 +35,9 @@ import org.openide.filesystems.FileObject;
 public class TagElement implements ElementHandle {
 
     protected final String name;
-    protected final ElementType type;
 
     public TagElement(String name) {
         this.name = name;
-        this.type = ElementType.NA;
     }
 
     @Override
@@ -59,7 +57,7 @@ public class TagElement implements ElementHandle {
 
     @Override
     public String getIn() {
-        return "";
+        return ""; // NOI18N
     }
 
     @Override
@@ -80,9 +78,5 @@ public class TagElement implements ElementHandle {
     @Override
     public OffsetRange getOffsetRange(ParserResult pr) {
         return OffsetRange.NONE;
-    }
-
-    public ElementType getType() {
-        return type;
     }
 }

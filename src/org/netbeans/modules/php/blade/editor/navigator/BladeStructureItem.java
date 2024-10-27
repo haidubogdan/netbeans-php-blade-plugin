@@ -18,19 +18,15 @@
  */
 package org.netbeans.modules.php.blade.editor.navigator;
 
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 import java.util.Set;
 import javax.swing.ImageIcon;
 import org.netbeans.modules.csl.api.ElementHandle;
-import org.netbeans.modules.csl.api.ElementKind;
 import org.netbeans.modules.csl.api.HtmlFormatter;
 import org.netbeans.modules.csl.api.Modifier;
 import org.netbeans.modules.csl.api.OffsetRange;
 import org.netbeans.modules.csl.api.StructureItem;
 import org.netbeans.modules.csl.spi.ParserResult;
-import org.netbeans.modules.php.blade.editor.ResourceUtilities;
 import org.openide.filesystems.FileObject;
 
 /**
@@ -39,10 +35,11 @@ import org.openide.filesystems.FileObject;
  */
 public abstract class BladeStructureItem implements ElementHandle, StructureItem {
 
-    final String name;
-    final FileObject source;
-    final int startOffset;
-    final int stopOffset;
+    private final String name;
+    private final FileObject source;
+    private final int startOffset;
+    private final int stopOffset;
+
 
     public BladeStructureItem(String name, FileObject source, int startOffset, int stopOffset) {
         this.name = name;
@@ -53,7 +50,9 @@ public abstract class BladeStructureItem implements ElementHandle, StructureItem
 
     @Override
     public String getSortText() {
-        return String.format("[%8d]", this.startOffset).replace(' ', '0');
+        //the api sorting is alphabetic natural
+        //using a string converted startOffset of the block item will give a good order in the navigator 
+        return String.format("[%8d]", this.startOffset).replace(' ', '0'); //NOI18N
     }
 
     @Override
@@ -117,102 +116,6 @@ public abstract class BladeStructureItem implements ElementHandle, StructureItem
         return new OffsetRange(startOffset, stopOffset);
     }
 
-    public static final class DirectiveBlockStructureItem extends BladeStructureItem {
 
-        private String identifier;
-
-        public final List<BladeStructureItem> nestedItems = new ArrayList<>();
-
-        public DirectiveBlockStructureItem(String name, FileObject source, int startOffset, int stopOffset) {
-            super(name, source, startOffset, stopOffset);
-        }
-
-        public DirectiveBlockStructureItem(String name, String identifier, FileObject source, int startOffset, int stopOffset) {
-            super(name, source, startOffset, stopOffset);
-            this.identifier = identifier;
-        }
-
-        @Override
-        public boolean isLeaf() {
-            return nestedItems.isEmpty();
-        }
-
-        @Override
-        public List<? extends StructureItem> getNestedItems() {
-            return nestedItems;
-        }
-
-        @Override
-        public ElementKind getKind() {
-            return ElementKind.CLASS;
-        }
-
-        @Override
-        public String getHtml(HtmlFormatter formatter) {
-            formatter.appendText(name);
-            if (identifier != null) {
-                formatter.appendText(" ");
-                formatter.appendHtml("<em>");
-                formatter.appendHtml("<font color='5b5b5b'>");
-                formatter.appendText(identifier);
-                formatter.appendHtml("</font>");
-                formatter.appendHtml("</em>");
-            }
-            return formatter.getText();
-        }
-
-        @Override
-        public ImageIcon getCustomIcon() {
-            return ResourceUtilities.loadResourceIcon("icons/layout.png");
-        }
-    }
-
-    public static class DirectiveInlineStructureItem extends BladeStructureItem {
-
-        private String identifier;
-
-        public DirectiveInlineStructureItem(String name, FileObject source, int startOffset, int stopOffset) {
-            super(name, source, startOffset, stopOffset);
-        }
-
-        public DirectiveInlineStructureItem(String name, String identifier, FileObject source, int startOffset, int stopOffset) {
-            super(name, source, startOffset, stopOffset);
-            this.identifier = identifier;
-        }
-
-        @Override
-        public boolean isLeaf() {
-            return true;
-        }
-
-        @Override
-        public String getHtml(HtmlFormatter formatter) {
-            formatter.appendText(name);
-            if (identifier != null) {
-                formatter.appendText(" ");
-                formatter.appendHtml("<em>");
-                formatter.appendHtml("<font color='5b5b5b'>");
-                formatter.appendText(identifier);
-                formatter.appendHtml("</font>");
-                formatter.appendHtml("</em>");
-            }
-            return formatter.getText();
-        }
-
-        @Override
-        public List<? extends StructureItem> getNestedItems() {
-            return Collections.emptyList();
-        }
-
-        @Override
-        public ElementKind getKind() {
-            return ElementKind.CLASS;
-        }
-
-        @Override
-        public ImageIcon getCustomIcon() {
-            return ResourceUtilities.loadResourceIcon("icons/layout.png");
-        }
-    }
 
 }

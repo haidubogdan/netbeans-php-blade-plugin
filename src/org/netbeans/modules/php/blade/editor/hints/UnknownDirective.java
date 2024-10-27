@@ -67,7 +67,7 @@ public class UnknownDirective implements Rule.AstRule {
 
     @Override
     public Set<?> getKinds() {
-        return Collections.singleton("blade.option.directive.hints");
+        return Collections.singleton("blade.option.directive.hints"); //NOI18N
     }
 
     @Override
@@ -77,11 +77,11 @@ public class UnknownDirective implements Rule.AstRule {
 
     @Override
     public String getDescription() {
-       return "Unknown Directive. The directive my not be in the base laravel blade compiler and was not found in the custom list.";
+       return "Unknown Directive. The directive my not be in the base laravel blade compiler and was not found in the custom list."; //NOI18N
     }
 
     @Override
     public String getDisplayName() {
-        return "Unknown Directive";
+        return "Unknown Directive"; //NOI18N
     }
 }

@@ -35,7 +35,6 @@ import org.netbeans.modules.php.blade.syntax.annotation.DirectiveRegister;
     @Directive(name = "@elseif", params = true),
     @Directive(name = "@else"),
     @Directive(name = "@endif"),
-    @Directive(name = "@empty", since = "5.4"),
     @Directive(name = "@empty", params = true, endtag = "@endempty", since = "5.4"),
     @Directive(name = "@isset", params = true, endtag = "@endisset"),
     @Directive(name = "@unless", params = true, endtag = "@endunless"),
@@ -48,13 +47,14 @@ import org.netbeans.modules.php.blade.syntax.annotation.DirectiveRegister;
     @Directive(name = "@endfor"),
     @Directive(name = "@endforeach"),
     @Directive(name = "@endforelse"),
+    @Directive(name = "@while", params = true, endtag = "@endwhile"),
     //layout
     @Directive(name = "@extends", params = true),
-    @Directive(name = "@section", params = true, endtag = "@endsection", endTags = {"@endsection", "@show", "@stop", "@append"}),
+    @Directive(name = "@section", params = true, endtag = "@endsection", endTags = {"@endsection", "@show", "@stop", "@append", "@overwrite"}),
     @Directive(name = "@endsection"),
     @Directive(name = "@stop"),
     @Directive(name = "@append"),
-    @Directive(name = "@once"),
+    @Directive(name = "@once", endtag="@endonce"),
     @Directive(name = "@endonce"),
     @Directive(name = "@overwrite"),
     @Directive(name = "@yield", params = true),
@@ -91,7 +91,8 @@ import org.netbeans.modules.php.blade.syntax.annotation.DirectiveRegister;
     //auth
     @Directive(name = "@auth", params = true, endtag = "@endauth"),
     @Directive(name = "@guest", params = true, endtag = "@endguest"),
-    @Directive(name = "@can", params = true, endtag = "@endcan", since = "5.1"),
+    @Directive(name = "@production", params = false, endtag = "@endproduction"),
+    @Directive(name = "@can", params = true, endtag = "@endcan", since = "5.1"),//spatie?
     @Directive(name = "@canany", params = true, endtag = "@endcanany", since = "5.8"),
     @Directive(name = "@cannot", params = true, endtag = "@endcannot", since = "5.3"),
     //php
@@ -116,6 +117,7 @@ import org.netbeans.modules.php.blade.syntax.annotation.DirectiveRegister;
     @Directive(name = "@required", params = true, since = "9"),
     }
 )
+//to do add a static cache directiveList with only blocks
 public class DirectivesList {
 
     public Directive[] getDirectives() {

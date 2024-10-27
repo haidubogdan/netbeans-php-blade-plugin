@@ -33,7 +33,7 @@ import org.openide.filesystems.FileObject;
 
 /**
  *
- * @author bhaidu
+ * @author bhaidu <haidubogdan@gmail.com>
  */
 public class NamedElement implements ElementHandle {
 
@@ -42,14 +42,12 @@ public class NamedElement implements ElementHandle {
     protected final ElementType type;
 
     public NamedElement(String name, FileObject file) {
-        //we can add a file object from element
         this.name = name;
         this.file = file;
         this.type = ElementType.NA;
     }
 
     public NamedElement(String name, FileObject file, ElementType type) {
-        //we can add a file object from element
         this.name = name;
         this.file = file;
         this.type = type;
@@ -86,6 +84,8 @@ public class NamedElement implements ElementHandle {
                 return ElementKind.METHOD;
             case PHP_CLASS:
                 return ElementKind.CLASS;
+            case PHP_CONSTANT:
+                return ElementKind.CONSTANT;
         }
         return ElementKind.FILE;
     }

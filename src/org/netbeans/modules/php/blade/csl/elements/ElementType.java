@@ -20,7 +20,7 @@ package org.netbeans.modules.php.blade.csl.elements;
 
 /**
  *
- * @author bogdan
+ * @author bhaidu <haidubogdan@gmail.com>
  */
 public enum ElementType {
     NA,

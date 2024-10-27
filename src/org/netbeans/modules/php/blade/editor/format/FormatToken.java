@@ -24,18 +24,19 @@ package org.netbeans.modules.php.blade.editor.format;
  */
 public class FormatToken {
 
-    public int tokenStart;
-    public int indent;
-    public int htmlIndent;
+    private final int tokenStart;
+    private final int indent;
+    private final int htmlIndent;
     //for directive
-    public String directive;
+    private final String directive;
 
     public FormatToken(int tokenStart, int indent, String directive) {
         this.tokenStart = tokenStart;
         this.indent = indent;
         this.directive = directive;
+        this.htmlIndent = 0;
     }
-    
+
     public FormatToken(int tokenStart, int indent, int htmlIndent, String directive) {
         this.tokenStart = tokenStart;
         this.indent = indent;
@@ -45,6 +46,18 @@ public class FormatToken {
 
     @Override
     public String toString() {
-        return this.directive + ", " + this.indent * 4 + ", " + this.tokenStart;
+        return this.directive + ", " + this.indent * 4 + ", " + this.tokenStart; //NOI18N
+    }
+
+    public int getTokenStart() {
+        return tokenStart;
+    }
+
+    public int getIndent() {
+        return indent;
+    }
+    
+    public int getHtmlIndent(){
+        return htmlIndent;
     }
 }

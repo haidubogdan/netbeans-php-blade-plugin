@@ -157,7 +157,7 @@ public class BladeDirectives extends javax.swing.JPanel {
         assert EventQueue.isDispatchThread();
         File sources = new FileChooserBuilder(BladeDirectives.class)
                 .setFilesOnly(true)
-                .setTitle("Select compiler File Path")
+                .setTitle("Select compiler File Path") // NOI18N
                 .setDefaultWorkingDirectory(FileUtil.toFile(project.getProjectDirectory()))
                 .forceUseOfDefaultWorkingDirectory(true)
                 .showOpenDialog();
@@ -177,7 +177,7 @@ public class BladeDirectives extends javax.swing.JPanel {
 
     private void jLabel3MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabel3MouseClicked
         try {
-            Desktop.getDesktop().browse(new URI("https://laravel.com/docs/10.x/blade#extending-blade"));
+            Desktop.getDesktop().browse(new URI("https://laravel.com/docs/10.x/blade#extending-blade")); // NOI18N
         } catch (URISyntaxException | IOException ex) {
             Exceptions.printStackTrace(ex);
         }

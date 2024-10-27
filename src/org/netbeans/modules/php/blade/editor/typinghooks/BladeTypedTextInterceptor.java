@@ -82,9 +82,9 @@ public class BladeTypedTextInterceptor implements TypedTextInterceptor {
         String typedText =  context.getText();
         
         Map<String, TagType> TagParts = new WeakHashMap<>();
-        TagParts.put("{", TagType.CONTENT);
-        TagParts.put("!", TagType.RAW);
-        TagParts.put("-", TagType.CONTENT);
+        TagParts.put("{", TagType.CONTENT); //NOI18N
+        TagParts.put("!", TagType.RAW); //NOI18N
+        TagParts.put("-", TagType.COMMENT); //NOI18N
         
         TagType tagType = TagParts.get(typedText);
         
@@ -99,9 +99,9 @@ public class BladeTypedTextInterceptor implements TypedTextInterceptor {
         }
         
         Document document = context.getDocument();
-        TokenHierarchy th = TokenHierarchy.get(document);
+        TokenHierarchy<?> th = TokenHierarchy.get(document);
         TokenSequence<?> ts = th.tokenSequence();
-        ts.move(context.getOffset() - 1);
+        ts.move(offset - 1);
         ts.moveNext();
 
         Token<?> token = ts.token();
@@ -110,18 +110,20 @@ public class BladeTypedTextInterceptor implements TypedTextInterceptor {
             return;
         }
         
-        BladeTokenId bladeToken = (BladeTokenId) token.id();
+        BladeTokenId bladeTokenId = (BladeTokenId) token.id();
         
-        String tokenText = token.text().toString();
+        String tokenText = token.text().toString().trim();
         
-        switch (bladeToken) {
+        switch (bladeTokenId) {
             case HTML:
-                if (tokenText.equals("{") && tagType == TagType.CONTENT){
-                    context.setText("{ }}", 1);
-                } else if (tokenText.equals("{!")  && tagType == TagType.RAW ){
-                    context.setText("! !!}", 1);
-                } else if (tokenText.equals("{{-")  && tagType == TagType.COMMENT ){
-                    context.setText("- --}}", 1);
+                int startOffset = Math.min(tokenText.length(), 3);
+                String snippet = document.getText(offset - startOffset, startOffset);
+                if (snippet.endsWith("{") && tagType.equals(TagType.CONTENT)){ //NOI18N
+                    context.setText("{ }}", 1); //NOI18N
+                } else if (snippet.endsWith("{!")  && tagType.equals(TagType.RAW )){ //NOI18N
+                    context.setText("! !!}", 1); //NOI18N
+                } else if (snippet.endsWith("{{-")  && tagType.equals(TagType.COMMENT)){ //NOI18N
+                    context.setText("- --}}", 1); //NOI18N
                 }
                 break;
         }

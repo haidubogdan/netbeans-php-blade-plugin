@@ -28,6 +28,7 @@ import org.netbeans.spi.project.ui.ProjectOpenedHook;
  * @author bhaidu
  */
 public class BladeProjectSupport extends ProjectOpenedHook implements PreferenceChangeListener{
+    public static String APP_PROVIDER_RELATIVE_PATH = "app/Providers/AppServiceProvider.php"; // NOI18N
     private final Project project;
         
     public BladeProjectSupport(Project project) {

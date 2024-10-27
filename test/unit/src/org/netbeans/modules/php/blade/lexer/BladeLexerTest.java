@@ -72,6 +72,34 @@ public class BladeLexerTest extends BladeLexerTestBase {
         performTest("html_javascript_01");
     }
     
+    public void testNewDirectivesLaravel_9() throws Exception {
+        performTest("laravel_9/directives");
+    }
+    
+    public void testNewDirectivesLaravel_11() throws Exception {
+        performTest("laravel_11/new_directives");
+    }
+    
+    public void testIssue10_directives() throws Exception {
+        performTest("issues/issue10_directives");
+    }
+    
+    public void testIssue11() throws Exception {
+        performTest("issues/issue11");
+    }
+    
+    public void testIssue12() throws Exception {
+        performTest("issues/issue12");
+    }
+    
+    public void testIssue18() throws Exception {
+        performTest("issues/issue18");
+    }
+    
+    public void testIssue67() throws Exception {
+        performTest("issues/issue67");
+    }
+    
     @Override
     protected String getTestResult(String filename) throws Exception {
         String content = BladeUtils.getFileContent(new File(getDataDir(), "testfiles/lexer/blade/" + filename + ".blade.php"));

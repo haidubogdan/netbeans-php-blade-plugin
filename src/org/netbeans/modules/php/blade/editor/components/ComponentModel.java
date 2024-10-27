@@ -18,10 +18,9 @@
  */
 package org.netbeans.modules.php.blade.editor.components;
 
-import java.util.Map;
-import java.util.WeakHashMap;
-import org.netbeans.api.project.Project;
-import org.netbeans.spi.project.ui.support.ProjectConvertors;
+import java.util.HashSet;
+import java.util.Set;
+import org.netbeans.modules.php.editor.parser.astnodes.FormalParameter;
 import org.openide.filesystems.FileObject;
 
 /**
@@ -31,21 +30,27 @@ import org.openide.filesystems.FileObject;
  */
 public class ComponentModel {
 
-    private static final Map<Integer, ComponentModel> MODEL_INSTANCE = new WeakHashMap<>();
-
-    protected static ComponentModel getModel(FileObject fo, String prefix) {
-        ComponentModel selfModel = new ComponentModel();
-        Project projectOwner = ProjectConvertors.getNonConvertorOwner(fo);
-        if (projectOwner == null) {
-            return null;
-        }
-        int pathHash = projectOwner.getProjectDirectory().toString().hashCode();
-        if (ComponentModel.MODEL_INSTANCE.containsKey(pathHash)) {
-            selfModel = MODEL_INSTANCE.get(pathHash);
-
-        } else {
-            MODEL_INSTANCE.put(pathHash, selfModel);
-        }
-        return selfModel;
+    private final FileObject file;
+    private boolean isValid = false;
+    private final Set<FormalParameter> constructorProperties = new HashSet<>();
+    
+    public ComponentModel(FileObject file){
+        this.file = file;
+    }
+    
+    public boolean isValid(){
+        return isValid;
+    }
+    
+    public void checkClassValidity(String className){
+        isValid = className.equals("Component");
+    }
+    
+    public void addConstructorProperty(FormalParameter property){
+        constructorProperties.add(property);
+    }
+    
+    public Set<FormalParameter> getConstructorProperties(){
+        return constructorProperties;
     }
 }

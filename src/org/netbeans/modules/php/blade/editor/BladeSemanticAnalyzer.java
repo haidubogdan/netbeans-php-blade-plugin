@@ -30,7 +30,6 @@ import org.netbeans.modules.parsing.spi.Scheduler;
 import org.netbeans.modules.parsing.spi.SchedulerEvent;
 import org.netbeans.modules.php.blade.editor.directives.CustomDirectives;
 import org.netbeans.modules.php.blade.editor.parser.BladeParserResult;
-import org.netbeans.modules.php.blade.editor.parser.BladeParserResult.Reference;
 import org.netbeans.modules.php.blade.project.ProjectUtils;
 import org.openide.filesystems.FileObject;
 
@@ -87,19 +86,14 @@ public class BladeSemanticAnalyzer extends SemanticAnalyzer<BladeParserResult> {
         FileObject fo = parserResult.getFileObject();
         Project project = ProjectUtils.getMainOwner(fo);
         CustomDirectives ct = CustomDirectives.getInstance(project);
-        for (Map.Entry<OffsetRange, Reference> entry : parserResult.customDirectivesReferences.entrySet()) {
-            if (entry.getValue().type == BladeParserResult.ReferenceType.POSSIBLE_DIRECTIVE && ct.customDirectiveConfigured(entry.getValue().identifier) ) {
+        for (Map.Entry<OffsetRange, String> entry : parserResult.getBladeCustomDirectiveOccurences().getAll().entrySet()) {
+            if (ct.customDirectiveConfigured(entry.getValue()) ) {
                 highlights.put(entry.getKey(), CUSTOM_DIRECTIVE_SET);
                 continue;
             }
             highlights.put(entry.getKey(), UNDEFINED_FIELD_SET);
         }
 
-//        List<? extends org.netbeans.modules.csl.api.Error> errorList = parserResult.getDiagnostics();
-//        for (org.netbeans.modules.csl.api.Error error : errorList) {
-//            OffsetRange range = new OffsetRange(error.getStartPosition(), error.getEndPosition());
-//            highlights.put(range, UNDEFINED_FIELD_SET);
-//        }
         this.semanticHighlights = highlights;
     }
 

@@ -39,13 +39,17 @@ public final class BladeProjectProperties {
     private static final Map<Project, BladeProjectProperties> INSTANCES = new HashMap<>();
     private static final String DIRECTIVE_CUSTOMIZER_PATH_LIST = "directive_customizer.path.list"; // NOI18N
     private static final String VIEW_PATH_LIST = "views.path.list"; // NOI18N
+    private static final String BLADE_COMPONENT_CLASS_FOLDER_LIST = "blade_component_class.folder.list"; // NOI18N
     private static final String NON_LARAVEL_DECL_FINDER = "non_laravel.decl.finder"; // NOI18N
     private final Project project;
 
     DefaultListModel<String> directiveCustomizerPathList = new DefaultListModel();
     DefaultListModel<String> viewsPathList = new DefaultListModel();
-        // enable declaration finder outside of framework plugin
+    private DefaultListModel<String> bladeComponentsClassFolderList = new DefaultListModel();
+    // enable declaration finder outside of framework plugin
     private final AtomicBoolean nonLaravelDeclFinder = new AtomicBoolean(false);
+    // the pipe "|" char needs to be escaped
+    public static final String ESCAPED_VIEW_PATH_SEPARATOR = "\\|"; // NOI18N
 
     private BladeProjectProperties(Project project) {
         this.project = project;
@@ -80,6 +84,7 @@ public final class BladeProjectProperties {
         directiveCustomizerPathList = createModelForDirectiveCusomizerPathList();
         viewsPathList = createModelForViewsPathList();
         nonLaravelDeclFinder.set(getPreferences().getBoolean(NON_LARAVEL_DECL_FINDER, false));
+        this.bladeComponentsClassFolderList = createModelForBladeComponentFolderList();
     }
 
     public void storeDirectiveCustomizerPaths() {
@@ -138,13 +143,35 @@ public final class BladeProjectProperties {
         return nonLaravelDeclFinder.get();
     }
 
+    //blade components
+    public void addCustomBladeComponentClassFolder(String path) {
+        bladeComponentsClassFolderList.addElement(path);
+    }
+    
+    public void removeCustomBladeComponentClassFolder(int index) {
+        bladeComponentsClassFolderList.remove(index);
+    }
+    
+    public DefaultListModel<String> createModelForBladeComponentFolderList() {
+        return creatModelFromPreferences(BLADE_COMPONENT_CLASS_FOLDER_LIST);
+    }
+    
+    public DefaultListModel<String> getModelForBladeComponentsClassFolderList() {
+        return bladeComponentsClassFolderList;
+    }
+    
+    public void storeBladeComponentsFolder() {
+        String includePath = UiOptionsUtils.encodeToStrings(bladeComponentsClassFolderList.elements());
+        getPreferences().put(BLADE_COMPONENT_CLASS_FOLDER_LIST, includePath);
+    }
+    
     private DefaultListModel<String> creatModelFromPreferences(String pathName) {
         DefaultListModel<String> model = new DefaultListModel<>();
         String encodedCompilerPathList = getPreferences().get(pathName, null);
         String[] paths;
 
         if (encodedCompilerPathList != null) {
-            paths = encodedCompilerPathList.split("\\|", -1);
+            paths = encodedCompilerPathList.split(ESCAPED_VIEW_PATH_SEPARATOR, -1);
         } else {
             return model;
         }
@@ -163,16 +190,25 @@ public final class BladeProjectProperties {
         String encodedCompilerPathList = getPreferences().get(DIRECTIVE_CUSTOMIZER_PATH_LIST, null);
         String[] paths = new String[]{};
         if (encodedCompilerPathList != null) {
-            return encodedCompilerPathList.split("\\|", -1);
+            return encodedCompilerPathList.split(ESCAPED_VIEW_PATH_SEPARATOR, -1);
         }
         return paths;
     }
 
-    public String[] getViewsPathList() {
-        String encodedCompilerPathList = getPreferences().get(VIEW_PATH_LIST, null);
+    public String[] getViewsFolderPathList() {
+        String encodedViewsFolderPathList = getPreferences().get(VIEW_PATH_LIST, null);
         String[] paths = new String[]{};
-        if (encodedCompilerPathList != null) {
-            return encodedCompilerPathList.split("\\|", -1);
+        if (encodedViewsFolderPathList != null) {
+            return encodedViewsFolderPathList.split(ESCAPED_VIEW_PATH_SEPARATOR, -1);
+        }
+        return paths;
+    }
+    
+    public String[] getBladeComponentsClassPathList() {
+        String encodedBladeComponentFolderPathList = getPreferences().get(BLADE_COMPONENT_CLASS_FOLDER_LIST, null);
+        String[] paths = new String[]{};
+        if (encodedBladeComponentFolderPathList != null) {
+            return encodedBladeComponentFolderPathList.split(ESCAPED_VIEW_PATH_SEPARATOR, -1);
         }
         return paths;
     }

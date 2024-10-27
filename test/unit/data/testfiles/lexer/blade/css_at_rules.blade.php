@@ -19,6 +19,11 @@
         margin-top: 4in;
     }
     
+    @-webkit-keyframes swal2-toast-show{
+        0% { transform : translateY(-.625em) }
+        100%{ transform : translateY(0) }
+    }
+    
     @keyframes slidein {
         from {
           transform: translateX(0%);

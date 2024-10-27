@@ -22,7 +22,15 @@ package org.netbeans.modules.php.blade.syntax;
  *
  * @author bhaidu
  */
-public class StringUtils {
+public final class StringUtils {
+
+    public static final String DOT = "."; //NOI18N
+    public static final String ESCAPED_DOT = "\\."; //NOI18N
+    public static final String FORWARD_SLASH = "/"; //NOI18N
+
+    private StringUtils() {
+
+    }
 
     public static boolean isUpperCase(String s) {
         for (char c : s.toCharArray()) {
@@ -45,7 +53,7 @@ public class StringUtils {
     }
 
     public static String toKebabCase(String str) {
-        return str.replaceAll("([A-Z])", "-$1").toLowerCase().substring(1);
+        return str.replaceAll("([A-Z])", "-$1").toLowerCase().substring(1); //NOI18N
     }
 
     public static String kebabToCamel(String str) {
@@ -56,5 +64,9 @@ public class StringUtils {
             camelCase += words[i].substring(0, 1).toUpperCase() + words[i].substring(1);
         }
         return capitalize(camelCase);
+    }
+
+    public static boolean isWhitespace(String text) {
+        return text.replaceAll(" ", "").isEmpty();
     }
 }

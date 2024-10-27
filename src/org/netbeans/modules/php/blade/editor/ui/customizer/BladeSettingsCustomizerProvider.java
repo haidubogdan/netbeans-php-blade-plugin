@@ -45,6 +45,8 @@ public class BladeSettingsCustomizerProvider implements ProjectCustomizer.Compos
         subcategories.add(optionsCustomizer.createCategory(lkp));
         BladeDirectivesCustomizerProvider directiveCustomizer = new BladeDirectivesCustomizerProvider();
         subcategories.add(directiveCustomizer.createCategory(lkp));
+        BladeComponentsCustomizerProvider bladeComponentsCustomizer = new BladeComponentsCustomizerProvider();
+        subcategories.add(bladeComponentsCustomizer.createCategory(lkp));
         return ProjectCustomizer.Category.create(CUSTOMIZER_IDENT,
                 NbBundle.getMessage(BladeSettingsCustomizerProvider.class, "LBL_LaravelBlade"), null,
                 subcategories.toArray(new ProjectCustomizer.Category[0]));
@@ -59,6 +61,9 @@ public class BladeSettingsCustomizerProvider implements ProjectCustomizer.Compos
             case BladeDirectivesCustomizerProvider.BLADE_DIRECTIVES:
                 BladeDirectivesCustomizerProvider directivesProvider = new BladeDirectivesCustomizerProvider();
                 return directivesProvider.createComponent(category, context);
+            case BladeComponentsCustomizerProvider.COMPONENTS_CUSTOMIZER:
+                BladeComponentsCustomizerProvider bladeComponentsCustomizer = new BladeComponentsCustomizerProvider();
+                return bladeComponentsCustomizer.createComponent(category, context);
         }
 
         return createGeneralSettingsComponent(category, context);

@@ -22,7 +22,6 @@ import java.awt.EventQueue;
 import java.io.File;
 import javax.swing.event.ChangeListener;
 import org.netbeans.api.project.Project;
-import org.netbeans.modules.php.blade.editor.indexing.BladeIndex;
 import org.netbeans.modules.php.blade.editor.indexing.IndexManager;
 import org.netbeans.modules.php.blade.project.BladeProjectProperties;
 import org.netbeans.spi.options.OptionsPanelController;
@@ -65,10 +64,6 @@ public final class BladeViewsFoldersPanel extends javax.swing.JPanel {
       
     public void addChangeListener(ChangeListener listener) {
         changeSupport.addChangeListener(listener);
-    }
-    
-    void fireChange() {
-        changeSupport.fireChange();
     }
   
     /**
@@ -185,7 +180,7 @@ public final class BladeViewsFoldersPanel extends javax.swing.JPanel {
         assert EventQueue.isDispatchThread();
         File sources = new FileChooserBuilder(BladeDirectives.class)
                 .setDirectoriesOnly(true)
-                .setTitle("Select View Folder Path")
+                .setTitle("Select View Folder Path") // NOI18N
                 .setDefaultWorkingDirectory(FileUtil.toFile(project.getProjectDirectory()))
                 .forceUseOfDefaultWorkingDirectory(true)
                 .showOpenDialog();

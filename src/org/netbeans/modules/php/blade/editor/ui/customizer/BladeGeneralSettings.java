@@ -73,13 +73,11 @@ public class BladeGeneralSettings extends javax.swing.JPanel {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(21, 21, 21)
-                        .addComponent(jLabel2))
                     .addComponent(auto_tag_completion)
                     .addComponent(formatting_enabled)
                     .addComponent(jLabel1)
-                    .addComponent(indentation_enabled))
+                    .addComponent(indentation_enabled)
+                    .addComponent(jLabel2))
                 .addContainerGap(119, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
@@ -91,10 +89,10 @@ public class BladeGeneralSettings extends javax.swing.JPanel {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(indentation_enabled)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(auto_tag_completion)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabel2)
-                .addGap(0, 175, Short.MAX_VALUE))
+                .addGap(11, 11, 11)
+                .addComponent(auto_tag_completion)
+                .addGap(0, 170, Short.MAX_VALUE))
         );
     }// </editor-fold>//GEN-END:initComponents
 

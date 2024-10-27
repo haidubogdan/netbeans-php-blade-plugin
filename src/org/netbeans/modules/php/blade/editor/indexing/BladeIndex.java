@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.WeakHashMap;
 import java.util.concurrent.ExecutionException;
+import javax.swing.event.ChangeListener;
 import org.netbeans.api.project.Project;
 import org.netbeans.api.project.ui.OpenProjects;
 import org.netbeans.modules.csl.api.OffsetRange;
@@ -83,7 +84,7 @@ public class BladeIndex {
             return index;
         }
     }
-
+    
     public List<IndexedReferenceId> queryYieldIds(String prefix) {
         return queryIndexedReferenceId(prefix, BladeIndexer.YIELD_ID);
     }
@@ -92,6 +93,7 @@ public class BladeIndex {
         return queryIndexedReferenceId(prefix, BladeIndexer.STACK_ID);
     }
 
+    //generic query method
     private List<IndexedReferenceId> queryIndexedReferenceId(String prefix, String indexKey) {
         List<IndexedReferenceId> indexedReferences = new ArrayList<>();
 
@@ -117,55 +119,6 @@ public class BladeIndex {
         return indexedReferences;
     }
 
-    public List<IndexedReference> queryYieldIndexedReferences(String prefix) {
-        return queryIndexedReferences(prefix,
-                BladeIndexer.YIELD_REFERENCE,
-                new IndexReferenceCallback() {
-            @Override
-            public Reference createIndexReference(String value) {
-                return BladeIndexer.extractYieldDataFromIndex(value);
-            }
-        }
-        );
-    }
-
-    public List<IndexedReference> queryStacksIdsReference(String prefix) {
-        return queryIndexedReferences(prefix,
-                BladeIndexer.STACK_REFERENCE,
-                new IndexReferenceCallback() {
-            @Override
-            public Reference createIndexReference(String value) {
-                return BladeIndexer.extractStackDataFromIndex(value);
-            }
-        }
-        );
-    }
-
-    private List<IndexedReference> queryIndexedReferences(String prefix, String indexKey, IndexReferenceCallback callback) {
-        List<IndexedReference> references = new ArrayList<>();
-        try {
-            Collection<? extends IndexResult> result = querySupport.query(indexKey,
-                    prefix, QuerySupport.Kind.PREFIX, indexKey);
-
-            if (result == null || result.isEmpty()) {
-                return references;
-            }
-
-            for (IndexResult indexResult : result) {
-                String[] values = indexResult.getValues(indexKey);
-                for (String value : values) {
-                    if (value.startsWith(prefix)) {
-                        references.add(new IndexedReference(callback.createIndexReference(value), indexResult.getFile()));
-                    }
-                }
-            }
-        } catch (IOException ex) {
-            Exceptions.printStackTrace(ex);
-        }
-
-        return references;
-    }
-
     public List<IndexedReference> findYieldIndexedReferences(String prefix) {
         return findIndexedReferences(prefix,
                 BladeIndexer.YIELD_ID,
@@ -175,6 +128,20 @@ public class BladeIndex {
             @Override
             public Reference createIndexReference(String value) {
                 return BladeIndexer.extractYieldDataFromIndex(value);
+            }
+        }
+        );
+    }
+
+    public List<IndexedReference> findStackIdIndexedReferences(String prefix) {
+        return findIndexedReferences(prefix,
+                BladeIndexer.STACK_ID,
+                new String[]{BladeIndexer.STACK_ID, BladeIndexer.STACK_REFERENCE},
+                BladeIndexer.STACK_REFERENCE,
+                new IndexReferenceCallback() {
+            @Override
+            public Reference createIndexReference(String value) {
+                return BladeIndexer.extractStackDataFromIndex(value);
             }
         }
         );
@@ -199,7 +166,7 @@ public class BladeIndex {
                     if (name != null && name.equals(prefix)) {
                         references.add(
                                 new IndexedReference(callback.createIndexReference(value),
-                                indexResult.getFile()));
+                                        indexResult.getFile()));
                     }
                 }
             }

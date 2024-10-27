@@ -86,8 +86,8 @@ Experimental formatting and indenting
 
 **blade components**
 
-Limited completion and declaration finder
-
+- Limited completion and declaration finder
+- Config to set paths of the components class implementation for autocomplete & declaration finder.
 
 ---
 

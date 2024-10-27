@@ -32,6 +32,10 @@ import org.netbeans.api.project.Project;
 import org.netbeans.modules.csl.api.DeclarationFinder;
 import org.netbeans.modules.php.blade.editor.parser.ParsingUtils;
 import org.netbeans.modules.php.blade.project.BladeProjectProperties;
+import static org.netbeans.modules.php.blade.project.BladeProjectSupport.APP_PROVIDER_RELATIVE_PATH;
+import static org.netbeans.modules.php.blade.syntax.BladeDirectivesUtils.DIRECTIVE_ELSE;
+import static org.netbeans.modules.php.blade.syntax.BladeDirectivesUtils.END_DIRECTIVE_PREFIX;
+import org.netbeans.modules.php.editor.parser.PHPParseResult;
 import org.netbeans.modules.php.editor.parser.astnodes.Expression;
 import org.netbeans.modules.php.editor.parser.astnodes.FunctionInvocation;
 import org.netbeans.modules.php.editor.parser.astnodes.Scalar;
@@ -54,9 +58,9 @@ public final class CustomDirectives {
     public List<CustomDirective> customDirectiveList = new ArrayList<>();
 
     private final FileChangeListener fileChangeListener = new FileChangeListenerImpl();
-    
+
     private static final Logger LOGGER = Logger.getLogger(CustomDirectives.class.getName());
-    
+
     public static CustomDirectives getInstance(Project project) {
         if (project == null) {
             return new CustomDirectives();
@@ -84,27 +88,27 @@ public final class CustomDirectives {
     private CustomDirectives(Project project) {
         this.project = project;
         extractCustomDirectives();
-        LOGGER.log(Level.INFO, "Finished extracting directives. Found ({0})", customDirectives.size());
+        LOGGER.log(Level.INFO, "Finished extracting directives. Found ({0})", customDirectives.size()); // NOI18N
     }
 
     private void extractCustomDirectives() {
         LOGGER.info("Extracting custom directives");
         String[] compilerPathList = BladeProjectProperties.getInstance(project).getCompilerPathList();
-        FileObject defaultAppProvider = project.getProjectDirectory().getFileObject("app/Providers/AppServiceProvider.php");
+        FileObject defaultAppProvider = project.getProjectDirectory().getFileObject(APP_PROVIDER_RELATIVE_PATH);
         String defaultAppPath = "";
-        
-        if (defaultAppProvider != null){
+
+        if (defaultAppProvider != null) {
             addDirectiveNamesFromFile(defaultAppProvider);
             File defaultAppFile = new File(defaultAppProvider.getPath());
             defaultAppPath = defaultAppFile.getAbsolutePath();
             FileUtil.addRecursiveListener(fileChangeListener, defaultAppFile);
         }
-        
+
         if (compilerPathList.length == 0) {
             return;
         }
         for (String path : compilerPathList) {
-            if (path.equals("")) {
+            if (path.equals("")) { // NOI18N
                 continue;
             }
             File file = new File(path);
@@ -112,9 +116,9 @@ public final class CustomDirectives {
                 //remove
                 continue;
             }
-            
+
             String filePath = file.getPath();
-            if (defaultAppPath.equals(filePath)){
+            if (defaultAppPath.equals(filePath)) {
                 continue;
             }
             FileUtil.addRecursiveListener(fileChangeListener, file);
@@ -135,14 +139,16 @@ public final class CustomDirectives {
         ParsingUtils parsingUtils = new ParsingUtils();
         parsingUtils.parseFileObject(file);
         FunctionInvocationVisitor functionInvocationVisitor = new FunctionInvocationVisitor();
-        if (parsingUtils.getParserResult() != null && parsingUtils.getParserResult().getProgram() != null) {
-            parsingUtils.getParserResult().getProgram().accept(functionInvocationVisitor);
+        PHPParseResult parserResult = parsingUtils.getParserResult();
+
+        if (parserResult != null && parserResult.getProgram() != null) {
+            parserResult.getProgram().accept(functionInvocationVisitor);
             List<CustomDirective> directiveList = functionInvocationVisitor.getDirectives();
 
             if (directiveList.isEmpty()) {
                 return;
             }
-            
+
             customDirectiveList.addAll(directiveList);
             customDirectives.put(file, directiveList);
         }
@@ -150,6 +156,41 @@ public final class CustomDirectives {
 
     public Map<FileObject, List<CustomDirective>> getCustomDirectives() {
         return customDirectives;
+    }
+
+    public void filterAction(FilterCallback callback) {
+        for (Map.Entry<FileObject, List<CustomDirective>> entry : customDirectives.entrySet()) {
+            if (!entry.getKey().isValid()) {
+                continue;
+            }
+
+            for (CustomDirective directive : entry.getValue()) {
+                callback.filterDirectiveName(directive, entry.getKey());
+            }
+
+        }
+    }
+
+    public void filterAction(FilterCallbackDeclaration callback) {
+        for (Map.Entry<FileObject, List<CustomDirective>> entry : customDirectives.entrySet()) {
+            if (!entry.getKey().isValid()) {
+                continue;
+            }
+
+            for (CustomDirective directive : entry.getValue()) {
+                callback.filterDirectiveName(directive, entry.getKey());
+            }
+
+        }
+    }
+
+    public boolean customDirectiveConfigured(String query) {
+        for (CustomDirectives.CustomDirective customDirective : customDirectiveList) {
+            if (customDirective.name.equals(query)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public class DirectiveNames {
@@ -171,7 +212,8 @@ public final class CustomDirectives {
      * directive name
      */
     private class FunctionInvocationVisitor extends org.netbeans.modules.php.editor.parser.astnodes.visitors.DefaultVisitor {
-        private final String[] validFunctions = new String[]{"directive", "if"};
+
+        private final String[] validFunctions = new String[]{"directive", "if"}; // NOI18N
         private final List<CustomDirective> directives;
 
         public FunctionInvocationVisitor() {
@@ -196,13 +238,16 @@ public final class CustomDirectives {
             Expression directiveName = (Expression) iter.next();
             if (directiveName != null && directiveName instanceof Scalar) {
                 Scalar name = (Scalar) directiveName;
-                String escapedDirectiveName = name.getStringValue().replaceAll("^[\"|\']|[\"|[\']]$", "");
-                directives.add(new CustomDirective("@" + escapedDirectiveName, name.getStartOffset()));
+                String escapedDirectiveName = name.getStringValue().replaceAll("^[\"|\']|[\"|[\']]$", ""); // NOI18N
+
                 //Custom If Statements
-                if (functionName.equals("if")){
-                    directives.add(new CustomDirective("@unless" + escapedDirectiveName, name.getStartOffset()));
-                    directives.add(new CustomDirective("@else" + escapedDirectiveName, name.getStartOffset()));
-                    directives.add(new CustomDirective("@end" + escapedDirectiveName, name.getStartOffset()));
+                if (functionName.equals("if")) { // NOI18N
+                    directives.add(new CustomDirective("@" + escapedDirectiveName, name.getStartOffset(), true)); // NOI18N
+                    directives.add(new CustomDirective("@unless" + escapedDirectiveName, name.getStartOffset())); // NOI18N
+                    directives.add(new CustomDirective(DIRECTIVE_ELSE + escapedDirectiveName, name.getStartOffset())); 
+                    directives.add(new CustomDirective(END_DIRECTIVE_PREFIX + escapedDirectiveName, name.getStartOffset())); 
+                } else {
+                    directives.add(new CustomDirective("@" + escapedDirectiveName, name.getStartOffset())); // NOI18N
                 }
             }
         }
@@ -236,67 +281,53 @@ public final class CustomDirectives {
 
     }
 
-    public void filterAction(FilterCallback callback) {
-        for (Map.Entry<FileObject, List<CustomDirective>> entry : customDirectives.entrySet()) {
-            if (!entry.getKey().isValid()) {
-                continue;
-            }
-
-            for (CustomDirective directive : entry.getValue()) {
-                 callback.filterDirectiveName(directive, entry.getKey());
-            }
-           
-        }
-    }
-    
-    public void filterAction(FilterCallbackDeclaration callback) {
-        for (Map.Entry<FileObject, List<CustomDirective>> entry : customDirectives.entrySet()) {
-            if (!entry.getKey().isValid()) {
-                continue;
-            }
-
-            for (CustomDirective directive : entry.getValue()) {
-                 callback.filterDirectiveName(directive, entry.getKey());
-            }
-           
-        }
-    }
-    
-    public boolean customDirectiveConfigured(String query){
-        for (CustomDirectives.CustomDirective customDirective : customDirectiveList){
-            if (customDirective.name.equals(query)){
-                return true;
-            }
-        }
-        return false;
-    }
-
     public static interface FilterCallback {
 
         public void filterDirectiveName(CustomDirective directive, FileObject file);
     }
-    
+
     public static abstract class FilterCallbackDeclaration {
-        protected DeclarationFinder.DeclarationLocation location ;
-        
-        public FilterCallbackDeclaration(DeclarationFinder.DeclarationLocation location){
+
+        protected DeclarationFinder.DeclarationLocation location;
+
+        public FilterCallbackDeclaration(DeclarationFinder.DeclarationLocation location) {
             this.location = location;
         }
 
-        public void filterDirectiveName(CustomDirective directive, FileObject file){}
-    }
-    
-    public static class CustomDirective {
-        public String name;
-        public int offset = 0;
-        
-        public CustomDirective(String name){
-            this.name = name;
+        public void filterDirectiveName(CustomDirective directive, FileObject file) {
         }
-        
-        public CustomDirective(String name, int offset){
+    }
+
+    public static class CustomDirective {
+
+        private final String name;
+        private final int offset;
+        private final boolean isBlockDirective;
+
+        public CustomDirective(String name, int offset) {
+            this(name, offset, false);
+        }
+
+        public CustomDirective(String name) {
+            this(name, 0, false);
+        }
+
+        public CustomDirective(String name, int offset, boolean isBlock) {
             this.name = name;
             this.offset = offset;
+            this.isBlockDirective = isBlock;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public int getOffset() {
+            return offset;
+        }
+
+        public boolean isBlockDirective() {
+            return isBlockDirective;
         }
     }
 }

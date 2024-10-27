@@ -49,6 +49,7 @@ D_ESCAPES
     |  '@@' '@'?
     | '@{' '{'?
     | '@media' [ ]+ ('screen' [ ]+ 'and'?)?
+    | '@media' (' ')* {this._input.LA(1) == '('}?
     | ( '@charset' | '@import' | '@namespace' | '@document' | '@font-face'
        | '@page' | '@layer' | '@supports' | '@tailwind' | '@apply' | '@-webkit-keyframes' 
        | '@keyframes' | '@counter-style' | '@font-feature-values' | '@property'
@@ -62,12 +63,7 @@ mode INSIDE_BLADE_COMMENT;
 BLADE_COMMENT_END : '--}}'->popMode;
 
 //hack to merge all php inputs into one token
-BLADE_COMMENT_PEEK : . {
-        this._input.LA(1) == '-' &&
-        this._input.LA(2) == '-' &&
-        this._input.LA(3) == '}' &&
-        this._input.LA(4) == '}'
-      }? ->type(BLADE_COMMENT);
-BLADE_COMMENT_MORE : . ->more;
+BLADE_COMMENT_GREEDY : ~[-]+ ->type(BLADE_COMMENT);
+BLADE_COMMENT_MORE : . ->type(BLADE_COMMENT);
 
 BLADE_COMMENT_EOF : EOF->type(BLADE_COMMENT),popMode;

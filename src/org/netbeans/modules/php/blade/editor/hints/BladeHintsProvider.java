@@ -22,7 +22,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import javax.swing.text.BadLocationException;
 import org.netbeans.api.editor.document.EditorDocumentUtils;
 import org.netbeans.api.project.Project;
 import org.netbeans.modules.csl.api.Error;
@@ -33,6 +32,7 @@ import org.netbeans.modules.csl.api.Rule;
 import org.netbeans.modules.csl.api.Rule.ErrorRule;
 import org.netbeans.modules.csl.api.RuleContext;
 import org.netbeans.modules.csl.api.HintsProvider;
+import org.netbeans.modules.php.blade.editor.BladeLanguage;
 import org.netbeans.modules.php.blade.editor.directives.CustomDirectives;
 import org.netbeans.modules.php.blade.editor.parser.BladeParserResult;
 import org.netbeans.modules.php.blade.editor.path.BladePathUtils;
@@ -44,6 +44,7 @@ import org.openide.filesystems.FileObject;
  * @author bhaidu
  */
 public class BladeHintsProvider implements HintsProvider {
+
 
     /**
      * Compute hints applicable to the given compilation info and add to the
@@ -59,7 +60,7 @@ public class BladeHintsProvider implements HintsProvider {
             return;
         }
         Map<?, List<? extends Rule.AstRule>> allHints = manager.getHints(false, context);
-        List<? extends Rule.AstRule> directiveHints = allHints.get("blade.option.directive.hints");
+        List<? extends Rule.AstRule> directiveHints = allHints.get("blade.option.directive.hints"); //NOI18N
 
         BladeParserResult parserResult = (BladeParserResult) context.parserResult;
         FileObject fo = EditorDocumentUtils.getFileObject(context.doc);
@@ -72,16 +73,12 @@ public class BladeHintsProvider implements HintsProvider {
                     continue;
                 }
                 if (astRule instanceof UnknownDirective) {
-                    for (Map.Entry<OffsetRange, BladeParserResult.Reference> entry : parserResult.customDirectivesReferences.entrySet()) {
-                        if (entry.getValue().type == BladeParserResult.ReferenceType.POSSIBLE_DIRECTIVE) {
-                            continue;
-                        }
-
-                        if (ct.customDirectiveConfigured(entry.getValue().identifier)) {
+                    for (Map.Entry<OffsetRange, String> entry : parserResult.getBladeCustomDirectiveOccurences().getAll().entrySet()) {
+                        if (ct.customDirectiveConfigured(entry.getValue())) {
                             continue;
                         }
                         hints.add(new Hint(astRule,
-                                "Unknown directive. Try adding the provider class file using Project -> Properties -> Custom Directives",
+                                "Unknown directive. Try adding the provider class file using Project -> Properties -> Custom Directives", //NOI18N
                                 context.parserResult.getSnapshot().getSource().getFileObject(),
                                 entry.getKey(),
                                 Collections.emptyList(),
@@ -92,7 +89,7 @@ public class BladeHintsProvider implements HintsProvider {
         }
 
         //validate path config
-        for (Map.Entry<String, List<OffsetRange>> entry : parserResult.includeBladeOccurences.entrySet()) {
+        for (Map.Entry<String, List<OffsetRange>> entry : parserResult.getBladeReferenceIdsCollection().getIncludePathsOccurences().entrySet()) {
             FileObject realFile = BladePathUtils.findFileObjectForBladeViewPath(parserResult.getFileObject(),
                     entry.getKey());
             if (realFile != null) {
@@ -101,7 +98,7 @@ public class BladeHintsProvider implements HintsProvider {
             for (OffsetRange range : entry.getValue()) {
                 OffsetRange hintRange = new OffsetRange(range.getStart(), range.getEnd() + 1);
                 hints.add(new Hint(new BladeRule(HintSeverity.WARNING),
-                        "Blade path not found.\nFor custom blade context you can try to set the root folder using:\nProject -> Properties -> Laravel Blade -> Views Folder",
+                        "Blade path not found.\nFor custom blade context you can try to set the root folder using:\nProject -> Properties -> Laravel Blade -> Views Folder", //NOI18N
                         context.parserResult.getSnapshot().getSource().getFileObject(),
                         hintRange,
                         Collections.emptyList(),
@@ -135,8 +132,17 @@ public class BladeHintsProvider implements HintsProvider {
     @Override
     public void computeErrors(HintsManager manager, RuleContext context, List<Hint> hints, List<Error> unhandled) {
         BladeParserResult parserResult = (BladeParserResult) context.parserResult;
-
         unhandled.addAll(parserResult.getDiagnostics());
+
+        Map<?, List<? extends Rule.AstRule>> allHints = manager.getHints(false, context);
+        List<? extends Rule.AstRule> phpSyntaxHints = allHints.get("blade.hints.php.syntax_errors"); //NOI18N
+        if (phpSyntaxHints.isEmpty()){
+            return;
+        }
+        Rule.AstRule rule = phpSyntaxHints.get(0);
+        if (manager.isEnabled(rule)) {
+            unhandled.addAll(parserResult.getPhpErrors());
+        }
     }
 
     /**
@@ -182,6 +188,17 @@ public class BladeHintsProvider implements HintsProvider {
     @Override
     public RuleContext createRuleContext() {
         return new BladeRuleContext();
+    }
+    
+    public static boolean phpSyntaxErrorsDisplayEnabled(){
+        HintsManager bladeHintsManager = HintsProvider.HintsManager.getManagerForMimeType(BladeLanguage.MIME_TYPE);
+        Map<?, List<? extends Rule.AstRule>> allHints = bladeHintsManager.getHints();
+        List<? extends Rule.AstRule> phpSyntaxHints = allHints.get("blade.hints.php.syntax_errors"); //NOI18N
+        if (phpSyntaxHints.isEmpty()){
+            return false;
+        }
+        Rule.AstRule rule = phpSyntaxHints.get(0);
+        return bladeHintsManager.isEnabled(rule);
     }
 
     private static final class BladeRule implements ErrorRule {

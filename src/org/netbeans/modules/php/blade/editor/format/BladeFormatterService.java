@@ -20,8 +20,6 @@ package org.netbeans.modules.php.blade.editor.format;
 
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.text.BadLocationException;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -40,7 +38,6 @@ import org.openide.util.Exceptions;
  * @author bhaidu
  */
 public class BladeFormatterService {
-    private static final Logger LOGGER = Logger.getLogger(BladeFormatterService.class.getName());
     public final Map<Integer, FormatToken> formattedLineIndentList = new TreeMap<>();
     boolean debugMode = false;
     public boolean isIndentation;
@@ -58,53 +55,39 @@ public class BladeFormatterService {
         final int cstart = context.startOffset();
         final int cend = context.endOffset();
         int textDelta = 0;
-        LOGGER.log(Level.INFO, "Starting formatting from caret {0}:\n", cstart);
         
         for (Map.Entry<Integer, FormatToken> entry : formattedLineIndentList.entrySet()) {
-            int tstart = entry.getValue().tokenStart;
-            int indent = entry.getValue().indent;
-            int htmlIndent = entry.getValue().htmlIndent;
+            int tstart = entry.getValue().getTokenStart();
+            int indent = entry.getValue().getIndent();
+            int htmlIndent = entry.getValue().getHtmlIndent();
             if (tstart < context.document().getLength()) {
-                int existingLineIndent = 0;
                 try {
-                    existingLineIndent = context.lineIndent(tstart);
+                    //safety check of offset position
+                    context.lineIndent(tstart);
                 } catch (BadLocationException ex) {
                     Exceptions.printStackTrace(ex);
                     break;
                 }
                 if (tstart > cend) {
-//                    System.out.println("exit " + tstart + " > " + cend);
-//                    System.out.println("line : " + entry.getKey() + " ei " + existingLineIndent);
-//                    System.out.println("token : " + entry.getValue());
-//                    System.out.println("Finished formatting for caret " + cstart);
                     break;
                 }
             }
 
             if (tstart >= cstart) {
-//                System.out.println("doc length : " + context.document().getLength());
-//                System.out.println("delta : " + (tstart - textDelta));
                 if (context.document().getLength() < (tstart - textDelta)) {
                     //skipping
                     continue;
                 }
 
-//                System.out.println("line : " + entry.getKey());
-//                System.out.println("token : " + entry.getValue());
-//                System.out.println("indent : " + indent);
-//                System.out.println("htmlindent : " + htmlIndent);
                 try {
                     int lineStart_i = context.lineStartOffset(tstart - textDelta);
                     int originalIndent_i = context.lineIndent(lineStart_i);
                     int wsIndent = (indent + htmlIndent) * indentSize;
-//                    System.out.println("linestart + offset : " + (lineStart_i + wsIndent));
+
                     if (lineStart_i + wsIndent > context.document().getLength()) {
-//                        System.out.println("out of range : " + (lineStart_i + wsIndent));
                         break;
                     }
                     context.modifyIndent(lineStart_i, wsIndent);
-//                    System.out.println("delta : " + (originalIndent_i - wsIndent));
-//                    System.out.println("====================================");
                     textDelta += (originalIndent_i - wsIndent);
                 } catch (BadLocationException ex) {
                     Exceptions.printStackTrace(ex);

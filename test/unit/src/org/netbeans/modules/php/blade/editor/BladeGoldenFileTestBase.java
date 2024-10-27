@@ -48,7 +48,6 @@ public abstract class BladeGoldenFileTestBase extends BladeTestBase {
             copyStringToFileObject(goldenFO, result);
         } else {
             // if exist, compare it.
-            goldenFile = getGoldenFile(filename + ".pass");
             FileObject resultFO = touch(getWorkDir(), filename + ".result");
             copyStringToFileObject(resultFO, result);
             assertFile(FileUtil.toFile(resultFO), goldenFile, getWorkDir());

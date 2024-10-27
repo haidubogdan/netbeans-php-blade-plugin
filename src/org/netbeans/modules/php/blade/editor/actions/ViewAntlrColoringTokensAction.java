@@ -38,7 +38,6 @@ import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.Vocabulary;
 import org.netbeans.modules.php.blade.syntax.antlr4.v10.BladeAntlrColoringLexer;
-import static org.netbeans.modules.php.blade.syntax.antlr4.v10.BladeAntlrColoringLexer.*;
 import org.openide.awt.ActionID;
 import org.openide.awt.ActionRegistration;
 import org.openide.filesystems.FileObject;
@@ -59,7 +58,7 @@ public class ViewAntlrColoringTokensAction extends AbstractAction implements Act
 
     public ViewAntlrColoringTokensAction(Node node) {
         this.node = node;
-        putValue(NAME, "AntlrColoring Tokens");
+        putValue(NAME, "AntlrColoring Tokens"); //NOI18N
     }
 
     @Override
@@ -88,7 +87,7 @@ public class ViewAntlrColoringTokensAction extends AbstractAction implements Act
         }
 
         protected void initComponents() {
-            setName("Antlr coloring token preview - " + fileObject.getName());
+            setName("Antlr coloring token preview - " + fileObject.getName()); //NOI18N
             setLayout(new BorderLayout());
             viewer = new JEditorPane();
             viewer.setContentType("text/plain");

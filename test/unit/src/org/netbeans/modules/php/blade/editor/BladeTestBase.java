@@ -18,15 +18,28 @@
  */
 package org.netbeans.modules.php.blade.editor;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
+import javax.swing.text.Document;
+import org.netbeans.api.lexer.Language;
+import org.netbeans.editor.BaseDocument;
 import org.netbeans.junit.NbTestCase;
+import org.netbeans.lib.lexer.LanguageManager;
+import org.netbeans.modules.csl.api.GsfLanguage;
+import org.netbeans.modules.csl.core.LanguageRegistry;
+import org.netbeans.modules.csl.spi.DefaultLanguageConfig;
+import org.openide.ErrorManager;
 import org.openide.filesystems.FileObject;
+import org.openide.filesystems.FileSystem;
 import org.openide.filesystems.FileUtil;
+import org.openide.loaders.DataObject;
+import org.openide.loaders.DataObjectNotFoundException;
 
 /**
  *
@@ -123,4 +136,123 @@ public abstract class BladeTestBase extends NbTestCase {
         }
         return result.toString();
     }
+
+    protected DefaultLanguageConfig getPreferredLanguage() {
+        return new BladeLanguage();
+    }
+
+    protected String getPreferredMimeType() {
+        return BladeLanguage.MIME_TYPE;
+    }
+
+    protected BaseDocument getDocument(String s) {
+        String mimeType = getPreferredMimeType();
+        assertNotNull("You must implement " + getClass().getName() + ".getPreferredMimeType()", mimeType);
+
+        GsfLanguage language = getPreferredLanguage();
+        assertNotNull("You must implement " + getClass().getName() + ".getPreferredLanguage()", language);
+
+        return getDocument(s, mimeType, language.getLexerLanguage());
+    }
+
+    protected BaseDocument getDocument(FileObject fo) {
+        return getDocument(fo, getPreferredMimeType(), getPreferredLanguage().getLexerLanguage());
+    }
+
+    protected BaseDocument getDocument(FileObject fo, String mimeType, Language language) {
+        try {
+            BaseDocument doc = getDocument(readFile(fo), mimeType, language);
+            try {
+                DataObject dobj = DataObject.find(fo);
+                doc.putProperty(Document.StreamDescriptionProperty, dobj);
+            } catch (DataObjectNotFoundException dnfe) {
+                fail(dnfe.toString());
+            }
+
+            return doc;
+        } catch (Exception ex) {
+            fail(ex.toString());
+            return null;
+        }
+    }
+
+    public BaseDocument getDocument(String s, final String mimeType, final Language language) {
+        try {
+            BaseDocument doc = new BaseDocument(true, mimeType) {
+                @Override
+                public boolean isIdentifierPart(char ch) {
+                    if (mimeType != null) {
+                        org.netbeans.modules.csl.core.Language l = LanguageRegistry.getInstance().getLanguageByMimeType(mimeType);
+                        if (l != null) {
+                            GsfLanguage gsfLanguage = l.getGsfLanguage();
+                            if (gsfLanguage != null) {
+                                return gsfLanguage.isIdentifierChar(ch);
+                            }
+                        }
+                    }
+
+                    return super.isIdentifierPart(ch);
+                }
+            };
+
+            doc.putProperty(org.netbeans.api.lexer.Language.class, language);
+            doc.insertString(0, s, null);
+
+            return doc;
+        } catch (Exception ex) {
+            fail(ex.toString());
+            return null;
+        }
+    }
+
+    public BaseDocument getDocument(String s, String mimeType) {
+        Language<?> language = LanguageManager.getInstance().findLanguage(mimeType);
+        assertNotNull(language);
+
+        return getDocument(s, mimeType, language);
+    }
+
+    protected String readFile(final FileObject fo) {
+        return read(fo);
+    }
+
+    public static String read(final FileObject fo) {
+        try {
+            final StringBuilder sb = new StringBuilder(5000);
+            fo.getFileSystem().runAtomicAction(new FileSystem.AtomicAction() {
+
+                public void run() throws IOException {
+
+                    if (fo == null) {
+                        return;
+                    }
+
+                    InputStream is = fo.getInputStream();
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8));
+
+                    while (true) {
+                        String line = reader.readLine();
+
+                        if (line == null) {
+                            break;
+                        }
+
+                        sb.append(line);
+                        sb.append('\n');
+                    }
+                }
+            });
+
+            if (sb.length() > 0) {
+                return sb.toString();
+            } else {
+                return null;
+            }
+        } catch (IOException ioe) {
+            ErrorManager.getDefault().notify(ioe);
+
+            return null;
+        }
+    }
+    
 }

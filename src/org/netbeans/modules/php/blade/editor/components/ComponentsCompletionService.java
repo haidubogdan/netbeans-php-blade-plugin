@@ -18,50 +18,123 @@
  */
 package org.netbeans.modules.php.blade.editor.components;
 
-import org.netbeans.modules.php.blade.editor.components.annotation.NamespaceRegister;
 import org.netbeans.modules.php.blade.editor.components.annotation.Namespace;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Map;
+import org.netbeans.api.annotations.common.CheckForNull;
 import org.netbeans.api.project.Project;
+import org.netbeans.modules.csl.api.OffsetRange;
+import org.netbeans.modules.php.blade.editor.BladeLanguage;
+import org.netbeans.modules.php.blade.editor.components.plugins.LivewireComponent;
 import org.netbeans.modules.php.blade.editor.indexing.PhpIndexResult;
 import org.netbeans.modules.php.blade.editor.indexing.PhpIndexUtils;
+import org.netbeans.modules.php.blade.project.ComponentsSupport;
 import org.netbeans.modules.php.blade.project.ProjectUtils;
+import org.netbeans.modules.php.blade.syntax.StringUtils;
 import org.openide.filesystems.FileObject;
 
 /**
  * most frequently used plugins for laravel
- * 
+ *
  * @author bhaidu
  */
-@NamespaceRegister({
-    @Namespace(path = "App\\View\\Components", from_app=true, relativeFilePath="app/View/Components"),
-    @Namespace(path = "App\\Http\\Livewire", from_app=true, relativeFilePath="app/Http/Livewire"),
-    @Namespace(path = "App\\Livewire", from_app=true, relativeFilePath="app/Livewire"),//from 10
-    @Namespace(path = "Illuminate\\Console\\View\\Components"),
-    @Namespace(path = "BladeUIKit\\Components\\Buttons", packageName="blade-ui-kit/blade-ui-kit"),
-    @Namespace(path = "BladeUIKit\\Components\\Layouts", packageName="blade-ui-kit/blade-ui-kit"),
-    @Namespace(path = "BladeUIKit\\Components\\Forms\\Inputs", packageName="blade-ui-kit/blade-ui-kit"),
-})
 public class ComponentsCompletionService {
 
     public Collection<PhpIndexResult> queryComponents(String prefix, FileObject fo) {
         Collection<PhpIndexResult> results = new ArrayList<>();
         Project project = ProjectUtils.getMainOwner(fo);
-        for (Namespace namespace : getNamespaces()){
-            if (namespace.from_app()){
-                //check if folder exists
-                if (project.getProjectDirectory().getFileObject(namespace.relativeFilePath()) == null){
-                    continue;
-                }
+
+        if (project == null) {
+            return results;
+        }
+
+        ComponentsSupport componentSupport = ComponentsSupport.getInstance(project);
+
+        if (!componentSupport.isScanned()) {
+            componentSupport.scanForInstalledComponents();
+            componentSupport.scanCustomComponentsFolders();
+        }
+
+        for (Map.Entry<FileObject, Namespace> namespace : componentSupport.getInstalledComponentNamespace().entrySet()) {
+            results.addAll(PhpIndexUtils.queryNamespaceClassesName(fo, prefix, namespace.getValue().path()));
+        }
+        
+        for (Map.Entry<FileObject, ComponentModel> componentEntry : componentSupport.getComponentClassCollection().entrySet()) {
+            String className = componentEntry.getKey().getName();
+            if (className.toLowerCase().startsWith(prefix)){
+                results.add(new PhpIndexResult(className, componentEntry.getKey(), PhpIndexResult.Type.CLASS, new OffsetRange(0, 1)));
             }
-            results.addAll(PhpIndexUtils.queryNamespaceClassesName(prefix, namespace.path(), fo));
         }
 
         return results;
     }
 
-    public Namespace[] getNamespaces() {
-        NamespaceRegister namespaceRegister = this.getClass().getAnnotation(NamespaceRegister.class);
-        return namespaceRegister.value();
+    public Collection<PhpIndexResult> findComponentClass(String prefixClassName, FileObject fo) {
+        Collection<PhpIndexResult> results = new ArrayList<>();
+        Project project = ProjectUtils.getMainOwner(fo);
+
+        if (project == null) {
+            return results;
+        }
+
+        ComponentsSupport componentSupport = ComponentsSupport.getInstance(project);
+
+        if (!componentSupport.isScanned()) {
+            componentSupport.scanForInstalledComponents();
+            componentSupport.scanCustomComponentsFolders();
+        } else if (componentSupport.getComponentClassCollection().isEmpty()){
+            componentSupport.scanCustomComponentsFolders();
+        }
+
+        for (Map.Entry<FileObject, Namespace> namespace : componentSupport.getInstalledComponentNamespace().entrySet()) {
+            results.addAll(PhpIndexUtils.queryExactNamespaceClasses(prefixClassName, namespace.getValue().path(), fo));
+        }
+        
+        if (prefixClassName.contains(StringUtils.DOT)){
+            //NOT a complete flow, but it should cover the necessities
+            String classPathParts[] = prefixClassName.split(StringUtils.ESCAPED_DOT);
+            String prefixClassPathName = classPathParts[classPathParts.length - 1];
+            for (Map.Entry<FileObject, ComponentModel> componentEntry : componentSupport.getComponentClassCollection().entrySet()) {
+                String className = componentEntry.getKey().getName().toLowerCase();
+                if (className.equals(prefixClassPathName)){
+                    results.add(new PhpIndexResult(className, componentEntry.getKey(), PhpIndexResult.Type.CLASS, new OffsetRange(0, 1)));
+                }
+            }
+        } else {
+            for (Map.Entry<FileObject, ComponentModel> componentEntry : componentSupport.getComponentClassCollection().entrySet()) {
+                String className = componentEntry.getKey().getName();
+                if (className.equals(prefixClassName)){
+                    results.add(new PhpIndexResult(className, componentEntry.getKey(), PhpIndexResult.Type.CLASS, new OffsetRange(0, 1)));
+                }
+            }
+        }
+
+        return results;
+    }
+
+    @CheckForNull
+    public FileObject getComponentResourceFile(String componentId, String classQualifiedName, FileObject sourceFo) {
+        if (classQualifiedName.toLowerCase().contains(LivewireComponent.LIVEWIRE_NAME)) {
+            return getLivewireComponentResourceFile(componentId, sourceFo);
+        }
+
+        return null;
+    }
+
+    @CheckForNull
+    public FileObject getLivewireComponentResourceFile(String componentId, FileObject sourceFo) {
+        Project project = ProjectUtils.getMainOwner(sourceFo);
+        if (project == null) {
+            return null;
+        }
+
+        FileObject componentResource = project.getProjectDirectory().getFileObject(LivewireComponent.RESOURCE_PATH + componentId + BladeLanguage.FILE_EXTENSION_WITH_DOT); // NOI18N
+
+        if (componentResource != null && componentResource.isValid()) {
+            return componentResource;
+        }
+
+        return null;
     }
 }

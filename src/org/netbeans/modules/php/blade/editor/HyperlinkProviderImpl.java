@@ -19,28 +19,25 @@
 package org.netbeans.modules.php.blade.editor;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.EnumSet;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.CompletableFuture;
 import javax.swing.text.Document;
-import javax.swing.text.JTextComponent;
-import org.netbeans.api.editor.*;
 import org.netbeans.api.editor.mimelookup.MimeRegistration;
 import org.netbeans.lib.editor.hyperlink.spi.HyperlinkProviderExt;
 import org.netbeans.lib.editor.hyperlink.spi.HyperlinkType;
 import org.netbeans.api.editor.document.LineDocumentUtils;
 import org.netbeans.api.lexer.Token;
 import org.netbeans.api.lexer.TokenSequence;
-import org.netbeans.api.lsp.HyperlinkLocation;
 import org.netbeans.api.project.Project;
 import org.netbeans.editor.BaseDocument;
+import static org.netbeans.lib.editor.hyperlink.spi.HyperlinkType.GO_TO_DECLARATION;
 import org.netbeans.modules.php.blade.editor.lexer.EditorUtils;
 import org.netbeans.modules.php.blade.editor.path.BladePathUtils;
 import org.netbeans.modules.php.blade.project.BladeProjectProperties;
 import org.netbeans.modules.php.editor.lexer.PHPTokenId;
-import org.netbeans.spi.lsp.HyperlinkLocationProvider;
-import org.netbeans.spi.lsp.HyperlinkTypeDefLocationProvider;
 import org.openide.filesystems.FileObject;
 import org.openide.loaders.DataObject;
 import org.openide.text.Line;
@@ -55,12 +52,16 @@ import org.openide.util.Exceptions;
 @MimeRegistration(mimeType = "text/x-php5", service = HyperlinkProviderExt.class)
 public class HyperlinkProviderImpl implements HyperlinkProviderExt {
 
-    String methodName;
-    String identifiableText;
-    String tooltipText = "";
-    FileObject goToFile;
-    int goToOffset = 0;
-    int triggeredEvent = 0;
+    private String methodName;
+    private String identifiableText;
+    private String tooltipText = ""; // NOI18N
+    private FileObject goToFile;
+    private int goToOffset = 0;
+    private int triggeredEvent = 0;
+    public static int MIN_STRING_IDENTIIFER_LENGTH = 5;
+
+    String[] viewMethods = new String[]{"view", "render", "make"}; // NOI18N
+    Set<String> viewMethodSet = new HashSet<>(Arrays.asList(viewMethods));
 
     public enum DeclarationType {
         VIEW_PATH;
@@ -107,7 +108,7 @@ public class HyperlinkProviderImpl implements HyperlinkProviderExt {
         String focusedText = currentToken.text().toString();
 
         //2 char config are not that relevant
-        if (focusedText.length() < 5 || !EditorStringUtils.isQuotedString(focusedText)) {
+        if (focusedText.length() < MIN_STRING_IDENTIIFER_LENGTH || !EditorStringUtils.isQuotedString(focusedText)) {
             return null;
         }
 
@@ -125,33 +126,30 @@ public class HyperlinkProviderImpl implements HyperlinkProviderExt {
             if (prevTokenId != null && id.equals(PHPTokenId.PHP_STRING)) {
                 methodName = text;
                 //tooltip text
-                switch (methodName) {
-                    case "view":
-                    case "make":
-                    case "render":
-                        FileObject currentFile = EditorUtils.getFileObjectFromDoc(doc);
 
-                        if (currentFile == null) {
-                            return null;
-                        }
-                        List<FileObject> includedFiles = BladePathUtils.findFileObjectsForBladeViewPath(currentFile, identifiableText);
-                        String viewPath = BladePathUtils.toBladeToProjectFilePath(identifiableText);
+                if (viewMethodSet.contains(methodName)) {
+                    FileObject currentFile = EditorUtils.getFileObjectFromDoc(doc);
 
-                        for (FileObject includedFile : includedFiles) {
-                            goToFile = includedFile;
-                            tooltipText = "Blade Template File : <b>" + viewPath
-                                    + "</b><br><br><i style='margin-left:20px;'>" + identifiableText + "</i>";
-                            goToOffset = 0;
-                            break;
-                        }
-
-                        return new int[]{startOffset, startOffset + currentToken.length()};
-                    default:
+                    if (currentFile == null) {
                         return null;
+                    }
+                    List<FileObject> includedFiles = BladePathUtils.findFileObjectsForBladeViewPath(currentFile, identifiableText);
+                    String viewPath = BladePathUtils.toBladeToProjectFilePath(identifiableText);
+
+                    for (FileObject includedFile : includedFiles) {
+                        goToFile = includedFile;
+                        tooltipText = "Blade Template File : <b>" + viewPath // NOI18N
+                                + "</b><br><br><i style='margin-left:20px;'>" + identifiableText + "</i>"; // NOI18N
+                        goToOffset = 0;
+                        break;
+                    }
+
+                    return new int[]{startOffset, startOffset + currentToken.length()};
                 }
+
             }
 
-            if (id.equals(PHPTokenId.PHP_TOKEN) && text.equals("(")) {
+            if (id.equals(PHPTokenId.PHP_TOKEN) && text.equals("(")) { // NOI18N
                 prevTokenId = id;
             }
         }
@@ -160,27 +158,20 @@ public class HyperlinkProviderImpl implements HyperlinkProviderExt {
 
     @Override
     public void performClickAction(Document doc, int offset, HyperlinkType type) {
-        switch (type) {
-            case GO_TO_DECLARATION:
-                switch (methodName) {
-                    case "view":
-                    case "make":
-                    case "render":
-                        if (goToFile != null) {
-                            openDocument(goToFile, goToOffset);
-                            triggeredEvent++;
-                        }
-                        break;
-                }
-                break;
-            case ALT_HYPERLINK:
-                JTextComponent focused = EditorRegistry.focusedComponent();
-                if (focused != null && focused.getDocument() == doc) {
-                    focused.setCaretPosition(offset);
-                    //GoToImplementation.goToImplementation(focused);
-                }
-                break;
+        if (type.equals(GO_TO_DECLARATION)) {
+            return;
         }
+        if (viewMethodSet.contains(methodName)) {
+            if (goToFile != null) {
+                openDocument(goToFile, goToOffset);
+                triggeredEvent++;
+            }
+        }
+    }
+    
+    @Override
+    public String getTooltipText(Document doc, int offset, HyperlinkType type) {
+        return "<html><body>" + tooltipText + "</body></html>"; // NOI18N
     }
 
     private void openDocument(FileObject f, int offset) {
@@ -196,35 +187,12 @@ public class HyperlinkProviderImpl implements HyperlinkProviderExt {
 
     private boolean nonLaravelDeclFinderEnabled(Document doc) {
         Project projectOwner = EditorUtils.getProjectOwner(doc);
-        if (projectOwner == null){
+        if (projectOwner == null) {
             return false;
         }
         BladeProjectProperties bladeProperties = BladeProjectProperties.getInstance(projectOwner);
-        
+
         return bladeProperties.getNonLaravelDeclFinderFlag();
     }
 
-    @Override
-    public String getTooltipText(Document doc, int offset, HyperlinkType type) {
-        return "<html><body>" + tooltipText + "</body></html>";
-    }
-
-    //??when does this work
-    @MimeRegistration(mimeType = "text/x-php5", service = HyperlinkLocationProvider.class)
-    public static class LocationProvider implements HyperlinkLocationProvider {
-
-        @Override
-        public CompletableFuture<HyperlinkLocation> getHyperlinkLocation(Document doc, int offset) {
-            return null;
-        }
-    }
-
-    @MimeRegistration(mimeType = "text/x-php5", service = HyperlinkTypeDefLocationProvider.class)
-    public static class TypeDefLocationProvider implements HyperlinkTypeDefLocationProvider {
-
-        @Override
-        public CompletableFuture<HyperlinkLocation> getHyperlinkTypeDefLocation(Document doc, int offset) {
-            return null;
-        }
-    }
 }

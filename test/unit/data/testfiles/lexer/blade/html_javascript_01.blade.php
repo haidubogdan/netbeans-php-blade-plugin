@@ -1,6 +1,6 @@
 <script>
-/*@can('test')*/
+/*@if('test')*/
 console.log('test');
-/*@endcan*/
+/*@endif*/
 console.log('test2');
 </script>
