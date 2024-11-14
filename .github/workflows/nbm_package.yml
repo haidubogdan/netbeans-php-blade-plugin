@@ -1,0 +1,51 @@
+# This workflow will build a Java project with Ant
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-java-with-ant
+
+name: netbeans-nbm-package
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up JDK 17
+      uses: actions/setup-java@v3
+      with:
+        java-version: '8'
+        distribution: 'temurin'
+    - name : get version
+      run: echo "::set-output name=version::$(grep 'OpenIDE-Module-Specification-Version'  ./manifest.mf | cut -d':' -f 2-)"
+      id: nbm_version
+    - name: view version
+      run: echo ${{ steps.nbm_version.outputs.version }}    
+    - name : prepare the files from project
+      run : mkdir -p  nb-plugin-package/src/main/java
+    - name : prepare the files from project  
+      run : mkdir -p nb-plugin-package/src/main/nbm
+    - name : prepare the files from project  
+      run : mkdir -p nb-plugin-package/src/main/resources/org/netbeans/modules/php/blade
+    - name : prepare the files from project  
+      run : cp -rf ./src/org nb-plugin-package/src/main/java
+    - name : prepare the files from project  
+      run : cp -rf ./src/org/netbeans/modules/php/blade/resources nb-plugin-package/src/main/resources/org/netbeans/modules/php/blade
+    - name : prepare the files from project  
+      run : cp ./manifest.mf nb-plugin-package/src/main/nbm/manifest.mf
+    - name : prepare the files from project  
+      run : cp ./.github/pom.xml nb-plugin-package/pom.xml
+    - name : prepare the files from project  
+      run : cp ./nbproject/project.properties nb-plugin-package/project.properties
+    - name : prepare the files from project  
+      run : cp ./LICENSE nb-plugin-package/LICENSE
+    - name : package  
+      working-directory: ./nb-plugin-package
+      run : mvn package
+    - name : upload nbm
+      uses: actions/upload-artifact@v4
+      with:
+        name: blade-php-nbm
+        path: ./nb-plugin-package/target/nbm/*.nbm
