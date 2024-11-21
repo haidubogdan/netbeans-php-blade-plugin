@@ -21,6 +21,7 @@ package org.netbeans.modules.php.blade.editor.completion;
 import java.util.Collection;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.text.AbstractDocument;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.JTextComponent;
 import javax.swing.text.Document;
@@ -29,20 +30,13 @@ import org.antlr.v4.runtime.Token;
 import org.netbeans.api.editor.document.EditorDocumentUtils;
 import org.netbeans.api.editor.mimelookup.MimeRegistration;
 import org.netbeans.api.editor.mimelookup.MimeRegistrations;
-import org.netbeans.api.project.Project;
 import org.netbeans.modules.php.blade.editor.BladeLanguage;
-import org.netbeans.modules.php.blade.editor.ResourceUtilities;
-import org.netbeans.modules.php.blade.editor.completion.BladeCompletionItem.BladeTag;
 import org.netbeans.modules.php.blade.editor.components.AttributeCompletionService;
 import org.netbeans.modules.php.blade.editor.components.ComponentsCompletionService;
-import org.netbeans.modules.php.blade.editor.directives.CustomDirectives;
-import org.netbeans.modules.php.blade.editor.directives.CustomDirectives.CustomDirective;
 import org.netbeans.modules.php.blade.editor.indexing.PhpIndexResult;
-import org.netbeans.modules.php.blade.project.ProjectUtils;
+import org.netbeans.modules.php.blade.project.ComponentsSupport;
 import org.netbeans.modules.php.blade.syntax.StringUtils;
-import org.netbeans.modules.php.blade.syntax.annotation.Directive;
-import org.netbeans.modules.php.blade.syntax.antlr4.v10.BladeAntlrLexer;
-import static org.netbeans.modules.php.blade.syntax.antlr4.v10.BladeAntlrLexer.*;
+import org.netbeans.modules.php.blade.syntax.antlr4.html_components.BladeHtmlAntlrLexer;
 import org.netbeans.spi.editor.completion.CompletionItem;
 import org.netbeans.spi.editor.completion.CompletionProvider;
 import static org.netbeans.spi.editor.completion.CompletionProvider.COMPLETION_QUERY_TYPE;
@@ -53,7 +47,6 @@ import org.netbeans.spi.editor.completion.support.AsyncCompletionTask;
 import org.netbeans.spi.editor.completion.support.CompletionUtilities;
 import org.netbeans.spi.lexer.antlr4.AntlrTokenSequence;
 import org.openide.filesystems.FileObject;
-import org.openide.util.Exceptions;
 
 /**
  *
@@ -66,6 +59,7 @@ import org.openide.util.Exceptions;
 public class BladeCompletionProvider implements CompletionProvider {
 
     private static final Logger LOGGER = Logger.getLogger(BladeCompletionProvider.class.getName());
+    private static final String CUSTOM_HTML_ICON = "org/netbeans/modules/html/custom/resources/custom_html_element.png"; //NOI18N
 
     public enum CompletionType {
         BLADE_PATH,
@@ -115,7 +109,7 @@ public class BladeCompletionProvider implements CompletionProvider {
         @Override
         protected void query(CompletionResultSet resultSet, Document doc, int caretOffset) {
             long startTime = System.currentTimeMillis();
-
+            AbstractDocument adoc = (AbstractDocument) doc;
             try {
                 FileObject fo = EditorDocumentUtils.getFileObject(doc);
 
@@ -123,50 +117,53 @@ public class BladeCompletionProvider implements CompletionProvider {
                     return;
                 }
 
+                adoc.readLock();
                 AntlrTokenSequence tokens;
+
                 try {
-                    String docText = doc.getText(0, doc.getLength());
-                    tokens = new AntlrTokenSequence(new BladeAntlrLexer(CharStreams.fromString(docText)));
+                    String text = doc.getText(0, doc.getLength());
+                    tokens = new AntlrTokenSequence(new BladeHtmlAntlrLexer(CharStreams.fromString(text)));
                 } catch (BadLocationException ex) {
-                    Exceptions.printStackTrace(ex);
                     return;
                 } finally {
+                    adoc.readUnlock();
                 }
 
-                if (tokens.isEmpty()) {
-                    return;
-                }
-
-                if (caretOffset > 1) {
-                    tokens.seekTo(caretOffset - 1);
-                } else {
+                if (!tokens.isEmpty()) {
                     tokens.seekTo(caretOffset);
+                    
+                    Token queryToken;
+                    
+                    if (tokens.hasNext()) {
+                        queryToken = tokens.next().get();
+                    } else if (tokens.hasPrevious()){
+                        queryToken = tokens.previous().get();
+                    } else {
+                        return;
+                    }
+
+                    int tokenOffset = tokens.getOffset();
+
+                    String text = queryToken.getText();
+                    int queryTokenOffset = queryToken.getStartIndex();
+                    
+//                    if (queryTokenOffset - text.length() != tokenOffset - 1){
+//                        //out of range
+//                        return;
+//                    }
+
+                    switch (queryToken.getType()) {
+                        case BladeHtmlAntlrLexer.HTML_COMPONENT_OPEN_TAG: {
+                            String identifier = ComponentsSupport.tag2ClassName(queryToken.getText());
+                            completeComponents(identifier, fo, caretOffset, resultSet);
+                        }
+                    }
+
                 }
-
-                Token currentToken;
-
-                if (!tokens.hasNext() && tokens.hasPrevious()) {
-                    //the carret got too far
-                    currentToken = tokens.previous().get();
-                } else if (tokens.hasNext()) {
-                    currentToken = tokens.next().get();
-                } else {
-                    return;
-                }
-
-                if (currentToken == null) {
-                    return;
-                }
-
-                if (currentToken.getText().trim().length() == 0) {
-                    return;
-                }
-
-                
             } finally {
                 long time = System.currentTimeMillis() - startTime;
-                if (time > 2000){
-                    LOGGER.log(Level.INFO, "Slow completion time detected. {0}ms", time);
+                if (time > 2000) {
+                    LOGGER.log(Level.INFO, "Slow completion time detected. {0}ms", time); //NOI18N
                 }
                 resultSet.finish();
             }
@@ -197,15 +194,6 @@ public class BladeCompletionProvider implements CompletionProvider {
         }
     }
 
-    //??
-    private void addHtmlTagCompletionItem(String prefix, String tagName, String plugin,
-            int caretOffset, CompletionResultSet resultSet) {
-
-        int insertOffset = caretOffset - prefix.length();
-        BladeTag item = new BladeTag(tagName, insertOffset);
-        resultSet.addItem(item);
-    }
-
     private void addSimplAttributeItem(String prefix, String attributeName, int caretOffset, CompletionResultSet resultSet) {
         int insertOffset = caretOffset - prefix.length();
         CompletionItem item = CompletionUtilities.newCompletionItemBuilder(attributeName)
@@ -221,23 +209,13 @@ public class BladeCompletionProvider implements CompletionProvider {
 
         String tagName = StringUtils.toKebabCase(indexReference.name);
         CompletionItem item = CompletionUtilities.newCompletionItemBuilder(tagName)
-                .iconResource(getReferenceIcon(CompletionType.HTML_COMPONENT_TAG))
+                .iconResource(CUSTOM_HTML_ICON)
                 .startOffset(caretOffset)
                 .leftHtmlText(tagName)
                 .rightHtmlText(indexReference.namespace)
                 .sortPriority(1)
                 .build();
         resultSet.addItem(item);
-    }
-
-    private static String getReferenceIcon(CompletionType type) {
-        switch (type) {
-            case HTML_COMPONENT_TAG:
-                return "org/netbeans/modules/html/custom/resources/custom_html_element.png"; //NOI18N
-            case YIELD_ID:
-                return ResourceUtilities.ICON_BASE + "icons/layout.png"; //NOI18N
-        }
-        return ResourceUtilities.ICON_BASE + "icons/at.png";
     }
 
 }

@@ -37,13 +37,13 @@ public abstract class PhpCompletionProposal implements CompletionProposal {
     private final ElementHandle element;
     private final int anchorOffset;
     private final String description;
-    
-    public PhpCompletionProposal(ElementHandle element, int anchorOffset, String description){
+
+    public PhpCompletionProposal(ElementHandle element, int anchorOffset, String description) {
         this.element = element;
         this.anchorOffset = anchorOffset;
         this.description = description;
     }
-    
+
     @Override
     public int getAnchorOffset() {
         return anchorOffset;
@@ -108,6 +108,10 @@ public abstract class PhpCompletionProposal implements CompletionProposal {
     @Override
     public boolean isSmart() {
         return true;
+    }
+
+    public String getDescription() {
+        return description;
     }
 
     public static class PhpKeywordProposal extends PhpCompletionProposal {

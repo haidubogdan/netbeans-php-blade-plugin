@@ -143,8 +143,9 @@ D_PHP_INLINE : '@php' (' ')* {this._input.LA(1) == '('}? ->type(D_PHP),pushMode(
 D_PHP : '@php' [ \r\n] ->pushMode(BLADE_INLINE_PHP);
 
 //misc
-D_SIMPLE_DIRECTIVE : ('@dd' | '@dump' | '@json' | '@checked' 
-| '@style' | '@class' | '@disabled' | '@required' | '@readonly' | '@when' | '@bool') (' ')* {lookupMode(INSIDE_PHP_EXPRESSION);};
+D_SIMPLE_DIRECTIVE : ('@dd' | '@dump' | '@json' | '@style' | '@class' 
+| '@checked'  | '@disabled' | '@selected' | '@required' | '@readonly' 
+| '@when' | '@bool') (' ')* {lookupMode(INSIDE_PHP_EXPRESSION);};
 
 D_VITE : '@vite' (' ')* {lookupMode(MIXED_STRING_AND_ARRAY_IDENTIFIER);}; 
 D_VITE_REFRESH : '@viteReactRefresh';
@@ -188,12 +189,16 @@ RCURLYBRACE: '}' {htmlCurlyParenBalance--;}->skip;
 
 PHP_INLINE_START : ('<?php' | '<?=')->pushMode(INSIDE_PHP_INLINE);
 
+HTML_COMPONENT_OPEN_TAG : '<x-' (Identifier (('::' | '.') Identifier)?)?;
+
 WS : ((' ')+ | [\r\n]+)->skip;
 
 OTHER : . ->skip;
 
 
+//==========================================
 //MODES
+
 mode INSIDE_PHP_EXPRESSION;
 
 START_E_LPAREN: '(' {rparenBalance == 0}? {rparenBalance++;}->type(LPAREN);
@@ -213,6 +218,7 @@ E_OTHER : . ->skip;
 
 EXIT_E_EOF : EOF->type(ERROR),mode(DEFAULT_MODE);
 
+//==========================================
 mode PHP_EXPR_WITH_FIRST_IDENTIFIABLE_STRING;
 
 EI_IDENTIFIABLE_STRING : (' ')*  STRING_LITERAL (' ')* 
@@ -227,6 +233,7 @@ EI_OTHER : . ->skip, mode(INSIDE_PHP_EXPRESSION);
 
 EXIT_EI_EOF : EOF->type(ERROR),mode(DEFAULT_MODE);
 
+//==========================================
 mode PHP_EXPR_WITH_CUSTOM_IDENTIFIABLE_STRING_POS;
 
 START_ESPOS_LPAREN: '(' {rparenBalance == 0}? {rparenBalance++; this.argCounter=1;}->type(LPAREN);
@@ -250,6 +257,7 @@ ESPOS_OTHER : . ->skip;
 
 EXIT_ESPOS_EOF : EOF->type(ERROR),mode(DEFAULT_MODE);
 
+//==========================================
 //@each
 mode PHP_EXPR_EACH;
 
@@ -276,6 +284,7 @@ EACH_OTHER : . ->skip;
 
 EXIT_EACH_EOF : EOF->type(ERROR),mode(DEFAULT_MODE);
 
+//==========================================
 //@includeFirst
 mode INCLUDE_FIRST_MODE;
 
@@ -300,6 +309,7 @@ INCF_OTHER : . ->skip;
 
 EXIT_INCF_EOF : EOF->type(ERROR),mode(DEFAULT_MODE);
 
+//==========================================
 mode MIXED_STRING_AND_ARRAY_IDENTIFIER;
 
 START_MIXED_S_A_LPAREN: '(' {rparenBalance == 0}? {rparenBalance++;}->type(LPAREN);
@@ -323,6 +333,7 @@ MIXED_S_A_OTHER : . ->skip;
 
 EXIT_MIXED_S_A_EOF : EOF->type(ERROR),mode(DEFAULT_MODE);
 
+//==========================================
 //@foreach expr
 mode FOREACH_PHP_EXPR;
 
@@ -347,6 +358,7 @@ FOREACH_OTHER : . ->skip;
 
 EXIT_FOREACH_EOF : EOF->type(ERROR),mode(DEFAULT_MODE);
 
+//==========================================
 //@php @endphp
 mode BLADE_INLINE_PHP;
 
@@ -356,17 +368,18 @@ BLADE_INLINE_PHP_OTHER : . ->skip;
 
 EXIT_BLADE_INLINE_PHP : EOF->type(ERROR),mode(DEFAULT_MODE);
 
-//verbatim
+//==========================================
+//@verbatim
 mode VERBATIM_MODE;
 
 D_ENDVERBATIM_IN_MODE : '@endverbatim'->type(D_ENDVERBATIM), mode(DEFAULT_MODE);
 
-//hack to merge all php inputs into one token
 VERBATIM_HTML : . ->skip;
 
 
 EXIT_VERBATIM_MOD_EOF : EOF->type(ERROR),mode(DEFAULT_MODE);
 
+//==========================================
 mode INSIDE_PHP_INLINE;
 
 PHP_INLINE_EXIT : '?>'->popMode;

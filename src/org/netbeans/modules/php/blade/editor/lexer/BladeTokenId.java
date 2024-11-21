@@ -20,7 +20,6 @@ package org.netbeans.modules.php.blade.editor.lexer;
 
 import java.util.Collection;
 import java.util.EnumSet;
-import java.util.WeakHashMap;
 import org.netbeans.api.html.lexer.HTMLTokenId;
 import org.netbeans.api.lexer.InputAttributes;
 import org.netbeans.api.lexer.Language;

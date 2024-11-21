@@ -112,10 +112,9 @@ public class AntlrDebugAction extends AbstractAction implements ContextAwareActi
             arr.add(new ViewAntlrColoringTokensAction(node));
             arr.add(new ViewAntlrFormatterTokensAction(node));
             arr.add(new ViewLexerColoringTokens(node));
+            arr.add(new ViewAntlrHtmlLexerTokensAction(node));
         }
-//        List<? extends Action> actions = Utilities.actionsForPath("Actions/AntlrDebugActions");
-//        arr.addAll(actions);
-        //add the actions 
+
         return arr;
     }
 
@@ -148,7 +147,7 @@ public class AntlrDebugAction extends AbstractAction implements ContextAwareActi
         private class MyMenu extends org.openide.awt.JMenuPlus implements PopupMenuListener {
 
             MyMenu() {
-                super("Antlr Debug");
+                super("Antlr Debug"); //NOI18N
             }
 
             @Override

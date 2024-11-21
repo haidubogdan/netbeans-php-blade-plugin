@@ -28,6 +28,7 @@ import org.netbeans.api.project.Project;
 import org.netbeans.modules.csl.api.OffsetRange;
 import org.netbeans.modules.parsing.spi.indexing.support.IndexResult;
 import org.netbeans.modules.parsing.spi.indexing.support.QuerySupport;
+import static org.netbeans.modules.php.blade.editor.EditorStringUtils.NAMESPACE_SEPARATOR;
 import org.netbeans.modules.php.blade.editor.cache.QueryCache;
 import org.netbeans.modules.php.editor.api.QuerySupportFactory;
 import org.netbeans.modules.php.editor.index.PHPIndexer;
@@ -43,8 +44,10 @@ import org.openide.util.Exceptions;
  */
 public class PhpIndexUtils {
 
+    public final static String ESCAPED_NAMESPACE_SEPARATOR = "\\\\"; // NOI18N
     private final static QueryCache<String, Collection<PhpIndexResult>> cache = new QueryCache();
     private final static QueryCache<String, Collection<PhpIndexFunctionResult>> functionCache = new QueryCache();
+
 
     private static final Map<Integer, PhpIndexUtils> QUERY_SUPPORT_INSTANCES = new WeakHashMap<>();
 
@@ -52,6 +55,11 @@ public class PhpIndexUtils {
         STATIC,
         DIRECT
     }
+    
+    private PhpIndexUtils() {
+
+    }
+
     /**
      * class query without namespace
      *
@@ -102,7 +110,7 @@ public class PhpIndexUtils {
             String namespace, FileObject fo) {
         QuerySupport phpindex = QuerySupportFactory.get(fo);
         Collection<PhpIndexResult> results = new ArrayList<>();
-        String queryPrefix = prefix.toLowerCase() + ".*" + namespace.replace("\\", "\\\\") + ";.*";
+        String queryPrefix = prefix.toLowerCase() + ".*" + namespace.replace(NAMESPACE_SEPARATOR, ESCAPED_NAMESPACE_SEPARATOR) + ";.*"; 
 
         try {
             Collection<? extends IndexResult> indexResults = phpindex.query(
@@ -122,7 +130,7 @@ public class PhpIndexUtils {
                             && classNamespace.length() > 0
                             && classNamespace.startsWith(namespace)) {
                         results.add(new PhpIndexResult(fullName,
-                                classNamespace + "\\" + fullName, indexFile, PhpIndexResult.Type.CLASS, new OffsetRange(0, 1)));
+                                classNamespace + NAMESPACE_SEPARATOR + fullName, indexFile, PhpIndexResult.Type.CLASS, new OffsetRange(0, 1)));
                     }
                 }
             }
@@ -156,7 +164,7 @@ public class PhpIndexUtils {
                     continue;
                 }
                 
-                results.add(new PhpIndexResult(namespace + "\\" + identifier, indexFile, PhpIndexResult.Type.CLASS, new OffsetRange(0, 1)));
+                results.add(new PhpIndexResult(namespace + NAMESPACE_SEPARATOR + identifier, indexFile, PhpIndexResult.Type.CLASS, new OffsetRange(0, 1)));
             }
         } catch (IOException ex) {
             Exceptions.printStackTrace(ex);

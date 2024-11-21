@@ -273,4 +273,14 @@ public interface BladeAntlrParserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitPhpInline(BladeAntlrParser.PhpInlineContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link BladeAntlrParser#htmlComponentOpenTag}.
+	 * @param ctx the parse tree
+	 */
+	void enterHtmlComponentOpenTag(BladeAntlrParser.HtmlComponentOpenTagContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link BladeAntlrParser#htmlComponentOpenTag}.
+	 * @param ctx the parse tree
+	 */
+	void exitHtmlComponentOpenTag(BladeAntlrParser.HtmlComponentOpenTagContext ctx);
 }

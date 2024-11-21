@@ -41,11 +41,8 @@ public class BladeLexer extends AbstractAntlrLexerBridge<BladeAntlrColoringLexer
 
     @Override
     protected Token<BladeTokenId> mapToken(org.antlr.v4.runtime.Token antlrToken) {
-        //debug text
-        String text = antlrToken.getText();
-        int type = antlrToken.getType();
-        //System.out.println(text + " " + type);
-        switch (type) {
+
+        switch (antlrToken.getType()) {
             case BladeAntlrColoringLexer.BLADE_PAREN:
                 return token(BLADE_PAREN);
             case BladeAntlrColoringLexer.BLADE_COMMENT_START:

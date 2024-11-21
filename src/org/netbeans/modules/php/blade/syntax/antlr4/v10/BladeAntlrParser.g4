@@ -27,6 +27,7 @@ statement :
     | errorDirectives
     | phpInline
     | D_ENDCUSTOM
+    | htmlComponentOpenTag
 ;
 
 blockDirective : 
@@ -163,3 +164,6 @@ foreachLoopArguments : '(' main_array=FOREACH_VAR 'as' array_item=FOREACH_VAR (F
 
 phpInline:
     PHP_INLINE_START phpInlineEnd=(PHP_INLINE_EXIT | PHP_INLINE_EOF);
+
+htmlComponentOpenTag:
+    HTML_COMPONENT_OPEN_TAG;

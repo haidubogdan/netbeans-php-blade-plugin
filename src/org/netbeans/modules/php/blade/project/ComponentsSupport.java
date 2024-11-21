@@ -23,6 +23,7 @@ import java.util.Map;
 import org.netbeans.api.project.Project;
 import org.netbeans.modules.php.blade.editor.components.annotation.Namespace;
 import org.netbeans.modules.php.blade.editor.components.annotation.NamespaceRegister;
+import org.netbeans.modules.php.blade.syntax.StringUtils;
 import org.openide.filesystems.FileObject;
 
 /**
@@ -41,6 +42,7 @@ public class ComponentsSupport {
 
     private static final Map<Project, ComponentsSupport> INSTANCES = new HashMap<>();
     private final Map<FileObject, Namespace> installedComponentNamespace = new HashMap<>();
+    public static final int COMPONENT_TAG_PREFIX_LENGTH = "<x-".length(); //NOI18N
     private boolean scanned = false;
     public Project project;
 
@@ -86,5 +88,9 @@ public class ComponentsSupport {
     public Namespace[] getRegisteredNamespaces() {
         NamespaceRegister namespaceRegister = this.getClass().getAnnotation(NamespaceRegister.class);
         return namespaceRegister.value();
+    }
+    
+    public static String tag2ClassName(String identifier){
+        return identifier.length() > COMPONENT_TAG_PREFIX_LENGTH ? StringUtils.kebabToCamel(identifier.substring(COMPONENT_TAG_PREFIX_LENGTH)) : ""; // NOI18N
     }
 }

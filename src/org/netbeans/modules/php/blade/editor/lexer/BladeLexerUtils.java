@@ -22,6 +22,7 @@ import java.util.Arrays;
 import java.util.List;
 import javax.swing.text.Document;
 import org.antlr.v4.runtime.Token;
+import org.netbeans.api.html.lexer.HTMLTokenId;
 import org.netbeans.api.lexer.Language;
 import org.netbeans.api.lexer.TokenHierarchy;
 import org.netbeans.api.lexer.TokenSequence;
@@ -47,6 +48,15 @@ public final class BladeLexerUtils {
     public static TokenSequence<? extends PHPTokenId> getPhpTokenSequence(final Document document, final int offset) {
         TokenHierarchy<Document> th = TokenHierarchy.get(document);
         return getTokenSequence(th, offset, PHPTokenId.language());
+    }
+    
+    public static TokenSequence<? extends HTMLTokenId> getHtmlTokenSequence(TokenHierarchy<Document> th, final int offset) {
+        return getTokenSequence(th, offset, HTMLTokenId.language());
+    }
+
+    public static TokenSequence<? extends HTMLTokenId> getHtmlTokenSequence(final Document document, final int offset) {
+        TokenHierarchy<Document> th = TokenHierarchy.get(document);
+        return getTokenSequence(th, offset, HTMLTokenId.language());
     }
 
     public static TokenSequence<BladeTokenId> getTokenSequence(final Document document, final int offset) {

@@ -36,8 +36,8 @@ fragment Include : '@include' ('If' | 'When' | 'First' | 'Unless')?;
 fragment ComponentTagIdentifier 
     : [a-z_\u0080-\ufffe][a-z0-9.:\u0080-\ufffe-]*;   
 
-//??
-fragment SpecialChars : '°';
+//====================================================
+//TOKENS:
 
 PHP_INLINE : '<?=' .*? '?>' | '<?php' .*? ('?>' | EOF);
 
@@ -89,15 +89,9 @@ RAW_TAG_OPEN : '{!!' ->pushMode(INSIDE_RAW_ECHO),type(RAW_TAG);
 
 CSS_COMMENT : ('/*' .*? '*/' | '//')->type(HTML);
 
-HTML_X : ('<x-' ComponentTagIdentifier | '<' ComponentTagIdentifier ('::' ComponentTagIdentifier)+)->type(HTML),pushMode(INSIDE_HTML_COMPONENT_TAG);
+HTML_X : ('<x-' (ComponentTagIdentifier (('::' | '.') ComponentTagIdentifier)?)?)->type(HTML),pushMode(INSIDE_HTML_COMPONENT_TAG);
 
 CLOSE_TAG : ('</' FullIdentifier '>' [\n\r ]*)+->type(HTML);
-
-HTML : ((' ')+ | [\r\n]+ | ComponentTagIdentifier | SpecialChars | '"' {this._input.LA(1) != '@'}? | '\\\'' {this._input.LA(1) != '@'}? | '_' | '.' 
-| ',' | '=' | [()-;]+ | '[' | ']' )* '<' {this._input.LA(1) != 'x' && this._input.LA(1) != '?' && this._input.LA(2) != 'p'}? ->pushMode(INSIDE_HTML_TAG),more;
-
-HTML_MISC : ((' ')+ | [\r\n]+ | ('#' | '.')? ComponentTagIdentifier | SpecialChars | '"' {this._input.LA(1) != '@'}?
-| ',' | '\\\'' | '_' | '.' | '=' | [()-;]+ | '[' | ']'  )+->type(HTML);
 
 HTML_WS : ((' ')+ | [\r\n]+)->type(HTML);
 
@@ -105,14 +99,9 @@ INCOMPLETE_BLADE_TAG : ('{!' | '{{-') ->type(HTML);
 
 OTHER : . ->type(HTML);
 
-mode INSIDE_HTML_TAG;
-
-OTHER_HTML_POP : . {this._input.LA(1) == '@' || this._input.LA(1) == '{' || (this._input.LA(1) == '<' && (this._input.LA(2) == 'x' || this._input.LA(2) == '?'))}? ->type(HTML_TAG), popMode;
-
-OTHER_HTML : . ->more;
-
-HTML_EOF : EOF->type(HTML_TAG),popMode;
-
+//=========================================================
+//=========================================================
+//MODES
 // {{  }}
 mode INSIDE_REGULAR_ECHO;
 
@@ -123,6 +112,7 @@ GREEDY_REGULAR_ECHO_EXPR : ~[ {}]+ {this.consumeEscapedEchoToken();};
 ESCAPED_ECHO_EXPR : . [ ]* {this.consumeEscapedEchoToken();};
 EXIT_ECHO_EOF : EOF->type(ERROR),popMode;
 
+//=========================================================
 // {!!  !!}
 mode INSIDE_RAW_ECHO;
 
@@ -132,6 +122,7 @@ RAW_ECHO_EXPR : ~[ !{}]+ {this.consumeNotEscapedEchoToken();};
 RAW_ECHO_EXPR_MORE : . [ ]* {this.consumeNotEscapedEchoToken();};
 EXIT_RAW_ECHO_EOF : EOF->type(ERROR),popMode;
 
+//=========================================================
 // @directive (?)
 mode INSIDE_PHP_EXPRESSION;
 
@@ -148,6 +139,7 @@ PHP_EXPRESSION_MORE : . ->type(PHP_EXPRESSION);
 
 EXIT_EOF : EOF->type(ERROR),mode(DEFAULT_MODE);
 
+//=========================================================
 // @php
 mode BLADE_INLINE_PHP;
 
@@ -158,6 +150,7 @@ BLADE_PHP_INLINE_MORE : . ->type(BLADE_PHP_INLINE);
 
 EXIT_INLINE_PHP_EOF : EOF->type(ERROR),popMode;
 
+//=========================================================
 // @verbatim
 mode VERBATIM_MODE;
 
@@ -169,6 +162,7 @@ VERBATIM_HTML_MORE : . ->type(HTML);
 
 EXIT_VERBATIM_MOD_EOF : EOF->type(ERROR),popMode;
 
+//=========================================================
 mode INSIDE_HTML_COMPONENT_TAG;
 
 COMPONENT_ATTRIBUTE : (':' FullIdentifier '="') ->type(HTML),pushMode(COMPONENT_PHP_EXPRESSION); 
@@ -182,6 +176,7 @@ HTML_COMPONENT_ANY : . ->type(HTML);
 
 EXIT_HTML_COMPONENT_EOF : EOF->type(ERROR),popMode;
 
+//=========================================================
 mode COMPONENT_PHP_EXPRESSION;
 
 EXIT_COMPONENT_PHP_EXPRESSION : '"'->type(HTML), popMode;
@@ -190,6 +185,7 @@ COMPONENT_PHP_EXPRESSION : . ->more;
 
 EXIT_COMPONENT_PHP_EXPRESSION_EOF : EOF->type(ERROR),popMode;
 
+//=========================================================
 mode ADIACENT_DIRECTIVE_TOKENS;
 
 TOKEN_ADIACENT_DIRECTIVE : (' ' | '>' | [\n\r] | '"')->type(D_UNKNOWN),popMode;
