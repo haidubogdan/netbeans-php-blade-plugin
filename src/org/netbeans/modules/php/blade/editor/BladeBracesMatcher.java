@@ -32,7 +32,7 @@ import org.netbeans.modules.php.blade.editor.lexer.BladeLexerUtils;
 import org.netbeans.modules.php.blade.syntax.BladeDirectivesUtils;
 import org.netbeans.modules.php.blade.syntax.BladeTagsUtils;
 import static org.netbeans.modules.php.blade.syntax.antlr4.v10.BladeAntlrLexer.*;
-import org.netbeans.modules.php.blade.syntax.antlr4.v10.BladeAntlrUtils;
+import org.netbeans.modules.php.blade.syntax.antlr4.v10.BladeAntlrLexerUtils;
 import org.netbeans.spi.editor.bracesmatching.BracesMatcher;
 import org.netbeans.spi.editor.bracesmatching.BracesMatcherFactory;
 import org.netbeans.spi.editor.bracesmatching.MatcherContext;
@@ -64,7 +64,7 @@ public class BladeBracesMatcher implements BracesMatcher {
         BaseDocument document = (BaseDocument) context.getDocument();
         document.readLock();
         try {
-            Token currentToken = BladeAntlrUtils.getToken(context.getDocument(), context.getSearchOffset());
+            Token currentToken = BladeAntlrLexerUtils.getToken(context.getDocument(), context.getSearchOffset());
 
             if (currentToken == null) {
                 return result;
@@ -166,9 +166,9 @@ public class BladeBracesMatcher implements BracesMatcher {
     }
 
     public int[] findOpenTag() {
-        int matchTokenType = BladeAntlrUtils.getTagPairTokenType(originToken.getType());
+        int matchTokenType = BladeAntlrLexerUtils.getTagPairTokenType(originToken.getType());
         List<Integer> skipableTokenTypes = new ArrayList<>();
-        Token startToken = BladeAntlrUtils.findBackwardWithStop(context.getDocument(),
+        Token startToken = BladeAntlrLexerUtils.findBackwardWithStop(context.getDocument(),
                 originToken,
                 matchTokenType,
                 skipableTokenTypes);
@@ -183,9 +183,9 @@ public class BladeBracesMatcher implements BracesMatcher {
     }
 
     public int[] findCloseTag() {
-        int matchTokenType = BladeAntlrUtils.getTagPairTokenType(originToken.getType());
+        int matchTokenType = BladeAntlrLexerUtils.getTagPairTokenType(originToken.getType());
         List<Integer> skipableTokenTypes = new ArrayList<>();
-        Token endToken = BladeAntlrUtils.findForwardWithStop(context.getDocument(),
+        Token endToken = BladeAntlrLexerUtils.findForwardWithStop(context.getDocument(),
                 originToken,
                 matchTokenType,
                 skipableTokenTypes);
@@ -215,7 +215,7 @@ public class BladeBracesMatcher implements BracesMatcher {
             }
         }
 
-        Token endToken = BladeAntlrUtils.findForward(context.getDocument(),
+        Token endToken = BladeAntlrLexerUtils.findForward(context.getDocument(),
                 originToken,
                 stopDirectives,
                 startDirectiveForBalance);
@@ -236,7 +236,7 @@ public class BladeBracesMatcher implements BracesMatcher {
         Set<String> startDirectiveForBalance = new HashSet<>();
         startDirectiveForBalance.add(directive);
 
-        Token endToken = BladeAntlrUtils.findForward(context.getDocument(),
+        Token endToken = BladeAntlrLexerUtils.findForward(context.getDocument(),
                 originToken,
                 stopDirectives,
                 startDirectiveForBalance);
@@ -256,7 +256,7 @@ public class BladeBracesMatcher implements BracesMatcher {
         Set<String> startDirectiveForBalance = new HashSet<>();
         startDirectiveForBalance.add(directive);
 
-        Token endToken = BladeAntlrUtils.findBackward(context.getDocument(),
+        Token endToken = BladeAntlrLexerUtils.findBackward(context.getDocument(),
                 originToken,
                 stopDirectives,
                 startDirectiveForBalance);
@@ -283,7 +283,7 @@ public class BladeBracesMatcher implements BracesMatcher {
             }
         }
 
-        Token startToken = BladeAntlrUtils.findBackward(context.getDocument(),
+        Token startToken = BladeAntlrLexerUtils.findBackward(context.getDocument(),
                 originToken,
                 openDirectives,
                 endDirectivesForBalance);

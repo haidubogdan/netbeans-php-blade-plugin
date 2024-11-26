@@ -56,11 +56,12 @@ import org.netbeans.modules.php.blade.syntax.antlr4.php.BladePhpAntlrUtils;
 import org.netbeans.modules.php.blade.syntax.antlr4.php.BladePhpSnippetParser.PhpReference;
 import org.openide.filesystems.FileObject;
 import static org.netbeans.modules.php.blade.syntax.antlr4.v10.BladeAntlrLexer.*;
-import org.netbeans.modules.php.blade.syntax.antlr4.v10.BladeAntlrUtils;
+import org.netbeans.modules.php.blade.syntax.antlr4.utils.BladeAntlrUtils;
 import org.openide.filesystems.FileUtil;
 import org.openide.util.Exceptions;
 import org.openide.util.RequestProcessor;
 import static org.netbeans.modules.php.blade.syntax.antlr4.php.BladePhpSnippetParser.PhpReferenceType.PHP_FUNCTION;
+import org.netbeans.modules.php.blade.syntax.antlr4.v10.BladeAntlrLexerUtils;
 import org.netbeans.modules.php.editor.lexer.PHPTokenId;
 import org.netbeans.spi.project.ui.support.ProjectConvertors;
 
@@ -169,7 +170,7 @@ public class BladeDeclarationFinder implements DeclarationFinder {
             int referencedOffset = caretOffset - start;
 
             if (directive != null) {//we can filter for identifiable directives here
-                org.antlr.v4.runtime.Token targetetToken = BladeAntlrUtils.getToken(snippet, referencedOffset);
+                org.antlr.v4.runtime.Token targetetToken = BladeAntlrLexerUtils.getToken(snippet, referencedOffset);
                 if (targetetToken != null && targetetToken.getType() == IDENTIFIABLE_STRING) {
                     offsetRange = new OffsetRange(targetetToken.getStartIndex() + start, start + targetetToken.getStopIndex() + 1);
                     return offsetRange;

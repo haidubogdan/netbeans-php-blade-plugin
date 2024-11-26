@@ -351,7 +351,7 @@ public class BladeCompletionProposal implements CompletionProposal {
 
         @Override
         public ImageIcon getIcon() {
-            String path = ResourceUtilities.ICON_BASE + "icons/layout.png";
+            String path = ResourceUtilities.LAYOUT_IDENTIFIER;
             return ImageUtilities.loadImageIcon(path, false);
         }
     }
@@ -518,7 +518,7 @@ public class BladeCompletionProposal implements CompletionProposal {
                 }
                 default: {
                     return getName() + "($$${arg})\n    ${cursor}\n" + getDirective().endtag(); // NOI18N
-                } // NOI18N
+                }
             }
         }
 

@@ -32,6 +32,7 @@ import org.netbeans.api.project.Project;
 import org.netbeans.modules.csl.api.DeclarationFinder;
 import org.netbeans.modules.php.blade.editor.parser.ParsingUtils;
 import org.netbeans.modules.php.blade.project.BladeProjectProperties;
+import org.netbeans.modules.php.editor.parser.PHPParseResult;
 import org.netbeans.modules.php.editor.parser.astnodes.Expression;
 import org.netbeans.modules.php.editor.parser.astnodes.FunctionInvocation;
 import org.netbeans.modules.php.editor.parser.astnodes.Scalar;
@@ -135,8 +136,10 @@ public final class CustomDirectives {
         ParsingUtils parsingUtils = new ParsingUtils();
         parsingUtils.parseFileObject(file);
         FunctionInvocationVisitor functionInvocationVisitor = new FunctionInvocationVisitor();
-        if (parsingUtils.getParserResult() != null && parsingUtils.getParserResult().getProgram() != null) {
-            parsingUtils.getParserResult().getProgram().accept(functionInvocationVisitor);
+        PHPParseResult parserResult = parsingUtils.getParserResult();
+
+        if (parserResult != null && parserResult.getProgram() != null) {
+            parserResult.getProgram().accept(functionInvocationVisitor);
             List<CustomDirective> directiveList = functionInvocationVisitor.getDirectives();
 
             if (directiveList.isEmpty()) {
@@ -172,7 +175,7 @@ public final class CustomDirectives {
      */
     private class FunctionInvocationVisitor extends org.netbeans.modules.php.editor.parser.astnodes.visitors.DefaultVisitor {
 
-        private final String[] validFunctions = new String[]{"directive", "if"};
+        private final String[] validFunctions = new String[]{"directive", "if"}; // NOI18N
         private final List<CustomDirective> directives;
 
         public FunctionInvocationVisitor() {
@@ -197,10 +200,10 @@ public final class CustomDirectives {
             Expression directiveName = (Expression) iter.next();
             if (directiveName != null && directiveName instanceof Scalar) {
                 Scalar name = (Scalar) directiveName;
-                String escapedDirectiveName = name.getStringValue().replaceAll("^[\"|\']|[\"|[\']]$", "");
+                String escapedDirectiveName = name.getStringValue().replaceAll("^[\"|\']|[\"|[\']]$", ""); // NOI18N
                 directives.add(new CustomDirective("@" + escapedDirectiveName, name.getStartOffset()));
                 //Custom If Statements
-                if (functionName.equals("if")) {
+                if (functionName.equals("if")) { // NOI18N
                     directives.add(new CustomDirective("@unless" + escapedDirectiveName, name.getStartOffset()));
                     directives.add(new CustomDirective("@else" + escapedDirectiveName, name.getStartOffset()));
                     directives.add(new CustomDirective("@end" + escapedDirectiveName, name.getStartOffset()));

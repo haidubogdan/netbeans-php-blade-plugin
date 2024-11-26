@@ -156,6 +156,10 @@ public class BladeCompletionProvider implements CompletionProvider {
                         case BladeHtmlAntlrLexer.HTML_COMPONENT_OPEN_TAG: {
                             String identifier = ComponentsSupport.tag2ClassName(queryToken.getText());
                             completeComponents(identifier, fo, caretOffset, resultSet);
+                            break;
+                        }
+                        case BladeHtmlAntlrLexer.COMPONENT_ATTRIBUTE: {
+                            
                         }
                     }
 
