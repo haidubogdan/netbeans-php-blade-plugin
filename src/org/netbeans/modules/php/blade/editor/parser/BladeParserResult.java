@@ -37,6 +37,7 @@ import org.netbeans.api.annotations.common.NonNull;
 import org.netbeans.api.annotations.common.NullAllowed;
 import org.netbeans.modules.csl.api.Severity;
 import org.netbeans.modules.csl.spi.DefaultError;
+import org.netbeans.modules.php.blade.editor.parser.listeners.BladeComponentTagOccurenceListener;
 import org.netbeans.modules.php.blade.editor.structure.BladeStructureItem;
 import org.netbeans.modules.php.blade.editor.parser.listeners.CustomDirectivesListener;
 import org.netbeans.modules.php.blade.editor.parser.listeners.PhpExpressionOccurenceListener;
@@ -59,6 +60,7 @@ public class BladeParserResult extends ParserResult {
     public final BladeReferenceIdsCollection bladeRreferenceIdsCollection = new BladeReferenceIdsCollection();
     public final BladePhpExpressionOccurences bladePhpExpressionOccurences = new BladePhpExpressionOccurences();
     public final BladeCustomDirectiveOccurences bladeCustomDirectiveOccurences = new BladeCustomDirectiveOccurences();
+    public final BladeComponentTagOccurences bladeComponentOccurences = new BladeComponentTagOccurences();
     public final BladeScope bladeScope = new BladeScope();
 
     volatile boolean finished = false;
@@ -93,6 +95,7 @@ public class BladeParserResult extends ParserResult {
             parser.addParseListener(new ReferenceIdListener(bladeRreferenceIdsCollection));
             parser.addParseListener(new PhpExpressionOccurenceListener(bladePhpExpressionOccurences));
             parser.addParseListener(new CustomDirectivesListener(bladeCustomDirectiveOccurences));
+            parser.addParseListener(new BladeComponentTagOccurenceListener(bladeComponentOccurences));
 
             if (taskClass.toLowerCase().contains("completion")) { //NOI18N
                 parser.addParseListener(new ScopeListener(bladeScope));
@@ -162,6 +165,11 @@ public class BladeParserResult extends ParserResult {
 
     public BladeCustomDirectiveOccurences getBladeCustomDirectiveOccurences() {
         return bladeCustomDirectiveOccurences;
+    }
+
+    //MAYBE NOT NEEDED ?!
+    public BladeComponentTagOccurences getBladeComponentTagOccurencess() {
+        return bladeComponentOccurences;
     }
 
     public BladeScope getBladeScope() {

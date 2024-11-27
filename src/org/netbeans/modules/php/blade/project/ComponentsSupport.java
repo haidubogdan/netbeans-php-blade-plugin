@@ -18,18 +18,12 @@
  */
 package org.netbeans.modules.php.blade.project;
 
-import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.netbeans.api.project.Project;
-import org.netbeans.modules.parsing.api.ParserManager;
-import org.netbeans.modules.parsing.api.Source;
-import org.netbeans.modules.parsing.api.UserTask;
-import org.netbeans.modules.parsing.spi.ParseException;
 import org.netbeans.modules.php.blade.editor.components.ComponentModel;
 import org.netbeans.modules.php.blade.editor.components.annotation.Namespace;
 import org.netbeans.modules.php.blade.editor.components.annotation.NamespaceRegister;
@@ -37,14 +31,10 @@ import org.netbeans.modules.php.blade.editor.parser.ParsingUtils;
 import org.netbeans.modules.php.blade.syntax.StringUtils;
 import org.netbeans.modules.php.editor.parser.PHPParseResult;
 import org.netbeans.modules.php.editor.parser.astnodes.ASTNode;
-import org.netbeans.modules.php.editor.parser.astnodes.Attribute;
-import org.netbeans.modules.php.editor.parser.astnodes.AttributeDeclaration;
-import org.netbeans.modules.php.editor.parser.astnodes.BodyDeclaration;
 import org.netbeans.modules.php.editor.parser.astnodes.ClassDeclaration;
 import org.netbeans.modules.php.editor.parser.astnodes.Expression;
 import org.netbeans.modules.php.editor.parser.astnodes.FieldsDeclaration;
 import org.netbeans.modules.php.editor.parser.astnodes.FormalParameter;
-import org.netbeans.modules.php.editor.parser.astnodes.FunctionInvocation;
 import org.netbeans.modules.php.editor.parser.astnodes.MethodDeclaration;
 import org.netbeans.modules.php.editor.parser.astnodes.visitors.DefaultVisitor;
 import org.openide.filesystems.FileChangeAdapter;
@@ -66,6 +56,7 @@ import org.openide.util.RequestProcessor;
     @Namespace(path = "BladeUIKit\\Components", packageName = "blade-ui-kit/blade-ui-kit"),})
 public class ComponentsSupport {
 
+    public static final String LIVEWIRE_NAME = "livewire";  // NOI18N
     private static final Map<Project, ComponentsSupport> INSTANCES = new HashMap<>();
     private final Map<FileObject, Namespace> installedComponentNamespace = new HashMap<>();
     public static final int COMPONENT_TAG_PREFIX_LENGTH = "<x-".length(); //NOI18N
@@ -74,7 +65,7 @@ public class ComponentsSupport {
     private boolean parseScan = false;
     private final Project project;
 
-    private final Map<FileObject, ComponentModel> componentCollection = new HashMap<>();
+    private final Map<FileObject, ComponentModel> componentClassCollection = new HashMap<>();
 
     private ComponentsSupport(Project project) {
         this.project = project;
@@ -105,7 +96,7 @@ public class ComponentsSupport {
                 continue;
             }
             installedComponentNamespace.put(fo, namespace);
-            RP.submit(new ComponentParsingTask(fo, componentCollection));
+            RP.submit(new ComponentParsingTask(fo, componentClassCollection));
         }
 
         installationScan.set(true);
@@ -122,6 +113,14 @@ public class ComponentsSupport {
     public Namespace[] getRegisteredNamespaces() {
         NamespaceRegister namespaceRegister = this.getClass().getAnnotation(NamespaceRegister.class);
         return namespaceRegister.value();
+    }
+    
+    public Map<FileObject, ComponentModel> getComponentClassCollection(){
+        return componentClassCollection;
+    }
+    
+    public ComponentModel findComponentClass(FileObject file){
+        return componentClassCollection.get(file);
     }
 
     public static String tag2ClassName(String identifier) {

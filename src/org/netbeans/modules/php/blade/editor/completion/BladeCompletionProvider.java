@@ -19,6 +19,8 @@
 package org.netbeans.modules.php.blade.editor.completion;
 
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.text.AbstractDocument;
@@ -30,13 +32,17 @@ import org.antlr.v4.runtime.Token;
 import org.netbeans.api.editor.document.EditorDocumentUtils;
 import org.netbeans.api.editor.mimelookup.MimeRegistration;
 import org.netbeans.api.editor.mimelookup.MimeRegistrations;
+import org.netbeans.api.project.Project;
 import org.netbeans.modules.php.blade.editor.BladeLanguage;
 import org.netbeans.modules.php.blade.editor.components.AttributeCompletionService;
+import org.netbeans.modules.php.blade.editor.components.ComponentModel;
 import org.netbeans.modules.php.blade.editor.components.ComponentsCompletionService;
 import org.netbeans.modules.php.blade.editor.indexing.PhpIndexResult;
+import org.netbeans.modules.php.blade.editor.lexer.EditorUtils;
 import org.netbeans.modules.php.blade.project.ComponentsSupport;
 import org.netbeans.modules.php.blade.syntax.StringUtils;
 import org.netbeans.modules.php.blade.syntax.antlr4.html_components.BladeHtmlAntlrLexer;
+import org.netbeans.modules.php.blade.syntax.antlr4.html_components.BladeHtmlAntlrUtils;
 import org.netbeans.spi.editor.completion.CompletionItem;
 import org.netbeans.spi.editor.completion.CompletionProvider;
 import static org.netbeans.spi.editor.completion.CompletionProvider.COMPLETION_QUERY_TYPE;
@@ -131,26 +137,32 @@ public class BladeCompletionProvider implements CompletionProvider {
 
                 if (!tokens.isEmpty()) {
                     tokens.seekTo(caretOffset);
-                    
                     Token queryToken;
-                    
+
                     if (tokens.hasNext()) {
                         queryToken = tokens.next().get();
-                    } else if (tokens.hasPrevious()){
+                    } else if (tokens.hasPrevious()) {
                         queryToken = tokens.previous().get();
                     } else {
                         return;
                     }
 
-                    int tokenOffset = tokens.getOffset();
+                    int queryTokenOffset = queryToken.getStartIndex();
+
+                    if (queryTokenOffset > caretOffset) {
+                        tokens.seekTo(caretOffset - 1);
+                        queryToken = tokens.next().get();
+                        queryTokenOffset = queryToken.getStartIndex();
+                    }
 
                     String text = queryToken.getText();
-                    int queryTokenOffset = queryToken.getStartIndex();
-                    
-//                    if (queryTokenOffset - text.length() != tokenOffset - 1){
-//                        //out of range
-//                        return;
-//                    }
+                    int textLength = text.length();
+                    int endOffset = queryTokenOffset + textLength;
+
+                    if (endOffset < caretOffset){
+                        //out of range
+                        return;
+                    }
 
                     switch (queryToken.getType()) {
                         case BladeHtmlAntlrLexer.HTML_COMPONENT_OPEN_TAG: {
@@ -159,7 +171,29 @@ public class BladeCompletionProvider implements CompletionProvider {
                             break;
                         }
                         case BladeHtmlAntlrLexer.COMPONENT_ATTRIBUTE: {
-                            
+                            Set<Integer> stopTokens = new HashSet<>();
+                            stopTokens.add(BladeHtmlAntlrLexer.HTML_COMPONENT_OPEN_TAG);
+                            stopTokens.add(BladeHtmlAntlrLexer.GT);
+                            Token componentToken = BladeHtmlAntlrUtils.findBackwardWithStop(tokens, BladeHtmlAntlrLexer.HTML_COMPONENT_OPEN_TAG, stopTokens);
+                            if (componentToken != null && componentToken.getType() == BladeHtmlAntlrLexer.HTML_COMPONENT_OPEN_TAG) {
+                                ComponentsCompletionService componentComplervice = new ComponentsCompletionService();
+                                String identifier = ComponentsSupport.tag2ClassName(componentToken.getText());
+                                Collection<PhpIndexResult> indexedReferences = componentComplervice.findComponentClass(identifier, fo);
+                                Project projectOwner = EditorUtils.getProjectOwner(doc);
+                                ComponentsSupport componentSupport = ComponentsSupport.getInstance(projectOwner);
+                                
+                                if (componentSupport == null){
+                                    break;
+                                }
+                                
+                                for (PhpIndexResult indexReference : indexedReferences) {
+                                    ComponentModel componentModel = componentSupport.findComponentClass(indexReference.declarationFile);
+                                    int x = 1;
+//                                    addComponentIdCompletionItem(indexReference,
+//                                            insertOffset, resultSet);
+                                }
+                            }
+                            break;
                         }
                     }
 

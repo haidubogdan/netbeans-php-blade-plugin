@@ -22,7 +22,9 @@ import java.util.Collection;
 import java.util.List;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
+import org.netbeans.api.html.lexer.HTMLTokenId;
 import org.netbeans.api.lexer.Token;
+import org.netbeans.api.lexer.TokenHierarchy;
 import org.netbeans.api.lexer.TokenSequence;
 import org.netbeans.api.project.Project;
 import org.netbeans.modules.csl.api.DeclarationFinder;
@@ -33,6 +35,8 @@ import org.netbeans.modules.csl.api.HtmlFormatter;
 import org.netbeans.modules.php.blade.csl.elements.ElementType;
 import org.netbeans.modules.php.blade.csl.elements.NamedElement;
 import org.netbeans.modules.php.blade.csl.elements.PathElement;
+import org.netbeans.modules.php.blade.editor.components.ComponentModel;
+import org.netbeans.modules.php.blade.editor.components.ComponentsCompletionService;
 import org.netbeans.modules.php.blade.editor.directives.CustomDirectives;
 import org.netbeans.modules.php.blade.editor.directives.CustomDirectives.CustomDirective;
 import org.netbeans.modules.php.blade.editor.indexing.BladeIndex;
@@ -42,15 +46,20 @@ import org.netbeans.modules.php.blade.editor.indexing.PhpIndexUtils;
 import org.netbeans.modules.php.blade.editor.indexing.QueryUtils;
 import org.netbeans.modules.php.blade.editor.lexer.BladeLexerUtils;
 import org.netbeans.modules.php.blade.editor.lexer.BladeTokenId;
+import static org.netbeans.modules.php.blade.editor.lexer.BladeTokenId.BLADE_CUSTOM_DIRECTIVE;
 import static org.netbeans.modules.php.blade.editor.lexer.BladeTokenId.BLADE_PAREN;
+import static org.netbeans.modules.php.blade.editor.lexer.BladeTokenId.HTML;
 import static org.netbeans.modules.php.blade.editor.lexer.BladeTokenId.PHP_BLADE_ECHO_EXPR;
 import static org.netbeans.modules.php.blade.editor.lexer.BladeTokenId.PHP_BLADE_EXPRESSION;
 import static org.netbeans.modules.php.blade.editor.lexer.BladeTokenId.PHP_BLADE_INLINE_CODE;
+import org.netbeans.modules.php.blade.editor.lexer.EditorUtils;
 import org.netbeans.modules.php.blade.editor.parser.BladeCustomDirectiveOccurences.CustomDirectiveOccurence;
 import org.netbeans.modules.php.blade.editor.parser.BladeParserResult;
 import org.netbeans.modules.php.blade.editor.parser.BladeParserResult.BladeStringReference;
 import org.netbeans.modules.php.blade.editor.parser.BladeParserResult.Reference;
 import org.netbeans.modules.php.blade.editor.path.BladePathUtils;
+import org.netbeans.modules.php.blade.project.ComponentsSupport;
+import org.netbeans.modules.php.blade.syntax.StringUtils;
 import static org.netbeans.modules.php.blade.syntax.antlr4.php.BladePhpAntlrParser.IDENTIFIER;
 import org.netbeans.modules.php.blade.syntax.antlr4.php.BladePhpAntlrUtils;
 import org.netbeans.modules.php.blade.syntax.antlr4.php.BladePhpSnippetParser.PhpReference;
@@ -127,6 +136,26 @@ public class BladeDeclarationFinder implements DeclarationFinder {
                 }
                 break;
             }
+            case HTML: {
+                TokenHierarchy th = TokenHierarchy.get(document);
+                Token<? extends HTMLTokenId> htmlToken = BladeLexerUtils.getHtmlToken(th, caretOffset);
+
+                if (htmlToken == null) {
+                    return offsetRange;
+                }
+
+                HTMLTokenId htmlTokenId = htmlToken.id();
+                int tokenOffset = htmlToken.offset(th);
+
+                if (htmlTokenId.equals(HTMLTokenId.TAG_OPEN)) {
+                    String tag = htmlToken.text().toString();
+                    if (tag.startsWith("x-")) { // NOI18N
+                        return new OffsetRange(tokenOffset, tokenOffset + htmlToken.length());
+                    }
+                }
+
+                break;
+            }
 
         }
 
@@ -186,15 +215,42 @@ public class BladeDeclarationFinder implements DeclarationFinder {
 
     @Override
     public DeclarationLocation findDeclaration(ParserResult info, int caretOffset) {
-        BladeParserResult parserResult = (BladeParserResult) info;
-
-        FileObject currentFile = parserResult.getFileObject();
         DeclarationLocation location = DeclarationLocation.NONE;
+        final TokenHierarchy<?> th = info.getSnapshot().getTokenHierarchy();
 
+        if (th == null) {
+            return location;
+        }
+
+        TokenSequence<BladeTokenId> ts = BladeLexerUtils.getBladeTokenSequenceDoc(th, caretOffset);
+
+        if (ts == null) {
+            return location;
+        }
+
+        ts.move(caretOffset);
+
+        if (!ts.moveNext() && !ts.movePrevious()) {
+            return location;
+        }
+
+        Token<BladeTokenId> token = ts.token();
+        BladeTokenId id = token.id();
+
+        BladeParserResult parserResult = (BladeParserResult) info;
+        FileObject currentFile = parserResult.getFileObject();
+
+        switch (id) {
+            case BLADE_CUSTOM_DIRECTIVE: {
+                return findCustomDirectiveDeclaration(parserResult, caretOffset, currentFile, location);
+            }
+            case HTML: {
+                return findComponentClassDeclaration(th, caretOffset, currentFile, location);
+            }
+        }
         //we can have string or php reference
         BladeStringReference bladeReference = parserResult.getBladeReferenceIdsCollection().findOccuredRefrence(caretOffset);
-        OffsetRange phpExprRange;
-        CustomDirectiveOccurence customDirectiveOccurence;
+        OffsetRange caretRange;
 
         if (bladeReference != null) {
             String referenceIdentifier = bladeReference.identifier;
@@ -261,29 +317,10 @@ public class BladeDeclarationFinder implements DeclarationFinder {
                     return location;
                 }
             }
-        } else if ((customDirectiveOccurence = parserResult.getBladeCustomDirectiveOccurences().findCustomDirectiveOccurence(caretOffset)) != null) {
-            Project projectOwner = ProjectConvertors.getNonConvertorOwner(currentFile);
-            CustomDirectives.getInstance(projectOwner).filterAction(new CustomDirectives.FilterCallbackDeclaration(location) {
-                @Override
-                public void filterDirectiveName(CustomDirective directive, FileObject file) {
-                    if (directive.getName().equals(customDirectiveOccurence.directiveName)) {
-                        NamedElement customDirectiveHandle = new NamedElement(customDirectiveOccurence.directiveName, file, ElementType.CUSTOM_DIRECTIVE);
-                        DeclarationFinder.DeclarationLocation newLoc = new DeclarationFinder.DeclarationLocation(file, directive.getOffset(), customDirectiveHandle);
-                        this.location.addAlternative(new AlternativeLocationImpl(newLoc));
-                    }
-                }
-            });
-
-            if (!location.getAlternativeLocations().isEmpty()) {
-                for (AlternativeLocation loc : location.getAlternativeLocations()) {
-                    location = loc.getLocation();
-                }
-            }
-            return location;
-        } else if ((phpExprRange = parserResult.getBladePhpExpressionOccurences().findPhpExpressionLocation(caretOffset)) != null) {
-            int referenceOffset = caretOffset - phpExprRange.getStart();
+        } else if ((caretRange = parserResult.getBladePhpExpressionOccurences().findPhpExpressionLocation(caretOffset)) != null) {
+            int referenceOffset = caretOffset - caretRange.getStart();
             PhpElementsDeclarationService phpDeclService = new PhpElementsDeclarationService();
-            PhpReference phpRef = phpDeclService.findReferenceAtCaret(info, phpExprRange, referenceOffset);
+            PhpReference phpRef = phpDeclService.findReferenceAtCaret(info, caretRange, referenceOffset);
 
             if (phpRef == null) {
                 return location;
@@ -323,6 +360,90 @@ public class BladeDeclarationFinder implements DeclarationFinder {
         }
 
         return DeclarationLocation.NONE;
+    }
+
+    private DeclarationLocation findCustomDirectiveDeclaration(
+            BladeParserResult parserResult, int caretOffset, FileObject currentFile,
+            DeclarationLocation location
+    ) {
+        Project projectOwner = ProjectConvertors.getNonConvertorOwner(currentFile);
+        if (projectOwner == null) {
+            return location;
+        }
+
+        CustomDirectiveOccurence customDirectiveOccurence = parserResult.getBladeCustomDirectiveOccurences().findCustomDirectiveOccurence(caretOffset);
+
+        if (customDirectiveOccurence == null) {
+            return location;
+        }
+
+        CustomDirectives.getInstance(projectOwner).filterAction(new CustomDirectives.FilterCallbackDeclaration(location) {
+            @Override
+            public void filterDirectiveName(CustomDirective directive, FileObject file) {
+                if (directive.getName().equals(customDirectiveOccurence.directiveName)) {
+                    NamedElement customDirectiveHandle = new NamedElement(customDirectiveOccurence.directiveName, file, ElementType.CUSTOM_DIRECTIVE);
+                    DeclarationFinder.DeclarationLocation newLoc = new DeclarationFinder.DeclarationLocation(file, directive.getOffset(), customDirectiveHandle);
+                    this.location.addAlternative(new AlternativeLocationImpl(newLoc));
+                }
+            }
+        });
+
+        if (!location.getAlternativeLocations().isEmpty()) {
+            for (AlternativeLocation loc : location.getAlternativeLocations()) {
+                location = loc.getLocation();
+            }
+        }
+        return location;
+    }
+
+    private DeclarationLocation findComponentClassDeclaration(
+            TokenHierarchy<?> th, int caretOffset, FileObject currentFile, DeclarationLocation location) {
+        Project projectOwner = ProjectConvertors.getNonConvertorOwner(currentFile);
+        if (projectOwner == null) {
+            return location;
+        }
+
+        Token<? extends HTMLTokenId> htmlToken = BladeLexerUtils.getHtmlToken(th, caretOffset);
+
+        if (htmlToken == null) {
+            return location;
+        }
+
+        HTMLTokenId htmlTokenId = htmlToken.id();
+
+        if (htmlTokenId.equals(HTMLTokenId.TAG_OPEN)) {
+            String tag = htmlToken.text().toString();
+            if (!tag.startsWith("x-")) { // NOI18N
+                return location;
+            }
+            ComponentsCompletionService componentComplervice = new ComponentsCompletionService();
+            String className = StringUtils.kebabToCamel(tag.substring("x-".length())); // NOI18N
+            Collection<PhpIndexResult> indexedReferences = componentComplervice.findComponentClass(className, currentFile);
+            ComponentsSupport componentSupport = ComponentsSupport.getInstance(projectOwner);
+
+            if (componentSupport == null) {
+                return location;
+            }
+
+            for (PhpIndexResult indexReference : indexedReferences) {
+                NamedElement resultHandle = new NamedElement(className, indexReference.declarationFile, ElementType.LARAVEL_COMPONENT);
+                DeclarationLocation constantLocation = new DeclarationFinder.DeclarationLocation(indexReference.declarationFile, indexReference.getStartOffset(), resultHandle);
+                if (location.equals(DeclarationLocation.NONE)) {
+                    location = constantLocation;
+                }
+                location.addAlternative(new AlternativeLocationImpl(constantLocation));
+
+                if (!location.equals(DeclarationLocation.NONE)) {
+                    FileObject resource = componentComplervice.getComponentResourceFile(tag, indexReference.name, currentFile);
+                    if (resource != null) {
+                        PathElement resourceHandle = new PathElement(tag, resource);
+                        DeclarationLocation resourceLocation = new DeclarationFinder.DeclarationLocation(resource, indexReference.getStartOffset(), resourceHandle);
+                        location.addAlternative(new AlternativeLocationImpl(resourceLocation));
+                    }
+                }
+            }
+        }
+        return location;
     }
 
     public static class AlternativeLocationImpl implements AlternativeLocation {

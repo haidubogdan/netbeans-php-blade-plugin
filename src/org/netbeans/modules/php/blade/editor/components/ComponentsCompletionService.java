@@ -18,12 +18,13 @@
  */
 package org.netbeans.modules.php.blade.editor.components;
 
-import org.netbeans.modules.php.blade.editor.components.annotation.NamespaceRegister;
 import org.netbeans.modules.php.blade.editor.components.annotation.Namespace;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
+import org.netbeans.api.annotations.common.CheckForNull;
 import org.netbeans.api.project.Project;
+import org.netbeans.modules.php.blade.editor.BladeLanguage;
 import org.netbeans.modules.php.blade.editor.indexing.PhpIndexResult;
 import org.netbeans.modules.php.blade.editor.indexing.PhpIndexUtils;
 import org.netbeans.modules.php.blade.project.ComponentsSupport;
@@ -32,7 +33,7 @@ import org.openide.filesystems.FileObject;
 
 /**
  * most frequently used plugins for laravel
- * 
+ *
  * @author bhaidu
  */
 public class ComponentsCompletionService {
@@ -40,21 +41,67 @@ public class ComponentsCompletionService {
     public Collection<PhpIndexResult> queryComponents(String prefix, FileObject fo) {
         Collection<PhpIndexResult> results = new ArrayList<>();
         Project project = ProjectUtils.getMainOwner(fo);
-        
-        if (project == null){
+
+        if (project == null) {
             return results;
         }
 
         ComponentsSupport componentSupport = ComponentsSupport.getInstance(project);
 
-        if (!componentSupport.isScanned()){
+        if (!componentSupport.isScanned()) {
             componentSupport.scanForInstalledComponents();
         }
-        
-        for (Map.Entry<FileObject, Namespace> namespace : componentSupport.getInstalledComponentNamespace().entrySet()){
+
+        for (Map.Entry<FileObject, Namespace> namespace : componentSupport.getInstalledComponentNamespace().entrySet()) {
             results.addAll(PhpIndexUtils.queryNamespaceClassesName(prefix, namespace.getValue().path(), fo));
         }
 
         return results;
+    }
+
+    public Collection<PhpIndexResult> findComponentClass(String prefix, FileObject fo) {
+        Collection<PhpIndexResult> results = new ArrayList<>();
+        Project project = ProjectUtils.getMainOwner(fo);
+
+        if (project == null) {
+            return results;
+        }
+
+        ComponentsSupport componentSupport = ComponentsSupport.getInstance(project);
+
+        if (!componentSupport.isScanned()) {
+            componentSupport.scanForInstalledComponents();
+        }
+
+        for (Map.Entry<FileObject, Namespace> namespace : componentSupport.getInstalledComponentNamespace().entrySet()) {
+            results.addAll(PhpIndexUtils.queryExactNamespaceClasses(prefix, namespace.getValue().path(), fo));
+        }
+
+        return results;
+    }
+
+    @CheckForNull
+    public FileObject getComponentResourceFile(String componentId, String classQualifiedName, FileObject sourceFo) {
+        if (classQualifiedName.toLowerCase().contains(ComponentsSupport.LIVEWIRE_NAME)) {
+            return getLivewireComponentResourceFile(componentId, sourceFo);
+        }
+
+        return null;
+    }
+
+    @CheckForNull
+    public FileObject getLivewireComponentResourceFile(String componentId, FileObject sourceFo) {
+        Project project = ProjectUtils.getMainOwner(sourceFo);
+        if (project == null) {
+            return null;
+        }
+
+        FileObject componentResource = project.getProjectDirectory().getFileObject("resources/views/livewire/" + componentId + "." + BladeLanguage.FILE_EXTENSION); // NOI18N
+
+        if (componentResource != null && componentResource.isValid()) {
+            return componentResource;
+        }
+
+        return null;
     }
 }

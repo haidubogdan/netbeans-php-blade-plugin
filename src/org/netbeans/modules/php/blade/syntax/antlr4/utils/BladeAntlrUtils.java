@@ -48,10 +48,10 @@ public abstract class BladeAntlrUtils {
 
         return findForward(tokens, start, stopTokenText, openTokensText);
     }
-    
+
     public static Token findForward(AntlrTokenSequence tokens, Token start,
-            Set<String> stopTokenText, Set<String> openTokensText){
-        
+            Set<String> stopTokenText, Set<String> openTokensText) {
+
         if (tokens == null || tokens.isEmpty()) {
             return null;
         }
@@ -87,12 +87,12 @@ public abstract class BladeAntlrUtils {
             Set<String> stopTokenText, Set<String> openTokensText) {
 
         AntlrTokenSequence tokens = getTokens(doc);
-        return findBackward(tokens,start, stopTokenText, openTokensText);
+        return findBackward(tokens, start, stopTokenText, openTokensText);
     }
-    
+
     public static Token findBackward(AntlrTokenSequence tokens, Token start,
             Set<String> stopTokenText, Set<String> openTokensText) {
-        
+
         if (tokens == null || tokens.isEmpty()) {
             return null;
         }
@@ -126,7 +126,7 @@ public abstract class BladeAntlrUtils {
     }
 
     public static Token findForwardWithStop(Document doc, Token start,
-            int tokensMatch, List<Integer> stopTokens) {
+            int tokensMatch, Set<Integer> stopTokens) {
         AntlrTokenSequence tokens = getTokens(doc);
 
         if (tokens == null || tokens.isEmpty()) {
@@ -186,9 +186,14 @@ public abstract class BladeAntlrUtils {
     }
 
     public static Token findBackwardWithStop(Document doc, Token start,
-            int tokensMatch, List<Integer> stopTokens) {
+            int tokenMatch, Set<Integer> stopTokens) {
         AntlrTokenSequence tokens = getTokens(doc);
 
+        return findBackwardWithStop(tokens, start, tokenMatch, stopTokens);
+    }
+
+    public static Token findBackwardWithStop(
+            AntlrTokenSequence tokens, Token start, int tokenMatch, Set<Integer> stopTokens) {
         if (tokens == null || tokens.isEmpty()) {
             return null;
         }
@@ -201,7 +206,7 @@ public abstract class BladeAntlrUtils {
                 continue;
             }
 
-            if (pt.getType() == tokensMatch) {
+            if (pt.getType() == tokenMatch) {
                 return pt;
             }
 
@@ -211,6 +216,5 @@ public abstract class BladeAntlrUtils {
         }
 
         return null;
-
     }
 }

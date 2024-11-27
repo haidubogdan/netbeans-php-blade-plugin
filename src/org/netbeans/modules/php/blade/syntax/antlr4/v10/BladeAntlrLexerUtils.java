@@ -68,4 +68,8 @@ public final class BladeAntlrLexerUtils extends BladeAntlrUtils {
                 return -1;
         }
     }
+    
+    public static boolean isUndefinedDirective(int token){
+        return token == BladeAntlrLexer.D_CUSTOM;
+    }
 }
