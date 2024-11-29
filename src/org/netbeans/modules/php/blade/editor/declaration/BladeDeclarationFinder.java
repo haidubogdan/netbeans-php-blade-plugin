@@ -105,18 +105,18 @@ public class BladeDeclarationFinder implements DeclarationFinder {
         Token<BladeTokenId> token = ts.token();
         String caretTokenText = token.text().toString();
         BladeTokenId id = token.id();
-        int phpExprStart = ts.offset();
+        int tokenStart = ts.offset();
 
         switch (id) {
             case BLADE_CUSTOM_DIRECTIVE: {
-                return new OffsetRange(phpExprStart, phpExprStart + caretTokenText.length());
+                return new OffsetRange(tokenStart, tokenStart + caretTokenText.length());
             }
             case PHP_BLADE_EXPRESSION: {
                 return getReferenceSpanInsidePhpExpr(document, ts, token, caretOffset);
             }
             case PHP_BLADE_ECHO_EXPR:
             case PHP_BLADE_INLINE_CODE: {
-                return getPhpReferenceSpan(caretTokenText, caretOffset, phpExprStart);
+                return getPhpReferenceSpan(caretTokenText, caretOffset, tokenStart);
             }
             case PHP_INLINE: {
                 TokenSequence<? extends PHPTokenId> tsPhp = BladeLexerUtils.getPhpTokenSequence(document, caretOffset);

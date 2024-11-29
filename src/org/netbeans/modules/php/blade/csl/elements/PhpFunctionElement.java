@@ -55,9 +55,9 @@ public class PhpFunctionElement extends NamedElement {
 
     public String getParamsAsString() {
         if (params == null || params.isEmpty()) {
-            return "()";
+            return "()"; // NOI18N
         }
-        return "(" + String.join(", ", params) + ")";
+        return "(" + String.join(", ", params) + ")"; // NOI18N
     }
 
     public List<String> getParams() {

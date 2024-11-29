@@ -48,7 +48,7 @@ public final class BladeLexerUtils {
         return getTokenSequence(th, offset, PHPTokenId.language());
     }
 
-    public static TokenSequence<? extends HTMLTokenId> getHtmlTokenSequence(TokenHierarchy<Document> th, final int offset) {
+    public static TokenSequence<? extends HTMLTokenId> getHtmlTokenSequence(TokenHierarchy<?> th, final int offset) {
         return getTokenSequence(th, offset, HTMLTokenId.language());
     }
 
@@ -57,7 +57,7 @@ public final class BladeLexerUtils {
         return getTokenSequence(th, offset, HTMLTokenId.language());
     }
 
-    public static Token<? extends HTMLTokenId> getHtmlToken(TokenHierarchy th, final int offset) {
+    public static Token<? extends HTMLTokenId> getHtmlToken(TokenHierarchy<?> th, final int offset) {
         TokenSequence<? extends HTMLTokenId> tsHtml = BladeLexerUtils.getHtmlTokenSequence(th, offset);
         if (tsHtml == null) {
             return null;
@@ -72,20 +72,10 @@ public final class BladeLexerUtils {
     }
 
     public static TokenSequence<BladeTokenId> getTokenSequence(final Document document, final int offset) {
-        final BaseDocument baseDocument = document instanceof BaseDocument ? (BaseDocument) document : null;
-        try {
-            if (baseDocument != null) {
-                baseDocument.readLock();
-            }
-            return getBladeTokenSequence(TokenHierarchy.get(document), offset);
-        } finally {
-            if (baseDocument != null) {
-                baseDocument.readUnlock();
-            }
-        }
+        return getBladeTokenSequence(TokenHierarchy.get(document), offset);
     }
 
-    public static TokenSequence<BladeTokenId> getBladeTokenSequence(TokenHierarchy<Document> th, int offset) {
+    public static TokenSequence<BladeTokenId> getBladeTokenSequence(TokenHierarchy<?> th, int offset) {
         BladeLanguage lang = new BladeLanguage();
         TokenSequence<BladeTokenId> ts = th.tokenSequence(lang.getLexerLanguage());
 
@@ -97,6 +87,30 @@ public final class BladeLexerUtils {
         TokenSequence<BladeTokenId> ts = th.tokenSequence(lang.getLexerLanguage());
 
         return ts;
+    }
+    
+    public static Token<BladeTokenId> getBladeToken(final Document document, final int offset){
+        TokenSequence<BladeTokenId> ts = getTokenSequence(document, offset);
+        return getBladeToken(ts, offset);
+    }
+    
+    public static Token<BladeTokenId> getBladeToken(TokenHierarchy<?> th, final int offset){
+        TokenSequence<BladeTokenId> ts = getBladeTokenSequence(th, offset);
+        return getBladeToken(ts, offset);
+    }
+    
+    public static Token<BladeTokenId> getBladeToken(TokenSequence<BladeTokenId> ts, final int offset){
+        if (ts == null){
+            return null;
+        }
+        
+        ts.move(offset);
+        
+        if (!ts.moveNext() && !ts.movePrevious()) {
+            return null;
+        }
+        
+        return ts.token();
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})

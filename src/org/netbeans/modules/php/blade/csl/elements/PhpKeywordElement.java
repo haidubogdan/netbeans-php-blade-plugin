@@ -57,7 +57,7 @@ public class PhpKeywordElement implements ElementHandle {
 
     @Override
     public String getIn() {
-        return "";
+        return null;
     }
 
     @Override
@@ -71,8 +71,8 @@ public class PhpKeywordElement implements ElementHandle {
     }
 
     @Override
-    public boolean signatureEquals(ElementHandle eh) {
-        return false;
+    public boolean signatureEquals(ElementHandle handle) {
+        return name.equals(handle.getName());
     }
 
     @Override

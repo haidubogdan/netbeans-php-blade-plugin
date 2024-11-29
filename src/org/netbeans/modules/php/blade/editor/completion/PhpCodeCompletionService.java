@@ -35,7 +35,7 @@ public class PhpCodeCompletionService {
         if (targetetToken == null) {
             return;
         }
-        //filter toke types?
+
         int completionOffset = exprStart + targetetToken.getStartIndex();
 
         String phpPrefix = "";
@@ -271,8 +271,6 @@ public class PhpCodeCompletionService {
         }
 
         for (PhpIndexFunctionResult indexResult : indexedFunctions) {
-            //to be completed
-            //might add syntax completion cursor
             String preview = indexResult.name + indexResult.getParamsAsString();
             completionProposals.add(new BladeCompletionProposal.FunctionItem(
                     functionElement(indexResult),
@@ -283,7 +281,6 @@ public class PhpCodeCompletionService {
         }
     }
 
-    //TODO might move in a factory for NamedElement
     private static ClassElement classElement(PhpIndexResult indexResult) {
         return new ClassElement(indexResult.name,
                 indexResult.namespace,
