@@ -26,8 +26,7 @@ tokens {
 fragment DirectivesWithEndTag : 'for' ('each')? | 'if' | 'while' 
    | 'section' | 'session' | 'once' | 'push' | 'PushOnce'
    | 'switch' | 'unless' | 'can' ('any' | 'not')?
-   | 'auth' | 'guest'
-   | 'error' | 'empty'
+   | 'auth' | 'guest'  | 'error' | 'empty' | 'isset'
    //11.x
    | 'fragment';
 
@@ -96,6 +95,8 @@ CLOSE_TAG : ('</' FullIdentifier '>' [\n\r ]*)+->type(HTML);
 HTML_WS : ((' ')+ | [\r\n]+)->type(HTML);
 
 INCOMPLETE_BLADE_TAG : ('{!' | '{{-') ->type(HTML);
+
+GENERAL_IDENTIFIER : '$'? NameString->type(HTML);
 
 OTHER : . ->type(HTML);
 

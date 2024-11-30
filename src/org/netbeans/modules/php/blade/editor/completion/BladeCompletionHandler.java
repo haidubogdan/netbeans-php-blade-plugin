@@ -136,7 +136,6 @@ public class BladeCompletionHandler implements CodeCompletionHandler2 {
                     }
                 }
             } else {
-                //
                 CharSequence snapshotExpr = completionContext.getParserResult().getSnapshot().getText().subSequence(phpExprRange.getStart(), phpExprRange.getEnd());
                 PhpCodeCompletionService.completePhpCode(completionProposals,
                         snapshotExpr.toString(), phpExprRange.getStart(), offset, fo);

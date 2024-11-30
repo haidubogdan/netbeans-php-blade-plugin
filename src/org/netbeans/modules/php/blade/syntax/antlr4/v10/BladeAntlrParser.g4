@@ -71,7 +71,7 @@ elseifStatement: D_ELSEIF directiveArguments statement*;
 switchStatement :
     D_SWITCH directiveArguments
     (D_CASE directiveArguments statement* D_BREAK?)*
-    (D_DEFAULT directiveArguments statement*)?
+    (D_DEFAULT statement*)?
     D_ENDSWITCH
     ;
 

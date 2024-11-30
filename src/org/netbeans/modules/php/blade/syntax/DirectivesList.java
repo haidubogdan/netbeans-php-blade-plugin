@@ -35,7 +35,6 @@ import org.netbeans.modules.php.blade.syntax.annotation.DirectiveRegister;
     @Directive(name = "@elseif", params = true),
     @Directive(name = "@else"),
     @Directive(name = "@endif"),
-    @Directive(name = "@empty", since = "5.4"),
     @Directive(name = "@empty", params = true, endtag = "@endempty", since = "5.4"),
     @Directive(name = "@isset", params = true, endtag = "@endisset"),
     @Directive(name = "@unless", params = true, endtag = "@endunless"),

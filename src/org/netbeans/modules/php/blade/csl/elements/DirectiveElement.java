@@ -23,7 +23,7 @@ import org.openide.filesystems.FileObject;
 
 /**
  *
- * @author bhaidu
+ * @author bhaidu <haidubogdan@gmail.com>
  */
 public class DirectiveElement extends NamedElement {
 

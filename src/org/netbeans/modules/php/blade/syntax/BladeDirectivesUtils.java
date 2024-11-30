@@ -26,7 +26,7 @@ import org.netbeans.modules.php.blade.syntax.annotation.Directive;
 /**
  *
  *
- * @author bhaidu
+ * @author bhaidu <haidubogdan@gmail.com>
  */
 public final class BladeDirectivesUtils {
 
@@ -39,6 +39,7 @@ public final class BladeDirectivesUtils {
     public static final String DIRECTIVE_STOP = "@stop"; // NOI18N
     public static final String DIRECTIVE_APPEND = "@append"; // NOI18N
     public static final String DIRECTIVE_IF = "@if"; // NOI18N
+    public static final String DIRECTIVE_ELSEIF = "@elseif"; // NOI18N
     public static final String DIRECTIVE_ELSE = "@else"; // NOI18N
     public static final String DIRECTIVE_ENDIF = "@endif"; // NOI18N
     public static final String DIRECTIVE_FOREACH = "@foreach"; // NOI18N
@@ -47,11 +48,14 @@ public final class BladeDirectivesUtils {
     public static final String DIRECTIVE_SESSION = "@session"; // NOI18N
 
     public static String[] blockDirectiveEndings(String directive) {
+
         if (directive.equals(DIRECTIVE_SECTION)) {
             return new String[]{DIRECTIVE_ENDSECTION, DIRECTIVE_SHOW, DIRECTIVE_STOP, DIRECTIVE_APPEND};
         }
+        
         DirectivesList listClass = new DirectivesList();
         for (Directive directiveEl : listClass.getDirectives()) {
+            String dirname = directiveEl.endtag();
             if (!directiveEl.name().equals(directive)) {
                 continue;
             }
@@ -64,10 +68,13 @@ public final class BladeDirectivesUtils {
     }
 
     public static String[] blockDirectiveOpenings(String directive) {
-        //still easier with switch
         switch (directive) {
             case DIRECTIVE_ENDIF: {
                 return new String[]{DIRECTIVE_IF, DIRECTIVE_HAS_SECTION, DIRECTIVE_SECTION_MISSING};
+            }
+            case DIRECTIVE_ELSEIF:
+            case DIRECTIVE_ELSE:{
+                return new String[]{DIRECTIVE_IF, DIRECTIVE_ELSEIF};
             }
             case DIRECTIVE_ENDSECTION:
             case DIRECTIVE_APPEND:
