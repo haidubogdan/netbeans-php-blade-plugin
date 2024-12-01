@@ -31,6 +31,7 @@ import javax.swing.text.Document;
 import javax.swing.text.JTextComponent;
 import org.antlr.v4.runtime.Token;
 import org.netbeans.api.annotations.common.NonNull;
+import org.netbeans.api.lexer.TokenHierarchy;
 import org.netbeans.api.lexer.TokenSequence;
 import org.netbeans.api.project.Project;
 import org.netbeans.modules.csl.api.CodeCompletionContext;
@@ -57,6 +58,7 @@ import org.netbeans.modules.php.blade.editor.indexing.BladeIndex;
 import org.netbeans.modules.php.blade.editor.lexer.BladeLexerUtils;
 import org.netbeans.modules.php.blade.editor.lexer.BladeTokenId;
 import static org.netbeans.modules.php.blade.editor.lexer.BladeTokenId.BLADE_DIRECTIVE_UNKNOWN;
+import static org.netbeans.modules.php.blade.editor.lexer.BladeTokenId.BLADE_ECHO_DELIMITOR;
 import org.netbeans.modules.php.blade.editor.parser.BladeDirectiveScope;
 import org.netbeans.modules.php.blade.editor.parser.BladeParserResult;
 import org.netbeans.modules.php.blade.editor.path.BladePathUtils;
@@ -98,8 +100,30 @@ public class BladeCompletionHandler implements CodeCompletionHandler2 {
         if (offset < 1) {
             return CodeCompletionResult.NONE;
         }
-
+        
         BladeParserResult parserResult = (BladeParserResult) completionContext.getParserResult();
+        
+        final TokenHierarchy<?> th = parserResult.getSnapshot().getTokenHierarchy();
+
+        if (th == null) {
+            return CodeCompletionResult.NONE;
+        }
+
+        TokenSequence<BladeTokenId> ts = BladeLexerUtils.getBladeTokenSequenceDoc(th, offset);
+
+        if (ts == null) {
+            return CodeCompletionResult.NONE;
+        }
+
+        ts.move(offset);
+
+        if (!ts.moveNext() && !ts.movePrevious()) {
+            return CodeCompletionResult.NONE;
+        }
+        
+        org.netbeans.api.lexer.Token<BladeTokenId> token = ts.token();
+        BladeTokenId id = token.id();
+
         FileObject fo = parserResult.getSnapshot().getSource().getFileObject();
 
         final List<CompletionProposal> completionProposals = new ArrayList<>();
@@ -112,6 +136,10 @@ public class BladeCompletionHandler implements CodeCompletionHandler2 {
         if (contextPrefix.startsWith(AT) && phpExprRange == null) { //NOI18N
             completeDirectives(completionProposals, offset, fo, contextPrefix);
             return new DefaultCompletionResult(completionProposals, false);
+        } else if (id.equals(BLADE_ECHO_DELIMITOR)) {
+            //??
+            String tagStart = token.text().toString();
+            completeBladeTags(completionProposals, offset, tagStart);
         } else if (phpExprRange != null) {
             BladeParserResult.BladeStringReference reference = parserResult.getBladeReferenceIdsCollection()
                     .findOccuredRefrence(offset);
@@ -181,7 +209,6 @@ public class BladeCompletionHandler implements CodeCompletionHandler2 {
                 completeStackIdFromIndex(completionProposals, stackId, fo, offset);
                 break;
             }
-            //push, once
             case D_VITE: {
                 String assetPath = reference.identifier;
                 completeResourcePath(completionProposals, assetPath, fo, offset);
@@ -286,10 +313,9 @@ public class BladeCompletionHandler implements CodeCompletionHandler2 {
      * @param currentToken
      */
     private void completeBladeTags(final List<CompletionProposal> completionProposals,
-            CodeCompletionContext completionContext, Token currentToken) {
-        String tagStart = currentToken.getText();
+            int carretOffset, String tagStart) {
 
-        int anchorOffset = computeAnchorOffset(tagStart, completionContext.getCaretOffset());
+        int anchorOffset = computeAnchorOffset(tagStart, carretOffset);
         BladeTags tagsContainer = new BladeTags();
         Tag[] tags = tagsContainer.getTags();
         for (Tag tag : tags) {

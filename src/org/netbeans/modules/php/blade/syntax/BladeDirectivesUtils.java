@@ -46,6 +46,7 @@ public final class BladeDirectivesUtils {
     public static final String DIRECTIVE_INCLUDE = "@include"; // NOI18N
     public static final String DIRECTIVE_EXTENDS = "@extends"; // NOI18N
     public static final String DIRECTIVE_SESSION = "@session"; // NOI18N
+    public static final String DIRECTIVE_CAN = "@can"; // NOI18N
 
     public static String[] blockDirectiveEndings(String directive) {
 
@@ -73,8 +74,9 @@ public final class BladeDirectivesUtils {
                 return new String[]{DIRECTIVE_IF, DIRECTIVE_HAS_SECTION, DIRECTIVE_SECTION_MISSING};
             }
             case DIRECTIVE_ELSEIF:
-            case DIRECTIVE_ELSE:{
                 return new String[]{DIRECTIVE_IF, DIRECTIVE_ELSEIF};
+            case DIRECTIVE_ELSE:{
+                return new String[]{DIRECTIVE_IF, DIRECTIVE_ELSEIF, DIRECTIVE_CAN};
             }
             case DIRECTIVE_ENDSECTION:
             case DIRECTIVE_APPEND:

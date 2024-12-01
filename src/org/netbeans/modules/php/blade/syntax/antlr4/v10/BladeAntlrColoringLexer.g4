@@ -44,7 +44,7 @@ D_GENERIC_BLOCK_DIRECTIVES : ('@' DirectivesWithEndTag | '@sectionMissing' | '@h
 
 D_SIMPLE_BLOCK_DIRECTIVES : '@' 'end'? ('empty' | 'production' | 'once') ->type(DIRECTIVE);
 
-D_GENERIC_INLINE_DIRECTIVES : ('@elseif' |  Include | '@extends' | '@each' | '@yield' | '@props' | '@method' 
+D_GENERIC_INLINE_DIRECTIVES : ('@elseif' |  Include | '@extends' | '@each' | '@yield' | '@props' | '@method' | '@elsecan' ('any' | 'not')?
    | '@class' | '@style' | '@aware' | '@break' | '@continue' | '@selected' | '@disabled' 
    | '@readonly' | '@required' | '@when' | '@bool') (' ')* {this._input.LA(1) == '('}? ->pushMode(INSIDE_PHP_EXPRESSION),type(DIRECTIVE);
 
@@ -68,9 +68,15 @@ D_PHP : '@php'->pushMode(BLADE_INLINE_PHP);
 D_END_ARG : ('@end' NameString) (' ')* {this._input.LA(1) == '('}?->pushMode(INSIDE_PHP_EXPRESSION),type(DIRECTIVE);
 D_END : ('@end' NameString)->type(DIRECTIVE);
 
+
+D_ASSET_BUNDLER : '@vite' (' ')* {this._input.LA(1) == '('}? ->pushMode(INSIDE_PHP_EXPRESSION),type(DIRECTIVE);
+
 //known plugins
 D_LIVEWIRE : ('@livewireStyles' | '@bukStyles' | '@livewireScripts' | '@bukScripts' | '@click' ('.away')? '=')->type(DIRECTIVE);
-D_ASSET_BUNDLER : '@vite' (' ')* {this._input.LA(1) == '('}? ->pushMode(INSIDE_PHP_EXPRESSION),type(DIRECTIVE);
+
+D_SPATIE_ARG : ('@' ( ('unless' | 'has' ('any')? )?  'role') | 'haspermission') {this._input.LA(1) == '('}? ->pushMode(INSIDE_PHP_EXPRESSION),type(DIRECTIVE);
+
+D_SPATIE : ('@end' ('unless' | 'has' ('any')?)? 'role' | 'haspermission')->type(DIRECTIVE);
 
 D_CSS_AT_RULE : ('@supports' | '@container' | '@scope' | '@media') (' ')* {this._input.LA(1) == '('}? ->type(HTML);
 //we will decide that a custom directive has expression to avoid email matching

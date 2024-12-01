@@ -133,6 +133,17 @@ D_ENDENV : '@endenv';
 D_PRODUCTION : '@production';
 D_ENDPRODUCTION : '@endproduction';
 
+//permission
+D_CAN : '@can' (' ')* {lookupMode(INSIDE_PHP_EXPRESSION);};
+D_ENDCAN : '@endcan';
+
+
+D_CANNOT : '@cannot' (' ')* {lookupMode(INSIDE_PHP_EXPRESSION);};
+D_CANANY : '@canany' (' ')* {lookupMode(INSIDE_PHP_EXPRESSION);};
+D_ELSECAN : '@elsecan' ('not' | 'any')? (' ')* {lookupMode(INSIDE_PHP_EXPRESSION);};
+D_ENDCANNOT : '@endcannot';
+D_ENDCANANY : '@endcanany';
+
 //blocks
 
 D_FRAGMENT : '@fragment' (' ')* {lookupMode(INSIDE_PHP_EXPRESSION);};
@@ -154,6 +165,11 @@ D_LANG : '@lang' {lookupMode(PHP_EXPR_WITH_FIRST_IDENTIFIABLE_STRING);};
 
 D_INJECT : '@inject' (' ')* {this.identifierStringPos = 2; lookupMode(PHP_EXPR_WITH_CUSTOM_IDENTIFIABLE_STRING_POS);};
 D_USE : '@use' {lookupMode(PHP_EXPR_WITH_FIRST_IDENTIFIABLE_STRING);};
+
+//spatie
+
+
+
 
 //extra
 

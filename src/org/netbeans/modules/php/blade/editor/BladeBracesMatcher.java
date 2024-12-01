@@ -47,7 +47,8 @@ import org.netbeans.spi.lexer.antlr4.AntlrTokenSequence;
 public class BladeBracesMatcher implements BracesMatcher {
 
     public enum BraceDirectionType {
-        BLOCK_DIRECTIVE_END_TO_START, BLOCK_DIRECTIVE_START_TO_END, CUSTOM_START_TO_END, CUSTOM_END_TO_START,
+        BLOCK_DIRECTIVE_END_TO_START, BLOCK_DIRECTIVE_START_TO_END,
+        CUSTOM_START_TO_END, CUSTOM_END_TO_START,
         CURLY_END_TO_START, CURLY_START_TO_END, STOP
     }
     private final MatcherContext context;

@@ -44,11 +44,16 @@ blockDirective :
     | D_EMPTY directiveArguments statement* D_ENDEMPTY
     | D_ISSET directiveArguments statement* D_ENDISSET
     | D_SESSION directiveArguments statement* D_ENDSESSION
+    //permission
+    | D_CAN directiveArguments statement* (D_ELSECAN directiveArguments statement*)* (D_ELSE statement*)? D_ENDCAN
+    | D_CANNOT directiveArguments statement* (D_ELSECAN directiveArguments statement*)* (D_ELSE statement*)? D_ENDCANNOT
+    | D_CANANY directiveArguments statement* (D_ELSECAN directiveArguments statement*)* (D_ELSE statement*)? D_ENDCANANY
     | bladePhpBlock
     //x.11
     | D_FRAGMENT directiveArguments statement* D_ENDFRAGMENT
     | D_VERBATIM D_ENDVERBATIM
     | D_ELSE statement* D_ENDCUSTOM
+
 ;
 
 ifStatement : ifStartStatement
@@ -157,7 +162,7 @@ errorDirectives:
 ;
 
 directiveArguments : 
-    '(' ')';
+    '(' ','* ')';
 
 foreachLoopArguments : '(' main_array=FOREACH_VAR 'as' array_item=FOREACH_VAR (FOREACH_DOUBLE_ARROW array_value=FOREACH_VAR)? ')'
     | '(' (FOREACH_VAR)* 'as' (FOREACH_VAR)* (FOREACH_DOUBLE_ARROW FOREACH_VAR*)? ')';//unscanable loop

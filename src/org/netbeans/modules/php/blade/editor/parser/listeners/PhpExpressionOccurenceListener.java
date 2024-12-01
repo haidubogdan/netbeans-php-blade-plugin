@@ -111,7 +111,7 @@ public class PhpExpressionOccurenceListener extends BladeAntlrParserBaseListener
         }
         Token openTag = ctx.D_PHP().getSymbol();
         Token closeTag = ctx.D_ENDPHP().getSymbol();
-        markPhpExprOccurence(openTag, closeTag);
+        markPhpExprOccurence(openTag, closeTag, 1);
     }
 
     @Override
@@ -148,8 +148,15 @@ public class PhpExpressionOccurenceListener extends BladeAntlrParserBaseListener
         markPhpExprOccurence(start, end, 0);
     }
 
-    private void markPhpExprOccurence(Token start, Token end, int startOffset) {
-        OffsetRange range = new OffsetRange(start.getStopIndex() + startOffset, end.getStartIndex());
+    private void markPhpExprOccurence(Token start, Token end, int offset) {
+        int startOffset = start.getStopIndex() + offset;
+        int endOffset = end.getStartIndex();
+        
+        if (startOffset > endOffset){
+            return;
+        }
+        
+        OffsetRange range = new OffsetRange(startOffset, endOffset);
         phpExprOccurences.markPhpExpressionOccurence(range);
     }
 }
