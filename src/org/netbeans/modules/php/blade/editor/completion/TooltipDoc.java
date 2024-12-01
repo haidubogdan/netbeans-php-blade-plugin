@@ -34,6 +34,8 @@ public class TooltipDoc {
         Documentation result = null;
         switch (elementHandle.getType()) {
             case PATH:
+            case YIELD_ID:
+            case STACK_ID:
                 String filePath = "";
                 if (elementHandle.getFileObject() != null){
                     filePath = BladePathUtils.getRelativeProjectPath(elementHandle.getFileObject());

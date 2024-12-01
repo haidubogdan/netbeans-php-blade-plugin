@@ -55,7 +55,7 @@ public final class BladeDirectivesUtils {
         
         DirectivesList listClass = new DirectivesList();
         for (Directive directiveEl : listClass.getDirectives()) {
-            String dirname = directiveEl.endtag();
+
             if (!directiveEl.name().equals(directive)) {
                 continue;
             }

@@ -173,6 +173,14 @@ public class BladeCompletionHandler implements CodeCompletionHandler2 {
                 completeYieldIdFromIndex(completionProposals, yieldId, fo, offset);
                 break;
             }
+            case D_PUSH:
+            case D_PUSH_IF:
+            case D_PUSH_ONCE:
+            case D_PREPEND: {
+                String stackId = reference.identifier;
+                completeStackIdFromIndex(completionProposals, stackId, fo, offset);
+                break;
+            }
             //push, once
             case D_VITE: {
                 String assetPath = reference.identifier;
@@ -208,6 +216,24 @@ public class BladeCompletionHandler implements CodeCompletionHandler2 {
             List<BladeIndex.IndexedReferenceId> indexedReferences = bladeIndex.queryYieldIds(prefixIdentifier);
             for (BladeIndex.IndexedReferenceId indexReference : indexedReferences) {
                 NamedElement yieldIdEl = new NamedElement(indexReference.getIdenfiier(), fo, ElementType.YIELD_ID);
+                completionProposals.add(new BladeCompletionProposal.LayoutIdentifierProposal(yieldIdEl, anchorOffset, indexReference.getIdenfiier()));
+            }
+        } catch (IOException ex) {
+            Exceptions.printStackTrace(ex);
+        }
+    }
+    
+    private void completeStackIdFromIndex(final List<CompletionProposal> completionProposals,
+            String prefixIdentifier, FileObject fo, int offset) {
+        BladeIndex bladeIndex;
+        Project project = ProjectUtils.getMainOwner(fo);
+        int anchorOffset = computeAnchorOffset(prefixIdentifier, offset);
+
+        try {
+            bladeIndex = BladeIndex.get(project);
+            List<BladeIndex.IndexedReferenceId> indexedReferences = bladeIndex.queryStacksIndexedReferences(prefixIdentifier);
+            for (BladeIndex.IndexedReferenceId indexReference : indexedReferences) {
+                NamedElement yieldIdEl = new NamedElement(indexReference.getIdenfiier(), fo, ElementType.STACK_ID);
                 completionProposals.add(new BladeCompletionProposal.LayoutIdentifierProposal(yieldIdEl, anchorOffset, indexReference.getIdenfiier()));
             }
         } catch (IOException ex) {

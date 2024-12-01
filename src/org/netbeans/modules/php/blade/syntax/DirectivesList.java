@@ -53,7 +53,7 @@ import org.netbeans.modules.php.blade.syntax.annotation.DirectiveRegister;
     @Directive(name = "@endsection"),
     @Directive(name = "@stop"),
     @Directive(name = "@append"),
-    @Directive(name = "@once"),
+    @Directive(name = "@once", endtag="@endonce"),
     @Directive(name = "@endonce"),
     @Directive(name = "@overwrite"),
     @Directive(name = "@yield", params = true),
