@@ -185,7 +185,7 @@ public class BladeDeclarationFinder implements DeclarationFinder {
             return offsetRange;
         }
 
-        if (snippetLength >= document.getLength()) {
+        if (snippetLength > document.getLength()) {
             return offsetRange;
         }
 
@@ -314,6 +314,26 @@ public class BladeDeclarationFinder implements DeclarationFinder {
                     }
 
                     return location;
+                }
+                case D_VITE: {
+                    String vitePath = referenceIdentifier;
+                    Project projectOwner = ProjectConvertors.getNonConvertorOwner(currentFile);
+
+                    if (projectOwner == null || projectOwner.getProjectDirectory() == null) {
+                        return location;
+                    }
+
+                    FileObject assetFile = projectOwner.getProjectDirectory().getFileObject(vitePath);
+
+                    if (assetFile != null) {
+                        NamedElement resultHandle = new NamedElement(referenceIdentifier, assetFile, ElementType.ASSET_FILE);
+                        DeclarationLocation constantLocation = new DeclarationFinder.DeclarationLocation(assetFile, 0, resultHandle);
+                        if (location.equals(DeclarationLocation.NONE)) {
+                            location = constantLocation;
+                        }
+                        location.addAlternative(new AlternativeLocationImpl(constantLocation));
+                        return location;
+                    }
                 }
             }
         } else if ((caretRange = parserResult.getBladePhpExpressionOccurences().findPhpExpressionLocation(caretOffset)) != null) {

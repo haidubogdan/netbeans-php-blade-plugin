@@ -138,7 +138,7 @@ OPEN_E_PAREN : '(' {this.rParenBalance++;}->type(PHP_EXPRESSION);
 CLOSE_PAREN : ')' {this.rParenBalance <= 1}? {this.rParenBalance = 0;}->type(BLADE_PAREN),mode(DEFAULT_MODE);
 CLOSE_E_PAREN : ')' {this.rParenBalance--;}->type(PHP_EXPRESSION);
 
-PHP_EXPRESSION_COMMENT : ('/*' .*? '*/')->skip;
+PHP_EXPRESSION_COMMENT : ('/*' .*? '*/')->type(PHP_EXPRESSION);
 
 PHP_EXPRESSION_GREEDY : ~[()]+ ->type(PHP_EXPRESSION);
 
