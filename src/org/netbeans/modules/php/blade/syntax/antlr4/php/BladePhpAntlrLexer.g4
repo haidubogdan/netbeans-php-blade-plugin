@@ -41,9 +41,14 @@ IDENTIFIER : Identifier;
 
 PHP_VARIABLE : PhpVariable;
 
+DOLLAR : '$';
+
 NAMESPACE_SEPARATOR : '\\';
 DOUBLE_COLON : '::';
+ARROW : '=>';
 OBJECT_OPERATOR : '->';
+
+SEMI_COLON : ';';
 
 STRING_LITERAL : StringLiteral->skip;
 

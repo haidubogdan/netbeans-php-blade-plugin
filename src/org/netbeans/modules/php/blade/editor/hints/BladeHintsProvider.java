@@ -37,13 +37,16 @@ import org.netbeans.modules.php.blade.editor.directives.CustomDirectives;
 import org.netbeans.modules.php.blade.editor.parser.BladeParserResult;
 import org.netbeans.modules.php.blade.editor.path.BladePathUtils;
 import org.netbeans.modules.php.blade.project.ProjectUtils;
+import org.netbeans.modules.php.blade.syntax.antlr4.php.BladePhpSnippetParser;
 import org.openide.filesystems.FileObject;
+import org.openide.util.RequestProcessor;
 
 /**
  *
  * @author bhaidu
  */
 public class BladeHintsProvider implements HintsProvider {
+
 
     /**
      * Compute hints applicable to the given compilation info and add to the
@@ -131,8 +134,8 @@ public class BladeHintsProvider implements HintsProvider {
     @Override
     public void computeErrors(HintsManager manager, RuleContext context, List<Hint> hints, List<Error> unhandled) {
         BladeParserResult parserResult = (BladeParserResult) context.parserResult;
-
         unhandled.addAll(parserResult.getDiagnostics());
+
     }
 
     /**

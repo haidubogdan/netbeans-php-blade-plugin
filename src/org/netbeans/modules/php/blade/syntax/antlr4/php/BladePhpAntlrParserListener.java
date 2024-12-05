@@ -1,13 +1,5 @@
 // Generated from BladePhpAntlrParser.g4 by ANTLR 4.13.0
 
-  /**
-   * Parser generated for netbeans blade editor
-   * Some elements have been simplified to optimize parser speed
-   * For example
-   * - switch statement have a loos validation
-   * - generic block statement "@isset" | "@unless" are grouped togehter
-   * - the start match and end match will be checked in the parser
-   */
   package org.netbeans.modules.php.blade.syntax.antlr4.php;
 
 import org.antlr.v4.runtime.tree.ParseTreeListener;
@@ -37,6 +29,26 @@ public interface BladePhpAntlrParserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitExprStatement(BladePhpAntlrParser.ExprStatementContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link BladePhpAntlrParser#foreachDirectiveStatement}.
+	 * @param ctx the parse tree
+	 */
+	void enterForeachDirectiveStatement(BladePhpAntlrParser.ForeachDirectiveStatementContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link BladePhpAntlrParser#foreachDirectiveStatement}.
+	 * @param ctx the parse tree
+	 */
+	void exitForeachDirectiveStatement(BladePhpAntlrParser.ForeachDirectiveStatementContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link BladePhpAntlrParser#foreachArguments}.
+	 * @param ctx the parse tree
+	 */
+	void enterForeachArguments(BladePhpAntlrParser.ForeachArgumentsContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link BladePhpAntlrParser#foreachArguments}.
+	 * @param ctx the parse tree
+	 */
+	void exitForeachArguments(BladePhpAntlrParser.ForeachArgumentsContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link BladePhpAntlrParser#staticClassReference}.
 	 * @param ctx the parse tree
@@ -137,4 +149,14 @@ public interface BladePhpAntlrParserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitArgument(BladePhpAntlrParser.ArgumentContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link BladePhpAntlrParser#misc}.
+	 * @param ctx the parse tree
+	 */
+	void enterMisc(BladePhpAntlrParser.MiscContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link BladePhpAntlrParser#misc}.
+	 * @param ctx the parse tree
+	 */
+	void exitMisc(BladePhpAntlrParser.MiscContext ctx);
 }

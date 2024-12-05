@@ -28,14 +28,51 @@ import org.netbeans.modules.csl.api.OffsetRange;
  */
 public class BladePhpExpressionOccurences {
 
-    private final Set<OffsetRange> bladePhpExpressionLocations = new TreeSet<>();
+    private final Set<OffsetRange> phpInlineExpressionLocations = new TreeSet<>();
+    private final Set<OffsetRange> phpOutputExpressionLocations = new TreeSet<>();
+    private final Set<OffsetRange> phpForeachExpressionLocations = new TreeSet<>();
 
-    public void markPhpExpressionOccurence(OffsetRange range) {
-        bladePhpExpressionLocations.add(range);
+    public void markPhpInlineExpressionOccurence(OffsetRange range) {
+        phpInlineExpressionLocations.add(range);
+    }
+
+    public void markPhpOutputExpressionOccurence(OffsetRange range) {
+        phpOutputExpressionLocations.add(range);
+    }
+
+    public void markPhpForeachExpressionOccurence(OffsetRange range) {
+        phpForeachExpressionLocations.add(range);
     }
 
     public OffsetRange findPhpExpressionLocation(int offset) {
-        for (OffsetRange range : bladePhpExpressionLocations) {
+        
+        //OUTPUT
+        for (OffsetRange range : phpOutputExpressionLocations) {
+
+            if (offset < range.getStart()) {
+                //excedeed the offset range
+                break;
+            }
+
+            if (range.containsInclusive(offset)) {
+                return range;
+            }
+        }
+
+        for (OffsetRange range : phpInlineExpressionLocations) {
+
+            if (offset < range.getStart()) {
+                //excedeed the offset range
+                break;
+            }
+
+            if (range.containsInclusive(offset)) {
+                return range;
+            }
+        }
+
+        //FOREACH
+        for (OffsetRange range : phpForeachExpressionLocations) {
 
             if (offset < range.getStart()) {
                 //excedeed the offset range
@@ -48,5 +85,17 @@ public class BladePhpExpressionOccurences {
         }
 
         return null;
+    }
+
+    public Set<OffsetRange> getPhpInlineOccurences() {
+        return phpInlineExpressionLocations;
+    }
+
+    public Set<OffsetRange> getPhpOutputOccurences() {
+        return phpOutputExpressionLocations;
+    }
+
+    public Set<OffsetRange> getPhpForeachOccurences() {
+        return phpForeachExpressionLocations;
     }
 }

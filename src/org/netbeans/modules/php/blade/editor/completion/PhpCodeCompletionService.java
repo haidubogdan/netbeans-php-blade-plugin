@@ -45,7 +45,7 @@ public class PhpCodeCompletionService {
             //double colon offset
             completionOffset += targetetToken.getText().length();
         }
-        BladePhpSnippetParser phpSnippetParser = new BladePhpSnippetParser(snapshotExpr);
+        BladePhpSnippetParser phpSnippetParser = new BladePhpSnippetParser(snapshotExpr, fo, exprStart);
         phpSnippetParser.parse();
         BladePhpSnippetParser.PhpReference phpRef = phpSnippetParser.findIdentifierReference(referencedOffset);
         BladePhpSnippetParser.FieldAcces fieldAccess = phpSnippetParser.findFieldAccessReference(referencedOffset);

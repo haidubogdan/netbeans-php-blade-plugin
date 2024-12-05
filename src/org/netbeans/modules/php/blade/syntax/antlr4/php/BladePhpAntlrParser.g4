@@ -1,29 +1,37 @@
 parser grammar BladePhpAntlrParser;
 
 @header{
-  /**
-   * Parser generated for netbeans blade editor
-   * Some elements have been simplified to optimize parser speed
-   * For example
-   * - switch statement have a loos validation
-   * - generic block statement "@isset" | "@unless" are grouped togehter
-   * - the start match and end match will be checked in the parser
-   */
   package org.netbeans.modules.php.blade.syntax.antlr4.php;
 }
 
-options { tokenVocab = BladePhpAntlrLexer; }
+options { 
+    superClass = ParserAdaptor;
+    tokenVocab = BladePhpAntlrLexer;
+ }
 
 expression : exprStatement* EOF;
 
 exprStatement :
-    'new' IDENTIFIER arguments?
+    //empty statement
+    ';'
+    | foreachDirectiveStatement
+    | 'new' IDENTIFIER arguments?
     | staticMethodAccess
     | staticFieldAccess
     | staticClassReference
     | staticAccess
     | directMethodAccess
     | functionExpr
+    | misc
+;
+
+foreachDirectiveStatement:
+    {this.bladeParserContext.equals(ParserContext.FOREACH)}? foreachArguments
+    ;
+
+foreachArguments:
+    main_array = PHP_VARIABLE 'as' array_item=PHP_VARIABLE
+    | main_array = PHP_VARIABLE 'as' array_key=PHP_VARIABLE '=>'  array_item=PHP_VARIABLE
 ;
 
 staticClassReference :
@@ -36,9 +44,13 @@ staticMethodAccess :
 
 staticFieldAccess : 
     namespace? className=IDENTIFIER '::' const=IDENTIFIER
+    | namespace? className=IDENTIFIER '::' propertyAlias=PHP_VARIABLE
+    | classAlias=PHP_VARIABLE '::' const=IDENTIFIER
+    | classAlias=PHP_VARIABLE '::' propertyAlias=PHP_VARIABLE
 ;
 
 staticAccess : 
+    //should throw an error?
     namespace? className=IDENTIFIER '::'
 ;
 
@@ -56,6 +68,7 @@ functionExpr :
 
 arguments :
     '(' argument (',' argument )* ')'
+    | '(' ')'
     ;
 
 namespace :
@@ -66,4 +79,9 @@ namespace :
 argument: 
     PHP_VARIABLE
     | expression
+    ;
+
+misc:
+  'new' PHP_VARIABLE arguments?
+  | '$'? PHP_VARIABLE
     ;

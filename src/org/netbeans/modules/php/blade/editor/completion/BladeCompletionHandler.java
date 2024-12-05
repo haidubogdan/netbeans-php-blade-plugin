@@ -100,9 +100,9 @@ public class BladeCompletionHandler implements CodeCompletionHandler2 {
         if (offset < 1) {
             return CodeCompletionResult.NONE;
         }
-        
+
         BladeParserResult parserResult = (BladeParserResult) completionContext.getParserResult();
-        
+
         final TokenHierarchy<?> th = parserResult.getSnapshot().getTokenHierarchy();
 
         if (th == null) {
@@ -120,7 +120,7 @@ public class BladeCompletionHandler implements CodeCompletionHandler2 {
         if (!ts.moveNext() && !ts.movePrevious()) {
             return CodeCompletionResult.NONE;
         }
-        
+
         org.netbeans.api.lexer.Token<BladeTokenId> token = ts.token();
         BladeTokenId id = token.id();
 
@@ -157,8 +157,8 @@ public class BladeCompletionHandler implements CodeCompletionHandler2 {
                             completionProposals.add(new BladeCompletionProposal.VariableItem(variableElement, anchorOffset, variableName));
                         }
                     }
-                    
-                    if (scope.getScopeType() == D_FOREACH && BLADE_LOOP_VAR.startsWith(contextPrefix)){  //NOI18N
+
+                    if (scope.getScopeType() == D_FOREACH && BLADE_LOOP_VAR.startsWith(contextPrefix)) {  //NOI18N
                         NamedElement variableElement = new NamedElement(BLADE_LOOP_VAR, fo, ElementType.VARIABLE);
                         completionProposals.add(new BladeCompletionProposal.VariableItem(variableElement, anchorOffset, BLADE_LOOP_VAR));
                     }
@@ -249,7 +249,7 @@ public class BladeCompletionHandler implements CodeCompletionHandler2 {
             Exceptions.printStackTrace(ex);
         }
     }
-    
+
     private void completeStackIdFromIndex(final List<CompletionProposal> completionProposals,
             String prefixIdentifier, FileObject fo, int offset) {
         BladeIndex bladeIndex;
@@ -305,7 +305,7 @@ public class BladeCompletionHandler implements CodeCompletionHandler2 {
     }
 
     /**
-     * BLADES
+     * BLADE
      *
      * @param completionProposals
      * @param completionContext
@@ -387,28 +387,34 @@ public class BladeCompletionHandler implements CodeCompletionHandler2 {
         if (document == null) {
             return null;
         }
-        TokenSequence<BladeTokenId> ts = BladeLexerUtils.getTokenSequence(document, offset);
+        try {
+            document.readLock();
+            TokenSequence<BladeTokenId> ts = BladeLexerUtils.getTokenSequence(document, offset);
 
-        if (ts == null) {
-            return null;
-        }
-
-        ts.move(offset);
-
-        if (!ts.moveNext() && !ts.movePrevious()) {
-            return null;
-        }
-
-        org.netbeans.api.lexer.Token<BladeTokenId> token = ts.token();
-
-        String tokenPrefix = token.text().toString().trim();
-        BladeTokenId tokenId = token.id();
-        if (tokenId.equals(BLADE_DIRECTIVE_UNKNOWN)) {
-            if (tokenPrefix.endsWith("\"") || tokenPrefix.endsWith(">")) { // NOI18N
-                return tokenPrefix.substring(0, tokenPrefix.length() - 1);
+            if (ts == null) {
+                return null;
             }
+
+            ts.move(offset);
+
+            if (!ts.moveNext() && !ts.movePrevious()) {
+                return null;
+            }
+            org.netbeans.api.lexer.Token<BladeTokenId> token = ts.token();
+
+            String tokenPrefix = token.text().toString().trim();
+            BladeTokenId tokenId = token.id();
+            if (tokenId.equals(BLADE_DIRECTIVE_UNKNOWN)) {
+                //adiacent emebedding hack to trigger blade completion
+                //ex: "@$caret" or @$caret>
+                if (tokenPrefix.endsWith("\"") || tokenPrefix.endsWith(">")) { // NOI18N
+                    return tokenPrefix.substring(0, tokenPrefix.length() - 1);
+                }
+            }
+            return tokenPrefix;
+        } finally {
+            document.readUnlock();
         }
-        return tokenPrefix;
     }
 
     @Override

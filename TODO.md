@@ -1,9 +1,17 @@
 # TODO
 
+## 05.12.2024
+
+- refactor checks
+- components attribute completion
+- tag completion
+
+
 ## 24.03.2024
 
 **new architecture stuff**
 
+- syntax error for php
 - directive component model ??
 - completion caching ~~
 - declaration finder caching ~~
@@ -13,10 +21,6 @@
 - pallete
 - selection actions ??
 - variable include completion
-
-**code duplication**
-
-- directive completion and brace matcher
 
 
 **directive specificity**
@@ -43,9 +47,4 @@ laravel specific
 
 ---
 
-erros to display
-
-```
-@if() should notify error
-```
 

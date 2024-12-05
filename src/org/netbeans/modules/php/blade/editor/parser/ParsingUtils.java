@@ -18,9 +18,19 @@
  */
 package org.netbeans.modules.php.blade.editor.parser;
 
+import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
+import javax.swing.JEditorPane;
+import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
+import javax.swing.text.EditorKit;
+import javax.xml.parsers.DocumentBuilder;
 import org.netbeans.modules.parsing.api.ParserManager;
 import org.netbeans.modules.parsing.api.ResultIterator;
 import org.netbeans.modules.parsing.api.Source;
@@ -32,6 +42,13 @@ import org.openide.filesystems.FileObject;
 import org.openide.util.Exceptions;
 import org.openide.cookies.EditorCookie;
 import org.openide.loaders.DataObject;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import org.netbeans.api.editor.mimelookup.MimeLookup;
+import org.netbeans.modules.php.blade.editor.declaration.BladeDeclarationFinder;
+import org.openide.filesystems.FileUtil;
+import org.openide.util.RequestProcessor;
+import org.openide.modules.InstalledFileLocator;
 
 /**
  *
@@ -39,19 +56,21 @@ import org.openide.loaders.DataObject;
  */
 public final class ParsingUtils {
 
+    private static final RequestProcessor RP = new RequestProcessor(BladeDeclarationFinder.class);
+
     public ParsingUtils() {
-        
+
     }
 
     private PHPParseResult phpParserResult;
-    
-    public void parseFileObject(FileObject file){
+
+    public void parseFileObject(FileObject file) {
         Document doc = openDocument(file);
 
         try {
             Source source = Source.create(doc);
-            
-            if (source == null){
+
+            if (source == null) {
                 return;
             }
 
@@ -77,15 +96,14 @@ public final class ParsingUtils {
             Exceptions.printStackTrace(ex);
         }
     }
-    
-    
-    public void laterParseFileObject(FileObject file){
+
+    public void laterParseFileObject(FileObject file) {
         Document doc = openDocument(file);
 
         try {
             Source source = Source.create(doc);
-            
-            if (source == null){
+
+            if (source == null) {
                 return;
             }
 
@@ -116,7 +134,7 @@ public final class ParsingUtils {
         return phpParserResult;
     }
 
-    public Document openDocument(FileObject f) {
+    private Document openDocument(FileObject f) {
         try {
             DataObject dataObject = DataObject.find(f);
             EditorCookie ec = dataObject.getLookup().lookup(EditorCookie.class);
@@ -126,5 +144,4 @@ public final class ParsingUtils {
         }
 
     }
-
 }

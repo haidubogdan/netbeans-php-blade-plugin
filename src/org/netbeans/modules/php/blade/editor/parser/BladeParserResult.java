@@ -37,13 +37,13 @@ import org.netbeans.api.annotations.common.NonNull;
 import org.netbeans.api.annotations.common.NullAllowed;
 import org.netbeans.modules.csl.api.Severity;
 import org.netbeans.modules.csl.spi.DefaultError;
-import org.netbeans.modules.php.blade.editor.parser.listeners.BladeComponentTagOccurenceListener;
 import org.netbeans.modules.php.blade.editor.structure.BladeStructureItem;
 import org.netbeans.modules.php.blade.editor.parser.listeners.CustomDirectivesListener;
 import org.netbeans.modules.php.blade.editor.parser.listeners.PhpExpressionOccurenceListener;
 import org.netbeans.modules.php.blade.editor.parser.listeners.ReferenceIdListener;
 import org.netbeans.modules.php.blade.editor.parser.listeners.ScopeListener;
 import org.netbeans.modules.php.blade.editor.parser.listeners.StructureListener;
+import org.netbeans.modules.php.blade.syntax.antlr4.php.BladePhpSnippetParser;
 import org.netbeans.modules.php.blade.syntax.antlr4.v10.BladeAntlrLexer;
 import org.netbeans.modules.php.blade.syntax.antlr4.v10.BladeAntlrParser;
 import org.openide.filesystems.FileObject;
@@ -54,13 +54,12 @@ import org.openide.filesystems.FileObject;
  */
 public class BladeParserResult extends ParserResult {
 
-    public final List<Error> errors = new ArrayList<>();
+    private final List<Error> errors = new ArrayList<>();
     public final List<BladeStructureItem> structure = new ArrayList<>();
     public final List<OffsetRange> folds = new ArrayList<>();
     public final BladeReferenceIdsCollection bladeRreferenceIdsCollection = new BladeReferenceIdsCollection();
     public final BladePhpExpressionOccurences bladePhpExpressionOccurences = new BladePhpExpressionOccurences();
     public final BladeCustomDirectiveOccurences bladeCustomDirectiveOccurences = new BladeCustomDirectiveOccurences();
-    public final BladeComponentTagOccurences bladeComponentOccurences = new BladeComponentTagOccurences();
     public final BladeScope bladeScope = new BladeScope();
 
     volatile boolean finished = false;
@@ -95,7 +94,6 @@ public class BladeParserResult extends ParserResult {
             parser.addParseListener(new ReferenceIdListener(bladeRreferenceIdsCollection));
             parser.addParseListener(new PhpExpressionOccurenceListener(bladePhpExpressionOccurences));
             parser.addParseListener(new CustomDirectivesListener(bladeCustomDirectiveOccurences));
-            parser.addParseListener(new BladeComponentTagOccurenceListener(bladeComponentOccurences));
 
             if (taskClass.toLowerCase().contains("completion")) { //NOI18N
                 parser.addParseListener(new ScopeListener(bladeScope));
@@ -106,10 +104,15 @@ public class BladeParserResult extends ParserResult {
                 parser.addParseListener(new StructureListener(structure, folds, getFileObject()));
             }
 
-            if (taskClass.toLowerCase().contains("hints")) { //NOI18N
-                //parser.addParseListener(createSemanticsListener());
-            }
+
             evaluateParser(parser);
+
+            if (!taskClass.toLowerCase().contains("completion") 
+                    && !taskClass.toLowerCase().contains("Declaration")
+                    && !taskClass.toLowerCase().contains(".indexing.Repository")
+                    ) { //NOI18N
+                scanPhpErrors();
+            }
 
             finished = true;
         }
@@ -131,12 +134,16 @@ public class BladeParserResult extends ParserResult {
         return errors;
     }
 
+    public void addError(Error error) {
+        errors.add(error);
+    }
+
     @Override
     protected void invalidate() {
 
     }
 
-    protected ANTLRErrorListener createErrorListener() {
+    private ANTLRErrorListener createErrorListener() {
         return new BaseErrorListener() {
             @Override
             public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line, int charPositionInLine, String msg, RecognitionException e) {
@@ -167,13 +174,19 @@ public class BladeParserResult extends ParserResult {
         return bladeCustomDirectiveOccurences;
     }
 
-    //MAYBE NOT NEEDED ?!
-    public BladeComponentTagOccurences getBladeComponentTagOccurencess() {
-        return bladeComponentOccurences;
-    }
-
     public BladeScope getBladeScope() {
         return bladeScope;
+    }
+
+    public void scanPhpErrors() {
+        for (OffsetRange range : getBladePhpExpressionOccurences().getPhpInlineOccurences()) {
+            CharSequence snapshotExpr = getSnapshot().getText().subSequence(range.getStart(), range.getEnd());
+            BladePhpSnippetParser phpSnippetParser = new BladePhpSnippetParser(snapshotExpr.toString(), getFileObject(), range.getStart());
+            phpSnippetParser.parse();
+            for (Error error : phpSnippetParser.getDiagnostics()) {
+                addError(error);
+            }
+        }
     }
 
     public static class BladeStringReference {

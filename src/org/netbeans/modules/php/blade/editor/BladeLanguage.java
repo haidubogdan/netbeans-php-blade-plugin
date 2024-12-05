@@ -168,17 +168,6 @@ public class BladeLanguage extends DefaultLanguageConfig {
     public SemanticAnalyzer<BladeParserResult> getSemanticAnalyzer() {
         return new BladeSemanticAnalyzer();
     }
-//
-//    @Override
-//    public boolean hasOccurrencesFinder() {
-//        return true;
-//    }
-//
-//    @Override
-//    public OccurrencesFinder<?> getOccurrencesFinder() {
-//        //practical just for php context
-//        return new BladeOcurrencesFinder();
-//    }
 
     /**
      * flag for detecting if we are in a string context enables to select the
@@ -202,11 +191,6 @@ public class BladeLanguage extends DefaultLanguageConfig {
                 || (hasQuote && c == '.') || (c == '_');
     }
 
-//    @deprecated    
-//    @Override
-//    public KeystrokeHandler getKeystrokeHandler() {
-//        return new BladeBracketCompleter();
-//    }
     private static final Language<BladeTokenId> language
             = new BladeLanguageHierarchy() {
 

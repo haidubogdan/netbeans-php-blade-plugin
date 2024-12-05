@@ -134,7 +134,7 @@ public class BladeDeclarationFinder implements DeclarationFinder {
                 break;
             }
             case HTML: {
-                TokenHierarchy th = TokenHierarchy.get(document);
+                TokenHierarchy<?> th = TokenHierarchy.get(document);
                 Token<? extends HTMLTokenId> htmlToken = BladeLexerUtils.getHtmlToken(th, caretOffset);
 
                 if (htmlToken == null) {
@@ -339,7 +339,7 @@ public class BladeDeclarationFinder implements DeclarationFinder {
         } else if ((caretRange = parserResult.getBladePhpExpressionOccurences().findPhpExpressionLocation(caretOffset)) != null) {
             int referenceOffset = caretOffset - caretRange.getStart();
             PhpElementsDeclarationService phpDeclService = new PhpElementsDeclarationService();
-            PhpReference phpRef = phpDeclService.findReferenceAtCaret(info, caretRange, referenceOffset);
+            PhpReference phpRef = phpDeclService.findReferenceAtCaret(info, caretRange, referenceOffset, currentFile);
 
             if (phpRef == null) {
                 return location;

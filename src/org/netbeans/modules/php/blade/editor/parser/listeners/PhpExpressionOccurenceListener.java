@@ -49,7 +49,7 @@ public class PhpExpressionOccurenceListener extends BladeAntlrParserBaseListener
             return;
         }
 
-        markPhpExprOccurence(leftParen, rightParen, 1);
+        markPhpOutputExprOccurence(leftParen, rightParen, 1);
     }
 
     @Override
@@ -65,7 +65,7 @@ public class PhpExpressionOccurenceListener extends BladeAntlrParserBaseListener
             return;
         }
 
-        markPhpExprOccurence(leftParen, rightParen, 1);
+        markPhpForeachExprOccurence(leftParen, rightParen, 1);
     }
 
     @Override
@@ -81,7 +81,7 @@ public class PhpExpressionOccurenceListener extends BladeAntlrParserBaseListener
             return;
         }
 
-        markPhpExprOccurence(leftParen, rightParen, 1);
+        markPhpOutputExprOccurence(leftParen, rightParen, 1);
     }
 
     @Override
@@ -91,7 +91,7 @@ public class PhpExpressionOccurenceListener extends BladeAntlrParserBaseListener
         }
         Token leftParen = ctx.LPAREN().getSymbol();
         Token rightParen = ctx.RPAREN().getSymbol();
-        markPhpExprOccurence(leftParen, rightParen, 1);
+        markPhpOutputExprOccurence(leftParen, rightParen, 1);
     }
 
     @Override
@@ -101,7 +101,28 @@ public class PhpExpressionOccurenceListener extends BladeAntlrParserBaseListener
         }
         Token leftParen = ctx.LPAREN().getSymbol();
         Token rightParen = ctx.RPAREN().getSymbol();
-        markPhpExprOccurence(leftParen, rightParen, 1);
+        markPhpOutputExprOccurence(leftParen, rightParen, 1);
+    }
+
+
+    @Override
+    public void exitBladeContentTags(BladeAntlrParser.BladeContentTagsContext ctx) {
+        if (ctx.BLADE_CONTENT_OPEN_TAG() == null || ctx.BLADE_CONTENT_CLOSE_TAG() == null) {
+            return;
+        }
+        Token openTag = ctx.BLADE_CONTENT_OPEN_TAG().getSymbol();
+        Token closeTag = ctx.BLADE_CONTENT_CLOSE_TAG().getSymbol();
+        markPhpOutputExprOccurence(openTag, closeTag, 1);
+    }
+
+    @Override
+    public void exitBladeRawTags(BladeAntlrParser.BladeRawTagsContext ctx) {
+        if (ctx.start == null || ctx.stop == null) {
+            return;
+        }
+        Token openTag = ctx.start;
+        Token closeTag = ctx.stop;
+        markPhpOutputExprOccurence(openTag, closeTag, 1);
     }
 
     @Override
@@ -115,37 +136,13 @@ public class PhpExpressionOccurenceListener extends BladeAntlrParserBaseListener
     }
 
     @Override
-    public void exitBladeContentTags(BladeAntlrParser.BladeContentTagsContext ctx) {
-        if (ctx.BLADE_CONTENT_OPEN_TAG() == null || ctx.BLADE_CONTENT_CLOSE_TAG() == null) {
-            return;
-        }
-        Token openTag = ctx.BLADE_CONTENT_OPEN_TAG().getSymbol();
-        Token closeTag = ctx.BLADE_CONTENT_CLOSE_TAG().getSymbol();
-        markPhpExprOccurence(openTag, closeTag);
-    }
-
-    @Override
-    public void exitBladeRawTags(BladeAntlrParser.BladeRawTagsContext ctx) {
-        if (ctx.start == null || ctx.stop == null) {
-            return;
-        }
-        Token openTag = ctx.start;
-        Token closeTag = ctx.stop;
-        markPhpExprOccurence(openTag, closeTag);
-    }
-
-    @Override
     public void exitPhpInline(BladeAntlrParser.PhpInlineContext ctx) {
         if (ctx.start == null || ctx.stop == null) {
             return;
         }
         Token openTag = ctx.start;
         Token closeTag = ctx.stop;
-        markPhpExprOccurence(openTag, closeTag);
-    }
-
-    private void markPhpExprOccurence(Token start, Token end) {
-        markPhpExprOccurence(start, end, 0);
+        markPhpExprOccurence(openTag, closeTag, 1);
     }
 
     private void markPhpExprOccurence(Token start, Token end, int offset) {
@@ -157,6 +154,30 @@ public class PhpExpressionOccurenceListener extends BladeAntlrParserBaseListener
         }
         
         OffsetRange range = new OffsetRange(startOffset, endOffset);
-        phpExprOccurences.markPhpExpressionOccurence(range);
+        phpExprOccurences.markPhpInlineExpressionOccurence(range);
+    }
+    
+    private void markPhpOutputExprOccurence(Token start, Token end, int offset) {
+        int startOffset = start.getStopIndex() + offset;
+        int endOffset = end.getStartIndex();
+        
+        if (startOffset > endOffset){
+            return;
+        }
+        
+        OffsetRange range = new OffsetRange(startOffset, endOffset);
+        phpExprOccurences.markPhpOutputExpressionOccurence(range);
+    }
+    
+    private void markPhpForeachExprOccurence(Token start, Token end, int offset) {
+        int startOffset = start.getStopIndex() + offset;
+        int endOffset = end.getStartIndex();
+        
+        if (startOffset > endOffset){
+            return;
+        }
+        
+        OffsetRange range = new OffsetRange(startOffset, endOffset);
+        phpExprOccurences.markPhpForeachExpressionOccurence(range);
     }
 }

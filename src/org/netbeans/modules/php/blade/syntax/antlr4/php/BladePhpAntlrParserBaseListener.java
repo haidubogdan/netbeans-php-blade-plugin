@@ -1,13 +1,5 @@
 // Generated from BladePhpAntlrParser.g4 by ANTLR 4.13.0
 
-  /**
-   * Parser generated for netbeans blade editor
-   * Some elements have been simplified to optimize parser speed
-   * For example
-   * - switch statement have a loos validation
-   * - generic block statement "@isset" | "@unless" are grouped togehter
-   * - the start match and end match will be checked in the parser
-   */
   package org.netbeans.modules.php.blade.syntax.antlr4.php;
 
 
@@ -46,6 +38,30 @@ public class BladePhpAntlrParserBaseListener implements BladePhpAntlrParserListe
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitExprStatement(BladePhpAntlrParser.ExprStatementContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterForeachDirectiveStatement(BladePhpAntlrParser.ForeachDirectiveStatementContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitForeachDirectiveStatement(BladePhpAntlrParser.ForeachDirectiveStatementContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterForeachArguments(BladePhpAntlrParser.ForeachArgumentsContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitForeachArguments(BladePhpAntlrParser.ForeachArgumentsContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -166,6 +182,18 @@ public class BladePhpAntlrParserBaseListener implements BladePhpAntlrParserListe
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitArgument(BladePhpAntlrParser.ArgumentContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterMisc(BladePhpAntlrParser.MiscContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitMisc(BladePhpAntlrParser.MiscContext ctx) { }
 
 	/**
 	 * {@inheritDoc}

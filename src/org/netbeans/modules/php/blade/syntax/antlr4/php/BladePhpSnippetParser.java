@@ -18,16 +18,30 @@
  */
 package org.netbeans.modules.php.blade.syntax.antlr4.php;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import org.antlr.v4.runtime.ANTLRErrorListener;
+import org.antlr.v4.runtime.BaseErrorListener;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.ConsoleErrorListener;
+import org.antlr.v4.runtime.DefaultErrorStrategy;
+import org.antlr.v4.runtime.FailedPredicateException;
+import org.antlr.v4.runtime.Parser;
+import org.antlr.v4.runtime.RecognitionException;
+import org.antlr.v4.runtime.Recognizer;
 import org.antlr.v4.runtime.Token;
+import org.antlr.v4.runtime.misc.IntervalSet;
 import org.antlr.v4.runtime.tree.ParseTreeListener;
 import org.netbeans.modules.csl.api.OffsetRange;
+import org.netbeans.modules.csl.api.Severity;
 import org.netbeans.modules.php.blade.editor.indexing.PhpIndexUtils.FieldAccessType;
+import org.netbeans.modules.php.blade.editor.parser.BladeParserResult.BladeError;
+import static org.netbeans.modules.php.blade.syntax.antlr4.php.BladePhpAntlrParser.RULE_foreachDirectiveStatement;
+import org.openide.filesystems.FileObject;
 
 /**
  *
@@ -36,6 +50,9 @@ import org.netbeans.modules.php.blade.editor.indexing.PhpIndexUtils.FieldAccessT
 public class BladePhpSnippetParser {
 
     private final String snippet;
+    private final FileObject originFile;
+    private final int snippetOffset;
+    private final List<org.netbeans.modules.csl.api.Error> errors = new ArrayList<>();
     private final Map<OffsetRange, PhpReference> identifierReference = new TreeMap<>();
     private final Map<OffsetRange, FieldAcces> fieldAccessReference = new TreeMap<>();
 
@@ -47,8 +64,10 @@ public class BladePhpSnippetParser {
         PHP_CLASS_CONSTANT
     }
 
-    public BladePhpSnippetParser(String snippet) {
+    public BladePhpSnippetParser(String snippet, FileObject originFile, int snippetOffset) {
         this.snippet = snippet;
+        this.originFile = originFile;
+        this.snippetOffset = snippetOffset;
     }
 
     public void parse() {
@@ -56,7 +75,9 @@ public class BladePhpSnippetParser {
         BladePhpAntlrLexer lexer = new BladePhpAntlrLexer(cs);
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         BladePhpAntlrParser parser = new BladePhpAntlrParser(tokens);
-        parser.removeErrorListener(ConsoleErrorListener.INSTANCE);
+        parser.removeErrorListeners();
+        parser.setErrorHandler(new RustANTLRErrorStrategy());
+        parser.addErrorListener(createErrorListener());
         //parser.setBuildParseTree(false);
         parser.addParseListener(createIdentifiablePhpElementReferences());
         parser.expression();
@@ -76,6 +97,11 @@ public class BladePhpSnippetParser {
             @Override
             public void exitStaticFieldAccess(BladePhpAntlrParser.StaticFieldAccessContext ctx) {
                 String namespace = null;
+                Token classToken = ctx.className;
+
+                if (classToken == null) {
+                    return;
+                }
 
                 if (ctx.namespace() != null) {
                     namespace = ctx.namespace().getText();
@@ -85,7 +111,7 @@ public class BladePhpSnippetParser {
                     PhpReference reference = new PhpReference(PhpReferenceType.PHP_NAMESPACE, namespace, null);
                     identifierReference.put(namespaceRange, reference);
                 }
-                Token classToken = ctx.className;
+
                 OffsetRange range = new OffsetRange(classToken.getStartIndex(), classToken.getStopIndex() + 1);
                 PhpReference reference = new PhpReference(PhpReferenceType.PHP_CLASS, classToken.getText(), namespace);
                 identifierReference.put(range, reference);
@@ -102,7 +128,11 @@ public class BladePhpSnippetParser {
             @Override
             public void exitStaticMethodAccess(BladePhpAntlrParser.StaticMethodAccessContext ctx) {
                 String namespace = null;
+                Token classToken = ctx.className;
 
+                if (classToken == null) {
+                    return;
+                }
                 if (ctx.namespace() != null) {
                     namespace = ctx.namespace().getText();
                     namespace = namespace.substring(0, namespace.length() - 1);
@@ -111,7 +141,7 @@ public class BladePhpSnippetParser {
                     PhpReference reference = new PhpReference(PhpReferenceType.PHP_NAMESPACE, namespace, null);
                     identifierReference.put(namespaceRange, reference);
                 }
-                Token classToken = ctx.className;
+
                 OffsetRange range = new OffsetRange(classToken.getStartIndex(), classToken.getStopIndex() + 1);
 
                 PhpReference reference = new PhpReference(PhpReferenceType.PHP_CLASS, classToken.getText(), namespace);
@@ -125,10 +155,14 @@ public class BladePhpSnippetParser {
                     fieldAccessReference.put(accessRange, fieldAccess);
                 }
             }
-            
-            @Override public void exitStaticAccess(BladePhpAntlrParser.StaticAccessContext ctx) { 
-                    String namespace = null;
 
+            @Override
+            public void exitStaticAccess(BladePhpAntlrParser.StaticAccessContext ctx) {
+                String namespace = null;
+                Token classToken = ctx.className;
+                if (classToken == null) {
+                    return;
+                }
                 if (ctx.namespace() != null) {
                     namespace = ctx.namespace().getText();
                     namespace = namespace.substring(0, namespace.length() - 1);
@@ -137,12 +171,12 @@ public class BladePhpSnippetParser {
                     PhpReference reference = new PhpReference(PhpReferenceType.PHP_NAMESPACE, namespace, null);
                     identifierReference.put(namespaceRange, reference);
                 }
-                Token classToken = ctx.className;
+
                 OffsetRange range = new OffsetRange(classToken.getStartIndex(), classToken.getStopIndex() + 1);
                 PhpReference reference = new PhpReference(PhpReferenceType.PHP_CLASS, classToken.getText(), namespace);
                 identifierReference.put(range, reference);
 
-                if (ctx.DOUBLE_COLON() != null && ctx.DOUBLE_COLON().getSymbol() != null){
+                if (ctx.DOUBLE_COLON() != null && ctx.DOUBLE_COLON().getSymbol() != null) {
                     //generic access
 //                    Token dbColon = ctx.DOUBLE_COLON().getSymbol();
 //                    PhpReference methodReference = new PhpReference(PhpReferenceType.PHP_CLASS_CONSTANT, "", namespace);
@@ -187,6 +221,41 @@ public class BladePhpSnippetParser {
         }
 
         return null;
+    }
+
+    private final class RustANTLRErrorStrategy extends DefaultErrorStrategy {
+
+        @Override
+        protected void reportFailedPredicate(Parser recognizer, FailedPredicateException e) {
+
+        }
+
+        @Override
+        public void reportError(Parser recognizer, RecognitionException e) {
+           if (e.getMessage() == null){
+               return;
+           }
+           super.reportError(recognizer, e);
+        }
+    }
+
+    private ANTLRErrorListener createErrorListener() {
+        return new BaseErrorListener() {
+            @Override
+            public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line, int charPositionInLine, String msg, RecognitionException e) {
+                int errorPosition = snippetOffset;
+                if (offendingSymbol instanceof Token) {
+                    Token offendingToken = (Token) offendingSymbol;
+                    errorPosition += offendingToken.getStartIndex();
+                }
+                errors.add(new BladeError(null, "PHP error: " + msg, null, originFile, errorPosition, errorPosition, Severity.ERROR));
+            }
+
+        };
+    }
+
+    public List<? extends org.netbeans.modules.csl.api.Error> getDiagnostics() {
+        return errors;
     }
 
     public static class PhpReference {

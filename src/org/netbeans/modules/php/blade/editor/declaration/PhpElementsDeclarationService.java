@@ -19,7 +19,6 @@
 package org.netbeans.modules.php.blade.editor.declaration;
 
 import java.util.Collection;
-import java.util.Collections;
 import org.netbeans.modules.csl.api.DeclarationFinder;
 import org.netbeans.modules.csl.api.DeclarationFinder.DeclarationLocation;
 import org.netbeans.modules.csl.api.OffsetRange;
@@ -29,9 +28,9 @@ import org.netbeans.modules.php.blade.csl.elements.NamedElement;
 import org.netbeans.modules.php.blade.csl.elements.PhpFunctionElement;
 import org.netbeans.modules.php.blade.editor.indexing.PhpIndexFunctionResult;
 import org.netbeans.modules.php.blade.editor.indexing.PhpIndexResult;
-import org.netbeans.modules.php.blade.editor.indexing.PhpIndexUtils;
 import org.netbeans.modules.php.blade.syntax.antlr4.php.BladePhpSnippetParser;
 import static org.netbeans.modules.php.blade.syntax.antlr4.php.BladePhpSnippetParser.PhpReference;
+import org.openide.filesystems.FileObject;
 
 /**
  *
@@ -39,9 +38,9 @@ import static org.netbeans.modules.php.blade.syntax.antlr4.php.BladePhpSnippetPa
  */
 public class PhpElementsDeclarationService {
 
-    public PhpReference findReferenceAtCaret(ParserResult info, OffsetRange phpExprRange, int referenceOffset) {
+    public PhpReference findReferenceAtCaret(ParserResult info, OffsetRange phpExprRange, int referenceOffset, FileObject file) {
         CharSequence phpExprSnippet = info.getSnapshot().getText().subSequence(phpExprRange.getStart(), phpExprRange.getEnd());
-        BladePhpSnippetParser phpSnippetParser = new BladePhpSnippetParser(phpExprSnippet.toString());
+        BladePhpSnippetParser phpSnippetParser = new BladePhpSnippetParser(phpExprSnippet.toString(), file, referenceOffset);
         phpSnippetParser.parse();
         return phpSnippetParser.findIdentifierReference(referenceOffset);
     }
