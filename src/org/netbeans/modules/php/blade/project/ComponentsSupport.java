@@ -209,9 +209,9 @@ public class ComponentsSupport {
         
         @Override
         public void visit(FormalParameter node) {
-            if (!model.isValid()){
-                return;
-            }
+//            if (!model.isValid()){
+//                return;
+//            }
             model.addConstructorProperty(node);
         }
         

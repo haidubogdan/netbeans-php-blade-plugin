@@ -20,6 +20,7 @@ package org.netbeans.modules.php.blade.editor.declaration;
 
 import java.util.Collection;
 import java.util.List;
+import javax.swing.text.AbstractDocument;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 import org.netbeans.api.html.lexer.HTMLTokenId;
@@ -86,74 +87,80 @@ public class BladeDeclarationFinder implements DeclarationFinder {
     @Override
     public OffsetRange getReferenceSpan(Document document, int caretOffset) {
         OffsetRange offsetRange = OffsetRange.NONE;
+        AbstractDocument adoc = (AbstractDocument) document;
 
-        TokenSequence<BladeTokenId> ts = BladeLexerUtils.getTokenSequence(document, caretOffset);
+        try {
+            adoc.readLock();
+            TokenSequence<BladeTokenId> ts = BladeLexerUtils.getTokenSequence(document, caretOffset);
 
-        if (ts == null) {
-            return offsetRange;
-        }
-
-        ts.move(caretOffset);
-
-        if (!ts.moveNext() && !ts.movePrevious()) {
-            return offsetRange;
-        }
-
-        Token<BladeTokenId> token = ts.token();
-        String caretTokenText = token.text().toString();
-        BladeTokenId id = token.id();
-        int tokenStart = ts.offset();
-
-        switch (id) {
-            case BLADE_CUSTOM_DIRECTIVE: {
-                return new OffsetRange(tokenStart, tokenStart + caretTokenText.length());
+            if (ts == null) {
+                return offsetRange;
             }
-            case PHP_BLADE_EXPRESSION: {
-                return getReferenceSpanInsidePhpExpr(document, ts, token, caretOffset);
+
+            ts.move(caretOffset);
+
+            if (!ts.moveNext() && !ts.movePrevious()) {
+                return offsetRange;
             }
-            case PHP_BLADE_ECHO_EXPR:
-            case PHP_BLADE_INLINE_CODE: {
-                return getPhpReferenceSpan(caretTokenText, caretOffset, tokenStart);
-            }
-            case PHP_INLINE: {
-                TokenSequence<? extends PHPTokenId> tsPhp = BladeLexerUtils.getPhpTokenSequence(document, caretOffset);
-                if (tsPhp == null) {
-                    return offsetRange;
+
+            Token<BladeTokenId> token = ts.token();
+            String caretTokenText = token.text().toString();
+            BladeTokenId id = token.id();
+            int tokenStart = ts.offset();
+
+            switch (id) {
+                case BLADE_CUSTOM_DIRECTIVE: {
+                    return new OffsetRange(tokenStart, tokenStart + caretTokenText.length());
                 }
-                tsPhp.move(caretOffset);
-
-                if (!tsPhp.moveNext() && !tsPhp.movePrevious()) {
-                    return offsetRange;
+                case PHP_BLADE_EXPRESSION: {
+                    return getReferenceSpanInsidePhpExpr(document, ts, token, caretOffset);
                 }
-
-                Token<? extends PHPTokenId> phpToken = tsPhp.token();
-                PHPTokenId phpTokenId = phpToken.id();
-                if (phpTokenId.equals(PHPTokenId.PHP_STRING)) {
-                    return new OffsetRange(tsPhp.offset(), tsPhp.offset() + phpToken.length());
+                case PHP_BLADE_ECHO_EXPR:
+                case PHP_BLADE_INLINE_CODE: {
+                    return getPhpReferenceSpan(caretTokenText, caretOffset, tokenStart);
                 }
-                break;
-            }
-            case HTML: {
-                TokenHierarchy<?> th = TokenHierarchy.get(document);
-                Token<? extends HTMLTokenId> htmlToken = BladeLexerUtils.getHtmlToken(th, caretOffset);
-
-                if (htmlToken == null) {
-                    return offsetRange;
-                }
-
-                HTMLTokenId htmlTokenId = htmlToken.id();
-                int tokenOffset = htmlToken.offset(th);
-
-                if (htmlTokenId.equals(HTMLTokenId.TAG_OPEN)) {
-                    String tag = htmlToken.text().toString();
-                    if (tag.startsWith("x-")) { // NOI18N
-                        return new OffsetRange(tokenOffset, tokenOffset + htmlToken.length());
+                case PHP_INLINE: {
+                    TokenSequence<? extends PHPTokenId> tsPhp = BladeLexerUtils.getPhpTokenSequence(document, caretOffset);
+                    if (tsPhp == null) {
+                        return offsetRange;
                     }
+                    tsPhp.move(caretOffset);
+
+                    if (!tsPhp.moveNext() && !tsPhp.movePrevious()) {
+                        return offsetRange;
+                    }
+
+                    Token<? extends PHPTokenId> phpToken = tsPhp.token();
+                    PHPTokenId phpTokenId = phpToken.id();
+                    if (phpTokenId.equals(PHPTokenId.PHP_STRING)) {
+                        return new OffsetRange(tsPhp.offset(), tsPhp.offset() + phpToken.length());
+                    }
+                    break;
+                }
+                case HTML: {
+                    TokenHierarchy<?> th = TokenHierarchy.get(document);
+                    Token<? extends HTMLTokenId> htmlToken = BladeLexerUtils.getHtmlToken(th, caretOffset);
+
+                    if (htmlToken == null) {
+                        return offsetRange;
+                    }
+
+                    HTMLTokenId htmlTokenId = htmlToken.id();
+                    int tokenOffset = htmlToken.offset(th);
+
+                    if (htmlTokenId.equals(HTMLTokenId.TAG_OPEN)) {
+                        String tag = htmlToken.text().toString();
+                        if (tag.startsWith("x-")) { // NOI18N
+                            return new OffsetRange(tokenOffset, tokenOffset + htmlToken.length());
+                        }
+                    }
+
+                    break;
                 }
 
-                break;
             }
-
+        } finally {
+            adoc.readUnlock();
         }
 
         return offsetRange;

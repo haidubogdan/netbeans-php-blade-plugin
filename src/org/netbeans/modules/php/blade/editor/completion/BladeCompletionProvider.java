@@ -43,6 +43,7 @@ import org.netbeans.modules.php.blade.project.ComponentsSupport;
 import org.netbeans.modules.php.blade.syntax.StringUtils;
 import org.netbeans.modules.php.blade.syntax.antlr4.html_components.BladeHtmlAntlrLexer;
 import org.netbeans.modules.php.blade.syntax.antlr4.html_components.BladeHtmlAntlrUtils;
+import org.netbeans.modules.php.editor.parser.astnodes.FormalParameter;
 import org.netbeans.spi.editor.completion.CompletionItem;
 import org.netbeans.spi.editor.completion.CompletionProvider;
 import static org.netbeans.spi.editor.completion.CompletionProvider.COMPLETION_QUERY_TYPE;
@@ -155,8 +156,8 @@ public class BladeCompletionProvider implements CompletionProvider {
                         queryTokenOffset = queryToken.getStartIndex();
                     }
 
-                    String text = queryToken.getText();
-                    int textLength = text.length();
+                    String queryText = queryToken.getText();
+                    int textLength = queryText.length();
                     int endOffset = queryTokenOffset + textLength;
 
                     if (endOffset < caretOffset){
@@ -174,6 +175,7 @@ public class BladeCompletionProvider implements CompletionProvider {
                             Set<Integer> stopTokens = new HashSet<>();
                             stopTokens.add(BladeHtmlAntlrLexer.HTML_COMPONENT_OPEN_TAG);
                             stopTokens.add(BladeHtmlAntlrLexer.GT);
+                            String attributeIdentifier = queryText.startsWith(":") ? queryText.substring(1) : queryText;
                             Token componentToken = BladeHtmlAntlrUtils.findBackwardWithStop(tokens, BladeHtmlAntlrLexer.HTML_COMPONENT_OPEN_TAG, stopTokens);
                             if (componentToken != null && componentToken.getType() == BladeHtmlAntlrLexer.HTML_COMPONENT_OPEN_TAG) {
                                 ComponentsCompletionService componentComplervice = new ComponentsCompletionService();
@@ -188,6 +190,15 @@ public class BladeCompletionProvider implements CompletionProvider {
                                 
                                 for (PhpIndexResult indexReference : indexedReferences) {
                                     ComponentModel componentModel = componentSupport.findComponentClass(indexReference.declarationFile);
+                                    if (componentModel == null){
+                                        continue;
+                                    }
+                                    for (FormalParameter parameter : componentModel.getConstructorProperties()){
+                                        String parameterName = parameter.getParameterName().toString();
+                                        if (parameterName.startsWith(attributeIdentifier)){
+                                            addSimplAttributeItem(attributeIdentifier, parameterName, caretOffset, resultSet);
+                                        }
+                                    }
                                     int x = 1;
 //                                    addComponentIdCompletionItem(indexReference,
 //                                            insertOffset, resultSet);

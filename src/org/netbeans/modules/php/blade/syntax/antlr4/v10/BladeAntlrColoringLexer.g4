@@ -84,8 +84,7 @@ D_CUSTOM : ('@' NameString (' ')* {this._input.LA(1) == '('}? ) ->pushMode(INSID
 
 D_UNKNOWN : '@' NameString->pushMode(ADIACENT_DIRECTIVE_TOKENS);
 
-//hack to allow completion for directives
-//it doesn't trigger completion
+//hack to trigger completion handler which is stopped due to embedding context like HTML, PHP
 D_AT : '@' (' ' | '>' | [\n\r])?;
 
 //display

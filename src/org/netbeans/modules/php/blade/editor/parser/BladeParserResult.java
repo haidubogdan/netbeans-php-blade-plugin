@@ -110,6 +110,7 @@ public class BladeParserResult extends ParserResult {
             if (!taskClass.toLowerCase().contains("completion") 
                     && !taskClass.toLowerCase().contains("Declaration")
                     && !taskClass.toLowerCase().contains(".indexing.Repository")
+                    && !taskClass.toLowerCase().contains("csl.navigation")
                     ) { //NOI18N
                 scanPhpErrors();
             }

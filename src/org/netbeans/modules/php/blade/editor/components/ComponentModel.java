@@ -49,4 +49,8 @@ public class ComponentModel {
     public void addConstructorProperty(FormalParameter property){
         constructorProperties.add(property);
     }
+    
+    public Set<FormalParameter> getConstructorProperties(){
+        return constructorProperties;
+    }
 }
