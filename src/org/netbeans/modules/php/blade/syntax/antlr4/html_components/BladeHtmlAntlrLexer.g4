@@ -32,10 +32,12 @@ BLADE_TAG_ESCAPE : '@' ('{')+->skip;
 CONTENT_TAG_OPEN : '{{' {contentTagBalance++;}->skip;
 CONTENT_TAG_CLOSE : '}}' {contentTagBalance--;}->skip;
 
-RAW_TAG_OPEN : '{!!' {rawTagBalance++;}->skip;
-RAW_TAG_CLOSE : '!!}' {rawTagBalance--;}->skip;
+RAW_TAG_OPEN : '{!!' {rawTagBalance++;};
+RAW_TAG_CLOSE : '!!}' {rawTagBalance--;};
 
 WS : ((' ')+ | [\r\n]+)->skip;
+
+TAG_PART : '!' | '!!';
 
 OTHER : . ->skip;
 

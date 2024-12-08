@@ -39,7 +39,7 @@ staticClassReference :
 ;
 
 staticMethodAccess : 
-    namespace? className=IDENTIFIER '::' method=IDENTIFIER arguments
+        namespace? className=IDENTIFIER '::' method=IDENTIFIER arguments
 ;
 
 staticFieldAccess : 
@@ -84,4 +84,5 @@ argument:
 misc:
   'new' PHP_VARIABLE arguments?
   | '$'? PHP_VARIABLE
+  | namespace className=IDENTIFIER
     ;

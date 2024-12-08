@@ -19,7 +19,7 @@ tokens {
  RAW_TAG,
  CONTENT_TAG,
  HTML,
- HTML_TAG,   
+ HTML_TAG,
  ERROR
 }
 
@@ -116,7 +116,7 @@ CONTENT_TAG_CLOSE : ('}}')->popMode,type(CONTENT_TAG);
 GREEDY_REGULAR_ECHO_EXPR : ~[ {}]+ {this.consumeEscapedEchoToken();};
 
 ESCAPED_ECHO_EXPR : . [ ]* {this.consumeEscapedEchoToken();};
-EXIT_ECHO_EOF : EOF->type(ERROR),popMode;
+EXIT_ECHO_EOF : EOF->type(HTML),popMode;
 
 //=========================================================
 // {!!  !!}
@@ -126,7 +126,7 @@ RAW_TAG_CLOSE : ('!!}')->popMode, type(RAW_TAG);
 
 RAW_ECHO_EXPR : ~[ !{}]+ {this.consumeNotEscapedEchoToken();};
 RAW_ECHO_EXPR_MORE : . [ ]* {this.consumeNotEscapedEchoToken();};
-EXIT_RAW_ECHO_EOF : EOF->type(ERROR),popMode;
+EXIT_RAW_ECHO_EOF : EOF->type(HTML),popMode;
 
 //=========================================================
 // @directive (?)

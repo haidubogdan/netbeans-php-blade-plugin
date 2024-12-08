@@ -1,14 +1,22 @@
 package org.netbeans.modules.php.blade.editor.completion;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
+import java.util.Set;
+import javax.swing.ImageIcon;
 import org.netbeans.api.annotations.common.NonNull;
 import org.netbeans.api.project.Project;
 import org.netbeans.modules.csl.api.CompletionProposal;
+import org.netbeans.modules.csl.api.ElementHandle;
+import org.netbeans.modules.csl.api.ElementKind;
+import org.netbeans.modules.csl.api.HtmlFormatter;
+import org.netbeans.modules.csl.api.Modifier;
 import org.netbeans.modules.php.blade.csl.elements.ClassElement;
 import org.netbeans.modules.php.blade.csl.elements.ElementType;
 import org.netbeans.modules.php.blade.csl.elements.NamedElement;
 import org.netbeans.modules.php.blade.csl.elements.PhpKeywordElement;
+import org.netbeans.modules.php.blade.editor.EditorStringUtils;
 import org.netbeans.modules.php.blade.editor.indexing.PhpIndexFunctionResult;
 import org.netbeans.modules.php.blade.editor.indexing.PhpIndexResult;
 import org.netbeans.modules.php.blade.editor.indexing.PhpIndexUtils;
@@ -38,27 +46,41 @@ public class PhpCodeCompletionService {
 
         int completionOffset = exprStart + targetetToken.getStartIndex();
 
-        String phpPrefix = "";
+        String phpIdentifier = ""; // NOI18N
+
         if (targetetToken.getType() != BladePhpAntlrLexer.DOUBLE_COLON) {
-            phpPrefix = targetetToken.getText();
+            phpIdentifier = targetetToken.getText();
         } else {
-            //double colon offset
+            //double colon offset increase "::"
             completionOffset += targetetToken.getText().length();
         }
+
         BladePhpSnippetParser phpSnippetParser = new BladePhpSnippetParser(snapshotExpr, fo, exprStart);
         phpSnippetParser.parse();
         BladePhpSnippetParser.PhpReference phpRef = phpSnippetParser.findIdentifierReference(referencedOffset);
         BladePhpSnippetParser.FieldAcces fieldAccess = phpSnippetParser.findFieldAccessReference(referencedOffset);
+
         if (fieldAccess != null) {
             if (fieldAccess.owner.namespace == null) {
-                completeClassConstants(completionProposals, phpPrefix, fieldAccess.owner.identifier, completionOffset, fo);
+                completeClassConstants(completionProposals, phpIdentifier, fieldAccess.owner.identifier, completionOffset, fo);
             }
-            completeClassMethods(completionProposals, phpPrefix, fieldAccess, completionOffset, fo);
+            completeClassMethods(completionProposals, phpIdentifier, fieldAccess, completionOffset, fo);
         } else if (phpRef != null) {
+            if (phpRef.namespace != null){
+                String namespaceQuery = phpRef.namespace;
+                if (phpRef.identifier != null){
+                    completeNamespaceClasses(completionProposals, phpRef.identifier, namespaceQuery, completionOffset, fo);
+                    completeNamespace(completionProposals, namespaceQuery + EditorStringUtils.NAMESPACE_SEPARATOR + phpRef.identifier, completionOffset, fo);
+                } else {
+                    completeNamespace(completionProposals, namespaceQuery, completionOffset, fo);
+                }
+            }
         } else if (targetetToken.getType() == BladePhpAntlrLexer.IDENTIFIER) {
-            completePhpKeywords(completionProposals, phpPrefix, completionOffset);
-            completePhpFunctions(completionProposals, phpPrefix, completionOffset, fo);
-            completePhpClasses(completionProposals, phpPrefix, completionOffset, fo);
+            //no context but with identifier
+            completePhpKeywords(completionProposals, phpIdentifier, completionOffset);
+            completePhpFunctions(completionProposals, phpIdentifier, completionOffset, fo);
+            completePhpClasses(completionProposals, phpIdentifier, completionOffset, fo);
+            completeNamespace(completionProposals, phpIdentifier, completionOffset, fo);
         }
         //add variable flow
 
@@ -70,7 +92,7 @@ public class PhpCodeCompletionService {
         for (PhpKeyword keyword : keywordList.getKeywords()) {
             if (keyword.name().startsWith(prefix)) {
                 PhpKeywordElement keywordEl = new PhpKeywordElement(keyword.name(), null);
-                completionProposals.add(new PhpCompletionProposal.PhpKeywordProposal(keywordEl, caretOffset, prefix));
+                completionProposals.add(new PhpKeywordProposal(keywordEl, caretOffset, prefix));
             }
         }
     }
@@ -153,7 +175,7 @@ public class PhpCodeCompletionService {
 
         for (PhpIndexResult indexResult : indexClassResults) {
             completionProposals.add(new BladeCompletionProposal.ClassItem(
-                    classElement(indexResult), offset, indexResult.name));
+                    classElement(indexResult), offset, indexResult.name, true));
         }
     }
 
@@ -177,55 +199,44 @@ public class PhpCodeCompletionService {
         }
     }
 
-    private static void completeNamespace(String prefix, int offset,
-            final List<CompletionProposal> completionProposals,
-            FileObject fo) {
+    private static void completeNamespace(final List<CompletionProposal> completionProposals,
+            String prefix, int offset, FileObject fo) {
 
-        if (!prefix.startsWith("\\") && !Character.isUpperCase(prefix.charAt(0))) {
-            //skip lowercase string from namespce search
-            return;
-        }
-
-        //TODO check if this really matters
-        Project projectOwner = ProjectConvertors.getNonConvertorOwner(fo);
-        if (projectOwner == null) {
-            return;
-        }
-        int substringOffset = prefix.startsWith("\\") ? 1 : 0;
+        int substringOffset = prefix.startsWith(EditorStringUtils.NAMESPACE_SEPARATOR) ? 1 : 0;
+        
         Collection<PhpIndexResult> indexClassResults = PhpIndexUtils.queryNamespace(
-                projectOwner.getProjectDirectory(), prefix.substring(substringOffset)
+                fo, prefix.substring(substringOffset)
         );
+
         if (indexClassResults.isEmpty()) {
             return;
         }
 
-        int anchorOffset = computeAnchorOffset(prefix, offset + substringOffset);
-
+        int firstSeparator = Math.max(0, prefix.lastIndexOf(EditorStringUtils.NAMESPACE_SEPARATOR));
+        int anchorOffset = offset - firstSeparator - 1;
         for (PhpIndexResult indexResult : indexClassResults) {
+            if (!indexResult.name.startsWith(prefix)){
+                continue;
+            }
             completionProposals.add(new BladeCompletionProposal.NamespaceItem(
                     namespaceElement(indexResult), anchorOffset, indexResult.name));
         }
     }
+    
+    private static void completeNamespaceClasses(final List<CompletionProposal> completionProposals,
+            String prefix, String namespace, int offset, FileObject fo) {
 
-    private static void completeConstants(String prefix, int offset,
-            final List<CompletionProposal> completionProposals,
-            FileObject fo) {
-        Collection<PhpIndexResult> indexClassResults = PhpIndexUtils.queryConstants(fo, prefix);
-
-        //treat only uppercase strings
-        if (!Character.isUpperCase(prefix.charAt(0))) {
-            return;
-        }
+        Collection<PhpIndexResult> indexClassResults = PhpIndexUtils.queryNamespaceClassesName(fo, prefix, namespace) ;
 
         if (indexClassResults.isEmpty()) {
             return;
         }
 
-        int anchorOffset = computeAnchorOffset(prefix, offset);
-
+        //include namespace separator offset
+        int completionOffset = offset;
         for (PhpIndexResult indexResult : indexClassResults) {
-            completionProposals.add(new BladeCompletionProposal.ConstantItem(
-                    constantElement(indexResult), anchorOffset, indexResult.name));
+            completionProposals.add(new BladeCompletionProposal.ClassItem(
+                    classElement(indexResult), completionOffset, indexResult.name, false));
         }
     }
 
@@ -292,7 +303,7 @@ public class PhpCodeCompletionService {
     }
 
     private static NamedElement functionElement(PhpIndexResult indexResult) {
-        String inputString = indexResult.name + "()";
+        String inputString = indexResult.name + "()"; // NOI18N
         return namedElement(inputString, indexResult, ElementType.PHP_FUNCTION);
     }
 
@@ -310,5 +321,97 @@ public class PhpCodeCompletionService {
 
     public static int computeAnchorOffset(@NonNull String prefix, int offset) {
         return offset - prefix.length();
+    }
+
+    public abstract static class PhpCompletionProposal implements CompletionProposal {
+
+        private final ElementHandle element;
+        private final int anchorOffset;
+        private final String description;
+
+        public PhpCompletionProposal(ElementHandle element, int anchorOffset, String description) {
+            this.element = element;
+            this.anchorOffset = anchorOffset;
+            this.description = description;
+        }
+
+        @Override
+        public int getAnchorOffset() {
+            return anchorOffset;
+        }
+
+        @Override
+        public ElementHandle getElement() {
+            return element;
+        }
+
+        @Override
+        public String getName() {
+            return element.getName();
+        }
+
+        @Override
+        public String getSortText() {
+            return getName();
+        }
+
+        @Override
+        public int getSortPrioOverride() {
+            return 0;
+        }
+
+        @Override
+        public String getLhsHtml(HtmlFormatter formatter) {
+            return getName();
+        }
+
+        @Override
+        public ImageIcon getIcon() {
+            return null;
+        }
+
+        @Override
+        public Set<Modifier> getModifiers() {
+            return Collections.emptySet();
+        }
+
+        @Override
+        public String getCustomInsertTemplate() {
+            return null;
+        }
+
+        @Override
+        public String getInsertPrefix() {
+            return getName();
+
+        }
+
+        @Override
+        public String getRhsHtml(HtmlFormatter formatter) {
+            return "";
+        }
+
+        @Override
+        public ElementKind getKind() {
+            return ElementKind.CONSTRUCTOR;
+        }
+
+        @Override
+        public boolean isSmart() {
+            return true;
+        }
+
+        public String getDescription() {
+            return description;
+        }
+
+    }
+
+    public static class PhpKeywordProposal extends PhpCompletionProposal {
+
+        public PhpKeywordProposal(ElementHandle element, int anchorOffset, String description) {
+            super(element, anchorOffset, description);
+        }
+
     }
 }

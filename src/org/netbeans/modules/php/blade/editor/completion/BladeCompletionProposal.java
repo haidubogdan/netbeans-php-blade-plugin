@@ -188,6 +188,12 @@ public class BladeCompletionProposal implements CompletionProposal {
         public int getSortPrioOverride() {
             return -50;//priority
         }
+
+        @Override
+        public String getCustomInsertTemplate() {
+            String insertText = getElement().getName();
+            return insertText;
+        }
     }
 
     public static class DirectiveItem extends BladeCompletionProposal {
@@ -201,10 +207,12 @@ public class BladeCompletionProposal implements CompletionProposal {
     public static class ClassItem extends PhpElementItem {
 
         private String namespace = null;
+        private final boolean autoCompleteNamespace;
 
-        public ClassItem(ClassElement element, int anchorOffset, String previewValue) {
+        public ClassItem(ClassElement element, int anchorOffset, String previewValue, boolean autoCompleteNamespace) {
             super(element, anchorOffset, previewValue);
             this.namespace = element.getNamespace();
+            this.autoCompleteNamespace = autoCompleteNamespace;
         }
 
         @Override
@@ -227,10 +235,12 @@ public class BladeCompletionProposal implements CompletionProposal {
 
         @Override
         public String getCustomInsertTemplate() {
-            if (namespace != null && namespace.length() > 0) {
+            if (autoCompleteNamespace == true && namespace != null && namespace.length() > 0) {
                 return EditorStringUtils.NAMESPACE_SEPARATOR + namespace + EditorStringUtils.NAMESPACE_SEPARATOR + getElement().getName(); // NOI18N
             }
-            return getElement().getName();
+
+            String insertText = getElement().getName();
+            return insertText;
         }
     }
 

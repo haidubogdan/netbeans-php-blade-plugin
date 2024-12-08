@@ -53,7 +53,7 @@ public class ComponentsCompletionService {
         }
 
         for (Map.Entry<FileObject, Namespace> namespace : componentSupport.getInstalledComponentNamespace().entrySet()) {
-            results.addAll(PhpIndexUtils.queryNamespaceClassesName(prefix, namespace.getValue().path(), fo));
+            results.addAll(PhpIndexUtils.queryNamespaceClassesName(fo, prefix, namespace.getValue().path()));
         }
 
         return results;

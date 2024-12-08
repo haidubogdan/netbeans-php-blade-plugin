@@ -30,15 +30,13 @@ import java.util.stream.Collectors;
  *
  * @author bogdan
  */
-public class QueryCache<K, V> {
+public final class QueryCache<K, V> {
 
     public static final Long DEFAULT_CACHE_TIMEOUT = 60000L;
 
-    protected Map<K, CacheValue<V>> cacheMap;
-    protected Long cacheTimeout;
+    private Map<K, CacheValue<V>> cacheMap;
+    private Long cacheTimeout;
     
-    //private static final Map<QuerySupport, QueryCache> QUERY_SUPPORT_INDEX = new WeakHashMap<>();
-
     public QueryCache() {
         this(DEFAULT_CACHE_TIMEOUT);
     }
@@ -59,7 +57,7 @@ public class QueryCache<K, V> {
     }
 
     protected Set<K> getExpiredKeys() {
-        return this.cacheMap.keySet().parallelStream()
+        return this.cacheMap.keySet().stream()
                 .filter(this::isExpired)
                 .collect(Collectors.toSet());
     }

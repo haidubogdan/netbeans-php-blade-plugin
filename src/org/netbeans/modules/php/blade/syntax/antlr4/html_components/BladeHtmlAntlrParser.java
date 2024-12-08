@@ -29,8 +29,8 @@ public class BladeHtmlAntlrParser extends Parser {
 	public static final int
 		HTML_COMPONENT_OPEN_TAG=1, COMPONENT_ATTRIBUTE=2, GT=3, BLADE_COMMENT_START=4, 
 		BLADE_TAG_ESCAPE=5, CONTENT_TAG_OPEN=6, CONTENT_TAG_CLOSE=7, RAW_TAG_OPEN=8, 
-		RAW_TAG_CLOSE=9, WS=10, OTHER=11, BLADE_COMMENT_END=12, BLADE_COMMENT_MORE=13, 
-		BLADE_COMMENT_EOF=14;
+		RAW_TAG_CLOSE=9, WS=10, TAG_PART=11, OTHER=12, BLADE_COMMENT_END=13, BLADE_COMMENT_MORE=14, 
+		BLADE_COMMENT_EOF=15;
 	public static final int
 		RULE_root = 0, RULE_element = 1;
 	private static String[] makeRuleNames() {
@@ -42,8 +42,8 @@ public class BladeHtmlAntlrParser extends Parser {
 
 	private static String[] makeLiteralNames() {
 		return new String[] {
-			null, null, null, "'>'", "'{{--'", null, null, null, null, null, null, 
-			null, "'--}}'"
+			null, null, null, "'>'", "'{{--'", null, null, null, "'{!!'", "'!!}'", 
+			null, null, null, "'--}}'"
 		};
 	}
 	private static final String[] _LITERAL_NAMES = makeLiteralNames();
@@ -51,7 +51,7 @@ public class BladeHtmlAntlrParser extends Parser {
 		return new String[] {
 			null, "HTML_COMPONENT_OPEN_TAG", "COMPONENT_ATTRIBUTE", "GT", "BLADE_COMMENT_START", 
 			"BLADE_TAG_ESCAPE", "CONTENT_TAG_OPEN", "CONTENT_TAG_CLOSE", "RAW_TAG_OPEN", 
-			"RAW_TAG_CLOSE", "WS", "OTHER", "BLADE_COMMENT_END", "BLADE_COMMENT_MORE", 
+			"RAW_TAG_CLOSE", "WS", "TAG_PART", "OTHER", "BLADE_COMMENT_END", "BLADE_COMMENT_MORE", 
 			"BLADE_COMMENT_EOF"
 		};
 	}
@@ -204,7 +204,7 @@ public class BladeHtmlAntlrParser extends Parser {
 	}
 
 	public static final String _serializedATN =
-		"\u0004\u0001\u000e\u000f\u0002\u0000\u0007\u0000\u0002\u0001\u0007\u0001"+
+		"\u0004\u0001\u000f\u000f\u0002\u0000\u0007\u0000\u0002\u0001\u0007\u0001"+
 		"\u0001\u0000\u0005\u0000\u0006\b\u0000\n\u0000\f\u0000\t\t\u0000\u0001"+
 		"\u0000\u0001\u0000\u0001\u0001\u0001\u0001\u0001\u0001\u0000\u0000\u0002"+
 		"\u0000\u0002\u0000\u0000\r\u0000\u0007\u0001\u0000\u0000\u0000\u0002\f"+

@@ -41,6 +41,7 @@ public enum BladeTokenId implements TokenId {
     BLADE_DIRECTIVE("blade_directive"), // NOI18N
     BLADE_CUSTOM_DIRECTIVE("blade_directive"), // NOI18N
     BLADE_ECHO_DELIMITOR("blade_echo_delimiters"), // NOI18N
+    BLADE_TAG_ERROR("html"), // NOI18N
     BLADE_PAREN("token"), // NOI18N
     HTML("html"), // NOI18N
     WS_D("html"), // NOI18N

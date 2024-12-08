@@ -26,10 +26,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.logging.Logger;
+import javax.swing.text.BadLocationException;
 import org.netbeans.editor.BaseDocument;
 import javax.swing.text.Document;
 import javax.swing.text.JTextComponent;
-import org.antlr.v4.runtime.Token;
 import org.netbeans.api.annotations.common.NonNull;
 import org.netbeans.api.lexer.TokenHierarchy;
 import org.netbeans.api.lexer.TokenSequence;
@@ -58,13 +58,13 @@ import org.netbeans.modules.php.blade.editor.indexing.BladeIndex;
 import org.netbeans.modules.php.blade.editor.lexer.BladeLexerUtils;
 import org.netbeans.modules.php.blade.editor.lexer.BladeTokenId;
 import static org.netbeans.modules.php.blade.editor.lexer.BladeTokenId.BLADE_DIRECTIVE_UNKNOWN;
-import static org.netbeans.modules.php.blade.editor.lexer.BladeTokenId.BLADE_ECHO_DELIMITOR;
 import org.netbeans.modules.php.blade.editor.parser.BladeDirectiveScope;
 import org.netbeans.modules.php.blade.editor.parser.BladeParserResult;
 import org.netbeans.modules.php.blade.editor.path.BladePathUtils;
 import org.netbeans.modules.php.blade.project.AssetsBundlerSupport;
 import org.netbeans.modules.php.blade.project.ProjectUtils;
 import org.netbeans.modules.php.blade.syntax.BladeTags;
+import org.netbeans.modules.php.blade.syntax.DirectivesList;
 import org.netbeans.modules.php.blade.syntax.StringUtils;
 import org.netbeans.modules.php.blade.syntax.ViewPathUtils;
 import org.netbeans.modules.php.blade.syntax.annotation.Directive;
@@ -136,10 +136,6 @@ public class BladeCompletionHandler implements CodeCompletionHandler2 {
         if (contextPrefix.startsWith(AT) && phpExprRange == null) { //NOI18N
             completeDirectives(completionProposals, offset, fo, contextPrefix);
             return new DefaultCompletionResult(completionProposals, false);
-        } else if (id.equals(BLADE_ECHO_DELIMITOR)) {
-            //??
-            String tagStart = token.text().toString();
-            completeBladeTags(completionProposals, offset, tagStart);
         } else if (phpExprRange != null) {
             BladeParserResult.BladeStringReference reference = parserResult.getBladeReferenceIdsCollection()
                     .findOccuredRefrence(offset);
@@ -304,35 +300,13 @@ public class BladeCompletionHandler implements CodeCompletionHandler2 {
         }
     }
 
-    /**
-     * BLADE
-     *
-     * @param completionProposals
-     * @param completionContext
-     * @param parserResult
-     * @param currentToken
-     */
-    private void completeBladeTags(final List<CompletionProposal> completionProposals,
-            int carretOffset, String tagStart) {
-
-        int anchorOffset = computeAnchorOffset(tagStart, carretOffset);
-        BladeTags tagsContainer = new BladeTags();
-        Tag[] tags = tagsContainer.getTags();
-        for (Tag tag : tags) {
-            if (tag.openTag().startsWith(tagStart)) {
-                TagElement tagElement = new TagElement(tag.closeTag());
-                completionProposals.add(new BladeCompletionProposal.BladeTag(tagElement, anchorOffset, tag));
-            }
-        }
-    }
-
     private void completeDirectives(final List<CompletionProposal> completionProposals,
             int caretOffset, FileObject fo, String prefix) {
-        DirectiveCompletionList completionList = new DirectiveCompletionList();
+        DirectivesList listClass = new DirectivesList();
 
         int anchorOffset = computeAnchorOffset(prefix, caretOffset);
 
-        for (Directive directive : completionList.getDirectives()) {
+        for (Directive directive : listClass.getDirectives()) {
             String directiveName = directive.name();
             if (directiveName.startsWith(prefix)) {
                 DirectiveElement directiveEl = new DirectiveElement(directiveName, fo);
@@ -405,7 +379,7 @@ public class BladeCompletionHandler implements CodeCompletionHandler2 {
             String tokenPrefix = token.text().toString().trim();
             BladeTokenId tokenId = token.id();
             if (tokenId.equals(BLADE_DIRECTIVE_UNKNOWN)) {
-                //adiacent emebedding hack to trigger blade completion
+                //sanitize adiacent emebedding hack to trigger blade completion
                 //ex: "@$caret" or @$caret>
                 if (tokenPrefix.endsWith("\"") || tokenPrefix.endsWith(">")) { // NOI18N
                     return tokenPrefix.substring(0, tokenPrefix.length() - 1);
@@ -474,7 +448,7 @@ public class BladeCompletionHandler implements CodeCompletionHandler2 {
         return result;
     }
 
-    public static int computeAnchorOffset(@NonNull String prefix, int offset) {
+    private int computeAnchorOffset(@NonNull String prefix, int offset) {
         return offset - prefix.length();
     }
 }

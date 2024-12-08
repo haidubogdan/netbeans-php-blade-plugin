@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.netbeans.modules.php.blade.editor.completion;
+package org.netbeans.modules.php.blade.editor.completion.providers;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -126,9 +126,10 @@ public class BladeCompletionProvider implements CompletionProvider {
 
                 adoc.readLock();
                 AntlrTokenSequence tokens;
-
+                String typedText;
                 try {
                     String text = doc.getText(0, doc.getLength());
+                    typedText = doc.getText(caretOffset - 1, 1);
                     tokens = new AntlrTokenSequence(new BladeHtmlAntlrLexer(CharStreams.fromString(text)));
                 } catch (BadLocationException ex) {
                     return;
@@ -151,7 +152,9 @@ public class BladeCompletionProvider implements CompletionProvider {
                     int queryTokenOffset = queryToken.getStartIndex();
 
                     if (queryTokenOffset > caretOffset) {
-                        tokens.seekTo(caretOffset - 1);
+                        int correction = typedText.equals("!") //NOI18N
+                                || typedText.equals("}")  ? 0 : 1; //NOI18N
+                        tokens.seekTo(caretOffset - correction);
                         queryToken = tokens.next().get();
                         queryTokenOffset = queryToken.getStartIndex();
                     }
@@ -166,6 +169,16 @@ public class BladeCompletionProvider implements CompletionProvider {
                     }
 
                     switch (queryToken.getType()) {
+                        case BladeHtmlAntlrLexer.TAG_PART: {
+                            tokens.seekTo(queryToken.getStartIndex() - 1);
+                            if (tokens.hasNext()){
+                                Token previousToken = tokens.next().get();
+                                if (previousToken.getType() == BladeHtmlAntlrLexer.RAW_TAG_OPEN && queryText.equals("!")){ //NOI18N
+                                    addBladeTagCompletionItem("!!}", caretOffset, resultSet); //NOI18N
+                                }
+                            }
+                            break;
+                        }
                         case BladeHtmlAntlrLexer.HTML_COMPONENT_OPEN_TAG: {
                             String identifier = ComponentsSupport.tag2ClassName(queryToken.getText());
                             completeComponents(identifier, fo, caretOffset, resultSet);
@@ -199,9 +212,6 @@ public class BladeCompletionProvider implements CompletionProvider {
                                             addSimplAttributeItem(attributeIdentifier, parameterName, caretOffset, resultSet);
                                         }
                                     }
-                                    int x = 1;
-//                                    addComponentIdCompletionItem(indexReference,
-//                                            insertOffset, resultSet);
                                 }
                             }
                             break;
@@ -262,6 +272,21 @@ public class BladeCompletionProvider implements CompletionProvider {
                 .startOffset(caretOffset)
                 .leftHtmlText(tagName)
                 .rightHtmlText(indexReference.namespace)
+                .sortPriority(1)
+                .build();
+        resultSet.addItem(item);
+    }
+    
+    
+    private void addBladeTagCompletionItem(String tag,
+            int caretOffset, CompletionResultSet resultSet) {
+
+        String tagName = StringUtils.toKebabCase(tag);
+        CompletionItem item = CompletionUtilities.newCompletionItemBuilder(tagName)
+                .iconResource(CUSTOM_HTML_ICON)
+                .startOffset(caretOffset)
+                .leftHtmlText(tagName)
+                .rightHtmlText(tag)
                 .sortPriority(1)
                 .build();
         resultSet.addItem(item);

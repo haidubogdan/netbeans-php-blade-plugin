@@ -106,11 +106,11 @@ public class PhpIndexUtils {
         return results;
     }
 
-    public static Collection<PhpIndexResult> queryNamespaceClassesName(String prefix,
-            String namespace, FileObject fo) {
+    public static Collection<PhpIndexResult> queryNamespaceClassesName(FileObject fo, String prefix,
+            String namespace) {
         QuerySupport phpindex = QuerySupportFactory.get(fo);
         Collection<PhpIndexResult> results = new ArrayList<>();
-        String queryPrefix = prefix.toLowerCase() + ".*" + namespace.replace(NAMESPACE_SEPARATOR, ESCAPED_NAMESPACE_SEPARATOR) + ";.*"; 
+        String queryPrefix = prefix.toLowerCase() + ".*" + namespace.replace(NAMESPACE_SEPARATOR, ESCAPED_NAMESPACE_SEPARATOR) + ";.*";// NOI18N
 
         try {
             Collection<? extends IndexResult> indexResults = phpindex.query(
@@ -492,12 +492,12 @@ public class PhpIndexUtils {
         //third signature namespace
         //the first el is the folder
         String originalPrefix = prefix;
-        
-        if (prefix.endsWith("\\\\")) {
+
+        if (prefix.endsWith(ESCAPED_NAMESPACE_SEPARATOR)) {
             return results;
         }
-        
-        String[] queryItems = prefix.split("\\\\");
+
+        String[] queryItems = prefix.split(ESCAPED_NAMESPACE_SEPARATOR);
 
         if (queryItems.length == 0) {
             return results;
@@ -507,7 +507,7 @@ public class PhpIndexUtils {
 
         try {
             Collection<? extends IndexResult> indexResults = phpindex.query(
-                    PHPIndexer.FIELD_TOP_LEVEL, queryPrefix + "\\", QuerySupport.Kind.PREFIX, new String[]{
+                    PHPIndexer.FIELD_TOP_LEVEL, queryPrefix, QuerySupport.Kind.PREFIX, new String[]{
                         PHPIndexer.FIELD_NAMESPACE, PHPIndexer.FIELD_TOP_LEVEL});
             for (IndexResult indexResult : indexResults) {
                 FileObject indexFile = indexResult.getFile();
@@ -523,10 +523,10 @@ public class PhpIndexUtils {
                     String name = sig.string(1);
                     String namespace = sig.string(2);
 
-                    String fullNamespace = "";
+                    String fullNamespace = ""; // NOI18N
 
                     if (!namespace.isEmpty()) {
-                        fullNamespace = namespace + "\\";
+                        fullNamespace = namespace + NAMESPACE_SEPARATOR;
                     }
 
                     fullNamespace += name;

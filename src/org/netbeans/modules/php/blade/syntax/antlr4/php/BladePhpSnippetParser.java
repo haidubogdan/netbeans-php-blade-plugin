@@ -135,6 +135,7 @@ public class BladePhpSnippetParser {
                 }
                 if (ctx.namespace() != null) {
                     namespace = ctx.namespace().getText();
+                    //trim the extra \\
                     namespace = namespace.substring(0, namespace.length() - 1);
                     OffsetRange namespaceRange = new OffsetRange(ctx.namespace().getStart().getStartIndex(),
                             ctx.namespace().getStop().getStopIndex());
@@ -186,6 +187,27 @@ public class BladePhpSnippetParser {
 //                    fieldAccessReference.put(accessRange, fieldAccess);
                 }
             }
+
+            @Override
+            public void exitMisc(BladePhpAntlrParser.MiscContext ctx) {
+                String namespace = null;
+                if (ctx.namespace() != null) {
+                    namespace = ctx.namespace().getText();
+                    //trim the extra \\
+                    namespace = namespace.substring(0, namespace.length() - 1);
+                    OffsetRange namespaceRange = new OffsetRange(ctx.namespace().getStart().getStartIndex(),
+                            ctx.namespace().getStop().getStopIndex());
+                    PhpReference reference = new PhpReference(PhpReferenceType.PHP_NAMESPACE, namespace, null);
+                    identifierReference.put(namespaceRange, reference);
+                }
+                
+                Token classToken = ctx.className;
+                if (classToken != null && classToken.getStartIndex() > 0){
+                    OffsetRange range = new OffsetRange(classToken.getStartIndex(), classToken.getStopIndex() + 1);
+                    PhpReference reference = new PhpReference(PhpReferenceType.PHP_CLASS, classToken.getText(), namespace);
+                    identifierReference.put(range, reference);
+                }
+            }
         };
     }
 
@@ -232,10 +254,10 @@ public class BladePhpSnippetParser {
 
         @Override
         public void reportError(Parser recognizer, RecognitionException e) {
-           if (e.getMessage() == null){
-               return;
-           }
-           super.reportError(recognizer, e);
+            if (e.getMessage() == null) {
+                return;
+            }
+            super.reportError(recognizer, e);
         }
     }
 
