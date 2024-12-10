@@ -46,18 +46,6 @@ public abstract class BladeAntlrUtils {
         return findForward(tokens, stopTokensText, openTokensText);
     }
 
-    public static Token findForward(AntlrTokenSequence tokens, Token start,
-            Set<String> stopTokensText, Set<String> openTokensText) {
-        
-        
-        if (tokens == null || tokens.isEmpty()) {
-            return null;
-        }
-        tokens.seekTo(start.getStopIndex() + 1);
-
-        return findForward(tokens, stopTokensText, openTokensText);
-    }
-
     private static Token findForward(AntlrTokenSequence tokens,
             Set<String> stopTokenText, Set<String> openTokensText) {
 
@@ -84,18 +72,6 @@ public abstract class BladeAntlrUtils {
             }
         }
         return null;
-    }
-
-    public static Token findBackward(AntlrTokenSequence tokens, Token start,
-            Set<String> stopTokenText, Set<String> balanceTokensText) {
-
-        if (tokens == null || tokens.isEmpty()) {
-            return null;
-        }
-
-        tokens.seekTo(start.getStartIndex() - 1);
-
-        return findBackward(tokens, stopTokenText, balanceTokensText);
     }
 
     public static Token findBackward(AntlrTokenSequence tokens, int offset,
@@ -139,87 +115,4 @@ public abstract class BladeAntlrUtils {
         return null;
     }
 
-    public static Token findForwardWithStop(AntlrTokenSequence tokens, Token start,
-            int tokensMatch, Set<Integer> stopTokens) {
-
-        if (tokens == null || tokens.isEmpty()) {
-            return null;
-        }
-
-        tokens.seekTo(start.getStopIndex() + 1);
-
-        while (tokens.hasNext()) {
-            Token pt = tokens.next().get();
-            if (pt == null) {
-                continue;
-            }
-
-            if (pt.getType() == tokensMatch) {
-                return pt;
-            }
-
-            if (stopTokens.contains(pt.getType())) {
-                return null;
-            }
-        }
-
-        return null;
-
-    }
-
-    public static Token findBackward(AntlrTokenSequence tokens, Token start,
-            int tokensMatch, List<Integer> skipableTokens) {
-
-        if (tokens == null || tokens.isEmpty()) {
-            return null;
-        }
-
-        tokens.seekTo(start.getStartIndex() - 1);
-
-        while (tokens.hasPrevious()) {
-            Token pt = tokens.previous().get();
-            if (pt == null) {
-                continue;
-            }
-
-            if (pt.getType() == tokensMatch) {
-                return pt;
-            }
-
-            if (skipableTokens.contains(pt.getType())) {
-                continue;
-            }
-
-            return null;
-        }
-
-        return null;
-
-    }
-
-    public static Token findBackwardWithStop(
-            AntlrTokenSequence tokens, Token start, int tokenMatch, Set<Integer> stopTokens) {
-        if (tokens == null || tokens.isEmpty()) {
-            return null;
-        }
-
-        tokens.seekTo(start.getStartIndex() - 1);
-
-        while (tokens.hasPrevious()) {
-            Token pt = tokens.previous().get();
-            if (pt == null) {
-                continue;
-            }
-
-            if (pt.getType() == tokenMatch) {
-                return pt;
-            }
-
-            if (stopTokens.contains(pt.getType())) {
-                return null;
-            }
-        }
-
-        return null;
-    }
 }
