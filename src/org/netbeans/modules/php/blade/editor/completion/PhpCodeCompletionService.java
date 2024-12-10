@@ -24,6 +24,7 @@ import org.netbeans.modules.php.blade.syntax.annotation.PhpKeyword;
 import org.netbeans.modules.php.blade.syntax.antlr4.php.BladePhpAntlrLexer;
 import org.netbeans.modules.php.blade.syntax.antlr4.php.BladePhpAntlrUtils;
 import org.netbeans.modules.php.blade.syntax.antlr4.php.BladePhpSnippetParser;
+import static org.netbeans.modules.php.blade.syntax.antlr4.php.BladePhpSnippetParser.PhpReferenceType.PHP_NAMESPACE;
 import org.netbeans.modules.php.blade.syntax.php.PhpKeywordList;
 import org.netbeans.spi.project.ui.support.ProjectConvertors;
 import org.openide.filesystems.FileObject;
@@ -74,6 +75,8 @@ public class PhpCodeCompletionService {
                 } else {
                     completeNamespace(completionProposals, namespaceQuery, completionOffset, fo);
                 }
+            } else if (phpRef.type.equals(PHP_NAMESPACE)){
+                  completeAllRelativeNamespacesClasses(completionProposals, phpRef.identifier, offset, fo);
             }
         } else if (targetetToken.getType() == BladePhpAntlrLexer.IDENTIFIER) {
             //no context but with identifier
@@ -220,6 +223,25 @@ public class PhpCodeCompletionService {
             }
             completionProposals.add(new BladeCompletionProposal.NamespaceItem(
                     namespaceElement(indexResult), anchorOffset, indexResult.name));
+        }
+    }
+    
+    private static void completeAllRelativeNamespacesClasses(final List<CompletionProposal> completionProposals,
+            String prefix, int offset, FileObject fo) {
+
+        int substringOffset = prefix.startsWith(EditorStringUtils.NAMESPACE_SEPARATOR) ? 1 : 0;
+        
+        Collection<PhpIndexResult> indexClassResults = PhpIndexUtils.queryAllNamespaceClasses(
+                fo, prefix.substring(substringOffset)
+        );
+
+        if (indexClassResults.isEmpty()) {
+            return;
+        }
+
+        for (PhpIndexResult indexResult : indexClassResults) {
+            completionProposals.add(new BladeCompletionProposal.NamespaceItem(
+                    namespaceElement(indexResult), offset, indexResult.name));
         }
     }
     

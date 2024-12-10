@@ -587,7 +587,7 @@ public class PhpIndexUtils {
 
         try {
             Collection<? extends IndexResult> indexResults = phpindex.query(
-                        PHPIndexer.FIELD_TOP_LEVEL, queryPrefix, QuerySupport.Kind.EXACT,
+                        PHPIndexer.FIELD_TOP_LEVEL, queryPrefix, QuerySupport.Kind.PREFIX,
                     new String[]{
                         PHPIndexer.FIELD_NAMESPACE,
                         PHPIndexer.FIELD_TOP_LEVEL
