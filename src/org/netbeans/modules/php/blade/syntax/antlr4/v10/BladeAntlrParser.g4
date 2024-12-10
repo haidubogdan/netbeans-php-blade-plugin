@@ -88,6 +88,7 @@ bladePhpBlock :
 inlineDirective:
     D_SIMPLE_DIRECTIVE directiveArguments
     | D_PHP directiveArguments
+    | D_DIRECTIVE
     | D_VITE_REFRESH
 ;
 

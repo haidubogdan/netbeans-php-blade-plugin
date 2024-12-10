@@ -119,6 +119,18 @@ public class StructureListener extends BladeAntlrParserBaseListener {
         identifier = null;
         addInlineDirective(directiveToken);
     }
+    
+    @Override
+    public void exitCustomDirective(BladeAntlrParser.CustomDirectiveContext ctx) {
+        Token directiveToken = ctx.getStart();
+
+        if (directiveToken == null) {
+            return;
+        }
+
+        identifier = null;
+        addInlineDirective(directiveToken);
+    }
 
     private void addInlineDirective(Token directiveToken) {
         DirectiveInlineStructureItem inlineElement;

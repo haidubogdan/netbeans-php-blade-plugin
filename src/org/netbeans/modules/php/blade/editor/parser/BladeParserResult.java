@@ -43,6 +43,7 @@ import org.netbeans.modules.php.blade.editor.parser.listeners.PhpExpressionOccur
 import org.netbeans.modules.php.blade.editor.parser.listeners.ReferenceIdListener;
 import org.netbeans.modules.php.blade.editor.parser.listeners.ScopeListener;
 import org.netbeans.modules.php.blade.editor.parser.listeners.StructureListener;
+import org.netbeans.modules.php.blade.editor.preferences.GeneralPreferencesUtils;
 import org.netbeans.modules.php.blade.syntax.antlr4.php.BladePhpSnippetParser;
 import org.netbeans.modules.php.blade.syntax.antlr4.v10.BladeAntlrLexer;
 import org.netbeans.modules.php.blade.syntax.antlr4.v10.BladeAntlrParser;
@@ -107,12 +108,12 @@ public class BladeParserResult extends ParserResult {
 
             evaluateParser(parser);
 
-            if (!taskClass.toLowerCase().contains("completion") 
+            if (GeneralPreferencesUtils.isPhpSyntaxAnalyzerEnabled() && !taskClass.toLowerCase().contains("completion") 
                     && !taskClass.toLowerCase().contains("Declaration")
                     && !taskClass.toLowerCase().contains(".indexing.Repository")
                     && !taskClass.toLowerCase().contains("csl.navigation")
                     ) { //NOI18N
-                scanPhpErrors();
+                phpSyntaxAnalyzer();
             }
 
             finished = true;
@@ -179,7 +180,7 @@ public class BladeParserResult extends ParserResult {
         return bladeScope;
     }
 
-    public void scanPhpErrors() {
+    public void phpSyntaxAnalyzer() {
         for (OffsetRange range : getBladePhpExpressionOccurences().getPhpInlineOccurences()) {
             CharSequence snapshotExpr = getSnapshot().getText().subSequence(range.getStart(), range.getEnd());
             BladePhpSnippetParser phpSnippetParser = new BladePhpSnippetParser(snapshotExpr.toString(), getFileObject(), range.getStart());

@@ -43,6 +43,30 @@ public class BladePhpAntlrParserBaseListener implements BladePhpAntlrParserListe
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterFunctionalExpr(BladePhpAntlrParser.FunctionalExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitFunctionalExpr(BladePhpAntlrParser.FunctionalExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterClassExpression(BladePhpAntlrParser.ClassExpressionContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitClassExpression(BladePhpAntlrParser.ClassExpressionContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterForeachDirectiveStatement(BladePhpAntlrParser.ForeachDirectiveStatementContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -182,6 +206,30 @@ public class BladePhpAntlrParserBaseListener implements BladePhpAntlrParserListe
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitArgument(BladePhpAntlrParser.ArgumentContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterArray(BladePhpAntlrParser.ArrayContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitArray(BladePhpAntlrParser.ArrayContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterArray_key_item(BladePhpAntlrParser.Array_key_itemContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitArray_key_item(BladePhpAntlrParser.Array_key_itemContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *

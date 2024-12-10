@@ -40,6 +40,7 @@ public class BladeGeneralSettings extends javax.swing.JPanel {
         this.formatting_enabled.setSelected(GeneralPreferencesUtils.isFormattingEnabled());
         this.indentation_enabled.setSelected(GeneralPreferencesUtils.isIndentationEnabled());
         this.auto_tag_completion.setSelected(GeneralPreferencesUtils.isAutoTagCompletionEnabled());
+        this.php_syntax_analyzer.setSelected(GeneralPreferencesUtils.isPhpSyntaxAnalyzerEnabled());
     }
     /**
      * This method is called from within the constructor to initialize the form.
@@ -55,6 +56,7 @@ public class BladeGeneralSettings extends javax.swing.JPanel {
         indentation_enabled = new javax.swing.JCheckBox();
         auto_tag_completion = new javax.swing.JCheckBox();
         jLabel2 = new javax.swing.JLabel();
+        php_syntax_analyzer = new javax.swing.JCheckBox();
 
         org.openide.awt.Mnemonics.setLocalizedText(jLabel1, org.openide.util.NbBundle.getMessage(BladeGeneralSettings.class, "BladeGeneralSettings.jLabel1.text")); // NOI18N
 
@@ -66,6 +68,8 @@ public class BladeGeneralSettings extends javax.swing.JPanel {
 
         org.openide.awt.Mnemonics.setLocalizedText(jLabel2, org.openide.util.NbBundle.getMessage(BladeGeneralSettings.class, "BladeGeneralSettings.jLabel2.text")); // NOI18N
 
+        org.openide.awt.Mnemonics.setLocalizedText(php_syntax_analyzer, org.openide.util.NbBundle.getMessage(BladeGeneralSettings.class, "BladeGeneralSettings.php_syntax_analyzer.text")); // NOI18N
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
@@ -73,13 +77,12 @@ public class BladeGeneralSettings extends javax.swing.JPanel {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(21, 21, 21)
-                        .addComponent(jLabel2))
                     .addComponent(auto_tag_completion)
                     .addComponent(formatting_enabled)
                     .addComponent(jLabel1)
-                    .addComponent(indentation_enabled))
+                    .addComponent(indentation_enabled)
+                    .addComponent(jLabel2)
+                    .addComponent(php_syntax_analyzer))
                 .addContainerGap(119, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
@@ -91,10 +94,12 @@ public class BladeGeneralSettings extends javax.swing.JPanel {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(indentation_enabled)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jLabel2)
+                .addGap(11, 11, 11)
                 .addComponent(auto_tag_completion)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jLabel2)
-                .addGap(0, 175, Short.MAX_VALUE))
+                .addComponent(php_syntax_analyzer)
+                .addGap(0, 144, Short.MAX_VALUE))
         );
     }// </editor-fold>//GEN-END:initComponents
 
@@ -105,12 +110,14 @@ public class BladeGeneralSettings extends javax.swing.JPanel {
     private javax.swing.JCheckBox indentation_enabled;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
+    private javax.swing.JCheckBox php_syntax_analyzer;
     // End of variables declaration//GEN-END:variables
 
     public void storeData() {
         ModulePreferences.setPrefBoolean(GeneralPreferencesUtils.ENABLE_FORMATTING, this.formatting_enabled.isSelected());
         ModulePreferences.setPrefBoolean(GeneralPreferencesUtils.ENABLE_INDENTATION, this.indentation_enabled.isSelected());
         ModulePreferences.setPrefBoolean(GeneralPreferencesUtils.ENABLE_AUTO_TAG_COMPLETION, this.auto_tag_completion.isSelected());
+        ModulePreferences.setPrefBoolean(GeneralPreferencesUtils.ENABLE_PHP_SYNTAX_ANLYZER, this.php_syntax_analyzer.isSelected());
     }
 
 }

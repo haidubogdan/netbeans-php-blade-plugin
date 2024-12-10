@@ -38,10 +38,12 @@ public final class GeneralPreferencesUtils {
     public static final String ENABLE_FORMATTING = "enable-blade-format"; // NOI18N
     public static final String ENABLE_INDENTATION = "enable-blade-indent"; // NOI18N
     public static final String ENABLE_AUTO_TAG_COMPLETION = "enable-auto-tag-completion"; // NOI18N
+    public static final String ENABLE_PHP_SYNTAX_ANLYZER = "enable-php-syntax-analyzer"; // NOI18N
 
     private static Boolean enableFormatting = null;
     private static Boolean enableIndentation = null;
     private static Boolean enableAutoTagCompletion = null;
+    private static Boolean enablePhpSyntaxAnalyzer = null;
 
     // default values
     private static Preferences PREFERENCES;
@@ -52,6 +54,7 @@ public final class GeneralPreferencesUtils {
             enableFormatting = PREFERENCES.getBoolean(ENABLE_FORMATTING, false);
             enableIndentation = PREFERENCES.getBoolean(ENABLE_INDENTATION, false);
             enableAutoTagCompletion = PREFERENCES.getBoolean(ENABLE_AUTO_TAG_COMPLETION, false);
+            enablePhpSyntaxAnalyzer = PREFERENCES.getBoolean(ENABLE_PHP_SYNTAX_ANLYZER, true);
         }
     };
 
@@ -71,6 +74,11 @@ public final class GeneralPreferencesUtils {
     public static boolean isAutoTagCompletionEnabled(){
         lazyInit();
         return enableAutoTagCompletion;
+    }
+    
+    public static boolean isPhpSyntaxAnalyzerEnabled(){
+        lazyInit();
+        return enablePhpSyntaxAnalyzer;
     }
     
     private static void lazyInit() {

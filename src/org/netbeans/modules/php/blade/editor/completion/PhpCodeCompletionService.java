@@ -68,9 +68,12 @@ public class PhpCodeCompletionService {
             completeClassMethods(completionProposals, phpIdentifier, fieldAccess, completionOffset, fo);
         } else if (phpRef != null) {
             if (phpRef.namespace != null){
-                String namespaceQuery = phpRef.namespace;
+                boolean globalNamespace = phpRef.namespace.startsWith(EditorStringUtils.NAMESPACE_SEPARATOR);
+                String namespaceQuery = globalNamespace ? phpRef.namespace.substring(1) : phpRef.namespace;
+                
                 if (phpRef.identifier != null){
-                    completeNamespaceClasses(completionProposals, phpRef.identifier, namespaceQuery, completionOffset, fo);
+                    int slashOffset = globalNamespace ? 1 : 0;
+                    completeNamespaceClasses(completionProposals, phpRef.identifier, namespaceQuery, completionOffset + slashOffset, fo);
                     completeNamespace(completionProposals, namespaceQuery + EditorStringUtils.NAMESPACE_SEPARATOR + phpRef.identifier, completionOffset, fo);
                 } else {
                     completeNamespace(completionProposals, namespaceQuery, completionOffset, fo);

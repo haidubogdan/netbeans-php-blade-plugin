@@ -15,15 +15,23 @@ exprStatement :
     //empty statement
     ';'
     | foreachDirectiveStatement
-    | 'new' IDENTIFIER arguments?
+    | functionalExpr
+;
+
+functionalExpr:
+     classExpression
+    | functionExpr
+    | misc
+    ;
+
+classExpression:
+    'new' IDENTIFIER arguments?
     | staticMethodAccess
     | staticFieldAccess
     | staticClassReference
     | staticAccess
     | directMethodAccess
-    | functionExpr
-    | misc
-;
+    ;
 
 foreachDirectiveStatement:
     {this.bladeParserContext.equals(ParserContext.FOREACH)}? foreachArguments
@@ -76,13 +84,23 @@ namespace :
     | '\\'
 ;
 
-argument: 
-    PHP_VARIABLE
-    | expression
+argument:
+     array
+    | PHP_VARIABLE
     ;
 
+array:
+   PHP_VARIABLE array_key_item*
+;
+
+array_key_item:
+    '[' PHP_VARIABLE ']'
+    | '[' ']'
+;    
 misc:
-  'new' PHP_VARIABLE arguments?
+  'echo' functionalExpr
+  | 'new' PHP_VARIABLE arguments?
+  | array
   | '$'? PHP_VARIABLE
   | namespace className=IDENTIFIER
     ;

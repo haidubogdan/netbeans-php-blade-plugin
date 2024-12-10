@@ -23,6 +23,7 @@ tokens {
     LPAREN,
     RPAREN,
     D_CUSTOM,
+    D_DIRECTIVE,
     IDENTIFIABLE_STRING,
     BLADE_CONTENT_CLOSE_TAG,
     LSQUAREBRACKET,
@@ -167,7 +168,8 @@ D_INJECT : '@inject' (' ')* {this.identifierStringPos = 2; lookupMode(PHP_EXPR_W
 D_USE : '@use' {lookupMode(PHP_EXPR_WITH_FIRST_IDENTIFIABLE_STRING);};
 
 //spatie
-
+D_LIVEWIRE_ARG : '@livewire' (' ')* {lookupMode(INSIDE_PHP_EXPRESSION);}->type(D_SIMPLE_DIRECTIVE);
+D_LIVEWIRE : ('@livewireStyles' | '@bukStyles' | '@livewireScripts' | '@bukScripts' | '@click' ('.away')? '=')->type(D_DIRECTIVE);
 
 
 

@@ -30,6 +30,26 @@ public interface BladePhpAntlrParserListener extends ParseTreeListener {
 	 */
 	void exitExprStatement(BladePhpAntlrParser.ExprStatementContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link BladePhpAntlrParser#functionalExpr}.
+	 * @param ctx the parse tree
+	 */
+	void enterFunctionalExpr(BladePhpAntlrParser.FunctionalExprContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link BladePhpAntlrParser#functionalExpr}.
+	 * @param ctx the parse tree
+	 */
+	void exitFunctionalExpr(BladePhpAntlrParser.FunctionalExprContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link BladePhpAntlrParser#classExpression}.
+	 * @param ctx the parse tree
+	 */
+	void enterClassExpression(BladePhpAntlrParser.ClassExpressionContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link BladePhpAntlrParser#classExpression}.
+	 * @param ctx the parse tree
+	 */
+	void exitClassExpression(BladePhpAntlrParser.ClassExpressionContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link BladePhpAntlrParser#foreachDirectiveStatement}.
 	 * @param ctx the parse tree
 	 */
@@ -149,6 +169,26 @@ public interface BladePhpAntlrParserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitArgument(BladePhpAntlrParser.ArgumentContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link BladePhpAntlrParser#array}.
+	 * @param ctx the parse tree
+	 */
+	void enterArray(BladePhpAntlrParser.ArrayContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link BladePhpAntlrParser#array}.
+	 * @param ctx the parse tree
+	 */
+	void exitArray(BladePhpAntlrParser.ArrayContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link BladePhpAntlrParser#array_key_item}.
+	 * @param ctx the parse tree
+	 */
+	void enterArray_key_item(BladePhpAntlrParser.Array_key_itemContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link BladePhpAntlrParser#array_key_item}.
+	 * @param ctx the parse tree
+	 */
+	void exitArray_key_item(BladePhpAntlrParser.Array_key_itemContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link BladePhpAntlrParser#misc}.
 	 * @param ctx the parse tree
