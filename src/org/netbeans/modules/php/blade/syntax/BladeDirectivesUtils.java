@@ -38,6 +38,7 @@ public final class BladeDirectivesUtils {
     public static final String DIRECTIVE_SHOW = "@show"; // NOI18N
     public static final String DIRECTIVE_STOP = "@stop"; // NOI18N
     public static final String DIRECTIVE_APPEND = "@append"; // NOI18N
+    public static final String DIRECTIVE_OVERWRITE = "@overwrite"; // NOI18N
     public static final String DIRECTIVE_IF = "@if"; // NOI18N
     public static final String DIRECTIVE_ELSEIF = "@elseif"; // NOI18N
     public static final String DIRECTIVE_ELSE = "@else"; // NOI18N
@@ -51,7 +52,7 @@ public final class BladeDirectivesUtils {
     public static String[] blockDirectiveEndings(String directive) {
 
         if (directive.equals(DIRECTIVE_SECTION)) {
-            return new String[]{DIRECTIVE_ENDSECTION, DIRECTIVE_SHOW, DIRECTIVE_STOP, DIRECTIVE_APPEND};
+            return new String[]{DIRECTIVE_ENDSECTION, DIRECTIVE_SHOW, DIRECTIVE_STOP, DIRECTIVE_APPEND, DIRECTIVE_OVERWRITE};
         }
         
         DirectivesList listClass = new DirectivesList();
@@ -81,7 +82,8 @@ public final class BladeDirectivesUtils {
             case DIRECTIVE_ENDSECTION:
             case DIRECTIVE_APPEND:
             case DIRECTIVE_STOP:
-            case DIRECTIVE_SHOW: {
+            case DIRECTIVE_SHOW:
+            case DIRECTIVE_OVERWRITE: {
                 return new String[]{DIRECTIVE_SECTION};
             }
         }
