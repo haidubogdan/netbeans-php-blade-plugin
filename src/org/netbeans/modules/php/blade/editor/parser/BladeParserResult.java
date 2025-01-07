@@ -103,7 +103,7 @@ public class BladeParserResult extends ParserResult {
             }
 
             //avoid on index
-            if (!taskClass.toLowerCase().contains(".indexing.Repository")) { //NOI18N
+            if (!taskClass.toLowerCase().contains(".indexing.repository")) { //NOI18N
                 parser.addParseListener(new StructureListener(structure, folds, getFileObject()));
             }
 

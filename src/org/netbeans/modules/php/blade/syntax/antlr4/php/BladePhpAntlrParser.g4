@@ -139,14 +139,17 @@ argument:
     ;
 
 array:
-   PHP_VARIABLE array_key_item*
+   PHP_VARIABLE array_key_item+
    | array_key_item
 ;
 
 array_key_item:
      '[' array_key_item* ']'
+    | 'array' '(' array_key_item* ')'
     | '[' (array_child '=>' array_key_item)+ ']'
+    | 'array' '(' (array_child '=>' array_key_item)+ ')'
     | '[' array_child (',' array_child)* ','? ']'
+    | 'array' '(' array_child (',' array_child)* ','? ')'
 ;
 
 array_child:
