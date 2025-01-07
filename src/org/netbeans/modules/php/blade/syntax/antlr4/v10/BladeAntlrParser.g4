@@ -111,7 +111,7 @@ multipleArgDirective :
 ;
 
 blockIdentifiableArgDirective : 
-    D_SECTION '(' IDENTIFIABLE_STRING? ')' D_PARENT? statement* (D_SHOW | D_STOP | D_OVERWRITE | D_ENDSECTION | D_APPEND)
+    D_SECTION '(' IDENTIFIABLE_STRING? ')' D_PARENT? statement* D_PARENT? (D_SHOW | D_STOP | D_OVERWRITE | D_ENDSECTION | D_APPEND)
     | D_HAS_SECTION '(' IDENTIFIABLE_STRING? ')' statement* D_ENDIF
     | D_SECTION_MISSING '(' IDENTIFIABLE_STRING? ')' statement* D_ENDIF
     | D_PUSH '(' IDENTIFIABLE_STRING? ')' statement* D_ENDPUSH
@@ -169,7 +169,7 @@ foreachLoopArguments : '(' main_array=FOREACH_VAR 'as' array_item=FOREACH_VAR (F
     | '(' (FOREACH_VAR)* 'as' (FOREACH_VAR)* (FOREACH_DOUBLE_ARROW FOREACH_VAR*)? ')';//unscanable loop
 
 phpInline:
-    PHP_INLINE_START phpInlineEnd=(PHP_INLINE_EXIT | PHP_INLINE_EOF);
+    PHP_INLINE_START phpInlineEnd=(PHP_INLINE_EXIT | EOF);
 
 htmlComponentOpenTag:
     HTML_COMPONENT_OPEN_TAG;
