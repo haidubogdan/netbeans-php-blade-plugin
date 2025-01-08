@@ -87,7 +87,13 @@ Experimental formatting and indenting
 **blade components**
 
 - Limited completion and declaration finder
+  
+  ![image](https://github.com/user-attachments/assets/5e6d19d4-f294-4da9-bc36-8b853fd8bb63)
+
 - Config to set paths of the components class implementation for autocomplete & declaration finder.
+
+![image](https://github.com/user-attachments/assets/4b143b75-81ad-4ec4-b50a-b262aad6089d)
+
 
 ---
 

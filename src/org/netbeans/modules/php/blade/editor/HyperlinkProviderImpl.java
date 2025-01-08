@@ -158,7 +158,7 @@ public class HyperlinkProviderImpl implements HyperlinkProviderExt {
 
     @Override
     public void performClickAction(Document doc, int offset, HyperlinkType type) {
-        if (type.equals(GO_TO_DECLARATION)) {
+        if (!type.equals(GO_TO_DECLARATION)) {
             return;
         }
         if (viewMethodSet.contains(methodName)) {
