@@ -55,8 +55,8 @@ import org.openide.util.RequestProcessor;
     @Namespace(path = "App\\Http\\Livewire", from_app = true, relativeFilePath = "app/Http/Livewire"),
     @Namespace(path = "App\\Livewire", from_app = true, relativeFilePath = "app/Livewire"),//from 10
     @Namespace(path = "Illuminate\\Console\\View\\Components"),
-    @Namespace(path = "BladeUI\\Icons\\Components", packageName = "blade-ui-kit/blade-icons"),
-    @Namespace(path = "BladeUIKit\\Components", packageName = "blade-ui-kit/blade-ui-kit"),})
+    @Namespace(path = "BladeUI\\Icons\\Components", packageName = "blade-ui-kit/blade-icons", relativeFilePath = "blade-ui-kit/blade-icons/src/Components"),
+    @Namespace(path = "BladeUIKit\\Components", packageName = "blade-ui-kit/blade-ui-kit", relativeFilePath = "blade-ui-kit/blade-ui-kit/src/Components"),})
 public class ComponentsSupport {
 
     private static final Map<Project, ComponentsSupport> INSTANCES = new HashMap<>();
@@ -85,11 +85,11 @@ public class ComponentsSupport {
 
     public void scanForInstalledComponents() {
         for (Namespace namespace : getRegisteredNamespaces()) {
-            FileObject fo;
+            FileObject fo = null;
             if (namespace.from_app()) {
                 //check if folder exists
                 fo = project.getProjectDirectory().getFileObject(namespace.relativeFilePath());
-            } else {
+            } else if (namespace.relativeFilePath() != null && namespace.relativeFilePath().length() > 0) {
                 fo = project.getProjectDirectory().getFileObject("vendor/" + namespace.relativeFilePath()); // NOI18N
 
             }

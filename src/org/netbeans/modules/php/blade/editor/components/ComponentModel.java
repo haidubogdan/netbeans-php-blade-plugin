@@ -43,7 +43,7 @@ public class ComponentModel {
     }
     
     public void checkClassValidity(String className){
-        isValid = className.equals("Component");
+        isValid = className.equals("Component") || className.equals("BladeComponent"); // NOI18N
     }
     
     public void addConstructorProperty(FormalParameter property){
