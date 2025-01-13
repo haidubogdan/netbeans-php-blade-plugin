@@ -43,8 +43,8 @@ public final class BladeProjectProperties {
     private static final String NON_LARAVEL_DECL_FINDER = "non_laravel.decl.finder"; // NOI18N
     private final Project project;
 
-    DefaultListModel<String> directiveCustomizerPathList = new DefaultListModel();
-    DefaultListModel<String> viewsPathList = new DefaultListModel();
+    private DefaultListModel<String> directiveCustomizerPathList = new DefaultListModel();
+    private DefaultListModel<String> viewsPathList = new DefaultListModel();
     private DefaultListModel<String> bladeComponentsClassFolderList = new DefaultListModel();
     // enable declaration finder outside of framework plugin
     private final AtomicBoolean nonLaravelDeclFinder = new AtomicBoolean(false);

@@ -19,6 +19,7 @@
 package org.netbeans.modules.php.blade.csl.elements;
 
 import java.util.List;
+import org.netbeans.api.annotations.common.NullAllowed;
 import org.netbeans.modules.csl.api.ElementKind;
 import org.openide.filesystems.FileObject;
 
@@ -28,8 +29,9 @@ import org.openide.filesystems.FileObject;
  */
 public class PhpFunctionElement extends NamedElement {
 
-    public final List<String> params;
-    public final String namespace;
+    @NullAllowed
+    private final List<String> params;
+    private final String namespace;
 
     public PhpFunctionElement(String name, FileObject file,
             ElementType type,
@@ -51,6 +53,10 @@ public class PhpFunctionElement extends NamedElement {
     @Override
     public ElementKind getKind() {
         return ElementKind.METHOD;
+    }
+    
+    public String getNamespace(){
+        return namespace;
     }
 
     public String getParamsAsString() {

@@ -29,6 +29,7 @@ import org.netbeans.modules.csl.api.HintSeverity;
 import org.netbeans.modules.csl.api.HintsProvider;
 import org.netbeans.modules.csl.api.Rule;
 import org.netbeans.modules.csl.api.RuleContext;
+import org.openide.util.NbBundle;
 
 /**
  *
@@ -77,11 +78,11 @@ public class UnknownDirective implements Rule.AstRule {
 
     @Override
     public String getDescription() {
-       return "Unknown Directive. The directive my not be in the base laravel blade compiler and was not found in the custom list."; //NOI18N
+       return NbBundle.getMessage(UnknownDirective.class, "AST_Rule_UnknownDirectiveDescription"); //NOI18N
     }
 
     @Override
     public String getDisplayName() {
-        return "Unknown Directive"; //NOI18N
+        return NbBundle.getMessage(UnknownDirective.class, "AST_Rule_UnknownDirective"); //NOI18N
     }
 }

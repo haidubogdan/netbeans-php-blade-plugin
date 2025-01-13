@@ -8,14 +8,14 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.Token;
-import org.netbeans.modules.php.blade.syntax.antlr4.utils.BladeAntlrUtils;
+import org.netbeans.modules.php.blade.syntax.antlr4.utils.BaseBladeAntlrUtils;
 import org.netbeans.spi.lexer.antlr4.AntlrTokenSequence;
 
 /**
  *
  * @author bogdan
  */
-public final class BladeHtmlAntlrUtils extends BladeAntlrUtils {
+public final class BladeHtmlAntlrUtils extends BaseBladeAntlrUtils {
 
     public static AntlrTokenSequence getTokens(Document doc) {
 

@@ -86,6 +86,8 @@ public class BladeSemanticAnalyzer extends SemanticAnalyzer<BladeParserResult> {
         FileObject fo = parserResult.getFileObject();
         Project project = ProjectUtils.getMainOwner(fo);
         CustomDirectives ct = CustomDirectives.getInstance(project);
+        
+        //highlight custom directives which are not found in the project configuration
         for (Map.Entry<OffsetRange, String> entry : parserResult.getBladeCustomDirectiveOccurences().getAll().entrySet()) {
             if (ct.customDirectiveConfigured(entry.getValue()) ) {
                 highlights.put(entry.getKey(), CUSTOM_DIRECTIVE_SET);

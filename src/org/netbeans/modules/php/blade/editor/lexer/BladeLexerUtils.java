@@ -38,10 +38,29 @@ public final class BladeLexerUtils {
     private BladeLexerUtils() {
 
     }
+    
+    public static TokenSequence<PHPTokenId> getLockedPhpTokenSequence(Document doc, int offset) {
+        BaseDocument baseDoc = (BaseDocument) doc;
+        TokenSequence<PHPTokenId> tokenSequence = null;
+        baseDoc.readLock();
+        try {
+            TokenHierarchy<Document> hierarchy = TokenHierarchy.get(baseDoc);
+            tokenSequence = hierarchy.tokenSequence(PHPTokenId.language());
+        } finally {
+            baseDoc.readUnlock();
+        }
+        if (tokenSequence != null) {
+            tokenSequence.move(offset);
+            tokenSequence.moveNext();
+        }
+        return tokenSequence;
+
+    }
 
     public static TokenSequence<? extends PHPTokenId> getPhpTokenSequence(TokenHierarchy<Document> th, final int offset) {
         return getTokenSequence(th, offset, PHPTokenId.language());
     }
+    
 
     public static TokenSequence<? extends PHPTokenId> getPhpTokenSequence(final Document document, final int offset) {
         TokenHierarchy<Document> th = TokenHierarchy.get(document);

@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Set;
 import javax.swing.ImageIcon;
 import org.netbeans.api.annotations.common.NonNull;
+import org.netbeans.api.annotations.common.NullAllowed;
 import org.netbeans.api.project.Project;
 import org.netbeans.modules.csl.api.CompletionProposal;
 import org.netbeans.modules.csl.api.ElementHandle;
@@ -95,8 +96,8 @@ public class PhpCodeCompletionService {
         PhpKeywordList keywordList = new PhpKeywordList();
         for (PhpKeyword keyword : keywordList.getKeywords()) {
             if (keyword.name().startsWith(prefix)) {
-                PhpKeywordElement keywordEl = new PhpKeywordElement(keyword.name(), null);
-                completionProposals.add(new PhpKeywordProposal(keywordEl, caretOffset, prefix));
+                PhpKeywordElement keywordEl = new PhpKeywordElement(keyword.name());
+                completionProposals.add(new PhpKeywordProposal(keywordEl, caretOffset));
             }
         }
     }
@@ -279,6 +280,7 @@ public class PhpCodeCompletionService {
 
         private final ElementHandle element;
         private final int anchorOffset;
+        @NullAllowed
         private final String description;
 
         public PhpCompletionProposal(ElementHandle element, int anchorOffset, String description) {
@@ -340,7 +342,7 @@ public class PhpCodeCompletionService {
 
         @Override
         public String getRhsHtml(HtmlFormatter formatter) {
-            return "";
+            return ""; // NOI18N
         }
 
         @Override
@@ -361,8 +363,8 @@ public class PhpCodeCompletionService {
 
     public static class PhpKeywordProposal extends PhpCompletionProposal {
 
-        public PhpKeywordProposal(ElementHandle element, int anchorOffset, String description) {
-            super(element, anchorOffset, description);
+        public PhpKeywordProposal(ElementHandle element, int anchorOffset) {
+            super(element, anchorOffset, null);
         }
 
     }

@@ -48,8 +48,16 @@ import org.openide.util.RequestProcessor;
 
 /**
  *
+ * Laravel Project support for blade components
+ * 
+ * At the first action request for a blade component tag completion or decl finder the scan for blade components configuration will be triggered.
+ * 
+ * The usage of ComponentModels collection is to have information about the file and custom attributes
+ * 
  * @author bogdan
  */
+
+//list of most common laravel framework directory paths for blade components classes
 @NamespaceRegister({
     @Namespace(path = "App\\View\\Components", from_app = true, relativeFilePath = "app/View/Components"),
     @Namespace(path = "App\\Http\\Livewire", from_app = true, relativeFilePath = "app/Http/Livewire"),

@@ -1,4 +1,4 @@
-// Generated from BladeAntlrFormatterParser.g4 by ANTLR 4.13.2
+// Generated from BladeAntlrFormatterParser.g4 by ANTLR 4.13.0
 
   package org.netbeans.modules.php.blade.syntax.antlr4.formatter;
 
@@ -11,9 +11,9 @@ import java.util.List;
 import java.util.Iterator;
 import java.util.ArrayList;
 
-@SuppressWarnings({"all", "warnings", "unchecked", "unused", "cast", "CheckReturnValue", "this-escape"})
+@SuppressWarnings({"all", "warnings", "unchecked", "unused", "cast", "CheckReturnValue"})
 public class BladeAntlrFormatterParser extends Parser {
-	static { RuntimeMetaData.checkVersion("4.13.2", RuntimeMetaData.VERSION); }
+	static { RuntimeMetaData.checkVersion("4.13.0", RuntimeMetaData.VERSION); }
 
 	protected static final DFA[] _decisionToDFA;
 	protected static final PredictionContextCache _sharedContextCache =

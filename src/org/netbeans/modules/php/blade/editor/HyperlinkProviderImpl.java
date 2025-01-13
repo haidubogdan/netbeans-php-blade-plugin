@@ -34,7 +34,7 @@ import org.netbeans.api.lexer.TokenSequence;
 import org.netbeans.api.project.Project;
 import org.netbeans.editor.BaseDocument;
 import static org.netbeans.lib.editor.hyperlink.spi.HyperlinkType.GO_TO_DECLARATION;
-import org.netbeans.modules.php.blade.editor.lexer.EditorUtils;
+import org.netbeans.modules.php.blade.editor.lexer.BladeLexerUtils;
 import org.netbeans.modules.php.blade.editor.path.BladePathUtils;
 import org.netbeans.modules.php.blade.project.BladeProjectProperties;
 import org.netbeans.modules.php.editor.lexer.PHPTokenId;
@@ -57,8 +57,8 @@ public class HyperlinkProviderImpl implements HyperlinkProviderExt {
     private String tooltipText = ""; // NOI18N
     private FileObject goToFile;
     private int goToOffset = 0;
-    private int triggeredEvent = 0;
-    public static int MIN_STRING_IDENTIIFER_LENGTH = 5;
+    public static final int MIN_STRING_IDENTIIFER_LENGTH = 5;
+    public static final String FILE_TITLE = "Blade Template File"; // NOI18N
 
     String[] viewMethods = new String[]{"view", "render", "make"}; // NOI18N
     Set<String> viewMethodSet = new HashSet<>(Arrays.asList(viewMethods));
@@ -92,7 +92,7 @@ public class HyperlinkProviderImpl implements HyperlinkProviderExt {
 
         BaseDocument baseDoc = (BaseDocument) doc;
         int lineStart = LineDocumentUtils.getLineStart(baseDoc, offset);
-        TokenSequence<PHPTokenId> tokensq = EditorUtils.getTokenSequence(doc, offset);
+        TokenSequence<PHPTokenId> tokensq = BladeLexerUtils.getLockedPhpTokenSequence(doc, offset);
 
         if (tokensq == null) {
             return null;
@@ -128,7 +128,7 @@ public class HyperlinkProviderImpl implements HyperlinkProviderExt {
                 //tooltip text
 
                 if (viewMethodSet.contains(methodName)) {
-                    FileObject currentFile = EditorUtils.getFileObjectFromDoc(doc);
+                    FileObject currentFile = FileSystemUtils.getFileObjectFromDoc(doc);
 
                     if (currentFile == null) {
                         return null;
@@ -138,7 +138,7 @@ public class HyperlinkProviderImpl implements HyperlinkProviderExt {
 
                     for (FileObject includedFile : includedFiles) {
                         goToFile = includedFile;
-                        tooltipText = "Blade Template File : <b>" + viewPath // NOI18N
+                        tooltipText = FILE_TITLE + " File : <b>" + viewPath // NOI18N
                                 + "</b><br><br><i style='margin-left:20px;'>" + identifiableText + "</i>"; // NOI18N
                         goToOffset = 0;
                         break;
@@ -164,7 +164,6 @@ public class HyperlinkProviderImpl implements HyperlinkProviderExt {
         if (viewMethodSet.contains(methodName)) {
             if (goToFile != null) {
                 openDocument(goToFile, goToOffset);
-                triggeredEvent++;
             }
         }
     }
@@ -186,7 +185,7 @@ public class HyperlinkProviderImpl implements HyperlinkProviderExt {
     }
 
     private boolean nonLaravelDeclFinderEnabled(Document doc) {
-        Project projectOwner = EditorUtils.getProjectOwner(doc);
+        Project projectOwner = FileSystemUtils.getProjectOwner(doc);
         if (projectOwner == null) {
             return false;
         }

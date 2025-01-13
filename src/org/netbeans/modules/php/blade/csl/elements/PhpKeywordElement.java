@@ -36,7 +36,7 @@ public class PhpKeywordElement implements ElementHandle {
 
     private final String name;
     
-    public PhpKeywordElement(String name, String description){
+    public PhpKeywordElement(String name){
         this.name = name;
     }
     

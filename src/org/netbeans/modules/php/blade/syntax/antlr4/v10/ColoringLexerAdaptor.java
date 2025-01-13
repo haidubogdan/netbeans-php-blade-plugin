@@ -14,6 +14,8 @@ import org.antlr.v4.runtime.Token;
 public abstract class ColoringLexerAdaptor extends Lexer {
 
     public int rParenBalance = 0;
+    public int compAttrQuoteBalance = 0;
+    public boolean insideComponentTag = false;
 
     public ColoringLexerAdaptor(CharStream input) {
         super(input);
@@ -22,6 +24,8 @@ public abstract class ColoringLexerAdaptor extends Lexer {
     @Override
     public void reset() {
         rParenBalance = 0;
+        compAttrQuoteBalance = 0;
+        insideComponentTag = false;
         super.reset();
     }
 

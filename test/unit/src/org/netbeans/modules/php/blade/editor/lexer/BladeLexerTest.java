@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.netbeans.modules.php.blade.lexer;
+package org.netbeans.modules.php.blade.editor.lexer;
 
 import java.io.File;
 import org.netbeans.api.lexer.TokenHierarchy;
@@ -24,7 +24,6 @@ import org.netbeans.api.lexer.Language;
 import org.netbeans.api.lexer.TokenSequence;
 import org.netbeans.modules.php.blade.editor.BladeLanguage;
 import org.netbeans.modules.php.blade.editor.BladeUtils;
-import org.netbeans.modules.php.blade.editor.lexer.BladeTokenId;
 
 /**
  *
@@ -95,9 +94,17 @@ public class BladeLexerTest extends BladeLexerTestBase {
     public void testIssue18() throws Exception {
         performTest("issues/issue18");
     }
+
+    public void testIssue62() throws Exception {
+        performTest("issues/issue62");
+    }
     
     public void testIssue67() throws Exception {
         performTest("issues/issue67");
+    }
+    
+    public void testForeachSyntaxError() throws Exception {
+        performTest("issues/foreach_syntax_error");
     }
     
     @Override

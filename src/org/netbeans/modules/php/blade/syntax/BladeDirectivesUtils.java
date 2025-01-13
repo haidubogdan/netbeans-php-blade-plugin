@@ -30,6 +30,7 @@ import org.netbeans.modules.php.blade.syntax.annotation.Directive;
  */
 public final class BladeDirectivesUtils {
 
+    public static final String AT = "@"; // NOI18N
     public static final String END_DIRECTIVE_PREFIX = "@end"; // NOI18N
     public static final String DIRECTIVE_SECTION = "@section"; // NOI18N
     public static final String DIRECTIVE_HAS_SECTION = "@hasSection"; // NOI18N

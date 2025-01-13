@@ -1,9 +1,23 @@
-// Generated from BladeAntlrParser.g4 by ANTLR 4.13.2
+// Generated from BladeAntlrParser.g4 by ANTLR 4.13.0
 
-  /**
-   * Parser generated for netbeans blade editor
-   * Php expression syntax is handled seprately
-   */
+ /*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
   package org.netbeans.modules.php.blade.syntax.antlr4.v10;
 
 import org.antlr.v4.runtime.atn.*;
@@ -15,9 +29,9 @@ import java.util.List;
 import java.util.Iterator;
 import java.util.ArrayList;
 
-@SuppressWarnings({"all", "warnings", "unchecked", "unused", "cast", "CheckReturnValue", "this-escape"})
+@SuppressWarnings({"all", "warnings", "unchecked", "unused", "cast", "CheckReturnValue"})
 public class BladeAntlrParser extends Parser {
-	static { RuntimeMetaData.checkVersion("4.13.2", RuntimeMetaData.VERSION); }
+	static { RuntimeMetaData.checkVersion("4.13.0", RuntimeMetaData.VERSION); }
 
 	protected static final DFA[] _decisionToDFA;
 	protected static final PredictionContextCache _sharedContextCache =
@@ -57,9 +71,9 @@ public class BladeAntlrParser extends Parser {
 		MIXED_S_A_RCURLYBRACE=150, MIXED_S_A_OTHER=151, FOREACH_LPAREN=152, FOREACH_RPAREN=153, 
 		FOREACH_LSQUAREBRACKET=154, FOREACH_RSQUAREBRACKET=155, FOREACH_LCURLYBRACE=156, 
 		FOREACH_RCURLYBRACE=157, FOREACH_VAR=158, FOREACH_AS=159, FOREACH_DOUBLE_ARROW=160, 
-		FOREACH_OTHER=161, D_ENDPHP=162, BLADE_INLINE_PHP_OTHER=163, VERBATIM_HTML=164, 
-		PHP_INLINE_EXIT=165, PHP_INLINE_OTHER=166, PHP_INLINE_EOF=167, BLADE_COMMENT_END=168, 
-		BLADE_COMMENT_MORE=169, BLADE_COMMENT_EOF=170;
+		FOREACH_DENTIFIER=161, FOREACH_OTHER=162, D_ENDPHP=163, BLADE_INLINE_PHP_OTHER=164, 
+		VERBATIM_HTML=165, PHP_INLINE_EXIT=166, PHP_INLINE_OTHER=167, PHP_INLINE_EOF=168, 
+		BLADE_COMMENT_END=169, BLADE_COMMENT_MORE=170, BLADE_COMMENT_EOF=171;
 	public static final int
 		RULE_file = 0, RULE_statement = 1, RULE_blockDirective = 2, RULE_ifStatement = 3, 
 		RULE_foreachStatement = 4, RULE_forStatement = 5, RULE_forElseStatement = 6, 
@@ -103,8 +117,8 @@ public class BladeAntlrParser extends Parser {
 			null, null, null, null, null, null, null, null, null, null, null, null, 
 			null, null, null, null, null, null, null, null, null, null, null, null, 
 			null, null, null, null, null, null, null, null, null, null, null, null, 
-			null, null, "'as'", "'=>'", null, "'@endphp'", null, null, "'?>'", null, 
-			null, "'--}}'"
+			null, null, "'as'", "'=>'", null, null, "'@endphp'", null, null, "'?>'", 
+			null, null, "'--}}'"
 		};
 	}
 	private static final String[] _LITERAL_NAMES = makeLiteralNames();
@@ -142,9 +156,9 @@ public class BladeAntlrParser extends Parser {
 			"MIXED_S_A_LCURLYBRACE", "MIXED_S_A_RCURLYBRACE", "MIXED_S_A_OTHER", 
 			"FOREACH_LPAREN", "FOREACH_RPAREN", "FOREACH_LSQUAREBRACKET", "FOREACH_RSQUAREBRACKET", 
 			"FOREACH_LCURLYBRACE", "FOREACH_RCURLYBRACE", "FOREACH_VAR", "FOREACH_AS", 
-			"FOREACH_DOUBLE_ARROW", "FOREACH_OTHER", "D_ENDPHP", "BLADE_INLINE_PHP_OTHER", 
-			"VERBATIM_HTML", "PHP_INLINE_EXIT", "PHP_INLINE_OTHER", "PHP_INLINE_EOF", 
-			"BLADE_COMMENT_END", "BLADE_COMMENT_MORE", "BLADE_COMMENT_EOF"
+			"FOREACH_DOUBLE_ARROW", "FOREACH_DENTIFIER", "FOREACH_OTHER", "D_ENDPHP", 
+			"BLADE_INLINE_PHP_OTHER", "VERBATIM_HTML", "PHP_INLINE_EXIT", "PHP_INLINE_OTHER", 
+			"PHP_INLINE_EOF", "BLADE_COMMENT_END", "BLADE_COMMENT_MORE", "BLADE_COMMENT_EOF"
 		};
 	}
 	private static final String[] _SYMBOLIC_NAMES = makeSymbolicNames();
@@ -4072,7 +4086,7 @@ public class BladeAntlrParser extends Parser {
 	}
 
 	public static final String _serializedATN =
-		"\u0004\u0001\u00aa\u0300\u0002\u0000\u0007\u0000\u0002\u0001\u0007\u0001"+
+		"\u0004\u0001\u00ab\u0300\u0002\u0000\u0007\u0000\u0002\u0001\u0007\u0001"+
 		"\u0002\u0002\u0007\u0002\u0002\u0003\u0007\u0003\u0002\u0004\u0007\u0004"+
 		"\u0002\u0005\u0007\u0005\u0002\u0006\u0007\u0006\u0002\u0007\u0007\u0007"+
 		"\u0002\b\u0007\b\u0002\t\u0007\t\u0002\n\u0007\n\u0002\u000b\u0007\u000b"+
@@ -4192,7 +4206,7 @@ public class BladeAntlrParser extends Parser {
 		"\u0004\u0006\b\n\f\u000e\u0010\u0012\u0014\u0016\u0018\u001a\u001c\u001e"+
 		" \"$&(*,.024\u0000\b\u0002\u0000\u0006\u0006ee\u0001\u0000\u001b\u001c"+
 		"\u0001\u0000\u001d\u001e\u0002\u0000%%\'*\u0002\u0000\u001a\u001b!!\u0001"+
-		"\u0000>?\u0002\u0000\u0010\u0010MM\u0001\u0001\u00a5\u00a5\u038a\u0000"+
+		"\u0000>?\u0002\u0000\u0010\u0010MM\u0001\u0001\u00a6\u00a6\u038a\u0000"+
 		"9\u0001\u0000\u0000\u0000\u0002K\u0001\u0000\u0000\u0000\u0004\u0107\u0001"+
 		"\u0000\u0000\u0000\u0006\u0109\u0001\u0000\u0000\u0000\b\u011e\u0001\u0000"+
 		"\u0000\u0000\n\u0129\u0001\u0000\u0000\u0000\f\u0134\u0001\u0000\u0000"+
@@ -4382,7 +4396,7 @@ public class BladeAntlrParser extends Parser {
 		"\u0000\u016a\u0163\u0001\u0000\u0000\u0000\u016a\u016b\u0001\u0000\u0000"+
 		"\u0000\u016b\u016c\u0001\u0000\u0000\u0000\u016c\u016d\u0005\u0019\u0000"+
 		"\u0000\u016d\u0013\u0001\u0000\u0000\u0000\u016e\u016f\u0005\u000b\u0000"+
-		"\u0000\u016f\u0170\u0005\u00a2\u0000\u0000\u0170\u0015\u0001\u0000\u0000"+
+		"\u0000\u016f\u0170\u0005\u00a3\u0000\u0000\u0170\u0015\u0001\u0000\u0000"+
 		"\u0000\u0171\u0172\u0005\\\u0000\u0000\u0172\u0178\u0003.\u0017\u0000"+
 		"\u0173\u0174\u0005\u000b\u0000\u0000\u0174\u0178\u0003.\u0017\u0000\u0175"+
 		"\u0178\u0005\u0004\u0000\u0000\u0176\u0178\u0005^\u0000\u0000\u0177\u0171"+

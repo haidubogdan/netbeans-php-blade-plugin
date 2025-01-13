@@ -16,29 +16,24 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.netbeans.modules.php.blade.lexer;
+package org.netbeans.modules.php.blade.editor.completion;
 
-import org.netbeans.modules.php.blade.editor.BladeGoldenFileTestBase;
-
+import org.netbeans.modules.php.blade.editor.parser.ParserTestBase;
 /**
  *
  * @author bogdan
  */
-public abstract class BladeLexerTestBase extends BladeGoldenFileTestBase {
+public class BladeCompletionTest extends ParserTestBase {
 
-    public BladeLexerTestBase(String testName) {
+    public BladeCompletionTest(String testName) {
         super(testName);
     }
-
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-        clearWorkDir();
+    
+    public void testCompletion_01() throws Exception {
+        checkCompletion("testfiles/completion/testCompletion_01.blade.php", "@^", false);
     }
-
-    @Override
-    protected void tearDown() throws Exception {
-        super.tearDown();
+    
+    public void testCompletion_loop_endtag_01() throws Exception {
+        checkCompletion("testfiles/completion/testCompletion_loop_endtag_01.blade.php", "@endfor^", false);
     }
-
 }

@@ -22,19 +22,20 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
 
-
 /**
  *
  * @author bhaidu
  */
 public class UiOptionsUtils {
-    
+
+    public static final String FILE_ITEM_SEPARATOR = "|";
+
     public static String encodeToStrings(Enumeration<String> list) {
         List<String> result = new ArrayList<>();
         while (list.hasMoreElements()) {
             result.add(list.nextElement());
         }
 
-        return String.join("|", result);
+        return String.join(FILE_ITEM_SEPARATOR, result);
     }
 }

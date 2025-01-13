@@ -1,4 +1,4 @@
-// Generated from BladeAntlrFormatterLexer.g4 by ANTLR 4.13.2
+// Generated from BladeAntlrFormatterLexer.g4 by ANTLR 4.13.0
 
   package org.netbeans.modules.php.blade.syntax.antlr4.formatter;
 
@@ -11,9 +11,9 @@ import org.antlr.v4.runtime.atn.*;
 import org.antlr.v4.runtime.dfa.DFA;
 import org.antlr.v4.runtime.misc.*;
 
-@SuppressWarnings({"all", "warnings", "unchecked", "unused", "cast", "CheckReturnValue", "this-escape"})
+@SuppressWarnings({"all", "warnings", "unchecked", "unused", "cast", "CheckReturnValue"})
 public class BladeAntlrFormatterLexer extends LexerAdaptor {
-	static { RuntimeMetaData.checkVersion("4.13.2", RuntimeMetaData.VERSION); }
+	static { RuntimeMetaData.checkVersion("4.13.0", RuntimeMetaData.VERSION); }
 
 	protected static final DFA[] _decisionToDFA;
 	protected static final PredictionContextCache _sharedContextCache =

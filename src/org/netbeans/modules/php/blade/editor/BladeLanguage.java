@@ -66,7 +66,7 @@ import org.netbeans.modules.php.blade.syntax.StringUtils;
 @NbBundle.Messages({
     "LBL_Blade_LOADER=Blade template files"
 })
-@LanguageRegistration(mimeType = "text/x-blade", useMultiview = true)
+@LanguageRegistration(mimeType = BladeLanguage.MIME_TYPE, useMultiview = true)
 @ActionReferences({
     @ActionReference(id = @ActionID(category = "System", id = "org.openide.actions.OpenAction"), path = ACTIONS, position = 100),
     @ActionReference(id = @ActionID(category = "Edit", id = "org.openide.actions.CutAction"), path = ACTIONS, position = 300, separatorBefore = 200),
@@ -81,7 +81,7 @@ import org.netbeans.modules.php.blade.syntax.StringUtils;
     @ActionReference(id = @ActionID(category = "System", id = "org.openide.actions.PropertiesAction"), path = ACTIONS, position = 1600),
     @ActionReference(id = @ActionID(category = "TemplateActions", id = "org.netbeans.modules.php.blade.editor.actions.FindUsage"),
             path = ACTIONS, separatorBefore = 1700, position = 1800),
-    @ActionReference(id = @ActionID(category = "System", id = "org.netbeans.modules.php.blade.editor.actions.AntlrDebug"), path = ACTIONS, position = 1900), //    @ActionReference(id = @ActionID(category = "DebugAntlrActions", id = "org.netbeans.modules.php.blade.editor.actions.ViewAntlrLexerTokens"), path = ACTIONS, position = 2000),
+    @ActionReference(id = @ActionID(category = "System", id = "org.netbeans.modules.php.blade.editor.actions.AntlrDebug"), path = ACTIONS, position = 1900),
 }
 )
 public class BladeLanguage extends DefaultLanguageConfig {
@@ -90,8 +90,10 @@ public class BladeLanguage extends DefaultLanguageConfig {
         super();
     }
 
-    public static final String ACTIONS = "Loaders/" + BladeLanguage.MIME_TYPE + "/Actions"; //NOI18N
     public static final String MIME_TYPE = "text/x-blade"; //NOI18N
+    
+    public static final String ACTIONS = "Loaders/" + BladeLanguage.MIME_TYPE + "/Actions"; //NOI18N
+    
     public static final String FILE_EXTENSION_SUFFIX = ".blade"; //NOI18N
     public static final String FILE_EXTENSION = "blade.php"; //NOI18N
     public static final String FILE_EXTENSION_WITH_DOT = StringUtils.DOT + FILE_EXTENSION;

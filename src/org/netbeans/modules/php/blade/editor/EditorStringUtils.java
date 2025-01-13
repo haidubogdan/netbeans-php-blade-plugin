@@ -25,6 +25,7 @@ package org.netbeans.modules.php.blade.editor;
 public final class EditorStringUtils {
 
     public static final String NAMESPACE_SEPARATOR = "\\"; // NOI18N
+    public static final String DB_QUOTE = "\"";
 
     private EditorStringUtils() {
     }
@@ -34,7 +35,7 @@ public final class EditorStringUtils {
             return false;
         }
         return (text.startsWith("'") && text.endsWith("'")) // NOI18N
-                || (text.startsWith("\"") && text.endsWith("\"")); // NOI18N
+                || (text.startsWith(DB_QUOTE) && text.endsWith(DB_QUOTE)); // NOI18N
     }
 
     public static String stripSurroundingQuotes(String text) {

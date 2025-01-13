@@ -58,12 +58,12 @@ public abstract class DirectiveStructureItem extends BladeStructureItem {
     public String getHtml(HtmlFormatter formatter) {
         formatter.appendText(getName());
         if (getDirectiveIdentiferArg() != null) {
-            formatter.appendText(" ");
-            formatter.appendHtml("<em>");
-            formatter.appendHtml("<font color='5b5b5b'>");
+            formatter.appendText(" "); //NOI18N
+            formatter.appendHtml("<em>"); //NOI18N
+            formatter.appendHtml("<font color='5b5b5b'>"); //NOI18N
             formatter.appendText(getDirectiveIdentiferArg());
-            formatter.appendHtml("</font>");
-            formatter.appendHtml("</em>");
+            formatter.appendHtml("</font>"); //NOI18N
+            formatter.appendHtml("</em>"); //NOI18N
         }
         return formatter.getText();
     }

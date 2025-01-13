@@ -28,7 +28,9 @@ import org.netbeans.modules.php.blade.syntax.annotation.PhpKeywordRegister;
 @PhpKeywordRegister({
     //conditionals
     @PhpKeyword(name = "empty", parenExpr = true),
+    @PhpKeyword(name = "isset", parenExpr = true),
     @PhpKeyword(name = "class"),
+    @PhpKeyword(name = "echo"),
 })
 public class PhpKeywordList {
 

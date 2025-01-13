@@ -16,16 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.netbeans.modules.php.blade.editor.lexer;
+package org.netbeans.modules.php.blade.editor;
 
 import javax.swing.text.Document;
-import org.netbeans.api.lexer.TokenHierarchy;
-import org.netbeans.api.lexer.TokenSequence;
 import org.netbeans.api.project.Project;
-import org.netbeans.editor.BaseDocument;
 import org.netbeans.modules.editor.NbEditorUtilities;
 import org.netbeans.modules.php.blade.project.ProjectUtils;
-import org.netbeans.modules.php.editor.lexer.PHPTokenId;
 import org.openide.filesystems.FileObject;
 import org.openide.loaders.DataObject;
 
@@ -33,24 +29,10 @@ import org.openide.loaders.DataObject;
  *
  * @author bogdan
  */
-public class EditorUtils {
-
-    public static TokenSequence<PHPTokenId> getTokenSequence(Document doc, int offset) {
-        BaseDocument baseDoc = (BaseDocument) doc;
-        TokenSequence<PHPTokenId> tokenSequence = null;
-        baseDoc.readLock();
-        try {
-            TokenHierarchy<Document> hierarchy = TokenHierarchy.get(baseDoc);
-            tokenSequence = hierarchy.tokenSequence(PHPTokenId.language());
-        } finally {
-            baseDoc.readUnlock();
-        }
-        if (tokenSequence != null) {
-            tokenSequence.move(offset);
-            tokenSequence.moveNext();
-        }
-        return tokenSequence;
-
+public final class FileSystemUtils {
+        
+    private FileSystemUtils() {
+        
     }
     
     public static FileObject getFileObjectFromDoc(Document doc) {

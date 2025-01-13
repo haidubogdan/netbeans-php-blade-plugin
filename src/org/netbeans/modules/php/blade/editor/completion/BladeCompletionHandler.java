@@ -51,6 +51,7 @@ import org.netbeans.modules.php.blade.csl.elements.NamedElement;
 import org.netbeans.modules.php.blade.csl.elements.PathElement;
 import org.netbeans.modules.php.blade.csl.elements.PhpFunctionElement;
 import org.netbeans.modules.php.blade.editor.BladeLanguage;
+import static org.netbeans.modules.php.blade.editor.EditorStringUtils.DB_QUOTE;
 import org.netbeans.modules.php.blade.editor.directives.CustomDirectives;
 import org.netbeans.modules.php.blade.editor.indexing.BladeIndex;
 import org.netbeans.modules.php.blade.editor.lexer.BladeLexerUtils;
@@ -116,9 +117,6 @@ public class BladeCompletionHandler implements CodeCompletionHandler2 {
         if (!ts.moveNext() && !ts.movePrevious()) {
             return CodeCompletionResult.NONE;
         }
-
-        org.netbeans.api.lexer.Token<BladeTokenId> token = ts.token();
-        BladeTokenId id = token.id();
 
         FileObject fo = parserResult.getSnapshot().getSource().getFileObject();
 
@@ -268,6 +266,11 @@ public class BladeCompletionHandler implements CodeCompletionHandler2 {
             String pathPrefix, FileObject fo, int offset) {
 
         FileObject projectDir = ProjectUtils.getProjectDirectory(fo);
+        
+        if (projectDir == null) {
+            return;
+        }
+
         FileObject resourceDir = projectDir.getFileObject(AssetsBundlerSupport.RESOURCE_ROOT);
 
         if (resourceDir == null) {
@@ -381,7 +384,7 @@ public class BladeCompletionHandler implements CodeCompletionHandler2 {
             if (tokenId.equals(BLADE_DIRECTIVE_UNKNOWN)) {
                 //sanitize adiacent emebedding hack to trigger blade completion
                 //ex: "@$caret" or @$caret>
-                if (tokenPrefix.endsWith("\"") || tokenPrefix.endsWith(">")) { // NOI18N
+                if (tokenPrefix.endsWith(DB_QUOTE) || tokenPrefix.endsWith(">")) { // NOI18N
                     return tokenPrefix.substring(0, tokenPrefix.length() - 1);
                 }
             }

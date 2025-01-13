@@ -85,16 +85,22 @@ public class BladeLexer extends AbstractAntlrLexerBridge<BladeAntlrColoringLexer
 
     private static class State extends AbstractAntlrLexerBridge.LexerState<BladeAntlrColoringLexer> {
         final int rParenBalance;
+        final int compAttrQuoteBalance;
+        final boolean insideComponentTag;
 
         public State(BladeAntlrColoringLexer lexer) {
             super(lexer);
             this.rParenBalance = lexer.rParenBalance;
+            this.compAttrQuoteBalance = lexer.compAttrQuoteBalance;
+            this.insideComponentTag = lexer.insideComponentTag;
         }
 
         @Override
         public void restore(BladeAntlrColoringLexer lexer) {
             super.restore(lexer);
             lexer.rParenBalance = rParenBalance;
+            lexer.compAttrQuoteBalance = compAttrQuoteBalance;
+            lexer.insideComponentTag = insideComponentTag;
         }
 
     }

@@ -1,4 +1,4 @@
-// Generated from BladePhpAntlrParser.g4 by ANTLR 4.13.2
+// Generated from BladePhpAntlrParser.g4 by ANTLR 4.13.0
 
   package org.netbeans.modules.php.blade.syntax.antlr4.php;
 

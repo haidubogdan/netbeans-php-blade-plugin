@@ -95,7 +95,7 @@ RAW_TAG_OPEN : '{!!' ->pushMode(INSIDE_RAW_ECHO),type(RAW_TAG);
 JS_COMMENT : LineComment->type(HTML);
 CSS_COMMENT : ('/*'  | '*/')->type(HTML);
 
-HTML_X : ('<x-' (ComponentTagIdentifier (('::' | '.') ComponentTagIdentifier)?)?)->type(HTML),pushMode(INSIDE_HTML_COMPONENT_TAG);
+HTML_X : ('<x-' (ComponentTagIdentifier (('::' | '.') ComponentTagIdentifier)?)?) {this.insideComponentTag = true;}->type(HTML),pushMode(INSIDE_HTML_COMPONENT_TAG);
 
 CLOSE_TAG : ('</' FullIdentifier '>' [\n\r ]*)+->type(HTML);
 
@@ -173,12 +173,12 @@ EXIT_VERBATIM_MOD_EOF : EOF->type(ERROR),popMode;
 //=========================================================
 mode INSIDE_HTML_COMPONENT_TAG;
 
-COMPONENT_ATTRIBUTE : (':' FullIdentifier '="') ->type(COMPONENT_ATTR),pushMode(COMPONENT_PHP_EXPRESSION); 
+COMPONENT_ATTRIBUTE : (':' FullIdentifier '="') {this.compAttrQuoteBalance = 1;} ->type(COMPONENT_ATTR),pushMode(COMPONENT_PHP_EXPRESSION); 
 
 COMPONENT_CONTENT_TAG_OPEN : '{{' ->pushMode(INSIDE_REGULAR_ECHO),type(CONTENT_TAG);
 COMPONENT_RAW_TAG_OPEN : '{!!' ->pushMode(INSIDE_RAW_ECHO),type(RAW_TAG);
 
-EXIT_HTML_COMPONENT : '>'->type(HTML), popMode;
+EXIT_HTML_COMPONENT : '>' {this.insideComponentTag = false;}->type(HTML), popMode;
 
 HTML_COMPONENT_ANY : . ->type(HTML);
 
@@ -187,9 +187,10 @@ EXIT_HTML_COMPONENT_EOF : EOF->type(ERROR),popMode;
 //=========================================================
 mode COMPONENT_PHP_EXPRESSION;
 
-EXIT_COMPONENT_PHP_EXPRESSION : '"'->type(COMPONENT_ATTR), popMode;
-COMPONENT_PHP_EXPRESSION_LAST : . {this._input.LA(1) == '"'}? ->type(PHP_EXPRESSION);
-COMPONENT_PHP_EXPRESSION : . ->more;
+
+EXIT_COMPONENT_PHP_EXPRESSION : {this.compAttrQuoteBalance == 1}? '"' {this.compAttrQuoteBalance = 0;}->type(COMPONENT_ATTR), popMode;
+COMPONENT_QUOTE_ATTR : '"' ->type(COMPONENT_ATTR);
+COMPONENT_PHP_EXPRESSION_LAST : . ->type(PHP_EXPRESSION);
 
 EXIT_COMPONENT_PHP_EXPRESSION_EOF : EOF->type(ERROR),popMode;
 

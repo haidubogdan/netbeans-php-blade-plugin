@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.netbeans.modules.php.blade.editor;
+package org.netbeans.modules.php.blade.editor.braces;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -28,15 +28,16 @@ import org.netbeans.api.editor.mimelookup.MimeRegistration;
 import org.netbeans.api.lexer.TokenHierarchy;
 import org.netbeans.api.project.Project;
 import org.netbeans.editor.BaseDocument;
+import org.netbeans.modules.php.blade.editor.BladeLanguage;
+import org.netbeans.modules.php.blade.editor.FileSystemUtils;
 import org.netbeans.modules.php.blade.editor.directives.CustomDirectives;
 import org.netbeans.modules.php.blade.editor.directives.CustomDirectives.CustomDirective;
 import org.netbeans.modules.php.blade.editor.lexer.BladeLexerUtils;
 import org.netbeans.modules.php.blade.editor.lexer.BladeTokenId;
-import org.netbeans.modules.php.blade.editor.lexer.EditorUtils;
 import org.netbeans.modules.php.blade.syntax.BladeDirectivesUtils;
 import static org.netbeans.modules.php.blade.syntax.BladeDirectivesUtils.END_DIRECTIVE_PREFIX;
 import org.netbeans.modules.php.blade.syntax.BladeTagsUtils;
-import org.netbeans.modules.php.blade.syntax.antlr4.utils.BladeAntlrUtils;
+import org.netbeans.modules.php.blade.syntax.antlr4.utils.BaseBladeAntlrUtils;
 import static org.netbeans.modules.php.blade.syntax.BladeTagsUtils.*;
 import org.netbeans.modules.php.blade.syntax.antlr4.v10.BladeAntlrLexerUtils;
 import org.netbeans.spi.editor.bracesmatching.BracesMatcher;
@@ -58,9 +59,8 @@ public class BladeBracesMatcher implements BracesMatcher {
         CURLY_END_TO_START, CURLY_START_TO_END, STOP
     }
     private final MatcherContext context;
-    String tokenText;
-    int tokenOffset;
-    private Token originToken;
+    private String tokenText;
+    private int tokenOffset;
     private BraceDirectionType currentDirection;
 
     private BladeBracesMatcher(MatcherContext context) {
@@ -70,7 +70,6 @@ public class BladeBracesMatcher implements BracesMatcher {
     @Override
     public int[] findOrigin() throws InterruptedException, BadLocationException {
         int[] result = null;
-        originToken = null;
         tokenText = null;
         tokenOffset = context.getSearchOffset();
         BaseDocument document = (BaseDocument) context.getDocument();
@@ -102,7 +101,7 @@ public class BladeBracesMatcher implements BracesMatcher {
                 }
                 case BLADE_CUSTOM_DIRECTIVE: {
                     tokenText = token.text().toString().trim();
-                    Project projectOwner = EditorUtils.getProjectOwner(document);
+                    Project projectOwner = FileSystemUtils.getProjectOwner(document);
                     if (projectOwner == null) {
                         return result;
                     }
@@ -167,7 +166,7 @@ public class BladeBracesMatcher implements BracesMatcher {
         int searchOffset = tokenOffset + tokenText.length() + 1;
         AntlrTokenSequence ats = BladeAntlrLexerUtils.getTokens(context.getDocument());
 
-        Token endToken = BladeAntlrUtils.findForward(ats,
+        Token endToken = BaseBladeAntlrUtils.findForward(ats,
                 searchOffset,
                 endDirectives,
                 openingDirectives);
@@ -182,7 +181,7 @@ public class BladeBracesMatcher implements BracesMatcher {
             if (!directive.startsWith(END_DIRECTIVE_PREFIX)){
                 return null;
             }
-            Project projectOwner = EditorUtils.getProjectOwner(context.getDocument());
+            Project projectOwner = FileSystemUtils.getProjectOwner(context.getDocument());
             if (projectOwner == null) {
                 return null;
             }
@@ -190,7 +189,7 @@ public class BladeBracesMatcher implements BracesMatcher {
             if (customDirectives == null) {
                 return null;
             }
-            String startTag = "@" +  directive.substring(END_DIRECTIVE_PREFIX.length()); // NOI18N
+            String startTag = BladeDirectivesUtils.AT +  directive.substring(END_DIRECTIVE_PREFIX.length()); // NOI18N
             for (List<CustomDirective> directiveCollection : customDirectives.getCustomDirectives().values()) {
                 for (CustomDirective customDirective : directiveCollection) {
                     if (customDirective.isBlockDirective()
@@ -211,7 +210,7 @@ public class BladeBracesMatcher implements BracesMatcher {
         int searchOffset = tokenOffset - 1;
         AntlrTokenSequence ats = BladeAntlrLexerUtils.getTokens(context.getDocument());
 
-        Token startToken = BladeAntlrUtils.findBackward(ats,
+        Token startToken = BaseBladeAntlrUtils.findBackward(ats,
                 searchOffset,
                 openDirectives,
                 endDirectivesForBalance);
@@ -251,7 +250,7 @@ public class BladeBracesMatcher implements BracesMatcher {
 
         AntlrTokenSequence ats = BladeAntlrLexerUtils.getTokens(context.getDocument());
         int searchOffset = tokenOffset - 1;
-        Token endToken = BladeAntlrUtils.findForward(ats,
+        Token endToken = BaseBladeAntlrUtils.findForward(ats,
                 searchOffset,
                 stopDirectives,
                 startDirectiveForBalance);
@@ -268,7 +267,7 @@ public class BladeBracesMatcher implements BracesMatcher {
 
         AntlrTokenSequence ats = BladeAntlrLexerUtils.getTokens(context.getDocument());
         int searchOffset = tokenOffset + tokenText.length() + 1;
-        Token endToken = BladeAntlrUtils.findBackward(ats,
+        Token endToken = BaseBladeAntlrUtils.findBackward(ats,
                 searchOffset,
                 stopDirectives,
                 startDirectiveForBalance);

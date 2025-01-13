@@ -19,10 +19,7 @@
 package org.netbeans.modules.php.blade.editor.parser;
 
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
-import java.util.TreeMap;
-import org.netbeans.modules.csl.api.OffsetRange;
 
 /**
  *
@@ -30,11 +27,9 @@ import org.netbeans.modules.csl.api.OffsetRange;
  */
 public class BladeDirectiveScope {
 
-//    private final OffsetRange range;
     private final int bladeAntlrTokenType;
     private final Set<String> variables = new HashSet<>();
     private BladeDirectiveScope child;
-
 
     public BladeDirectiveScope(int tokenType) {
         this.bladeAntlrTokenType = tokenType;
@@ -51,8 +46,12 @@ public class BladeDirectiveScope {
     public int getScopeType() {
         return bladeAntlrTokenType;
     }
-        
-    public void setChild(BladeDirectiveScope child){
+
+    public void setChild(BladeDirectiveScope child) {
         this.child = child;
+    }
+
+    public BladeDirectiveScope getChild() {
+        return child;
     }
 }

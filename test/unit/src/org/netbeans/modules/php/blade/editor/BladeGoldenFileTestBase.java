@@ -26,7 +26,7 @@ import org.openide.filesystems.FileUtil;
  *
  * @author bogdan
  */
-public abstract class BladeGoldenFileTestBase extends BladeTestBase {
+public abstract class BladeGoldenFileTestBase extends CslTestBase {
 
     public BladeGoldenFileTestBase(String testName) {
         super(testName);

@@ -38,7 +38,7 @@ import org.netbeans.modules.php.blade.editor.parser.BladeParserResult;
 import org.netbeans.modules.php.blade.editor.path.BladePathUtils;
 import org.netbeans.modules.php.blade.project.ProjectUtils;
 import org.openide.filesystems.FileObject;
-
+import org.openide.util.NbBundle;
 /**
  *
  * @author bhaidu
@@ -78,7 +78,7 @@ public class BladeHintsProvider implements HintsProvider {
                             continue;
                         }
                         hints.add(new Hint(astRule,
-                                "Unknown directive. Try adding the provider class file using Project -> Properties -> Custom Directives", //NOI18N
+                                NbBundle.getMessage(BladeHintsProvider.class, "UnknownDirectiveHintMsg"), //NOI18N
                                 context.parserResult.getSnapshot().getSource().getFileObject(),
                                 entry.getKey(),
                                 Collections.emptyList(),
@@ -98,7 +98,7 @@ public class BladeHintsProvider implements HintsProvider {
             for (OffsetRange range : entry.getValue()) {
                 OffsetRange hintRange = new OffsetRange(range.getStart(), range.getEnd() + 1);
                 hints.add(new Hint(new BladeRule(HintSeverity.WARNING),
-                        "Blade path not found.\nFor custom blade context you can try to set the root folder using:\nProject -> Properties -> Laravel Blade -> Views Folder", //NOI18N
+                        NbBundle.getMessage(BladeHintsProvider.class, "BladeViewNotFound"), //NOI18N
                         context.parserResult.getSnapshot().getSource().getFileObject(),
                         hintRange,
                         Collections.emptyList(),

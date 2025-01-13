@@ -34,11 +34,10 @@ import org.netbeans.api.editor.mimelookup.MimeRegistration;
 import org.netbeans.api.editor.mimelookup.MimeRegistrations;
 import org.netbeans.api.project.Project;
 import org.netbeans.modules.php.blade.editor.BladeLanguage;
-import org.netbeans.modules.php.blade.editor.components.AttributeCompletionService;
+import org.netbeans.modules.php.blade.editor.FileSystemUtils;
 import org.netbeans.modules.php.blade.editor.components.ComponentModel;
 import org.netbeans.modules.php.blade.editor.components.ComponentsCompletionService;
 import org.netbeans.modules.php.blade.editor.indexing.PhpIndexResult;
-import org.netbeans.modules.php.blade.editor.lexer.EditorUtils;
 import org.netbeans.modules.php.blade.project.ComponentsSupport;
 import org.netbeans.modules.php.blade.syntax.StringUtils;
 import org.netbeans.modules.php.blade.syntax.antlr4.html_components.BladeHtmlAntlrLexer;
@@ -61,7 +60,7 @@ import org.openide.filesystems.FileObject;
  */
 @MimeRegistrations(value = {
     @MimeRegistration(mimeType = "text/html", service = CompletionProvider.class),
-    @MimeRegistration(mimeType = "text/x-blade", service = CompletionProvider.class)
+    @MimeRegistration(mimeType = BladeLanguage.MIME_TYPE, service = CompletionProvider.class)
 })
 public class BladeCompletionProvider implements CompletionProvider {
 
@@ -194,7 +193,7 @@ public class BladeCompletionProvider implements CompletionProvider {
                                 ComponentsCompletionService componentComplervice = new ComponentsCompletionService();
                                 String identifier = ComponentsSupport.tag2ClassName(componentToken.getText());
                                 Collection<PhpIndexResult> indexedReferences = componentComplervice.findComponentClass(identifier, fo);
-                                Project projectOwner = EditorUtils.getProjectOwner(doc);
+                                Project projectOwner = FileSystemUtils.getProjectOwner(doc);
                                 ComponentsSupport componentSupport = ComponentsSupport.getInstance(projectOwner);
                                 
                                 if (componentSupport == null){

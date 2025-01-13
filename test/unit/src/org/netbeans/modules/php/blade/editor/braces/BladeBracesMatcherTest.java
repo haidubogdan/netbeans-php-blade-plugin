@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.netbeans.modules.php.blade.editor;
+package org.netbeans.modules.php.blade.editor.braces;
 
 import java.io.File;
 import java.io.IOException;
@@ -24,7 +24,9 @@ import java.util.Arrays;
 import java.util.Collections;
 import org.netbeans.editor.BaseDocument;
 import static org.netbeans.junit.NbTestCase.assertFile;
-import static org.netbeans.modules.php.blade.editor.BladeTestBase.copyStringToFileObject;
+import org.netbeans.modules.php.blade.editor.BracesMatchingTestUtils;
+import org.netbeans.modules.php.blade.editor.CslTestBase;
+import static org.netbeans.modules.php.blade.editor.CslTestBase.copyStringToFileObject;
 import org.netbeans.spi.editor.bracesmatching.BracesMatcher;
 import org.netbeans.spi.editor.bracesmatching.BracesMatcherFactory;
 import org.netbeans.spi.editor.bracesmatching.MatcherContext;
@@ -35,7 +37,7 @@ import org.openide.filesystems.FileUtil;
  *
  * @author bogdan
  */
-public class BladeBracesMatcherTest extends BladeTestBase {
+public class BladeBracesMatcherTest extends CslTestBase {
 
     public BladeBracesMatcherTest(String testName) {
         super(testName);
@@ -126,7 +128,7 @@ public class BladeBracesMatcherTest extends BladeTestBase {
             expected = expected.substring(0, i) + "*" + expected.substring(i);
         }
         
-        int x = 1;
+        
         assertFileContent(expected);
     }
     
