@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.netbeans.modules.php.blade.lexer;
+package org.netbeans.modules.php.blade.editor.lexer;
 
 import org.netbeans.modules.php.blade.editor.BladeGoldenFileTestBase;
 

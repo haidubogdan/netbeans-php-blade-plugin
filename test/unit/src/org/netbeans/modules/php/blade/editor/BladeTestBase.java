@@ -25,27 +25,63 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import javax.swing.text.Document;
+import org.netbeans.api.editor.mimelookup.MimePath;
+import org.netbeans.api.java.classpath.ClassPath;
 import org.netbeans.api.lexer.Language;
 import org.netbeans.editor.BaseDocument;
+import org.netbeans.junit.MockServices;
 import org.netbeans.junit.NbTestCase;
 import org.netbeans.lib.lexer.LanguageManager;
 import org.netbeans.modules.csl.api.GsfLanguage;
 import org.netbeans.modules.csl.core.LanguageRegistry;
 import org.netbeans.modules.csl.spi.DefaultLanguageConfig;
+import org.netbeans.modules.parsing.api.Source;
+import org.netbeans.modules.parsing.impl.indexing.PathRegistry;
+import org.netbeans.modules.parsing.impl.indexing.implspi.ActiveDocumentProvider;
+import org.netbeans.modules.parsing.spi.indexing.PathRecognizer;
+import static org.netbeans.modules.php.blade.editor.MockLookup.setLookup;
+import org.netbeans.modules.php.blade.editor.parser.TestEnvironmentFactory;
+import org.netbeans.spi.editor.document.DocumentFactory;
+import org.netbeans.spi.java.classpath.ClassPathProvider;
 import org.openide.ErrorManager;
+import org.openide.cookies.EditorCookie;
 import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileSystem;
 import org.openide.filesystems.FileUtil;
+import org.openide.filesystems.MultiFileSystem;
+import org.openide.filesystems.Repository;
+import org.openide.filesystems.XMLFileSystem;
 import org.openide.loaders.DataObject;
 import org.openide.loaders.DataObjectNotFoundException;
+import org.openide.util.Exceptions;
+import org.openide.util.Lookup;
+import org.openide.util.lookup.Lookups;
+import org.openide.util.lookup.ServiceProvider;
+import org.netbeans.modules.parsing.impl.Utilities;
 
 /**
  *
  * @author bogdan
  */
 public abstract class BladeTestBase extends NbTestCase {
+
+    static {
+        // testing performance: set scanner update delay to 0
+        System.setProperty(PathRegistry.class.getName() + ".FIRER_EVT_COLLAPSE_WINDOW", "0");
+    }
+    private Map<String, ClassPath> classPathsForTest;
+    private Object[] extraLookupContent = null;
 
     public BladeTestBase(String testName) {
         super(testName);
@@ -54,6 +90,45 @@ public abstract class BladeTestBase extends NbTestCase {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
+
+        parserSetup();
+
+        List<URL> layers = new LinkedList<URL>();
+        String[] additionalLayers = new String[]{"META-INF/generated-layer.xml"};
+        Object[] additionalLookupContent = new Object[0];
+        if (additionalLookupContent == null) {
+            additionalLookupContent = new Object[0];
+        }
+
+        for (int cntr = 0; cntr < additionalLayers.length; cntr++) {
+            boolean found = false;
+
+            for (Enumeration<URL> en = Thread.currentThread().getContextClassLoader().getResources(additionalLayers[cntr]); en.hasMoreElements();) {
+                found = true;
+                layers.add(en.nextElement());
+            }
+
+            assertTrue(additionalLayers[cntr], found);
+        }
+
+        XMLFileSystem xmlFS = new XMLFileSystem();
+        xmlFS.setXmlUrls(layers.toArray(new URL[0]));
+
+        FileSystem system = new MultiFileSystem(new FileSystem[]{FileUtil.createMemoryFileSystem(), xmlFS});
+
+        Repository repository = new Repository(system);
+
+        extraLookupContent = new Object[additionalLookupContent.length + 2];
+        int at = 0;
+        System.arraycopy(additionalLookupContent, 0, extraLookupContent, at, additionalLookupContent.length);
+        at += additionalLookupContent.length;
+        // act as a fallback: if no other Repository is found.
+        extraLookupContent[at++] = new TestClassPathProvider();
+        extraLookupContent[at++] = new TestPathRecognizer();
+
+        ClassLoader l = MockLookup.class.getClassLoader();
+        setLookup(Lookups.fixed(extraLookupContent), Lookups.metaInfServices(l), Lookups.singleton(l), Lookups.singleton(repository));
+
     }
 
     @Override
@@ -254,5 +329,149 @@ public abstract class BladeTestBase extends NbTestCase {
             return null;
         }
     }
-    
+
+    /**
+     * Gets the <code>Source</code> for a file. This method makes sure that a
+     * <code>Document</code> is loaded from the file and accessible through the
+     * returned <code>Source</code> instance. Many language-specific feature
+     * implementations rely on that.
+     *
+     * @param relFilePath The file path relative to <code>getDataDir()</code>.
+     *
+     * @return The <code>Source</code> instance with a the <code>Document</code>
+     * loaded from the specified file.
+     */
+    protected Source getTestSource(FileObject f) {
+        Document doc = getDocument(f);
+        FileObject fileObject = Utilities.getFileObject(doc);
+    return Source.create(doc);
+    }
+
+    private class TestClassPathProvider implements ClassPathProvider {
+
+        public TestClassPathProvider() {
+
+        }
+
+        public ClassPath findClassPath(FileObject file, String type) {
+            Map<String, ClassPath> map = classPathsForTest;
+
+            if (map != null) {
+                return map.get(type);
+            } else {
+                return null;
+            }
+        }
+    } // End of TestClassPathProvider class
+
+    private class TestPathRecognizer extends PathRecognizer {
+
+        @Override
+        public Set<String> getSourcePathIds() {
+            return BladeTestBase.this.getPreferredLanguage().getSourcePathIds();
+        }
+
+        @Override
+        public Set<String> getLibraryPathIds() {
+            return BladeTestBase.this.getPreferredLanguage().getLibraryPathIds();
+        }
+
+        @Override
+        public Set<String> getBinaryLibraryPathIds() {
+            return BladeTestBase.this.getPreferredLanguage().getBinaryLibraryPathIds();
+        }
+
+        @Override
+        public Set<String> getMimeTypes() {
+            return Collections.singleton(BladeTestBase.this.getPreferredMimeType());
+        }
+
+    } // End of TestPathRecognizer class
+
+    @ServiceProvider(service = ActiveDocumentProvider.class)
+    public static class ActiveDocumentProviderImpl implements ActiveDocumentProvider {
+
+        @Override
+        public Document getActiveDocument() {
+            return null;
+        }
+
+        @Override
+        public Set<? extends Document> getActiveDocuments() {
+            return Collections.emptySet();
+        }
+
+        @Override
+        public void addActiveDocumentListener(ActiveDocumentProvider.ActiveDocumentListener listener) {
+        }
+
+        @Override
+        public void removeActiveDocumentListener(ActiveDocumentProvider.ActiveDocumentListener listener) {
+        }
+
+    }
+
+    private void parserSetup() {
+        Class[] services = getServices();
+        List<Class> classes = new ArrayList<Class>(4);
+        if (services != null) {
+            classes.addAll(Arrays.asList(services));
+        }
+        services = getMockServices();
+        if (services != null) {
+            classes.addAll(Arrays.asList(services));
+        }
+        MockServices.setServices(classes.toArray(new Class[0]));
+//        MockLookup.setLookup(
+//                Lookups.metaInfServices(getClass().getClassLoader()),
+//                createTestServices());
+        MockMimeLookup.setInstances(
+                MimePath.EMPTY,
+                new DocumentFactory() {
+            @Override
+            public Document createDocument(String mimeType) {
+                return new BaseDocument(false, mimeType);
+            }
+
+            @Override
+            public Document getDocument(FileObject file) {
+                try {
+                    final DataObject dobj = DataObject.find(file);
+                    final EditorCookie ec = dobj.getLookup().lookup(EditorCookie.class);
+                    return ec == null
+                            ? null
+                            : ec.openDocument();
+                } catch (DataObjectNotFoundException e) {
+                    return null;
+                } catch (IOException ioe) {
+                    Exceptions.printStackTrace(ioe);
+                    return null;
+                }
+            }
+
+            @Override
+            public FileObject getFileObject(Document document) {
+                Object sdp = document.getProperty(Document.StreamDescriptionProperty);
+                if (sdp instanceof FileObject) {
+                    return (FileObject) sdp;
+                }
+                if (sdp instanceof DataObject) {
+                    return ((DataObject) sdp).getPrimaryFile();
+                }
+                return null;
+            }
+        });
+    }
+
+    protected Class[] getMockServices() {
+        return new Class[]{MockMimeLookup.class, TestEnvironmentFactory.class};
+    }
+
+    protected Class[] getServices() {
+        return null;
+    }
+
+    protected Lookup createTestServices() {
+        return Lookups.fixed(new TestEnvironmentFactory());
+    }
 }

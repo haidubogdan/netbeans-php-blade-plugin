@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.netbeans.modules.php.blade.lexer;
+package org.netbeans.modules.php.blade.editor.lexer;
 
 import java.io.File;
 import org.netbeans.api.lexer.TokenHierarchy;
