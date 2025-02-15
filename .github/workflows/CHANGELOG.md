@@ -2,20 +2,14 @@
 
 ## What's changed
 
-**Source code unit tests**
+**Removing custom php syntax analyzer**
 
-As some netbeans platform utility classes (CslTestBase) are not available for stand-alone plugins. This proved to be a little challenge.
+- removing the custom php syntax analyzer due to unreliable behaviour (#74)
 
-- added unit tests for parsing, braces & navigator
+**Hints interactivity**
 
-**Syntax highlighting**
+- include config actions for hints
 
-- improved syntax highlighting for component attributes values
+**Wrong directive detection in url paths**
 
-- fix `@foreach` wrong parser error
-
-```
-    @foreach ($array->task as $el)
-
-    @endforeach
-```
+- fix warning hints inside url paths like `https://unpkg.com/@coreui/coreui@3.4/dist/css/coreui.min.css`
