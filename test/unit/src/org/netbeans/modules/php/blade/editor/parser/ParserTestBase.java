@@ -174,7 +174,7 @@ public abstract class ParserTestBase extends CslTestBase {
 
     protected Source getTestSource(String testFile) {
         FileObject fileObj = getTestFile(testFile);
-        ParsingUtils parserUtils = new ParsingUtils();
+        ParsingTestUtils parserUtils = new ParsingTestUtils();
         return parserUtils.createSource(readFile(fileObj));
     }
 

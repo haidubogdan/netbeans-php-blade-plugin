@@ -19,13 +19,16 @@
 package org.netbeans.modules.php.blade.editor.hints;
 
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.netbeans.api.editor.document.EditorDocumentUtils;
+import org.netbeans.api.options.OptionsDisplayer;
 import org.netbeans.api.project.Project;
 import org.netbeans.modules.csl.api.Error;
 import org.netbeans.modules.csl.api.Hint;
+import org.netbeans.modules.csl.api.HintFix;
 import org.netbeans.modules.csl.api.HintSeverity;
 import org.netbeans.modules.csl.api.OffsetRange;
 import org.netbeans.modules.csl.api.Rule;
@@ -34,17 +37,19 @@ import org.netbeans.modules.csl.api.RuleContext;
 import org.netbeans.modules.csl.api.HintsProvider;
 import org.netbeans.modules.php.blade.editor.BladeLanguage;
 import org.netbeans.modules.php.blade.editor.directives.CustomDirectives;
+import static org.netbeans.modules.php.blade.editor.hints.PhpSyntaxErrorRule.PHP_SYNTAX_ERROR_HINT_ID;
 import org.netbeans.modules.php.blade.editor.parser.BladeParserResult;
 import org.netbeans.modules.php.blade.editor.path.BladePathUtils;
 import org.netbeans.modules.php.blade.project.ProjectUtils;
+import org.netbeans.spi.project.ui.CustomizerProvider;
 import org.openide.filesystems.FileObject;
 import org.openide.util.NbBundle;
+
 /**
  *
  * @author bhaidu
  */
 public class BladeHintsProvider implements HintsProvider {
-
 
     /**
      * Compute hints applicable to the given compilation info and add to the
@@ -81,7 +86,7 @@ public class BladeHintsProvider implements HintsProvider {
                                 NbBundle.getMessage(BladeHintsProvider.class, "UnknownDirectiveHintMsg"), //NOI18N
                                 context.parserResult.getSnapshot().getSource().getFileObject(),
                                 entry.getKey(),
-                                Collections.emptyList(),
+                                generateSetProjectConfigHints(project),
                                 10));
                     }
                 }
@@ -101,7 +106,7 @@ public class BladeHintsProvider implements HintsProvider {
                         NbBundle.getMessage(BladeHintsProvider.class, "BladeViewNotFound"), //NOI18N
                         context.parserResult.getSnapshot().getSource().getFileObject(),
                         hintRange,
-                        Collections.emptyList(),
+                        generateSetProjectConfigHints(project),
                         10));
             }
         }
@@ -114,6 +119,7 @@ public class BladeHintsProvider implements HintsProvider {
      */
     @Override
     public void computeSuggestions(HintsManager manager, RuleContext context, List<Hint> suggestions, int caretOffset) {
+
     }
 
     /**
@@ -135,8 +141,8 @@ public class BladeHintsProvider implements HintsProvider {
         unhandled.addAll(parserResult.getDiagnostics());
 
         Map<?, List<? extends Rule.AstRule>> allHints = manager.getHints(false, context);
-        List<? extends Rule.AstRule> phpSyntaxHints = allHints.get("blade.hints.php.syntax_errors"); //NOI18N
-        if (phpSyntaxHints.isEmpty()){
+        List<? extends Rule.AstRule> phpSyntaxHints = allHints.get(PHP_SYNTAX_ERROR_HINT_ID); //NOI18N
+        if (phpSyntaxHints == null || phpSyntaxHints.isEmpty()) {
             return;
         }
         Rule.AstRule rule = phpSyntaxHints.get(0);
@@ -190,11 +196,23 @@ public class BladeHintsProvider implements HintsProvider {
         return new BladeRuleContext();
     }
     
-    public static boolean phpSyntaxErrorsDisplayEnabled(){
+    private List<HintFix> generateSetProjectConfigHints(Project project){
+        List<HintFix> fixes = new LinkedList<>();
+        if (project == null) {
+            return fixes;
+        }
+        
+        fixes.add(new OpneProjectPropertiesFix(project));
+        fixes.add(new ConfigHintFix());
+
+        return fixes;
+    }
+
+    public static boolean phpSyntaxErrorsDisplayEnabled() {
         HintsManager bladeHintsManager = HintsProvider.HintsManager.getManagerForMimeType(BladeLanguage.MIME_TYPE);
         Map<?, List<? extends Rule.AstRule>> allHints = bladeHintsManager.getHints();
-        List<? extends Rule.AstRule> phpSyntaxHints = allHints.get("blade.hints.php.syntax_errors"); //NOI18N
-        if (phpSyntaxHints.isEmpty()){
+        List<? extends Rule.AstRule> phpSyntaxHints = allHints.get(PHP_SYNTAX_ERROR_HINT_ID); //NOI18N
+        if (phpSyntaxHints == null || phpSyntaxHints.isEmpty()) {
             return false;
         }
         Rule.AstRule rule = phpSyntaxHints.get(0);
@@ -237,18 +255,65 @@ public class BladeHintsProvider implements HintsProvider {
 
     public class BladeRuleContext extends RuleContext {
 
-        private BladeParserResult bladeParserResult = null;
-
-        public BladeParserResult getJsParserResult() {
-            if (bladeParserResult == null) {
-                bladeParserResult = (BladeParserResult) parserResult;
-            }
-            return bladeParserResult;
-        }
-
         public boolean isCancelled() {
             return false;
         }
 
+    }
+    
+    private static class OpneProjectPropertiesFix implements HintFix {
+
+        private final Project project;
+
+        public OpneProjectPropertiesFix(Project project) {
+            this.project = project;
+        }
+
+        @Override
+        public String getDescription() {
+            return "Configure Project Properties"; //NOI18N
+        }
+
+        @Override
+        public void implement() throws Exception {
+            CustomizerProvider projectCustomizer = project.getLookup().lookup(CustomizerProvider.class);
+            projectCustomizer.showCustomizer();
+        }
+
+        @Override
+        public boolean isSafe() {
+            return true;
+        }
+
+        @Override
+        public boolean isInteractive() {
+            return false;
+        }
+    }
+
+    private static class ConfigHintFix implements HintFix {
+
+        public ConfigHintFix() {}
+
+        @Override
+        public String getDescription() {
+            return "Configure Hints"; //NOI18N
+        }
+
+        @Override
+        public void implement() throws Exception {
+            OptionsDisplayer displayer = OptionsDisplayer.getDefault();
+            displayer.open("Editor/Hints/text/x-blade"); //NOI18N
+        }
+
+        @Override
+        public boolean isSafe() {
+            return true;
+        }
+
+        @Override
+        public boolean isInteractive() {
+            return false;
+        }
     }
 }
