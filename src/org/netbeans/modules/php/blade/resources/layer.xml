@@ -78,7 +78,7 @@
                         <file name="org-netbeans-modules-php-blade-editor-hints-UnknownDirective.instance"/>
                     </folder>
                     <folder name="php_syntax">
-                        <file name="org-netbeans-modules-php-blade-editor-hints-PhpSyntaxErrorDirective.instance"/>
+                        <file name="org-netbeans-modules-php-blade-editor-hints-PhpSyntaxErrorRule.instance"/>
                     </folder>
                 </folder>
             </folder>

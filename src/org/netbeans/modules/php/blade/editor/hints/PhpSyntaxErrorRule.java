@@ -19,30 +19,24 @@
 package org.netbeans.modules.php.blade.editor.hints;
 
 import java.util.Collections;
-import java.util.List;
 import java.util.Set;
 import java.util.prefs.Preferences;
 import javax.swing.JComponent;
-import javax.swing.text.BadLocationException;
-import org.netbeans.modules.csl.api.Hint;
 import org.netbeans.modules.csl.api.HintSeverity;
-import org.netbeans.modules.csl.api.HintsProvider;
 import org.netbeans.modules.csl.api.Rule;
 import org.netbeans.modules.csl.api.RuleContext;
+import org.openide.util.NbBundle;
 
 /**
  *
  * @author bogdan
  */
-public class PhpSyntaxErrorDirective implements Rule.AstRule {
-
-    public void computeHints(RuleContext context, List<Hint> hints, int offset, HintsProvider.HintsManager manager) throws BadLocationException {
-        
-    }
-
+public class PhpSyntaxErrorRule implements Rule.AstRule {
+    public static final String PHP_SYNTAX_ERROR_HINT_ID = "blade.hint.php_syntax_errors"; //NOI18N
+            
     @Override
     public boolean getDefaultEnabled() {
-        return true;
+        return false;
     }
 
     @Override
@@ -67,21 +61,21 @@ public class PhpSyntaxErrorDirective implements Rule.AstRule {
 
     @Override
     public Set<?> getKinds() {
-        return Collections.singleton("blade.hints.php.syntax_errors"); //NOI18N
+        return Collections.singleton(PHP_SYNTAX_ERROR_HINT_ID);
     }
 
     @Override
     public String getId() {
-        return "blade.hint.php_syntax_error"; //NOI18N
+        return PHP_SYNTAX_ERROR_HINT_ID;
     }
 
     @Override
     public String getDescription() {
-       return "Php Syntax error"; //NOI18N
+       return NbBundle.getMessage(PhpSyntaxErrorRule.class, "AST_Rule_PhpSyntaxError"); //NOI18N
     }
 
     @Override
     public String getDisplayName() {
-        return "Php Syntax error"; //NOI18N
+        return NbBundle.getMessage(PhpSyntaxErrorRule.class, "AST_Rule_PhpSyntaxErrorDescription"); //NOI18N
     }
 }

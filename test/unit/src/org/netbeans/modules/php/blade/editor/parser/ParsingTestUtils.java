@@ -21,25 +21,21 @@ package org.netbeans.modules.php.blade.editor.parser;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Enumeration;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
-import static junit.framework.TestCase.fail;
 import org.netbeans.api.lexer.Language;
 import org.netbeans.editor.BaseDocument;
 import org.netbeans.modules.csl.api.GsfLanguage;
 import org.netbeans.modules.csl.core.LanguageRegistry;
-import org.netbeans.modules.csl.spi.DefaultLanguageConfig;
 import org.netbeans.modules.parsing.api.ParserManager;
 import org.netbeans.modules.parsing.api.ResultIterator;
 import org.netbeans.modules.parsing.api.Source;
@@ -58,16 +54,14 @@ import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileStateInvalidException;
 import org.openide.filesystems.FileSystem;
 import org.openide.util.Exceptions;
-import org.openide.cookies.EditorCookie;
-import org.openide.loaders.DataObject;
 
 /**
  *
  * @author bogdan
  */
-public class ParsingUtils {
+public class ParsingTestUtils {
 
-    public ParsingUtils() {
+    public ParsingTestUtils() {
     }
 
     private PHPParseResult phpParserResult;

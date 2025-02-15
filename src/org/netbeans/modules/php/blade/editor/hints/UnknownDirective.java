@@ -37,10 +37,6 @@ import org.openide.util.NbBundle;
  */
 public class UnknownDirective implements Rule.AstRule {
 
-    public void computeHints(RuleContext context, List<Hint> hints, int offset, HintsProvider.HintsManager manager) throws BadLocationException {
-        
-    }
-
     @Override
     public boolean getDefaultEnabled() {
         return true;

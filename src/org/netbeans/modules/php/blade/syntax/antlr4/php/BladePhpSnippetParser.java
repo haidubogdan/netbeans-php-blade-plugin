@@ -19,9 +19,11 @@
 package org.netbeans.modules.php.blade.syntax.antlr4.php;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import javax.swing.text.Document;
 import org.antlr.v4.runtime.ANTLRErrorListener;
 import org.antlr.v4.runtime.BaseErrorListener;
 import org.antlr.v4.runtime.CharStream;
@@ -34,11 +36,21 @@ import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.Recognizer;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ParseTreeListener;
+import org.netbeans.editor.BaseDocument;
 import org.netbeans.modules.csl.api.OffsetRange;
 import org.netbeans.modules.csl.api.Severity;
+import org.netbeans.modules.parsing.api.ParserManager;
+import org.netbeans.modules.parsing.api.ResultIterator;
+import org.netbeans.modules.parsing.api.Source;
+import org.netbeans.modules.parsing.api.UserTask;
+import org.netbeans.modules.parsing.spi.ParseException;
 import org.netbeans.modules.php.blade.editor.indexing.PhpIndexUtils.FieldAccessType;
 import org.netbeans.modules.php.blade.editor.parser.BladeParserResult.BladeError;
+import org.netbeans.modules.php.blade.editor.parser.ParsingUtils;
+import org.netbeans.modules.php.editor.parser.PHPParseResult;
 import org.openide.filesystems.FileObject;
+import org.openide.util.Exceptions;
+import org.netbeans.modules.csl.api.Error;
 
 /**
  *
@@ -46,10 +58,11 @@ import org.openide.filesystems.FileObject;
  */
 public class BladePhpSnippetParser {
 
+    public static final String PHP_START = "<?php ";//NOI18N
     private final String snippet;
     private final FileObject originFile;
     private final int snippetOffset;
-    private final List<org.netbeans.modules.csl.api.Error> errors = new ArrayList<>();
+    private final List<Error> errors = new ArrayList<>();
     private final Map<OffsetRange, PhpReference> identifierReference = new TreeMap<>();
     private final Map<OffsetRange, FieldAcces> fieldAccessReference = new TreeMap<>();
 
@@ -67,17 +80,64 @@ public class BladePhpSnippetParser {
         this.snippetOffset = snippetOffset;
     }
 
+    /**
+     * 1) php parser
+     *  - finding the context
+     *  - getting the offset
+     *  - memory issue ?
+     * 
+     * 2) custom php (sort of a lint maybe)
+     * - reinventing the wheel
+     * - bugs 
+     * - faster
+     * - finding the context, adapt to it
+     * 
+     */
     public void parse() {
         CharStream cs = CharStreams.fromString(snippet);
+
         BladePhpAntlrLexer lexer = new BladePhpAntlrLexer(cs);
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         BladePhpAntlrParser parser = new BladePhpAntlrParser(tokens);
         parser.removeErrorListeners();
         parser.setErrorHandler(new RustANTLRErrorStrategy());
-        parser.addErrorListener(createErrorListener());
-        //parser.setBuildParseTree(false);
+//        parser.addErrorListener(createErrorListener());
+//        //parser.setBuildParseTree(false);
         parser.addParseListener(createIdentifiablePhpElementReferences());
         parser.expression();
+      
+    }
+    
+    public void parseForErrors() {
+        ParsingUtils pUtils = new ParsingUtils();
+        BaseDocument doc = pUtils.createPhpBaseDocument(PHP_START + snippet);
+        try {
+            Source source = Source.create(doc);
+
+            if (source == null) {
+                return;
+            }
+
+            Document sourceDoc = source.getDocument(false);
+
+            if (sourceDoc == null) {
+                return;
+            }
+
+            source.createSnapshot();
+            ParserManager.parse(Collections.singletonList(source), new UserTask() {
+                @Override
+                public void run(ResultIterator resultIterator) throws Exception {
+                    org.netbeans.modules.parsing.spi.Parser.Result parserResult = resultIterator.getParserResult();
+                    if (parserResult != null && parserResult instanceof PHPParseResult) {
+                        PHPParseResult phpParserResult = (PHPParseResult) parserResult;
+                        errors.addAll(phpParserResult.getDiagnostics());
+                    }
+                }
+            });
+        } catch (ParseException ex) {
+            Exceptions.printStackTrace(ex);
+        }
     }
 
     private ParseTreeListener createIdentifiablePhpElementReferences() {

@@ -42,7 +42,6 @@ public final class GeneralPreferencesUtils {
     private static Boolean enableFormatting = null;
     private static Boolean enableIndentation = null;
     private static Boolean enableAutoTagCompletion = null;
-    private static Boolean enablePhpSyntaxAnalyzer = null;
 
     // default values
     private static Preferences PREFERENCES;

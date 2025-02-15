@@ -102,13 +102,13 @@ public class BladeParserResult extends ParserResult {
             }
 
             //avoid on index
-            if (!taskClass.toLowerCase().contains(".indexing.repository")) { //NOI18N
+            if (!taskClass.toLowerCase().contains(".indexing.Repository")) { //NOI18N
                 parser.addParseListener(new StructureListener(structure, folds, getFileObject()));
             }
 
 
             evaluateParser(parser);
-
+            System.out.println(taskClass);
             if (allowPhpSyntaxParsingForTask(taskClass) 
                     && BladeHintsProvider.phpSyntaxErrorsDisplayEnabled()
                     ) {
@@ -183,7 +183,7 @@ public class BladeParserResult extends ParserResult {
         for (OffsetRange range : getBladePhpExpressionOccurences().getPhpInlineOccurences()) {
             CharSequence snapshotExpr = getSnapshot().getText().subSequence(range.getStart(), range.getEnd());
             BladePhpSnippetParser phpSnippetParser = new BladePhpSnippetParser(snapshotExpr.toString(), getFileObject(), range.getStart());
-            phpSnippetParser.parse();
+            phpSnippetParser.parseForErrors();
             for (Error error : phpSnippetParser.getDiagnostics()) {
                 phpErrors.add(error);
             }
@@ -209,7 +209,8 @@ public class BladeParserResult extends ParserResult {
         return !taskClass.toLowerCase().contains("completion")  //NOI18N
                     && !taskClass.toLowerCase().contains("Declaration")  //NOI18N
                     && !taskClass.toLowerCase().contains(".indexing.Repository")  //NOI18N
-                    && !taskClass.toLowerCase().contains("csl.navigation");  //NOI18N
+                    && !taskClass.toLowerCase().contains("csl.navigation") //NOI18N
+                ;  
     }
 
     public static class Reference {

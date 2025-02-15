@@ -18,37 +18,26 @@
  */
 package org.netbeans.modules.php.blade.editor.parser;
 
-import java.io.ByteArrayInputStream;
-import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
 import java.util.Collections;
-import javax.swing.JEditorPane;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
-import javax.swing.text.EditorKit;
-import javax.xml.parsers.DocumentBuilder;
+import org.netbeans.api.lexer.Language;
+import org.netbeans.editor.BaseDocument;
+import org.netbeans.modules.csl.api.GsfLanguage;
+import org.netbeans.modules.csl.spi.DefaultLanguageConfig;
 import org.netbeans.modules.parsing.api.ParserManager;
 import org.netbeans.modules.parsing.api.ResultIterator;
 import org.netbeans.modules.parsing.api.Source;
 import org.netbeans.modules.parsing.api.UserTask;
 import org.netbeans.modules.parsing.spi.ParseException;
 import org.netbeans.modules.parsing.spi.Parser;
+import org.netbeans.modules.php.blade.editor.BladeLanguage;
 import org.netbeans.modules.php.editor.parser.PHPParseResult;
 import org.openide.filesystems.FileObject;
 import org.openide.util.Exceptions;
 import org.openide.cookies.EditorCookie;
 import org.openide.loaders.DataObject;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import org.netbeans.api.editor.mimelookup.MimeLookup;
-import org.netbeans.modules.php.blade.editor.declaration.BladeDeclarationFinder;
-import org.openide.filesystems.FileUtil;
-import org.openide.util.RequestProcessor;
-import org.openide.modules.InstalledFileLocator;
 
 /**
  *
@@ -56,14 +45,30 @@ import org.openide.modules.InstalledFileLocator;
  */
 public final class ParsingUtils {
 
-    private static final RequestProcessor RP = new RequestProcessor(BladeDeclarationFinder.class);
-
     public ParsingUtils() {
 
     }
 
     private PHPParseResult phpParserResult;
+    
+    public BaseDocument createPhpBaseDocument(String content) {
+        String mimeType = "text/x-php5"; //NOI18N
+        try {
+            BaseDocument doc = new BaseDocument(true, mimeType) {
+                @Override
+                public boolean isIdentifierPart(char ch) {
+                    return super.isIdentifierPart(ch);
+                }
+            };
 
+            doc.putProperty("mimeType", mimeType); //NOI18N
+            doc.insertString(0,content, null);
+
+            return doc;
+        } catch (BadLocationException ex) {
+            return null;
+        }
+    }
     public void parseFileObject(FileObject file) {
         Document doc = openDocument(file);
 

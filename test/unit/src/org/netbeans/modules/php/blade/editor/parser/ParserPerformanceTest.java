@@ -51,7 +51,7 @@ public class ParserPerformanceTest extends ParserTestBase {
 
     private void testGoodFile(String filePath, int expectedTime) throws Exception {
         FileObject fileObj = getTestFile(filePath);
-        ParsingUtils parserUtils = new ParsingUtils();
+        ParsingTestUtils parserUtils = new ParsingTestUtils();
         Source testSource = parserUtils.createSource(readFile(fileObj));
         Date start = new Date();
         ParserManager.parse(Collections.singletonList(testSource), new UserTask() {
