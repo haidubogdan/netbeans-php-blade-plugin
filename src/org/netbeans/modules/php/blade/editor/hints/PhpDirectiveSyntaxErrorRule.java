@@ -31,7 +31,7 @@ import org.openide.util.NbBundle;
  *
  * @author bogdan
  */
-public class PhpSyntaxErrorRule implements Rule.AstRule {
+public class PhpDirectiveSyntaxErrorRule implements Rule.AstRule {
     public static final String PHP_SYNTAX_ERROR_HINT_ID = "blade.hint.php_syntax_errors"; //NOI18N
             
     @Override
@@ -71,11 +71,11 @@ public class PhpSyntaxErrorRule implements Rule.AstRule {
 
     @Override
     public String getDescription() {
-       return NbBundle.getMessage(PhpSyntaxErrorRule.class, "AST_Rule_PhpSyntaxError"); //NOI18N
+       return NbBundle.getMessage(PhpDirectiveSyntaxErrorRule.class, "AST_Rule_PhpSyntaxError"); //NOI18N
     }
 
     @Override
     public String getDisplayName() {
-        return NbBundle.getMessage(PhpSyntaxErrorRule.class, "AST_Rule_PhpSyntaxErrorDescription"); //NOI18N
+        return NbBundle.getMessage(PhpDirectiveSyntaxErrorRule.class, "AST_Rule_PhpSyntaxErrorDescription"); //NOI18N
     }
 }

@@ -69,6 +69,7 @@ public final class ParsingUtils {
             return null;
         }
     }
+
     public void parseFileObject(FileObject file) {
         Document doc = openDocument(file);
 
