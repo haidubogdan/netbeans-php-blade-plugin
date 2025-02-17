@@ -19,9 +19,12 @@
 package org.netbeans.modules.php.blade.syntax.antlr4.php;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import javax.swing.text.Document;
+import org.netbeans.modules.csl.api.Error;
 import org.antlr.v4.runtime.ANTLRErrorListener;
 import org.antlr.v4.runtime.BaseErrorListener;
 import org.antlr.v4.runtime.CharStream;
@@ -34,11 +37,20 @@ import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.Recognizer;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ParseTreeListener;
+import org.netbeans.editor.BaseDocument;
 import org.netbeans.modules.csl.api.OffsetRange;
 import org.netbeans.modules.csl.api.Severity;
+import org.netbeans.modules.parsing.api.ParserManager;
+import org.netbeans.modules.parsing.api.ResultIterator;
+import org.netbeans.modules.parsing.api.Source;
+import org.netbeans.modules.parsing.api.UserTask;
+import org.netbeans.modules.parsing.spi.ParseException;
 import org.netbeans.modules.php.blade.editor.indexing.PhpIndexUtils.FieldAccessType;
 import org.netbeans.modules.php.blade.editor.parser.BladeParserResult.BladeError;
+import org.netbeans.modules.php.blade.editor.parser.ParsingUtils;
+import org.netbeans.modules.php.editor.parser.PHPParseResult;
 import org.openide.filesystems.FileObject;
+import org.openide.util.Exceptions;
 
 /**
  *
@@ -49,10 +61,12 @@ public class BladePhpSnippetParser {
     private final String snippet;
     private final FileObject originFile;
     private final int snippetOffset;
-    private final List<org.netbeans.modules.csl.api.Error> errors = new ArrayList<>();
+    private final List<Error> errors = new ArrayList<>();
     private final Map<OffsetRange, PhpReference> identifierReference = new TreeMap<>();
     private final Map<OffsetRange, FieldAcces> fieldAccessReference = new TreeMap<>();
 
+    public static final String PHP_START = "<?php "; //NOI18N
+    
     public enum PhpReferenceType {
         PHP_NAMESPACE,
         PHP_CLASS,
@@ -75,9 +89,51 @@ public class BladePhpSnippetParser {
         parser.removeErrorListeners();
         parser.setErrorHandler(new RustANTLRErrorStrategy());
         parser.addErrorListener(createErrorListener());
-        //parser.setBuildParseTree(false);
+
         parser.addParseListener(createIdentifiablePhpElementReferences());
         parser.expression();
+    }
+    
+    public void syntaxAnalysis(){
+        ParsingUtils parsingUtils = new ParsingUtils();
+        BaseDocument doc = parsingUtils.createPhpBaseDocument(snippet);
+        if (doc == null) {
+            return;
+        }
+        
+        try {
+            Source source = Source.create(doc);
+
+            if (source == null) {
+                return;
+            }
+
+            Document sourceDoc = source.getDocument(false);
+
+            if (sourceDoc == null) {
+                return;
+            }
+
+            source.createSnapshot();
+            ParserManager.parseWhenScanFinished(Collections.singletonList(source), new UserTask() {
+
+                @Override
+                public void run(ResultIterator resultIterator) throws Exception {
+                    org.netbeans.modules.parsing.spi.Parser.Result parserResult = resultIterator.getParserResult();
+                    if (parserResult != null && parserResult instanceof PHPParseResult) {
+                        PHPParseResult phpParserResult = (PHPParseResult) parserResult;
+                        for (Error error : phpParserResult.getDiagnostics()) {
+                            int errorStartPosition = error.getStartPosition() + snippetOffset - 1;
+                            int errorEndPosition = error.getEndPosition() + snippetOffset;
+                            errors.add(new BladeError(error.getKey(), error.getDisplayName(), error.getDescription(), originFile, errorStartPosition, errorEndPosition, error.getSeverity()));
+                        }
+                    }
+                }
+            });
+
+        } catch (ParseException ex) {
+            Exceptions.printStackTrace(ex);
+        }
     }
 
     private ParseTreeListener createIdentifiablePhpElementReferences() {

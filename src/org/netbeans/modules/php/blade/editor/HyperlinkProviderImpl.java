@@ -60,8 +60,8 @@ public class HyperlinkProviderImpl implements HyperlinkProviderExt {
     public static final int MIN_STRING_IDENTIIFER_LENGTH = 5;
     public static final String FILE_TITLE = "Blade Template File"; // NOI18N
 
-    String[] viewMethods = new String[]{"view", "render", "make"}; // NOI18N
-    Set<String> viewMethodSet = new HashSet<>(Arrays.asList(viewMethods));
+    private final String[] viewMethods = new String[]{"view", "render", "make"}; // NOI18N
+    private final Set<String> viewMethodSet = new HashSet<>(Arrays.asList(viewMethods));
 
     public enum DeclarationType {
         VIEW_PATH;
@@ -181,9 +181,15 @@ public class HyperlinkProviderImpl implements HyperlinkProviderExt {
         } catch (IOException ex) {
             Exceptions.printStackTrace(ex);
         }
-
     }
 
+    /**
+     * compatible relation with laravel framework plugin
+     * blade editor is not a Php Extension, so that's the reason for the implementation of HyperlinkProvider.
+     * 
+     * @param doc
+     * @return 
+     */
     private boolean nonLaravelDeclFinderEnabled(Document doc) {
         Project projectOwner = FileSystemUtils.getProjectOwner(doc);
         if (projectOwner == null) {

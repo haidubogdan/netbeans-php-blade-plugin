@@ -26,7 +26,7 @@ import org.netbeans.api.annotations.common.CheckForNull;
 import org.netbeans.api.project.Project;
 import org.netbeans.modules.csl.api.OffsetRange;
 import org.netbeans.modules.php.blade.editor.BladeLanguage;
-import org.netbeans.modules.php.blade.editor.components.plugins.LivewireComponent;
+import org.netbeans.modules.php.blade.editor.components.plugins.LivewireComponentResource;
 import org.netbeans.modules.php.blade.editor.indexing.PhpIndexResult;
 import org.netbeans.modules.php.blade.editor.indexing.PhpIndexUtils;
 import org.netbeans.modules.php.blade.project.ComponentsSupport;
@@ -35,12 +35,17 @@ import org.netbeans.modules.php.blade.syntax.StringUtils;
 import org.openide.filesystems.FileObject;
 
 /**
- * most frequently used plugins for laravel
+ * Service class used to search, from index, info about a php component class using identified project related filters like : 
+ * - namespace
+ * - file path
+ * 
+ * 
  *
  * @author bhaidu
  */
-public class ComponentsCompletionService {
+public class ComponentsQueryService {
 
+    
     public Collection<PhpIndexResult> queryComponents(String prefix, FileObject fo) {
         Collection<PhpIndexResult> results = new ArrayList<>();
         Project project = ProjectUtils.getMainOwner(fo);
@@ -123,7 +128,7 @@ public class ComponentsCompletionService {
 
     @CheckForNull
     public FileObject getComponentResourceFile(String componentId, String classQualifiedName, FileObject sourceFo) {
-        if (classQualifiedName.toLowerCase().contains(LivewireComponent.LIVEWIRE_NAME)) {
+        if (classQualifiedName.toLowerCase().contains(LivewireComponentResource.LIVEWIRE_NAME)) {
             return getLivewireComponentResourceFile(componentId, sourceFo);
         }
 
@@ -137,7 +142,7 @@ public class ComponentsCompletionService {
             return null;
         }
 
-        FileObject componentResource = project.getProjectDirectory().getFileObject(LivewireComponent.RESOURCE_PATH + componentId + BladeLanguage.FILE_EXTENSION_WITH_DOT); // NOI18N
+        FileObject componentResource = project.getProjectDirectory().getFileObject(LivewireComponentResource.RESOURCE_PATH + componentId + BladeLanguage.FILE_EXTENSION_WITH_DOT); // NOI18N
 
         if (componentResource != null && componentResource.isValid()) {
             return componentResource;

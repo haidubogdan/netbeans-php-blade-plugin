@@ -22,17 +22,13 @@ import java.io.IOException;
 import java.util.Collections;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
-import org.netbeans.api.lexer.Language;
 import org.netbeans.editor.BaseDocument;
-import org.netbeans.modules.csl.api.GsfLanguage;
-import org.netbeans.modules.csl.spi.DefaultLanguageConfig;
 import org.netbeans.modules.parsing.api.ParserManager;
 import org.netbeans.modules.parsing.api.ResultIterator;
 import org.netbeans.modules.parsing.api.Source;
 import org.netbeans.modules.parsing.api.UserTask;
 import org.netbeans.modules.parsing.spi.ParseException;
 import org.netbeans.modules.parsing.spi.Parser;
-import org.netbeans.modules.php.blade.editor.BladeLanguage;
 import org.netbeans.modules.php.editor.parser.PHPParseResult;
 import org.openide.filesystems.FileObject;
 import org.openide.util.Exceptions;
@@ -69,6 +65,7 @@ public final class ParsingUtils {
             return null;
         }
     }
+
     public void parseFileObject(FileObject file) {
         Document doc = openDocument(file);
 
@@ -86,7 +83,7 @@ public final class ParsingUtils {
             }
 
             source.createSnapshot();
-            ParserManager.parse(Collections.singletonList(source), new UserTask() {
+            ParserManager.parseWhenScanFinished(Collections.singletonList(source), new UserTask() {
 
                 @Override
                 public void run(ResultIterator resultIterator) throws Exception {

@@ -18,14 +18,15 @@
  */
 package org.netbeans.modules.php.blade.editor.components;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 import org.netbeans.modules.php.editor.parser.astnodes.FormalParameter;
 import org.openide.filesystems.FileObject;
 
 /**
- * TO BE CONTINUED
- * 
+ * Basic model class for to store information for a laravel component php class
+ *
  * @author bhaidu
  */
 public class ComponentModel {
@@ -33,24 +34,31 @@ public class ComponentModel {
     private final FileObject file;
     private boolean isValid = false;
     private final Set<FormalParameter> constructorProperties = new HashSet<>();
-    
-    public ComponentModel(FileObject file){
+
+    private final String[] componentParentClassNames = new String[]{"Component", "BladeComponent"}; // NOI18N
+    private final Set<String> componentParentClassNamesSet = new HashSet<>(Arrays.asList(componentParentClassNames));
+
+    public ComponentModel(FileObject file) {
         this.file = file;
     }
-    
-    public boolean isValid(){
+
+    public boolean isValid() {
         return isValid;
     }
-    
-    public void checkClassValidity(String className){
-        isValid = className.equals("Component") || className.equals("BladeComponent"); // NOI18N
+
+    public void checkClassValidity(String className) {
+        isValid = componentParentClassNamesSet.contains(className);
     }
-    
-    public void addConstructorProperty(FormalParameter property){
+
+    public void addConstructorProperty(FormalParameter property) {
         constructorProperties.add(property);
     }
-    
-    public Set<FormalParameter> getConstructorProperties(){
+
+    public Set<FormalParameter> getConstructorProperties() {
         return constructorProperties;
+    }
+
+    public FileObject getFile() {
+        return file;
     }
 }

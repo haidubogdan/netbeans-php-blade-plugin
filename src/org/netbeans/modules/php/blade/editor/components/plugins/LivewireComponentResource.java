@@ -22,7 +22,7 @@ package org.netbeans.modules.php.blade.editor.components.plugins;
  *
  * @author bogdan
  */
-public class LivewireComponent {
+public class LivewireComponentResource {
     public static final String LIVEWIRE_NAME = "livewire";  // NOI18N
-    public static String RESOURCE_PATH = "resources/views/livewire/"; // NOI18N
+    public static final String RESOURCE_PATH = "resources/views/livewire/"; // NOI18N
 }

@@ -35,12 +35,9 @@ import org.netbeans.modules.php.editor.parser.PHPParseResult;
 import org.netbeans.modules.php.editor.parser.astnodes.ASTNode;
 import org.netbeans.modules.php.editor.parser.astnodes.ClassDeclaration;
 import org.netbeans.modules.php.editor.parser.astnodes.Expression;
-import org.netbeans.modules.php.editor.parser.astnodes.FieldsDeclaration;
 import org.netbeans.modules.php.editor.parser.astnodes.FormalParameter;
 import org.netbeans.modules.php.editor.parser.astnodes.MethodDeclaration;
 import org.netbeans.modules.php.editor.parser.astnodes.visitors.DefaultVisitor;
-import org.openide.filesystems.FileChangeAdapter;
-import org.openide.filesystems.FileEvent;
 import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileUtil;
 import org.openide.util.Cancellable;
@@ -59,17 +56,21 @@ import org.openide.util.RequestProcessor;
 
 //list of most common laravel framework directory paths for blade components classes
 @NamespaceRegister({
-    @Namespace(path = "App\\View\\Components", from_app = true, relativeFilePath = "app/View/Components"),
-    @Namespace(path = "App\\Http\\Livewire", from_app = true, relativeFilePath = "app/Http/Livewire"),
-    @Namespace(path = "App\\Livewire", from_app = true, relativeFilePath = "app/Livewire"),//from 10
+    @Namespace(path = "App\\View\\Components", fromApp = true, relativeFilePath = "app/View/Components"),
+    @Namespace(path = "App\\Http\\Livewire", fromApp = true, relativeFilePath = "app/Http/Livewire"),
+    @Namespace(path = "App\\Livewire", fromApp = true, relativeFilePath = "app/Livewire"),//from 10
     @Namespace(path = "Illuminate\\Console\\View\\Components"),
     @Namespace(path = "BladeUI\\Icons\\Components", packageName = "blade-ui-kit/blade-icons", relativeFilePath = "blade-ui-kit/blade-icons/src/Components"),
     @Namespace(path = "BladeUIKit\\Components", packageName = "blade-ui-kit/blade-ui-kit", relativeFilePath = "blade-ui-kit/blade-ui-kit/src/Components"),})
 public class ComponentsSupport {
 
+    public static final String COMPONENT_TAG_NAME_PREFIX = "x-"; //NOI18N
+    public static final String COMPONENT_TAG_PREFIX = "<" + COMPONENT_TAG_NAME_PREFIX; //NOI18N
+    public static final int COMPONENT_TAG_PREFIX_LENGTH = COMPONENT_TAG_PREFIX.length();
+
     private static final Map<Project, ComponentsSupport> INSTANCES = new HashMap<>();
     private final Map<FileObject, Namespace> installedComponentNamespace = new HashMap<>();
-    public static final int COMPONENT_TAG_PREFIX_LENGTH = "<x-".length(); //NOI18N
+    
     private static final RequestProcessor RP = new RequestProcessor(ComponentsSupport.class);
     private static final AtomicBoolean installationScan = new AtomicBoolean(false);
     private final Project project;
@@ -94,7 +95,7 @@ public class ComponentsSupport {
     public void scanForInstalledComponents() {
         for (Namespace namespace : getRegisteredNamespaces()) {
             FileObject fo = null;
-            if (namespace.from_app()) {
+            if (namespace.fromApp()) {
                 //check if folder exists
                 fo = project.getProjectDirectory().getFileObject(namespace.relativeFilePath());
             } else if (namespace.relativeFilePath() != null && namespace.relativeFilePath().length() > 0) {
@@ -227,11 +228,6 @@ public class ComponentsSupport {
         }
 
         @Override
-        public void visit(FieldsDeclaration node) {
-            //todo add functionality
-        }
-
-        @Override
         public void visit(MethodDeclaration node) {
             if (node.getFunction() == null){
                 return;
@@ -254,30 +250,6 @@ public class ComponentsSupport {
         private String sanitazeClassName(String className) {
             return className.replace("\\", ""); // NOI18N
         }
-    }
-
-    private final class FileChangeListenerImpl extends FileChangeAdapter {
-
-        @Override
-        public void fileFolderCreated(FileEvent fe) {
-
-        }
-
-        @Override
-        public void fileChanged(FileEvent fe) {
-            processFile(fe.getFile());
-        }
-
-        @Override
-        public void fileDataCreated(FileEvent fe) {
-
-        }
-
-        private void processFile(FileObject file) {
-            assert file.isData() : file;
-            //scan
-        }
-
     }
 
 }

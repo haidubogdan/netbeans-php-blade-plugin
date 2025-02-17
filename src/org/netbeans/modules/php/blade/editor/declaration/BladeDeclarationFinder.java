@@ -37,7 +37,7 @@ import org.netbeans.modules.php.blade.csl.elements.ElementType;
 import org.netbeans.modules.php.blade.csl.elements.NamedElement;
 import org.netbeans.modules.php.blade.csl.elements.PathElement;
 import org.netbeans.modules.php.blade.csl.elements.PhpFunctionElement;
-import org.netbeans.modules.php.blade.editor.components.ComponentsCompletionService;
+import org.netbeans.modules.php.blade.editor.components.ComponentsQueryService;
 import org.netbeans.modules.php.blade.editor.directives.CustomDirectives;
 import org.netbeans.modules.php.blade.editor.directives.CustomDirectives.CustomDirective;
 import org.netbeans.modules.php.blade.editor.indexing.BladeIndex;
@@ -59,6 +59,7 @@ import org.netbeans.modules.php.blade.editor.parser.BladeParserResult.BladeStrin
 import org.netbeans.modules.php.blade.editor.parser.BladeParserResult.Reference;
 import org.netbeans.modules.php.blade.editor.path.BladePathUtils;
 import org.netbeans.modules.php.blade.project.ComponentsSupport;
+import static org.netbeans.modules.php.blade.project.ComponentsSupport.COMPONENT_TAG_NAME_PREFIX;
 import org.netbeans.modules.php.blade.syntax.StringUtils;
 import static org.netbeans.modules.php.blade.syntax.antlr4.php.BladePhpAntlrParser.IDENTIFIER;
 import org.netbeans.modules.php.blade.syntax.antlr4.php.BladePhpAntlrUtils;
@@ -152,7 +153,7 @@ public class BladeDeclarationFinder implements DeclarationFinder {
 
                     if (htmlTokenId.equals(HTMLTokenId.TAG_OPEN)) {
                         String tag = htmlToken.text().toString();
-                        if (tag.startsWith("x-")) { // NOI18N
+                        if (tag.startsWith(COMPONENT_TAG_NAME_PREFIX)) { // NOI18N
                             return new OffsetRange(tokenOffset, tokenOffset + htmlToken.length());
                         }
                     }
@@ -467,11 +468,11 @@ public class BladeDeclarationFinder implements DeclarationFinder {
 
         if (htmlTokenId.equals(HTMLTokenId.TAG_OPEN)) {
             String tag = htmlToken.text().toString();
-            if (!tag.startsWith("x-")) { // NOI18N
+            if (!tag.startsWith(COMPONENT_TAG_NAME_PREFIX)) {
                 return location;
             }
-            ComponentsCompletionService componentComplervice = new ComponentsCompletionService();
-            String className = StringUtils.kebabToCamel(tag.substring("x-".length())); // NOI18N
+            ComponentsQueryService componentComplervice = new ComponentsQueryService();
+            String className = StringUtils.kebabToCamel(tag.substring(COMPONENT_TAG_NAME_PREFIX.length()));
 
             Collection<PhpIndexResult> indexedReferences = componentComplervice.findComponentClass(className, currentFile);
             ComponentsSupport componentSupport = ComponentsSupport.getInstance(projectOwner);

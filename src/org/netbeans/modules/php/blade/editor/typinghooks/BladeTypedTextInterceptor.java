@@ -94,8 +94,20 @@ public class BladeTypedTextInterceptor implements TypedTextInterceptor {
         
         int offset = context.getOffset();
         
-        if (offset < 2){
-            return;
+        switch(tagType) {
+            case CONTENT: {
+                if (offset < 1) {
+                    return;
+                }
+                break;
+            }
+            case RAW:
+            case COMMENT:{
+                if (offset < 2) {
+                    return;
+                }
+                break;
+            }
         }
         
         Document document = context.getDocument();

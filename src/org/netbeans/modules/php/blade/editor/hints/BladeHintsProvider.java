@@ -37,7 +37,7 @@ import org.netbeans.modules.csl.api.RuleContext;
 import org.netbeans.modules.csl.api.HintsProvider;
 import org.netbeans.modules.php.blade.editor.BladeLanguage;
 import org.netbeans.modules.php.blade.editor.directives.CustomDirectives;
-import static org.netbeans.modules.php.blade.editor.hints.PhpSyntaxErrorRule.PHP_SYNTAX_ERROR_HINT_ID;
+import static org.netbeans.modules.php.blade.editor.hints.PhpDirectiveSyntaxErrorRule.PHP_SYNTAX_ERROR_HINT_ID;
 import org.netbeans.modules.php.blade.editor.parser.BladeParserResult;
 import org.netbeans.modules.php.blade.editor.path.BladePathUtils;
 import org.netbeans.modules.php.blade.project.ProjectUtils;
@@ -139,16 +139,6 @@ public class BladeHintsProvider implements HintsProvider {
     public void computeErrors(HintsManager manager, RuleContext context, List<Hint> hints, List<Error> unhandled) {
         BladeParserResult parserResult = (BladeParserResult) context.parserResult;
         unhandled.addAll(parserResult.getDiagnostics());
-
-        Map<?, List<? extends Rule.AstRule>> allHints = manager.getHints(false, context);
-        List<? extends Rule.AstRule> phpSyntaxHints = allHints.get(PHP_SYNTAX_ERROR_HINT_ID); //NOI18N
-        if (phpSyntaxHints == null || phpSyntaxHints.isEmpty()) {
-            return;
-        }
-        Rule.AstRule rule = phpSyntaxHints.get(0);
-        if (manager.isEnabled(rule)) {
-            unhandled.addAll(parserResult.getPhpErrors());
-        }
     }
 
     /**

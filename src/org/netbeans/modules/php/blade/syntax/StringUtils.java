@@ -58,7 +58,7 @@ public final class StringUtils {
 
     public static String kebabToCamel(String str) {
         str = str.toLowerCase();
-        String[] words = str.split("-");
+        String[] words = str.split("-"); //NOI18N
         String camelCase = words[0];
         for (int i = 1; i < words.length; i++) {
             camelCase += words[i].substring(0, 1).toUpperCase() + words[i].substring(1);
@@ -67,6 +67,14 @@ public final class StringUtils {
     }
 
     public static boolean isWhitespace(String text) {
-        return text.replaceAll(" ", "").isEmpty();
+        return text.replaceAll(" ", "").isEmpty(); //NOI18N
+    }
+
+    public static String replaceLinesAndTabs(String input) {
+        String escapedString = input;
+        escapedString = escapedString.replaceAll("\n", "\\\\n"); // NOI18N
+        escapedString = escapedString.replaceAll("\r", "\\\\r"); // NOI18N
+        escapedString = escapedString.replaceAll("\t", "\\\\t"); // NOI18N
+        return escapedString;
     }
 }

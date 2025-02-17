@@ -25,7 +25,7 @@ package org.netbeans.modules.php.blade.editor;
 public final class EditorStringUtils {
 
     public static final String NAMESPACE_SEPARATOR = "\\"; // NOI18N
-    public static final String DB_QUOTE = "\"";
+    public static final String DB_QUOTE = "\""; // NOI18N
 
     private EditorStringUtils() {
     }

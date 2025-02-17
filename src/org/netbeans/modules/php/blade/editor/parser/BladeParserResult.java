@@ -44,6 +44,7 @@ import org.netbeans.modules.php.blade.editor.parser.listeners.PhpExpressionOccur
 import org.netbeans.modules.php.blade.editor.parser.listeners.ReferenceIdListener;
 import org.netbeans.modules.php.blade.editor.parser.listeners.ScopeListener;
 import org.netbeans.modules.php.blade.editor.parser.listeners.StructureListener;
+import org.netbeans.modules.php.blade.syntax.BladeDirectivesUtils;
 import org.netbeans.modules.php.blade.syntax.antlr4.php.BladePhpSnippetParser;
 import org.netbeans.modules.php.blade.syntax.antlr4.v10.BladeAntlrLexer;
 import org.netbeans.modules.php.blade.syntax.antlr4.v10.BladeAntlrParser;
@@ -56,7 +57,6 @@ import org.openide.filesystems.FileObject;
 public class BladeParserResult extends ParserResult {
 
     private final List<Error> errors = new ArrayList<>();
-    private final List<Error> phpErrors = new ArrayList<>();
     public final List<BladeStructureItem> structure = new ArrayList<>();
     public final List<OffsetRange> folds = new ArrayList<>();
     public final BladeReferenceIdsCollection bladeRreferenceIdsCollection = new BladeReferenceIdsCollection();
@@ -90,6 +90,7 @@ public class BladeParserResult extends ParserResult {
 
     public BladeParserResult get(String taskClass) {
         if (!finished) {
+            String taskClassL = taskClass.toLowerCase();
             BladeAntlrParser parser = createParser(getSnapshot());
             parser.setBuildParseTree(false);
             parser.addErrorListener(createErrorListener());
@@ -97,22 +98,21 @@ public class BladeParserResult extends ParserResult {
             parser.addParseListener(new PhpExpressionOccurenceListener(bladePhpExpressionOccurences));
             parser.addParseListener(new CustomDirectivesListener(bladeCustomDirectiveOccurences));
 
-            if (taskClass.toLowerCase().contains("completion")) { //NOI18N
+            if (taskClassL.contains("completion")) { //NOI18N
                 parser.addParseListener(new ScopeListener(bladeScope));
             }
 
             //avoid on index
-            if (!taskClass.toLowerCase().contains(".indexing.Repository")) { //NOI18N
+            if (!taskClassL.contains(".indexing.repository")) { //NOI18N
                 parser.addParseListener(new StructureListener(structure, folds, getFileObject()));
             }
 
             evaluateParser(parser);
 
-            if (allowPhpSyntaxParsingForTask(taskClass) 
+            if (allowPhpSyntaxParsingForTask(taskClassL) 
                     && BladeHintsProvider.phpSyntaxErrorsDisplayEnabled()
                     ) {
-                //comment until logic is improved
-                //phpSyntaxAnalyzer();
+                phpSyntaxAnalyzer();
             }
 
             finished = true;
@@ -180,11 +180,14 @@ public class BladeParserResult extends ParserResult {
     }
 
     public void phpSyntaxAnalyzer() {
-        //to implement
-    }
-    
-    public List<? extends Error> getPhpErrors(){
-        return phpErrors;
+        for (OffsetRange range : getBladePhpExpressionOccurences().getPhpInlineOccurences()) {
+            String prefix = BladePhpSnippetParser.PHP_START;
+            CharSequence snapshotExpr = getSnapshot().getText().subSequence(range.getStart(), range.getEnd());
+            int start = range.getStart() + prefix.length() - BladeDirectivesUtils.DIRECTIVE_PHP.length();
+            BladePhpSnippetParser phpSnippetParser = new BladePhpSnippetParser(prefix + snapshotExpr.toString(), getFileObject(), start);
+            phpSnippetParser.syntaxAnalysis();
+            errors.addAll(phpSnippetParser.getDiagnostics());
+        }
     }
 
     public static class BladeStringReference {
@@ -198,11 +201,11 @@ public class BladeParserResult extends ParserResult {
         }
     }
     
-    private boolean allowPhpSyntaxParsingForTask(String taskClass){
-        return !taskClass.toLowerCase().contains("completion")  //NOI18N
-                    && !taskClass.toLowerCase().contains("Declaration")  //NOI18N
-                    && !taskClass.toLowerCase().contains(".indexing.Repository")  //NOI18N
-                    && !taskClass.toLowerCase().contains("csl.navigation") //NOI18N
+    private boolean allowPhpSyntaxParsingForTask(String taskClassL){
+        return !taskClassL.contains("completion")  //NOI18N
+                    && !taskClassL.contains("declaration")  //NOI18N
+                    && !taskClassL.contains(".indexing.repository")  //NOI18N
+                    && !taskClassL.contains("csl.navigation") //NOI18N
                 ;  
     }
 
@@ -243,29 +246,6 @@ public class BladeParserResult extends ParserResult {
         PROPERTY,
         CONSTANT,
         METHOD;
-    }
-
-    public static class FieldAccessReference {
-
-        public final ReferenceType type;
-        public final Reference ownerClass;
-        public final String fieldName;
-        public final FieldType fieldType;
-
-        public FieldAccessReference(ReferenceType type, Reference ownerClass,
-                String fieldName, FieldType fieldType) {
-            this.type = type;
-            this.ownerClass = ownerClass;
-            this.fieldName = fieldName;
-            this.fieldType = fieldType;
-        }
-    }
-
-    public class ForeachVariables {
-
-        public String arrayVariable;
-        public String keyVariable;
-        public String itemVariable;
     }
 
     /**

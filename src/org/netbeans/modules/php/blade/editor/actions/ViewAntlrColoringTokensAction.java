@@ -37,6 +37,7 @@ import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.Vocabulary;
+import org.netbeans.modules.php.blade.syntax.StringUtils;
 import org.netbeans.modules.php.blade.syntax.antlr4.v10.BladeAntlrColoringLexer;
 import org.openide.awt.ActionID;
 import org.openide.awt.ActionRegistration;
@@ -117,7 +118,7 @@ public class ViewAntlrColoringTokensAction extends AbstractAction implements Act
                     result.append(tokenId);
                     result.append(" ");
                     result.append(vocabulary.getDisplayName(tokenId));
-                    String tokenText = text;
+                    String tokenText = StringUtils.replaceLinesAndTabs(text);
                     if (!tokenText.isEmpty()) {
                         result.append(" ");
                         result.append("[");

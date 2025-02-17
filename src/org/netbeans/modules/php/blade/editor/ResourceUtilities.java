@@ -36,6 +36,9 @@ public final class ResourceUtilities {
     public static final String COMPONENT_TAG = "org/netbeans/modules/html/custom/resources/custom_html_element.png"; //NOI18N
     public static final String CSS_FILE = "org/netbeans/modules/css/visual/resources/style_sheet_16.png"; //NOI18N
     public static final String JS_FILE = "org/netbeans/modules/css/visual/resources/javascript.png"; //NOI18N
+    public static final String CUSTOM_HTML_ICON = "org/netbeans/modules/html/custom/resources/custom_html_element.png"; //NOI18N
+    public static final String XML_ATTRIBUTE_ICON = "org/netbeans/modules/xml/schema/completion/resources/attribute.png"; //NOI18N
+    
     
     private ResourceUtilities() {
         
