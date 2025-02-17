@@ -29,11 +29,16 @@ import org.netbeans.modules.csl.api.OffsetRange;
 public class BladePhpExpressionOccurences {
 
     private final Set<OffsetRange> phpInlineExpressionLocations = new TreeSet<>();
+    private final Set<OffsetRange> phpRawInlineExpressionLocations = new TreeSet<>();
     private final Set<OffsetRange> phpOutputExpressionLocations = new TreeSet<>();
     private final Set<OffsetRange> phpForeachExpressionLocations = new TreeSet<>();
 
     public void markPhpInlineExpressionOccurence(OffsetRange range) {
         phpInlineExpressionLocations.add(range);
+    }
+    
+    public void markPhpRawInlineExpressionOccurence(OffsetRange range) {
+        phpRawInlineExpressionLocations.add(range);
     }
 
     public void markPhpOutputExpressionOccurence(OffsetRange range) {
@@ -70,6 +75,18 @@ public class BladePhpExpressionOccurences {
                 return range;
             }
         }
+        
+        for (OffsetRange range : phpRawInlineExpressionLocations) {
+
+            if (offset < range.getStart()) {
+                //excedeed the offset range
+                break;
+            }
+
+            if (range.containsInclusive(offset)) {
+                return range;
+            }
+        }
 
         //FOREACH
         for (OffsetRange range : phpForeachExpressionLocations) {
@@ -90,6 +107,11 @@ public class BladePhpExpressionOccurences {
     public Set<OffsetRange> getPhpInlineOccurences() {
         return phpInlineExpressionLocations;
     }
+    
+    public Set<OffsetRange> getPhpRawInlineOccurences() {
+        return phpRawInlineExpressionLocations;
+    }
+
 
     public Set<OffsetRange> getPhpOutputOccurences() {
         return phpOutputExpressionLocations;

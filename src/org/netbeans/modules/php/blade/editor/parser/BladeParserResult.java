@@ -95,8 +95,6 @@ public class BladeParserResult extends ParserResult {
             parser.setBuildParseTree(false);
             parser.addErrorListener(createErrorListener());
             parser.addParseListener(new ReferenceIdListener(bladeRreferenceIdsCollection));
-            parser.addParseListener(new PhpExpressionOccurenceListener(bladePhpExpressionOccurences));
-            parser.addParseListener(new CustomDirectivesListener(bladeCustomDirectiveOccurences));
 
             if (taskClassL.contains("completion")) { //NOI18N
                 parser.addParseListener(new ScopeListener(bladeScope));
@@ -104,6 +102,10 @@ public class BladeParserResult extends ParserResult {
 
             //avoid on index
             if (!taskClassL.contains(".indexing.repository")) { //NOI18N
+                //until the error ballon issue is fixed
+                parser.addParseListener(new PhpExpressionOccurenceListener(bladePhpExpressionOccurences));
+
+                parser.addParseListener(new CustomDirectivesListener(bladeCustomDirectiveOccurences));
                 parser.addParseListener(new StructureListener(structure, folds, getFileObject()));
             }
 
@@ -204,7 +206,6 @@ public class BladeParserResult extends ParserResult {
     private boolean allowPhpSyntaxParsingForTask(String taskClassL){
         return !taskClassL.contains("completion")  //NOI18N
                     && !taskClassL.contains("declaration")  //NOI18N
-                    && !taskClassL.contains(".indexing.repository")  //NOI18N
                     && !taskClassL.contains("csl.navigation") //NOI18N
                 ;  
     }

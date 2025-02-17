@@ -97,7 +97,7 @@ public final class CustomDirectives {
         LOGGER.info("Extracting custom directives");
         String[] compilerPathList = BladeProjectProperties.getInstance(project).getCompilerPathList();
         FileObject defaultAppProvider = project.getProjectDirectory().getFileObject(APP_PROVIDER_RELATIVE_PATH);
-        String defaultAppPath = "";
+        String defaultAppPath = ""; // NOI18N
 
         if (defaultAppProvider != null) {
             addDirectiveNamesFromFile(defaultAppProvider);

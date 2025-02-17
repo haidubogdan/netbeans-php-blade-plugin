@@ -293,7 +293,7 @@ public class BladeHintsProvider implements HintsProvider {
         @Override
         public void implement() throws Exception {
             OptionsDisplayer displayer = OptionsDisplayer.getDefault();
-            displayer.open("Editor/Hints/text/x-blade"); //NOI18N
+            displayer.open("Editor/Hints/" + BladeLanguage.MIME_TYPE); //NOI18N
         }
 
         @Override

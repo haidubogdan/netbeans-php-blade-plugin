@@ -52,4 +52,7 @@ public class BladeParserErrorTest extends ParserTestBase {
         checkErrors("testfiles/parser/errors/wrong_foreach_syntax_error.blade.php");
     }
 
+    public void testWrongEmptySyntaxError() throws Exception {
+        checkErrors("testfiles/parser/errors/wrong_empty_syntax_error.blade.php");
+    }
 }

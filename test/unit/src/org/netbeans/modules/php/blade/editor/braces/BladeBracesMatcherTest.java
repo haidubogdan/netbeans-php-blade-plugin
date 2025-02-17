@@ -133,7 +133,6 @@ public class BladeBracesMatcherTest extends CslTestBase {
     }
     
     protected void assertFileContent(String expected) throws IOException{
-//        String fullClassName = this.getClass().getName();
         // try to find golden file
         String goldenFolder = getDataSourceDir().getAbsolutePath() + "/testfiles/braces/";
         File goldenFile = new File(goldenFolder +  getName() + ".braces");
