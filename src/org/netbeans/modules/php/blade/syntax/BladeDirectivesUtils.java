@@ -50,6 +50,7 @@ public final class BladeDirectivesUtils {
     public static final String DIRECTIVE_SESSION = "@session"; // NOI18N
     public static final String DIRECTIVE_CAN = "@can"; // NOI18N
     public static final String DIRECTIVE_UNLESS = "@unless"; // NOI18N
+
     public static final String DIRECTIVE_PHP = "@php"; // NOI18N
 
     public static String[] blockDirectiveEndings(String directive) {

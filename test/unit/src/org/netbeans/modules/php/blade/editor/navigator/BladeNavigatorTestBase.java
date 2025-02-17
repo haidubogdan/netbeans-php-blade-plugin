@@ -21,7 +21,6 @@ package org.netbeans.modules.php.blade.editor.navigator;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import static org.netbeans.junit.NbTestCase.assertFile;
 import org.netbeans.modules.csl.api.HtmlFormatter;
@@ -66,8 +65,6 @@ public abstract class BladeNavigatorTestBase extends ParserTestBase {
 
         ParserManager.parse(Collections.singleton(testSource), task);
 
-//        result.sort(STRUCTURE_ITEM_COMPARATOR);
-//
         for (StructureItem structureItem : result) {
             structureItem.getNestedItems();
             sb.append(printStructureItem(structureItem, 0));

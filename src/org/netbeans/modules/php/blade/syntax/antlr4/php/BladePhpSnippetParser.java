@@ -64,7 +64,6 @@ public class BladePhpSnippetParser {
     private final List<Error> errors = new ArrayList<>();
     private final Map<OffsetRange, PhpReference> identifierReference = new TreeMap<>();
     private final Map<OffsetRange, FieldAcces> fieldAccessReference = new TreeMap<>();
-
     public static final String PHP_START = "<?php "; //NOI18N
     
     public enum PhpReferenceType {
@@ -115,8 +114,8 @@ public class BladePhpSnippetParser {
             }
 
             source.createSnapshot();
-            ParserManager.parseWhenScanFinished(Collections.singletonList(source), new UserTask() {
 
+            ParserManager.parseWhenScanFinished(Collections.singletonList(source), new UserTask() {
                 @Override
                 public void run(ResultIterator resultIterator) throws Exception {
                     org.netbeans.modules.parsing.spi.Parser.Result parserResult = resultIterator.getParserResult();
