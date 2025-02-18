@@ -139,16 +139,6 @@ public class BladeHintsProvider implements HintsProvider {
     public void computeErrors(HintsManager manager, RuleContext context, List<Hint> hints, List<Error> unhandled) {
         BladeParserResult parserResult = (BladeParserResult) context.parserResult;
         unhandled.addAll(parserResult.getDiagnostics());
-
-        Map<?, List<? extends Rule.AstRule>> allHints = manager.getHints(false, context);
-        List<? extends Rule.AstRule> phpSyntaxHints = allHints.get(PHP_SYNTAX_ERROR_HINT_ID); //NOI18N
-        if (phpSyntaxHints == null || phpSyntaxHints.isEmpty()) {
-            return;
-        }
-        Rule.AstRule rule = phpSyntaxHints.get(0);
-        if (manager.isEnabled(rule)) {
-            unhandled.addAll(parserResult.getPhpErrors());
-        }
     }
 
     /**
@@ -303,7 +293,7 @@ public class BladeHintsProvider implements HintsProvider {
         @Override
         public void implement() throws Exception {
             OptionsDisplayer displayer = OptionsDisplayer.getDefault();
-            displayer.open("Editor/Hints/text/x-blade"); //NOI18N
+            displayer.open("Editor/Hints/" + BladeLanguage.MIME_TYPE); //NOI18N
         }
 
         @Override

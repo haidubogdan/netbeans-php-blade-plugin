@@ -142,7 +142,7 @@ public class PhpExpressionOccurenceListener extends BladeAntlrParserBaseListener
         }
         Token openTag = ctx.start;
         Token closeTag = ctx.stop;
-        markPhpExprOccurence(openTag, closeTag, 1);
+        markPhpRawExprOccurence(openTag, closeTag, 1);
     }
 
     private void markPhpExprOccurence(Token start, Token end, int offset) {
@@ -155,6 +155,18 @@ public class PhpExpressionOccurenceListener extends BladeAntlrParserBaseListener
         
         OffsetRange range = new OffsetRange(startOffset, endOffset);
         phpExprOccurences.markPhpInlineExpressionOccurence(range);
+    }
+    
+    private void markPhpRawExprOccurence(Token start, Token end, int offset) {
+        int startOffset = start.getStopIndex() + offset;
+        int endOffset = end.getStartIndex();
+        
+        if (startOffset > endOffset){
+            return;
+        }
+        
+        OffsetRange range = new OffsetRange(startOffset, endOffset);
+        phpExprOccurences.markPhpRawInlineExpressionOccurence(range);
     }
     
     private void markPhpOutputExprOccurence(Token start, Token end, int offset) {

@@ -57,7 +57,6 @@ import org.openide.filesystems.FileObject;
 public class BladeParserResult extends ParserResult {
 
     private final List<Error> errors = new ArrayList<>();
-    private final List<Error> phpErrors = new ArrayList<>();
     public final List<BladeStructureItem> structure = new ArrayList<>();
     public final List<OffsetRange> folds = new ArrayList<>();
     public final BladeReferenceIdsCollection bladeRreferenceIdsCollection = new BladeReferenceIdsCollection();
@@ -187,12 +186,8 @@ public class BladeParserResult extends ParserResult {
             int start = range.getStart() + prefix.length() - BladeDirectivesUtils.DIRECTIVE_PHP.length();
             BladePhpSnippetParser phpSnippetParser = new BladePhpSnippetParser(prefix + snapshotExpr.toString(), getFileObject(), start);
             phpSnippetParser.syntaxAnalysis();
-            phpErrors.addAll(phpSnippetParser.getDiagnostics());
+            errors.addAll(phpSnippetParser.getDiagnostics());
         }
-    }
-    
-    public List<? extends Error> getPhpErrors(){
-        return phpErrors;
     }
 
     public static class BladeStringReference {
