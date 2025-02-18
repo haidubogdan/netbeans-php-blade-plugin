@@ -1,4 +1,4 @@
-// Generated from BladeAntlrLexer.g4 by ANTLR 4.13.0
+// Generated from BladeAntlrLexer.g4 by ANTLR 4.13.2
 
  /*
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -30,9 +30,9 @@ import org.antlr.v4.runtime.atn.*;
 import org.antlr.v4.runtime.dfa.DFA;
 import org.antlr.v4.runtime.misc.*;
 
-@SuppressWarnings({"all", "warnings", "unchecked", "unused", "cast", "CheckReturnValue"})
+@SuppressWarnings({"all", "warnings", "unchecked", "unused", "cast", "CheckReturnValue", "this-escape"})
 public class BladeAntlrLexer extends LexerAdaptor {
-	static { RuntimeMetaData.checkVersion("4.13.0", RuntimeMetaData.VERSION); }
+	static { RuntimeMetaData.checkVersion("4.13.2", RuntimeMetaData.VERSION); }
 
 	protected static final DFA[] _decisionToDFA;
 	protected static final PredictionContextCache _sharedContextCache =
