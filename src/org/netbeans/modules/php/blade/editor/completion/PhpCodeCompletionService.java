@@ -215,7 +215,7 @@ public class PhpCodeCompletionService {
     }
 
     /**
-     * warning this doesn't check permission
+     * warning this doesn't check visibility : public, private, protected
      *
      * @param completionProposals
      * @param prefix

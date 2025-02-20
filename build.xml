@@ -7,28 +7,33 @@
     <import file="nbproject/build-impl.xml"/>
     <target name="generate-antlr-parser" description="Regenerate the ANTLRv4 parser" depends="init">
         <property name="v10.outdir" location="${src.dir}/org/netbeans/modules/php/blade/syntax/antlr4/v10"/>
-        <property name="formatter.outdir" location="${src.dir}/org/netbeans/modules/php/blade/syntax/antlr4/formatter"/>
-        <property name="php.outdir" location="${src.dir}/org/netbeans/modules/php/blade/syntax/antlr4/php"/>
-
+        
+        <!--coloring-->
+        <java classname="org.antlr.v4.Tool"  fork="true" dir="${v10.outdir}">
+            <arg value="-o"/>
+            <arg value="${v10.outdir}"/>
+            <arg value="BladeAntlrColoringLexer.g4"/>
+        </java>
+        
+        <!--ide parser-->
         <java classname="org.antlr.v4.Tool"  fork="true" dir="${v10.outdir}">
             <arg value="-o"/>
             <arg value="${v10.outdir}"/>
             <arg value="BladeAntlrLexer.g4"/>
             <arg value="BladeAntlrParser.g4"/>
         </java>
-        <java classname="org.antlr.v4.Tool"  fork="true" dir="${v10.outdir}">
-            <arg value="-o"/>
-            <arg value="${v10.outdir}"/>
-            <arg value="BladeAntlrColoringLexer.g4"/>
-        </java>
 
+        <!--formatter-->
+        <property name="formatter.outdir" location="${src.dir}/org/netbeans/modules/php/blade/syntax/antlr4/formatter"/>
         <java classname="org.antlr.v4.Tool" fork="true" dir="${formatter.outdir}">
             <arg value="-o"/>
             <arg value="${formatter.outdir}"/>
             <arg value="BladeAntlrFormatterLexer.g4"/>
             <arg value="BladeAntlrFormatterParser.g4"/>
         </java>
-        
+
+        <!--php-->
+        <property name="php.outdir" location="${src.dir}/org/netbeans/modules/php/blade/syntax/antlr4/php"/>
         <java classname="org.antlr.v4.Tool" fork="true" dir="${php.outdir}">
             <arg value="-o"/>
             <arg value="${php.outdir}"/>
@@ -36,6 +41,7 @@
             <arg value="BladePhpAntlrParser.g4"/>
         </java>
         
+        <!--html-->
         <property name="html_components.outdir" location="${src.dir}/org/netbeans/modules/php/blade/syntax/antlr4/html_components"/>
         <java classname="org.antlr.v4.Tool" fork="true" dir="${html_components.outdir}">
             <arg value="-o"/>

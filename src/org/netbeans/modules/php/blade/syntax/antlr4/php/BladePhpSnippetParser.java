@@ -65,7 +65,7 @@ public class BladePhpSnippetParser {
     private final Map<OffsetRange, PhpReference> identifierReference = new TreeMap<>();
     private final Map<OffsetRange, FieldAcces> fieldAccessReference = new TreeMap<>();
 
-    public static final String PHP_START = "<?php ";
+    public static final String PHP_START = "<?php "; //NOI18N
     
     public enum PhpReferenceType {
         PHP_NAMESPACE,
@@ -89,7 +89,7 @@ public class BladePhpSnippetParser {
         parser.removeErrorListeners();
         parser.setErrorHandler(new RustANTLRErrorStrategy());
         parser.addErrorListener(createErrorListener());
-        //parser.setBuildParseTree(false);
+
         parser.addParseListener(createIdentifiablePhpElementReferences());
         parser.expression();
     }
@@ -115,7 +115,7 @@ public class BladePhpSnippetParser {
             }
 
             source.createSnapshot();
-            ParserManager.parse(Collections.singletonList(source), new UserTask() {
+            ParserManager.parseWhenScanFinished(Collections.singletonList(source), new UserTask() {
 
                 @Override
                 public void run(ResultIterator resultIterator) throws Exception {
@@ -123,9 +123,9 @@ public class BladePhpSnippetParser {
                     if (parserResult != null && parserResult instanceof PHPParseResult) {
                         PHPParseResult phpParserResult = (PHPParseResult) parserResult;
                         for (Error error : phpParserResult.getDiagnostics()) {
-                            int errorStartPosition = error.getStartPosition() + snippetOffset;
+                            int errorStartPosition = error.getStartPosition() + snippetOffset - 1;
                             int errorEndPosition = error.getEndPosition() + snippetOffset;
-                            errors.add(new BladeError(error.getKey(), error.getDisplayName(), null, originFile, errorStartPosition, errorEndPosition, error.getSeverity()));
+                            errors.add(new BladeError(error.getKey(), error.getDisplayName(), error.getDescription(), originFile, errorStartPosition, errorEndPosition, error.getSeverity()));
                         }
                     }
                 }

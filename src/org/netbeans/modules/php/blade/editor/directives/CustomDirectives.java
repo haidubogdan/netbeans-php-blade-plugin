@@ -33,7 +33,9 @@ import org.netbeans.modules.csl.api.DeclarationFinder;
 import org.netbeans.modules.php.blade.editor.parser.ParsingUtils;
 import org.netbeans.modules.php.blade.project.BladeProjectProperties;
 import static org.netbeans.modules.php.blade.project.BladeProjectSupport.APP_PROVIDER_RELATIVE_PATH;
+import static org.netbeans.modules.php.blade.syntax.BladeDirectivesUtils.AT;
 import static org.netbeans.modules.php.blade.syntax.BladeDirectivesUtils.DIRECTIVE_ELSE;
+import static org.netbeans.modules.php.blade.syntax.BladeDirectivesUtils.DIRECTIVE_UNLESS;
 import static org.netbeans.modules.php.blade.syntax.BladeDirectivesUtils.END_DIRECTIVE_PREFIX;
 import org.netbeans.modules.php.editor.parser.PHPParseResult;
 import org.netbeans.modules.php.editor.parser.astnodes.Expression;
@@ -242,12 +244,12 @@ public final class CustomDirectives {
 
                 //Custom If Statements
                 if (functionName.equals("if")) { // NOI18N
-                    directives.add(new CustomDirective("@" + escapedDirectiveName, name.getStartOffset(), true)); // NOI18N
-                    directives.add(new CustomDirective("@unless" + escapedDirectiveName, name.getStartOffset())); // NOI18N
+                    directives.add(new CustomDirective(AT + escapedDirectiveName, name.getStartOffset(), true));
+                    directives.add(new CustomDirective(DIRECTIVE_UNLESS + escapedDirectiveName, name.getStartOffset())); // NOI18N
                     directives.add(new CustomDirective(DIRECTIVE_ELSE + escapedDirectiveName, name.getStartOffset())); 
                     directives.add(new CustomDirective(END_DIRECTIVE_PREFIX + escapedDirectiveName, name.getStartOffset())); 
                 } else {
-                    directives.add(new CustomDirective("@" + escapedDirectiveName, name.getStartOffset())); // NOI18N
+                    directives.add(new CustomDirective(AT + escapedDirectiveName, name.getStartOffset()));
                 }
             }
         }

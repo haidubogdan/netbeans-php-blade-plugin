@@ -57,7 +57,6 @@ import org.openide.filesystems.FileObject;
 public class BladeParserResult extends ParserResult {
 
     private final List<Error> errors = new ArrayList<>();
-    private final List<Error> phpErrors = new ArrayList<>();
     public final List<BladeStructureItem> structure = new ArrayList<>();
     public final List<OffsetRange> folds = new ArrayList<>();
     public final BladeReferenceIdsCollection bladeRreferenceIdsCollection = new BladeReferenceIdsCollection();
@@ -187,12 +186,8 @@ public class BladeParserResult extends ParserResult {
             int start = range.getStart() + prefix.length() - BladeDirectivesUtils.DIRECTIVE_PHP.length();
             BladePhpSnippetParser phpSnippetParser = new BladePhpSnippetParser(prefix + snapshotExpr.toString(), getFileObject(), start);
             phpSnippetParser.syntaxAnalysis();
-            phpErrors.addAll(phpSnippetParser.getDiagnostics());
+            errors.addAll(phpSnippetParser.getDiagnostics());
         }
-    }
-    
-    public List<? extends Error> getPhpErrors(){
-        return phpErrors;
     }
 
     public static class BladeStringReference {
@@ -251,29 +246,6 @@ public class BladeParserResult extends ParserResult {
         PROPERTY,
         CONSTANT,
         METHOD;
-    }
-
-    public static class FieldAccessReference {
-
-        public final ReferenceType type;
-        public final Reference ownerClass;
-        public final String fieldName;
-        public final FieldType fieldType;
-
-        public FieldAccessReference(ReferenceType type, Reference ownerClass,
-                String fieldName, FieldType fieldType) {
-            this.type = type;
-            this.ownerClass = ownerClass;
-            this.fieldName = fieldName;
-            this.fieldType = fieldType;
-        }
-    }
-
-    public class ForeachVariables {
-
-        public String arrayVariable;
-        public String keyVariable;
-        public String itemVariable;
     }
 
     /**
