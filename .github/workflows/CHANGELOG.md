@@ -2,14 +2,8 @@
 
 ## What's changed
 
-**Removing custom php syntax analyzer**
+**`@php` directive parser error**
 
-- removing the custom php syntax analyzer due to unreliable behaviour (#74)
+- using Netbeans PHP Parser to handle `@php` directive syntax errors
 
-**Hints interactivity**
-
-- include config actions for hints
-
-**Wrong directive detection in url paths**
-
-- fix warning hints inside url paths like `https://unpkg.com/@coreui/coreui@3.4/dist/css/coreui.min.css`
+**Fix issue #75 wrong parser error in `@foreach` directive**
