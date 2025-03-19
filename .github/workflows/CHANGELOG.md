@@ -2,4 +2,6 @@
 
 ## What's changed
 
-**fix wrong `@empty` `@else` syntax error on directive block
+**fix issue #74 wrong `@php` echo syntax error
+
+@php echo 'test' @endphp

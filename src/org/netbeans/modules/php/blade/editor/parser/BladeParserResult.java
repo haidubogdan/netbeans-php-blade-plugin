@@ -45,7 +45,6 @@ import org.netbeans.modules.php.blade.editor.parser.listeners.ReferenceIdListene
 import org.netbeans.modules.php.blade.editor.parser.listeners.ScopeListener;
 import org.netbeans.modules.php.blade.editor.parser.listeners.StructureListener;
 import org.netbeans.modules.php.blade.syntax.BladeDirectivesUtils;
-import org.netbeans.modules.php.blade.syntax.antlr4.php.BladePhpSnippetParser;
 import org.netbeans.modules.php.blade.syntax.antlr4.v10.BladeAntlrLexer;
 import org.netbeans.modules.php.blade.syntax.antlr4.v10.BladeAntlrParser;
 import org.openide.filesystems.FileObject;
@@ -186,7 +185,7 @@ public class BladeParserResult extends ParserResult {
             String prefix = BladePhpSnippetParser.PHP_START;
             CharSequence snapshotExpr = getSnapshot().getText().subSequence(range.getStart(), range.getEnd());
             int start = range.getStart() + prefix.length() - BladeDirectivesUtils.DIRECTIVE_PHP.length();
-            BladePhpSnippetParser phpSnippetParser = new BladePhpSnippetParser(prefix + snapshotExpr.toString(), getFileObject(), start);
+            BladePhpSnippetParser phpSnippetParser = new BladePhpSnippetParser(prefix + snapshotExpr.toString() + BladePhpSnippetParser.PHP_END, getFileObject(), start);
             phpSnippetParser.syntaxAnalysis();
             errors.addAll(phpSnippetParser.getDiagnostics());
         }
