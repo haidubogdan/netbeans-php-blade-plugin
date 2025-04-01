@@ -42,7 +42,7 @@ public class CustomDirectivesListener extends BladeAntlrParserBaseListener {
             return;
         }
         Token customDirective = ctx.D_CUSTOM().getSymbol();
-        OffsetRange range = new OffsetRange(customDirective.getStartIndex() + 1, customDirective.getStopIndex());
+        OffsetRange range = new OffsetRange(customDirective.getStartIndex() + 1, customDirective.getStopIndex() + 1);
         phpExprOccurences.markPhpExpressionOccurence(range, customDirective.getText());
     }
 }

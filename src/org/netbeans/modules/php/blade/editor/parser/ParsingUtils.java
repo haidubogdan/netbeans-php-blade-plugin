@@ -83,7 +83,7 @@ public final class ParsingUtils {
             }
 
             source.createSnapshot();
-            ParserManager.parseWhenScanFinished(Collections.singletonList(source), new UserTask() {
+            ParserManager.parse(Collections.singletonList(source), new UserTask() {
 
                 @Override
                 public void run(ResultIterator resultIterator) throws Exception {

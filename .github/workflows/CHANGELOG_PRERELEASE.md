@@ -2,6 +2,4 @@
 
 ## What's changed
 
-**Don't install this**
-
-checking compatiblity with older IDE versions
+- Fix custom directive warnings, due to delay in parser scanning

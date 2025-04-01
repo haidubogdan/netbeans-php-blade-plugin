@@ -132,7 +132,8 @@ public final class CustomDirectives {
 
     private void rescanFile(FileObject file) {
         List<CustomDirective> entry = customDirectives.get(file);
-        if (entry.isEmpty()) {
+        if (entry == null || 
+                entry.isEmpty()) {
             addDirectiveNamesFromFile(file);
         }
     }
