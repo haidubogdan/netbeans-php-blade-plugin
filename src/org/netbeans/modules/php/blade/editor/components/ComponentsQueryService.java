@@ -21,6 +21,7 @@ package org.netbeans.modules.php.blade.editor.components;
 import org.netbeans.modules.php.blade.editor.components.annotation.Namespace;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import org.netbeans.api.annotations.common.CheckForNull;
 import org.netbeans.api.project.Project;
@@ -29,6 +30,7 @@ import org.netbeans.modules.php.blade.editor.BladeLanguage;
 import org.netbeans.modules.php.blade.editor.components.plugins.LivewireComponentResource;
 import org.netbeans.modules.php.blade.editor.indexing.PhpIndexResult;
 import org.netbeans.modules.php.blade.editor.indexing.PhpIndexUtils;
+import org.netbeans.modules.php.blade.editor.path.BladePathUtils;
 import org.netbeans.modules.php.blade.project.ComponentsSupport;
 import org.netbeans.modules.php.blade.project.ProjectUtils;
 import org.netbeans.modules.php.blade.syntax.StringUtils;
@@ -79,59 +81,55 @@ public class ComponentsQueryService {
         return results;
     }
 
-    public Collection<PhpIndexResult> findComponentClass(String prefixClassName, FileObject fo) {
-        Collection<PhpIndexResult> results = new ArrayList<>();
-        Project project = ProjectUtils.getMainOwner(fo);
-
-        if (project == null) {
-            return results;
-        }
-
-        ComponentsSupport componentSupport = ComponentsSupport.getInstance(project);
-
-        if (!componentSupport.isScanned()) {
-            componentSupport.scanForInstalledComponents();
-            componentSupport.scanCustomComponentsFolders();
-        } else if (componentSupport.getComponentClassCollection().isEmpty()) {
-            componentSupport.scanCustomComponentsFolders();
-        }
-
-        for (Map.Entry<FileObject, Namespace> namespace : componentSupport.getInstalledComponentNamespace().entrySet()) {
-            results.addAll(PhpIndexUtils.queryExactNamespaceClasses(prefixClassName, namespace.getValue().path(), fo));
-        }
-
-        if (prefixClassName.contains(StringUtils.DOT)) {
-            //NOT a complete flow, but it should cover the necessities
-            String classPathParts[] = prefixClassName.split(StringUtils.ESCAPED_DOT);
+    public Collection<ComponentModel> findComponentClassModels(String tagName, ComponentsSupport componentSupport) {
+        Collection<ComponentModel> results = new ArrayList<>();
+        String queryClassName = StringUtils.kebabToCamel(tagName);
+        if (queryClassName.contains(StringUtils.DOT)) {
+            String classPathParts[] = queryClassName.split(StringUtils.ESCAPED_DOT);
             String prefixClassPathName = classPathParts[classPathParts.length - 1];
             for (Map.Entry<FileObject, ComponentModel> componentEntry : componentSupport.getComponentClassCollection().entrySet()) {
                 String className = componentEntry.getKey().getName().toLowerCase();
                 if (className.equals(prefixClassPathName)) {
-                    results.add(new PhpIndexResult(className, componentEntry.getKey(), PhpIndexResult.Type.CLASS, new OffsetRange(0, 1)));
+                    results.add(componentEntry.getValue());
                 }
-            }
+            } 
         } else {
             for (Map.Entry<FileObject, ComponentModel> componentEntry : componentSupport.getComponentClassCollection().entrySet()) {
-                FileObject parentDir = componentEntry.getKey().getParent();
-                if (componentSupport.getInstalledComponentNamespace().containsKey(parentDir)) {
-                    continue;
-                }
+
                 String className = componentEntry.getKey().getName();
-                if (className.equals(prefixClassName)) {
-                    results.add(new PhpIndexResult(className, componentEntry.getKey(), PhpIndexResult.Type.CLASS, new OffsetRange(0, 1)));
+                if (className.equals(queryClassName)) {
+                    results.add(componentEntry.getValue());
                 }
-            }
+            }  
+        }
+
+        return results;
+    }
+    
+    public Collection<PhpIndexResult> findIndexedComponentClass(String queryClassName, Project project) {
+        Collection<PhpIndexResult> results = new ArrayList<>();
+
+        ComponentsSupport componentSupport = ComponentsSupport.getInstance(project);
+        componentSupport.warmup();
+
+        for (Map.Entry<FileObject, Namespace> namespace : componentSupport.getInstalledComponentNamespace().entrySet()) {
+            results.addAll(PhpIndexUtils.queryExactNamespaceClasses(queryClassName, namespace.getValue().path(), namespace.getKey()));
         }
 
         return results;
     }
 
     @CheckForNull
-    public FileObject getComponentResourceFile(String componentId, String classQualifiedName, FileObject sourceFo) {
+    public FileObject getComponentResourceFile(String componentId, String classQualifiedName, FileObject sourceFo, ComponentModel componentModel) {
         if (classQualifiedName.toLowerCase().contains(LivewireComponentResource.LIVEWIRE_NAME)) {
             return getLivewireComponentResourceFile(componentId, sourceFo);
         }
 
+        if (componentModel != null && componentModel.getViewPath() != null) {
+            String viewPath = componentModel.getViewPath();
+            List<FileObject> includedFiles = BladePathUtils.findFileObjectsForBladeViewPath(sourceFo, viewPath);
+            return !includedFiles.isEmpty() ?  includedFiles.get(0) : null;
+        }
         return null;
     }
 

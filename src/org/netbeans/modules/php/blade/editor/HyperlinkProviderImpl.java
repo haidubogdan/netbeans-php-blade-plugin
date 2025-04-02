@@ -36,6 +36,7 @@ import org.netbeans.editor.BaseDocument;
 import static org.netbeans.lib.editor.hyperlink.spi.HyperlinkType.GO_TO_DECLARATION;
 import org.netbeans.modules.php.blade.editor.lexer.BladeLexerUtils;
 import org.netbeans.modules.php.blade.editor.path.BladePathUtils;
+import static org.netbeans.modules.php.blade.editor.path.BladePathUtils.BLADE_VIEW_METHODS_SET;
 import org.netbeans.modules.php.blade.project.BladeProjectProperties;
 import org.netbeans.modules.php.editor.lexer.PHPTokenId;
 import org.openide.filesystems.FileObject;
@@ -59,10 +60,7 @@ public class HyperlinkProviderImpl implements HyperlinkProviderExt {
     private int goToOffset = 0;
     public static final int MIN_STRING_IDENTIIFER_LENGTH = 5;
     public static final String FILE_TITLE = "Blade Template File"; // NOI18N
-
-    private final String[] viewMethods = new String[]{"view", "render", "make"}; // NOI18N
-    private final Set<String> viewMethodSet = new HashSet<>(Arrays.asList(viewMethods));
-
+    
     public enum DeclarationType {
         VIEW_PATH;
     }
@@ -127,7 +125,7 @@ public class HyperlinkProviderImpl implements HyperlinkProviderExt {
                 methodName = text;
                 //tooltip text
 
-                if (viewMethodSet.contains(methodName)) {
+                if (BLADE_VIEW_METHODS_SET.contains(methodName)) {
                     FileObject currentFile = FileSystemUtils.getFileObjectFromDoc(doc);
 
                     if (currentFile == null) {
@@ -161,7 +159,7 @@ public class HyperlinkProviderImpl implements HyperlinkProviderExt {
         if (!type.equals(GO_TO_DECLARATION)) {
             return;
         }
-        if (viewMethodSet.contains(methodName)) {
+        if (BLADE_VIEW_METHODS_SET.contains(methodName)) {
             if (goToFile != null) {
                 openDocument(goToFile, goToOffset);
             }

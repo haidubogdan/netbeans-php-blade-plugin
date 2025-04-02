@@ -25,6 +25,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import org.netbeans.api.project.Project;
 import org.netbeans.modules.php.blade.editor.BladeLanguage;
 import org.netbeans.modules.php.blade.project.BladeProjectProperties;
@@ -44,6 +45,10 @@ public final class BladePathUtils {
     public static final String LARAVEL_VIEW_FOLDER = "views"; //NOI18N
     public static final String LARAVEL_VIEW_PATH = LARAVEL_RESOURCES + StringUtils.FORWARD_SLASH + LARAVEL_VIEW_FOLDER;
 
+    public static final String[] BLADE_VIEW_METHODS = new String[]{"view", "render", "make"}; // NOI18N
+
+    public static final Set<String> BLADE_VIEW_METHODS_SET = new HashSet<>(Arrays.asList(BLADE_VIEW_METHODS));
+    
     private BladePathUtils() {
 
     }

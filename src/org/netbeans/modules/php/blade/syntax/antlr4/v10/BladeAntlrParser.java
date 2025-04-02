@@ -74,7 +74,7 @@ public class BladeAntlrParser extends Parser {
 		FOREACH_AS=162, FOREACH_DOUBLE_ARROW=163, FOREACH_DENTIFIER=164, FOREACH_OTHER=165, 
 		D_ENDPHP=166, BLADE_INLINE_PHP_OTHER=167, VERBATIM_HTML=168, PHP_INLINE_EXIT=169, 
 		PHP_INLINE_OTHER=170, PHP_INLINE_EOF=171, BLADE_COMMENT_END=172, BLADE_COMMENT_MORE=173, 
-		BLADE_COMMENT_EOF=174;
+		BLADE_COMMENT_EOF=174, D_SPATIE=175;
 	public static final int
 		RULE_file = 0, RULE_statement = 1, RULE_blockDirective = 2, RULE_ifStatement = 3, 
 		RULE_foreachStatement = 4, RULE_forStatement = 5, RULE_forElseStatement = 6, 
@@ -119,7 +119,7 @@ public class BladeAntlrParser extends Parser {
 			null, null, null, null, null, null, null, null, null, null, null, null, 
 			null, null, null, null, null, null, null, null, null, null, null, null, 
 			null, null, null, null, "'as'", "'=>'", null, null, "'@endphp'", null, 
-			null, "'?>'", null, null, "'--}}'"
+			null, "'?>'", null, null, "'--}}'", null, null, "'@honeypot'"
 		};
 	}
 	private static final String[] _LITERAL_NAMES = makeLiteralNames();
@@ -160,7 +160,7 @@ public class BladeAntlrParser extends Parser {
 			"FOREACH_AS", "FOREACH_DOUBLE_ARROW", "FOREACH_DENTIFIER", "FOREACH_OTHER", 
 			"D_ENDPHP", "BLADE_INLINE_PHP_OTHER", "VERBATIM_HTML", "PHP_INLINE_EXIT", 
 			"PHP_INLINE_OTHER", "PHP_INLINE_EOF", "BLADE_COMMENT_END", "BLADE_COMMENT_MORE", 
-			"BLADE_COMMENT_EOF"
+			"BLADE_COMMENT_EOF", "D_SPATIE"
 		};
 	}
 	private static final String[] _SYMBOLIC_NAMES = makeSymbolicNames();
@@ -4156,7 +4156,7 @@ public class BladeAntlrParser extends Parser {
 	}
 
 	public static final String _serializedATN =
-		"\u0004\u0001\u00ae\u0314\u0002\u0000\u0007\u0000\u0002\u0001\u0007\u0001"+
+		"\u0004\u0001\u00af\u0314\u0002\u0000\u0007\u0000\u0002\u0001\u0007\u0001"+
 		"\u0002\u0002\u0007\u0002\u0002\u0003\u0007\u0003\u0002\u0004\u0007\u0004"+
 		"\u0002\u0005\u0007\u0005\u0002\u0006\u0007\u0006\u0002\u0007\u0007\u0007"+
 		"\u0002\b\u0007\b\u0002\t\u0007\t\u0002\n\u0007\n\u0002\u000b\u0007\u000b"+

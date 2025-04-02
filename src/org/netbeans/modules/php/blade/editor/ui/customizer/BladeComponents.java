@@ -59,8 +59,7 @@ public class BladeComponents extends javax.swing.JPanel {
         ComponentsSupport componentSupport = ComponentsSupport.getInstance(project);
 
         if (bladeComponentFolder != null) {
-            FileObject root = FileUtil.toFileObject(bladeComponentFolder);
-            componentSupport.scanBladeComponentsClassFolder(root);
+            componentSupport.scanBladeComponentsClassFolder(bladeComponentFolder);
         }
     }
 

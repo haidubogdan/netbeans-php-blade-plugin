@@ -233,7 +233,10 @@ public final class CustomDirectives {
         @Override
         public void visit(FunctionInvocation node) {
             String functionName = node.getFunctionName().toString();
+            
             if (!Arrays.stream(validFunctions).anyMatch(functionName::equals)) {
+                //in case of callback config
+                super.visit(node);
                 return;
             }
             List<Expression> parameters = node.getParameters();

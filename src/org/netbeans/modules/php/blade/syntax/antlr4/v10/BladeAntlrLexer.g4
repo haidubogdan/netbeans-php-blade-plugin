@@ -210,7 +210,7 @@ D_USE : '@use' {lookupMode(PHP_EXPR_WITH_FIRST_IDENTIFIABLE_STRING);};
 D_LIVEWIRE_ARG : '@livewire' (' ')* {lookupMode(INSIDE_PHP_EXPRESSION);}->type(D_SIMPLE_DIRECTIVE);
 D_LIVEWIRE : ('@livewireStyles' | '@bukStyles' | '@livewireScripts' | '@bukScripts' | '@click' ('.away')? '=')->type(D_DIRECTIVE);
 
-
+D_SPATIE : '@honeypot'->type(D_DIRECTIVE);
 
 //extra
 

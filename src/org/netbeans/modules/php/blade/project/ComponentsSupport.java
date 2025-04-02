@@ -19,8 +19,10 @@
 package org.netbeans.modules.php.blade.project;
 
 import java.io.File;
+import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Future;
@@ -30,14 +32,20 @@ import org.netbeans.modules.php.blade.editor.components.ComponentModel;
 import org.netbeans.modules.php.blade.editor.components.annotation.Namespace;
 import org.netbeans.modules.php.blade.editor.components.annotation.NamespaceRegister;
 import org.netbeans.modules.php.blade.editor.parser.ParsingUtils;
+import static org.netbeans.modules.php.blade.editor.path.BladePathUtils.BLADE_VIEW_METHODS;
 import org.netbeans.modules.php.blade.syntax.StringUtils;
 import org.netbeans.modules.php.editor.parser.PHPParseResult;
 import org.netbeans.modules.php.editor.parser.astnodes.ASTNode;
 import org.netbeans.modules.php.editor.parser.astnodes.ClassDeclaration;
 import org.netbeans.modules.php.editor.parser.astnodes.Expression;
 import org.netbeans.modules.php.editor.parser.astnodes.FormalParameter;
+import org.netbeans.modules.php.editor.parser.astnodes.FunctionInvocation;
 import org.netbeans.modules.php.editor.parser.astnodes.MethodDeclaration;
+import org.netbeans.modules.php.editor.parser.astnodes.Scalar;
 import org.netbeans.modules.php.editor.parser.astnodes.visitors.DefaultVisitor;
+import org.openide.filesystems.FileChangeAdapter;
+import org.openide.filesystems.FileChangeListener;
+import org.openide.filesystems.FileEvent;
 import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileUtil;
 import org.openide.util.Cancellable;
@@ -77,6 +85,8 @@ public class ComponentsSupport {
 
     private final Map<FileObject, ComponentModel> componentClassCollection = new HashMap<>();
 
+    private final FileChangeListener fileChangeListener = new FileChangeListenerImpl();
+    
     private ComponentsSupport(Project project) {
         this.project = project;
     }
@@ -126,11 +136,23 @@ public class ComponentsSupport {
             
             FileObject folderObj = FileUtil.toFileObject(folderFile);
             RP.submit(new ComponentParsingTask(folderObj, componentClassCollection));
+            try {
+                FileUtil.addRecursiveListener(fileChangeListener, folderFile);
+            } catch (IllegalArgumentException ex) {
+                //already listening
+            }
+            
         }
     }
 
-    public void scanBladeComponentsClassFolder(FileObject file) {
-        RP.submit(new ComponentParsingTask(file, componentClassCollection));
+    public void scanBladeComponentsClassFolder(File folder) {
+        FileObject folderObj = FileUtil.toFileObject(folder);
+        RP.submit(new ComponentParsingTask(folderObj, componentClassCollection));
+        try {
+            FileUtil.addRecursiveListener(fileChangeListener, folder);
+        } catch (IllegalArgumentException ex) {
+            //already listening
+        }
     }
 
     public boolean isScanned() {
@@ -157,6 +179,26 @@ public class ComponentsSupport {
     public static String tag2ClassName(String identifier) {
         return identifier.length() > COMPONENT_TAG_PREFIX_LENGTH ? StringUtils.kebabToCamel(identifier.substring(COMPONENT_TAG_PREFIX_LENGTH)) : ""; // NOI18N
     }
+    
+    public void warmup() {
+        if (!isScanned()) {
+            scanForInstalledComponents();
+            scanCustomComponentsFolders();
+        }
+    }
+    
+    private void parseComponentFile(FileObject file, Map<FileObject, ComponentModel> componentCollection) {
+        ParsingUtils parsingUtils = new ParsingUtils();
+        parsingUtils.parseFileObject(file);
+        PHPParseResult result = parsingUtils.getParserResult();
+        if (result != null) {
+            ComponentModel model = new ComponentModel(file);
+            result.getProgram().accept(new ComponentModelVisitor(model));
+            if (model.isValid()) {
+                componentCollection.put(file, model);
+            }
+        }
+    }
 
     private final class ComponentParsingTask implements Runnable, Cancellable {
 
@@ -180,16 +222,9 @@ public class ComponentsSupport {
                     continue;
                 }
                 if (!cancelled) {
-                    ParsingUtils parsingUtils = new ParsingUtils();
-                    parsingUtils.laterParseFileObject(file);
-                    PHPParseResult result = parsingUtils.getParserResult();
-                    if (result != null) {
-                        ComponentModel model = new ComponentModel(file);
-                        result.getProgram().accept(new ComponentModelVisitor(model));
-                        if (model.isValid()) {
-                            componentCollection.putIfAbsent(file, model);
-                        }
-                    }
+                    parseComponentFile(file, componentCollection);
+                } else {
+                    installationScan.set(false);
                 }
             }
         }
@@ -238,6 +273,27 @@ public class ComponentsSupport {
                 for (FormalParameter parameter : formalParameters){
                     model.addConstructorProperty(parameter);
                 }
+            } else if (functionName.equals("render")) {
+                //scan for view paths
+                super.visit(node);
+            }
+        }
+        
+        @Override
+        public void visit(FunctionInvocation node) {
+            String functionName = node.getFunctionName().getName().toString().replace("\\", "");
+
+            if (!Arrays.stream(BLADE_VIEW_METHODS).anyMatch(functionName::equals)) {
+                return;
+            }
+            
+            List<Expression> parameters = node.getParameters();
+            Iterator<?> iter = parameters.iterator();
+            Expression viewPath = (Expression) iter.next();
+            if (viewPath != null && viewPath instanceof Scalar) {
+                Scalar name = (Scalar) viewPath;
+                String escapedViewPath = name.getStringValue().replaceAll("^[\"|\']|[\"|[\']]$", ""); // NOI18N
+                model.setViewPath(escapedViewPath);
             }
         }
 
@@ -252,4 +308,28 @@ public class ComponentsSupport {
         }
     }
 
+    private final class FileChangeListenerImpl extends FileChangeAdapter {
+
+        @Override
+        public void fileFolderCreated(FileEvent fe) {
+
+        }
+
+        @Override
+        public void fileChanged(FileEvent fe) {
+            processFile(fe.getFile());
+        }
+
+        @Override
+        public void fileDataCreated(FileEvent fe) {
+
+        }
+
+        private void processFile(FileObject file) {
+            assert file.isData() : file;
+            parseComponentFile(file, componentClassCollection);
+        }
+
+    }
+    
 }
