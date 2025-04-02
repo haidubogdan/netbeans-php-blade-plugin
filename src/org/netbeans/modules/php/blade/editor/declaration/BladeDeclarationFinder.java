@@ -473,16 +473,17 @@ public class BladeDeclarationFinder implements DeclarationFinder {
             }
             ComponentsQueryService componentComplervice = new ComponentsQueryService();
             String className = StringUtils.kebabToCamel(tag.substring(COMPONENT_TAG_NAME_PREFIX.length()));
-
-            Collection<PhpIndexResult> indexedReferences = componentComplervice.findComponentClass(className, currentFile);
             ComponentsSupport componentSupport = ComponentsSupport.getInstance(projectOwner);
 
             if (componentSupport == null) {
                 return location;
             }
 
+            Collection<PhpIndexResult> indexedReferences = componentComplervice.findComponentClass(className, currentFile);
+
             for (PhpIndexResult indexReference : indexedReferences) {
-                NamedElement resultHandle = new NamedElement(className, indexReference.declarationFile, ElementType.LARAVEL_COMPONENT);
+                NamedElement resultHandle = new NamedElement("Component class : " + className,
+                        indexReference.declarationFile, ElementType.LARAVEL_COMPONENT); // NOI18N
                 DeclarationLocation constantLocation = new DeclarationFinder.DeclarationLocation(indexReference.declarationFile, indexReference.getStartOffset(), resultHandle);
                 if (location.equals(DeclarationLocation.NONE)) {
                     location = constantLocation;
@@ -490,9 +491,9 @@ public class BladeDeclarationFinder implements DeclarationFinder {
                 location.addAlternative(new AlternativeLocationImpl(constantLocation));
 
                 if (!location.equals(DeclarationLocation.NONE)) {
-                    FileObject resource = componentComplervice.getComponentResourceFile(tag, indexReference.name, currentFile);
+                    FileObject resource = componentComplervice.getComponentResourceFile(tag, indexReference.name, indexReference.declarationFile, componentSupport);
                     if (resource != null) {
-                        PathElement resourceHandle = new PathElement(tag, resource);
+                        PathElement resourceHandle = new PathElement("View file : " + tag, resource);// NOI18N
                         DeclarationLocation resourceLocation = new DeclarationFinder.DeclarationLocation(resource, indexReference.getStartOffset(), resourceHandle);
                         location.addAlternative(new AlternativeLocationImpl(resourceLocation));
                     }

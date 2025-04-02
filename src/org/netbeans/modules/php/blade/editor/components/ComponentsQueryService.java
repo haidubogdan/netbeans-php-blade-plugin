@@ -21,6 +21,7 @@ package org.netbeans.modules.php.blade.editor.components;
 import org.netbeans.modules.php.blade.editor.components.annotation.Namespace;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import org.netbeans.api.annotations.common.CheckForNull;
 import org.netbeans.api.project.Project;
@@ -29,6 +30,7 @@ import org.netbeans.modules.php.blade.editor.BladeLanguage;
 import org.netbeans.modules.php.blade.editor.components.plugins.LivewireComponentResource;
 import org.netbeans.modules.php.blade.editor.indexing.PhpIndexResult;
 import org.netbeans.modules.php.blade.editor.indexing.PhpIndexUtils;
+import org.netbeans.modules.php.blade.editor.path.BladePathUtils;
 import org.netbeans.modules.php.blade.project.ComponentsSupport;
 import org.netbeans.modules.php.blade.project.ProjectUtils;
 import org.netbeans.modules.php.blade.syntax.StringUtils;
@@ -127,11 +129,16 @@ public class ComponentsQueryService {
     }
 
     @CheckForNull
-    public FileObject getComponentResourceFile(String componentId, String classQualifiedName, FileObject sourceFo) {
+    public FileObject getComponentResourceFile(String componentId, String classQualifiedName, FileObject sourceFo, ComponentsSupport componentSupport) {
         if (classQualifiedName.toLowerCase().contains(LivewireComponentResource.LIVEWIRE_NAME)) {
             return getLivewireComponentResourceFile(componentId, sourceFo);
         }
-
+        ComponentModel componentModel = componentSupport.findComponentClass(sourceFo);
+        if (componentModel != null && componentModel.getViewPath() != null) {
+            String viewPath = componentModel.getViewPath();
+            List<FileObject> includedFiles = BladePathUtils.findFileObjectsForBladeViewPath(sourceFo, viewPath);
+            return !includedFiles.isEmpty() ?  includedFiles.get(0) : null;
+        }
         return null;
     }
 

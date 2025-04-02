@@ -38,6 +38,8 @@ public class ComponentModel {
     private final String[] componentParentClassNames = new String[]{"Component", "BladeComponent"}; // NOI18N
     private final Set<String> componentParentClassNamesSet = new HashSet<>(Arrays.asList(componentParentClassNames));
 
+    private String viewPath;
+    
     public ComponentModel(FileObject file) {
         this.file = file;
     }
@@ -56,6 +58,14 @@ public class ComponentModel {
 
     public Set<FormalParameter> getConstructorProperties() {
         return constructorProperties;
+    }
+    
+    public void setViewPath(String path) {
+        viewPath = path;
+    }
+    
+    public String getViewPath() {
+        return viewPath;
     }
 
     public FileObject getFile() {
