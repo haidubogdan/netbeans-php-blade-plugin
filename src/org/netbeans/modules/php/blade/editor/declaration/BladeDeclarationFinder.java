@@ -37,6 +37,7 @@ import org.netbeans.modules.php.blade.csl.elements.ElementType;
 import org.netbeans.modules.php.blade.csl.elements.NamedElement;
 import org.netbeans.modules.php.blade.csl.elements.PathElement;
 import org.netbeans.modules.php.blade.csl.elements.PhpFunctionElement;
+import org.netbeans.modules.php.blade.editor.components.ComponentModel;
 import org.netbeans.modules.php.blade.editor.components.ComponentsQueryService;
 import org.netbeans.modules.php.blade.editor.directives.CustomDirectives;
 import org.netbeans.modules.php.blade.editor.directives.CustomDirectives.CustomDirective;
@@ -74,18 +75,17 @@ import org.netbeans.modules.php.editor.lexer.PHPTokenId;
 import org.netbeans.spi.project.ui.support.ProjectConvertors;
 
 /**
- * declaration finder for : 
- * - include paths
- * - section related yields
- * - stack locations
- * - vite assets path
- * - custom directive definitions
- * - components class origin
+ * declaration finder for : - include paths - section related yields - stack
+ * locations - vite assets path - custom directive definitions - components
+ * class origin
  *
  *
  * @author bhaidu
  */
 public class BladeDeclarationFinder implements DeclarationFinder {
+
+    public static final String COMPONENT_CLASS_LABEL_PREFIX = "Component class : ";  // NOI18N
+    public static final String COMPONENT_VIEW_LABEL_PREFIX = "View file : ";  // NOI18N
 
     @Override
     public OffsetRange getReferenceSpan(Document document, int caretOffset) {
@@ -377,10 +377,10 @@ public class BladeDeclarationFinder implements DeclarationFinder {
                 case PHP_METHOD: {
                     String queryNamespace = phpRef.namespace;
 
-                    if (phpRef.ownerClass == null){
+                    if (phpRef.ownerClass == null) {
                         return location;
                     }
-                    
+
                     Collection<PhpIndexFunctionResult> indexMethodResults = PhpIndexUtils.queryExactClassMethods(currentFile,
                             phpRef.identifier, phpRef.ownerClass.identifier, queryNamespace);
 
@@ -471,34 +471,60 @@ public class BladeDeclarationFinder implements DeclarationFinder {
             if (!tag.startsWith(COMPONENT_TAG_NAME_PREFIX)) {
                 return location;
             }
-            ComponentsQueryService componentComplervice = new ComponentsQueryService();
-            String className = StringUtils.kebabToCamel(tag.substring(COMPONENT_TAG_NAME_PREFIX.length()));
+            ComponentsQueryService componentQueryService = new ComponentsQueryService();
+            String tagName = tag.substring(COMPONENT_TAG_NAME_PREFIX.length());
+            String className = StringUtils.kebabToCamel(tagName);
             ComponentsSupport componentSupport = ComponentsSupport.getInstance(projectOwner);
 
             if (componentSupport == null) {
                 return location;
             }
 
-            Collection<PhpIndexResult> indexedReferences = componentComplervice.findComponentClass(className, currentFile);
+            componentSupport.warmup();
+            Collection<ComponentModel> compModels = componentQueryService.findComponentClassModels(tagName, componentSupport);
 
-            for (PhpIndexResult indexReference : indexedReferences) {
-                NamedElement resultHandle = new NamedElement("Component class : " + className,
-                        indexReference.declarationFile, ElementType.LARAVEL_COMPONENT); // NOI18N
-                DeclarationLocation constantLocation = new DeclarationFinder.DeclarationLocation(indexReference.declarationFile, indexReference.getStartOffset(), resultHandle);
+            for (ComponentModel compModel : compModels) {
+                NamedElement resultHandle = new NamedElement(COMPONENT_CLASS_LABEL_PREFIX + className,
+                        compModel.getFile(), ElementType.LARAVEL_COMPONENT);
+                DeclarationLocation constantLocation = new DeclarationFinder.DeclarationLocation(compModel.getFile(), 0, resultHandle);
+
                 if (location.equals(DeclarationLocation.NONE)) {
                     location = constantLocation;
                 }
-                location.addAlternative(new AlternativeLocationImpl(constantLocation));
+
+                location.addAlternative(new CustomAlternativeLocationImpl(constantLocation, compModel.getFile().getName()));
 
                 if (!location.equals(DeclarationLocation.NONE)) {
-                    FileObject resource = componentComplervice.getComponentResourceFile(tag, indexReference.name, indexReference.declarationFile, componentSupport);
-                    if (resource != null) {
-                        PathElement resourceHandle = new PathElement("View file : " + tag, resource);// NOI18N
-                        DeclarationLocation resourceLocation = new DeclarationFinder.DeclarationLocation(resource, indexReference.getStartOffset(), resourceHandle);
+                    
+                    FileObject viewResource = componentQueryService.getComponentResourceFile(tag, compModel.getFile().getName(), compModel.getFile(), compModel);
+                    if (viewResource != null) {
+                        PathElement resourceHandle = new PathElement(COMPONENT_VIEW_LABEL_PREFIX + tag, viewResource);
+                        DeclarationLocation resourceLocation = new DeclarationFinder.DeclarationLocation(viewResource, 0, resourceHandle);
                         location.addAlternative(new AlternativeLocationImpl(resourceLocation));
                     }
                 }
             }
+
+//            Collection<PhpIndexResult> indexedReferences = componentComplervice.findComponentClass(className, currentFile);
+//
+//            for (PhpIndexResult indexReference : indexedReferences) {
+//                NamedElement resultHandle = new NamedElement("Component class : " + className,
+//                        indexReference.declarationFile, ElementType.LARAVEL_COMPONENT); // NOI18N
+//                DeclarationLocation constantLocation = new DeclarationFinder.DeclarationLocation(indexReference.declarationFile, indexReference.getStartOffset(), resultHandle);
+//                if (location.equals(DeclarationLocation.NONE)) {
+//                    location = constantLocation;
+//                }
+//                location.addAlternative(new AlternativeLocationImpl(constantLocation));
+//
+//                if (!location.equals(DeclarationLocation.NONE)) {
+//                    FileObject resource = componentComplervice.getComponentResourceFile(tag, indexReference.name, indexReference.declarationFile, componentSupport);
+//                    if (resource != null) {
+//                        PathElement resourceHandle = new PathElement("View file : " + tag, resource);// NOI18N
+//                        DeclarationLocation resourceLocation = new DeclarationFinder.DeclarationLocation(resource, indexReference.getStartOffset(), resourceHandle);
+//                        location.addAlternative(new AlternativeLocationImpl(resourceLocation));
+//                    }
+//                }
+//            }
         }
         return location;
     }
@@ -524,6 +550,46 @@ public class BladeDeclarationFinder implements DeclarationFinder {
                 if (el.getFileObject() != null) {
                     formatter.appendText(" in "); // NOI18N
                     formatter.appendText(FileUtil.getFileDisplayName(el.getFileObject()));
+                }
+                return formatter.getText();
+            }
+            return getLocation().toString();
+        }
+
+        @Override
+        public DeclarationFinder.DeclarationLocation getLocation() {
+            return location;
+        }
+
+        @Override
+        public int compareTo(DeclarationFinder.AlternativeLocation o) {
+            return 0;
+        }
+    }
+
+    public static class CustomAlternativeLocationImpl implements AlternativeLocation {
+
+        private final DeclarationLocation location;
+        private final String description;
+
+        public CustomAlternativeLocationImpl(DeclarationLocation location, String description) {
+            this.location = location;
+            this.description = description;
+        }
+
+        @Override
+        public ElementHandle getElement() {
+            return getLocation().getElement();
+        }
+
+        @Override
+        public String getDisplayHtml(HtmlFormatter formatter) {
+            ElementHandle el = getLocation().getElement();
+            if (el != null) {
+                formatter.appendText(el.getName());
+                if (description != null) {
+                    formatter.appendText(" in "); // NOI18N
+                    formatter.appendText(description);
                 }
                 return formatter.getText();
             }

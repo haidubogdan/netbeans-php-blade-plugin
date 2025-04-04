@@ -136,14 +136,23 @@ public class ComponentsSupport {
             
             FileObject folderObj = FileUtil.toFileObject(folderFile);
             RP.submit(new ComponentParsingTask(folderObj, componentClassCollection));
-            FileUtil.addRecursiveListener(fileChangeListener, folderFile);
+            try {
+                FileUtil.addRecursiveListener(fileChangeListener, folderFile);
+            } catch (IllegalArgumentException ex) {
+                //already listening
+            }
+            
         }
     }
 
     public void scanBladeComponentsClassFolder(File folder) {
         FileObject folderObj = FileUtil.toFileObject(folder);
         RP.submit(new ComponentParsingTask(folderObj, componentClassCollection));
-        FileUtil.addRecursiveListener(fileChangeListener, folder);
+        try {
+            FileUtil.addRecursiveListener(fileChangeListener, folder);
+        } catch (IllegalArgumentException ex) {
+            //already listening
+        }
     }
 
     public boolean isScanned() {
@@ -169,6 +178,15 @@ public class ComponentsSupport {
 
     public static String tag2ClassName(String identifier) {
         return identifier.length() > COMPONENT_TAG_PREFIX_LENGTH ? StringUtils.kebabToCamel(identifier.substring(COMPONENT_TAG_PREFIX_LENGTH)) : ""; // NOI18N
+    }
+    
+    public void warmup() {
+        if (!isScanned()) {
+            scanForInstalledComponents();
+            scanCustomComponentsFolders();
+        } else if (getComponentClassCollection().isEmpty()) {
+            scanCustomComponentsFolders();
+        }
     }
     
     private void parseComponentFile(FileObject file, Map<FileObject, ComponentModel> componentCollection) {
@@ -309,7 +327,6 @@ public class ComponentsSupport {
 
         private void processFile(FileObject file) {
             assert file.isData() : file;
-            int x = 1;
             parseComponentFile(file, componentClassCollection);
         }
 
