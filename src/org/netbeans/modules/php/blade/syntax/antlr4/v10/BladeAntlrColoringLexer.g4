@@ -113,7 +113,8 @@ D_LIVEWIRE : ('@livewireStyles' | '@bukStyles' | '@livewireScripts' | '@bukScrip
 
 D_SPATIE_ARG : ('@' ( ('unless' | 'has' ('any')? )?  'role') | 'haspermission') {this._input.LA(1) == '('}? ->pushMode(INSIDE_PHP_EXPRESSION),type(DIRECTIVE);
 
-D_SPATIE : ('@end' ('unless' | 'has' ('any')?)? 'role' | 'haspermission')->type(DIRECTIVE);
+D_SPATIE : ('@honeypot' //honeypot plugin
+| '@end' ('unless' | 'has' ('any')?)? 'role' | 'haspermission')->type(DIRECTIVE);
 
 D_CSS_AT_RULE : ('@supports' | '@container' | '@scope' | '@media') (' ')* {this._input.LA(1) == '('}? ->type(HTML);
 //we will decide that a custom directive has expression to avoid email matching

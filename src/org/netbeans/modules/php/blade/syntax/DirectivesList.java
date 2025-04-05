@@ -116,6 +116,10 @@ import org.netbeans.modules.php.blade.syntax.annotation.DirectiveRegister;
     @Directive(name = "@disabled", params = true, since = "9"),
     @Directive(name = "@readony", params = true, since = "9"),
     @Directive(name = "@required", params = true, since = "9"),
+    
+    //plugins
+    //spatie / honeypot
+    @Directive(name = "@honeypot", description="spatie plugin"),
     }
 )
 //to do add a static cache directiveList with only blocks

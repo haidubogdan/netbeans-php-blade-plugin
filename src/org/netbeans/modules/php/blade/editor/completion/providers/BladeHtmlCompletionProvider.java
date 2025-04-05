@@ -41,6 +41,7 @@ import org.netbeans.modules.php.blade.editor.components.ComponentModel;
 import org.netbeans.modules.php.blade.editor.components.ComponentsQueryService;
 import org.netbeans.modules.php.blade.editor.indexing.PhpIndexResult;
 import org.netbeans.modules.php.blade.project.ComponentsSupport;
+import static org.netbeans.modules.php.blade.project.ComponentsSupport.COMPONENT_TAG_NAME_PREFIX;
 import org.netbeans.modules.php.blade.syntax.BladeTagsUtils;
 import org.netbeans.modules.php.blade.syntax.StringUtils;
 import org.netbeans.modules.php.blade.syntax.antlr4.html_components.BladeHtmlAntlrLexer;
@@ -185,22 +186,25 @@ public class BladeHtmlCompletionProvider implements CompletionProvider {
                             String attributeIdentifier = queryText.startsWith(":") ? queryText.substring(1) : queryText; //NOI18N
                             Token componentToken = BladeHtmlAntlrUtils.findBackwardWithStop(tokens, BladeHtmlAntlrLexer.HTML_COMPONENT_OPEN_TAG, stopTokens);
                             if (componentToken != null && componentToken.getType() == BladeHtmlAntlrLexer.HTML_COMPONENT_OPEN_TAG) {
-                                ComponentsQueryService componentComplervice = new ComponentsQueryService();
-                                String identifier = ComponentsSupport.tag2ClassName(componentToken.getText());
-                                Collection<PhpIndexResult> indexedReferences = componentComplervice.findComponentClass(identifier, fo);
+                                ComponentsQueryService componentQueryService = new ComponentsQueryService();
+                                String tag = componentToken.getText();
+                                String tagName = tag.substring(COMPONENT_TAG_NAME_PREFIX.length());
                                 Project projectOwner = FileSystemUtils.getProjectOwner(doc);
-                                ComponentsSupport componentSupport = ComponentsSupport.getInstance(projectOwner);
                                 
+                                if (projectOwner == null){
+                                    break;
+                                }
+
+                                ComponentsSupport componentSupport = ComponentsSupport.getInstance(projectOwner);
+
                                 if (componentSupport == null){
                                     break;
                                 }
 
-                                for (PhpIndexResult indexReference : indexedReferences) {
-                                    ComponentModel componentModel = componentSupport.findComponentClass(indexReference.declarationFile);
-                                    if (componentModel == null){
-                                        continue;
-                                    }
-                                    for (FormalParameter parameter : componentModel.getConstructorProperties()){
+                                Collection<ComponentModel> compModels = componentQueryService.findComponentClassModels(tagName, componentSupport);
+
+                                for (ComponentModel compModel : compModels) {
+                                    for (FormalParameter parameter : compModel.getConstructorProperties()){
                                         String parameterName = parameter.getParameterName().toString().substring(1);
                                         if (parameterName.startsWith(attributeIdentifier)){
                                             addSimplAttributeItem(attributeIdentifier, parameterName, caretOffset, resultSet);

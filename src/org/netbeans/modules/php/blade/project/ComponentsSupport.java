@@ -184,14 +184,12 @@ public class ComponentsSupport {
         if (!isScanned()) {
             scanForInstalledComponents();
             scanCustomComponentsFolders();
-        } else if (getComponentClassCollection().isEmpty()) {
-            scanCustomComponentsFolders();
         }
     }
     
     private void parseComponentFile(FileObject file, Map<FileObject, ComponentModel> componentCollection) {
         ParsingUtils parsingUtils = new ParsingUtils();
-        parsingUtils.laterParseFileObject(file);
+        parsingUtils.parseFileObject(file);
         PHPParseResult result = parsingUtils.getParserResult();
         if (result != null) {
             ComponentModel model = new ComponentModel(file);
@@ -225,6 +223,8 @@ public class ComponentsSupport {
                 }
                 if (!cancelled) {
                     parseComponentFile(file, componentCollection);
+                } else {
+                    installationScan.set(false);
                 }
             }
         }

@@ -495,36 +495,33 @@ public class BladeDeclarationFinder implements DeclarationFinder {
                 location.addAlternative(new CustomAlternativeLocationImpl(constantLocation, compModel.getFile().getName()));
 
                 if (!location.equals(DeclarationLocation.NONE)) {
-                    
-                    FileObject viewResource = componentQueryService.getComponentResourceFile(tag, compModel.getFile().getName(), compModel.getFile(), compModel);
-                    if (viewResource != null) {
-                        PathElement resourceHandle = new PathElement(COMPONENT_VIEW_LABEL_PREFIX + tag, viewResource);
-                        DeclarationLocation resourceLocation = new DeclarationFinder.DeclarationLocation(viewResource, 0, resourceHandle);
-                        location.addAlternative(new AlternativeLocationImpl(resourceLocation));
+                    String viewPath = compModel.getViewPath();
+                    if (viewPath != null) {
+                        List<FileObject> includedFiles = BladePathUtils.findFileObjectsForBladeViewPath(compModel.getFile(), viewPath);
+                        if (!includedFiles.isEmpty()) {
+                            FileObject viewResource = includedFiles.get(0);
+                            PathElement resourceHandle = new PathElement(COMPONENT_VIEW_LABEL_PREFIX + viewPath, viewResource);
+                            DeclarationLocation resourceLocation = new DeclarationFinder.DeclarationLocation(viewResource, 0, resourceHandle);
+                            location.addAlternative(new AlternativeLocationImpl(resourceLocation));
+                        }
                     }
                 }
             }
 
-//            Collection<PhpIndexResult> indexedReferences = componentComplervice.findComponentClass(className, currentFile);
-//
-//            for (PhpIndexResult indexReference : indexedReferences) {
-//                NamedElement resultHandle = new NamedElement("Component class : " + className,
-//                        indexReference.declarationFile, ElementType.LARAVEL_COMPONENT); // NOI18N
-//                DeclarationLocation constantLocation = new DeclarationFinder.DeclarationLocation(indexReference.declarationFile, indexReference.getStartOffset(), resultHandle);
-//                if (location.equals(DeclarationLocation.NONE)) {
-//                    location = constantLocation;
-//                }
-//                location.addAlternative(new AlternativeLocationImpl(constantLocation));
-//
-//                if (!location.equals(DeclarationLocation.NONE)) {
-//                    FileObject resource = componentComplervice.getComponentResourceFile(tag, indexReference.name, indexReference.declarationFile, componentSupport);
-//                    if (resource != null) {
-//                        PathElement resourceHandle = new PathElement("View file : " + tag, resource);// NOI18N
-//                        DeclarationLocation resourceLocation = new DeclarationFinder.DeclarationLocation(resource, indexReference.getStartOffset(), resourceHandle);
-//                        location.addAlternative(new AlternativeLocationImpl(resourceLocation));
-//                    }
-//                }
-//            }
+            if (compModels.isEmpty()) {
+                //fallback mode
+                Collection<PhpIndexResult> indexedReferences = componentQueryService.findIndexedComponentClass(className, projectOwner);
+
+                for (PhpIndexResult indexReference : indexedReferences) {
+                    NamedElement resultHandle = new NamedElement(COMPONENT_CLASS_LABEL_PREFIX + className,
+                            indexReference.declarationFile, ElementType.LARAVEL_COMPONENT); // NOI18N
+                    DeclarationLocation constantLocation = new DeclarationFinder.DeclarationLocation(indexReference.declarationFile, indexReference.getStartOffset(), resultHandle);
+                    if (location.equals(DeclarationLocation.NONE)) {
+                        location = constantLocation;
+                    }
+                    location.addAlternative(new AlternativeLocationImpl(constantLocation));
+                }
+            }
         }
         return location;
     }
