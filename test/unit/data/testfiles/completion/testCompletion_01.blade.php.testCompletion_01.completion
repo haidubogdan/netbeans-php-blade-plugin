@@ -17,6 +17,7 @@ CONSTRUCTO <font><b>@endonce</b></font>
 CONSTRUCTO <font><b>@endprepend</b></font             
 CONSTRUCTO <font><b>@endpush</b></font>               
 CONSTRUCTO <font><b>@endsection</b></font             
+CONSTRUCTO <font><b>@honeypot</b></font>              spatie plugin
 CONSTRUCTO <font><b>@once</b></font>                  
 CONSTRUCTO <font><b>@overwrite</b></font>             
 CONSTRUCTO <font><b>@php</b></font>                   

@@ -95,10 +95,7 @@ public class ComponentsQueryService {
             } 
         } else {
             for (Map.Entry<FileObject, ComponentModel> componentEntry : componentSupport.getComponentClassCollection().entrySet()) {
-                FileObject parentDir = componentEntry.getKey().getParent();
-                if (componentSupport.getInstalledComponentNamespace().containsKey(parentDir)) {
-                    continue;
-                }
+
                 String className = componentEntry.getKey().getName();
                 if (className.equals(queryClassName)) {
                     results.add(componentEntry.getValue());

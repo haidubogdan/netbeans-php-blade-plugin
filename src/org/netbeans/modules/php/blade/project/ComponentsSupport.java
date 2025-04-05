@@ -281,7 +281,7 @@ public class ComponentsSupport {
         
         @Override
         public void visit(FunctionInvocation node) {
-            String functionName = node.getFunctionName().toString();
+            String functionName = node.getFunctionName().getName().toString().replace("\\", "");
 
             if (!Arrays.stream(BLADE_VIEW_METHODS).anyMatch(functionName::equals)) {
                 return;
