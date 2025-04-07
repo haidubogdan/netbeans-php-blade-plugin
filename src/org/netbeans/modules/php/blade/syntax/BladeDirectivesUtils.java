@@ -81,7 +81,7 @@ public final class BladeDirectivesUtils {
             case DIRECTIVE_ELSEIF:
                 return new String[]{DIRECTIVE_IF, DIRECTIVE_ELSEIF};
             case DIRECTIVE_ELSE:{
-                return new String[]{DIRECTIVE_IF, DIRECTIVE_ELSEIF, DIRECTIVE_CAN};
+                return new String[]{DIRECTIVE_IF, DIRECTIVE_ELSEIF, DIRECTIVE_CAN, DIRECTIVE_HAS_SECTION, DIRECTIVE_SECTION_MISSING};
             }
             case DIRECTIVE_ENDSECTION:
             case DIRECTIVE_APPEND:

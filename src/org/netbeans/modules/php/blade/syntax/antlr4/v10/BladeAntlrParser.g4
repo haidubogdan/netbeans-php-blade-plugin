@@ -145,10 +145,10 @@ multipleArgDirective :
 
 blockIdentifiableArgDirective : 
     D_SECTION '(' IDENTIFIABLE_STRING? ')' D_PARENT? statement* D_PARENT? (D_SHOW | D_STOP | D_OVERWRITE | D_ENDSECTION | D_APPEND)
-    | D_HAS_SECTION '(' IDENTIFIABLE_STRING? ')' statement* D_ENDIF
-    | D_SECTION_MISSING '(' IDENTIFIABLE_STRING? ')' statement* D_ENDIF
+    | D_HAS_SECTION '(' IDENTIFIABLE_STRING? ')' statement* (D_ELSE statement*)? D_ENDIF
+    | D_SECTION_MISSING '(' IDENTIFIABLE_STRING? ')' statement* (D_ELSE statement*)? D_ENDIF
     | D_PUSH '(' IDENTIFIABLE_STRING? ')' statement* D_ENDPUSH
-    | D_PUSH_IF '(' IDENTIFIABLE_STRING? ',' ')' statement* D_ENDPUSH_IF
+    | D_PUSH_IF '(' IDENTIFIABLE_STRING? ',' ')' statement* (D_ELSE statement*)? D_ENDPUSH_IF
     | D_PUSH_ONCE '(' IDENTIFIABLE_STRING? ')' statement* D_ENDPUSH_ONCE
     | D_PREPEND '(' IDENTIFIABLE_STRING?  ')' statement* D_ENDPREPEND
 ;   

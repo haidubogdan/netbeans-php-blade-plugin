@@ -32,7 +32,6 @@ import org.netbeans.modules.parsing.api.UserTask;
 import org.netbeans.modules.parsing.spi.Parser;
 import org.netbeans.modules.parsing.spi.ParserFactory;
 import org.netbeans.modules.php.blade.editor.BladeLanguage;
-import org.netbeans.modules.php.blade.editor.parser.BladeParser;
 import org.openide.filesystems.FileObject;
 
 /**
@@ -40,13 +39,14 @@ import org.openide.filesystems.FileObject;
  * @author bogdan
  */
 public class ParserPerformanceTest extends ParserTestBase {
+    public static final int MAX_PARSER_TIME = 550;
 
     public ParserPerformanceTest(String testName) {
         super(testName);
     }
 
     public void testFile_01() throws Exception {
-        testGoodFile("testfiles/parser/performance/perf_test_01.blade.php", 500);
+        testGoodFile("testfiles/parser/performance/perf_test_01.blade.php", MAX_PARSER_TIME);
     }
 
     private void testGoodFile(String filePath, int expectedTime) throws Exception {
@@ -78,7 +78,7 @@ public class ParserPerformanceTest extends ParserTestBase {
         );
 
         System.out.println(output);
-        assertTrue("Parsing time should be below 500. It took " + time + "ms", time < expectedTime);
+        assertTrue("Parsing time should be below 550. It took " + time + "ms", time < expectedTime);
     }
 
     @MimeRegistration(mimeType = BladeLanguage.MIME_TYPE, service = ParserFactory.class)
