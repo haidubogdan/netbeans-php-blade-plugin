@@ -2,4 +2,4 @@
 
 ## What's changed
 
-- Fix custom directive warnings, due to delay in parser scanning
+- Fix issue #83 exclude known extension from blade mime detection when filename contains `.blade.php`

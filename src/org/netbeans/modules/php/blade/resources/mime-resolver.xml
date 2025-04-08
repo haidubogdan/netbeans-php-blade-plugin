@@ -3,6 +3,13 @@
           "http://www.netbeans.org/dtds/mime-resolver-1_0.dtd">
 <MIME-resolver>
     <file>
+        <!-- Ignore files with following extensions. -->
+        <ext name="xml"/>
+        <ext name="json"/>
+        <ext name="html"/>
+        <exit/>
+    </file>
+    <file>
         <name name=".blade.php" substring="true">
             <resolver mime="text/x-blade"/>
         </name>
