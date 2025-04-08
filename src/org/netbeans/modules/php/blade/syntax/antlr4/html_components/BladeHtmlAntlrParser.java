@@ -1,4 +1,4 @@
-// Generated from BladeHtmlAntlrParser.g4 by ANTLR 4.13.0
+// Generated from BladeHtmlAntlrParser.g4 by ANTLR 4.13.2
 
   /**
    * Parser generated for netbeans blade editor
@@ -19,9 +19,9 @@ import java.util.List;
 import java.util.Iterator;
 import java.util.ArrayList;
 
-@SuppressWarnings({"all", "warnings", "unchecked", "unused", "cast", "CheckReturnValue"})
+@SuppressWarnings({"all", "warnings", "unchecked", "unused", "cast", "CheckReturnValue", "this-escape"})
 public class BladeHtmlAntlrParser extends Parser {
-	static { RuntimeMetaData.checkVersion("4.13.0", RuntimeMetaData.VERSION); }
+	static { RuntimeMetaData.checkVersion("4.13.2", RuntimeMetaData.VERSION); }
 
 	protected static final DFA[] _decisionToDFA;
 	protected static final PredictionContextCache _sharedContextCache =

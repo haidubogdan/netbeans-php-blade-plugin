@@ -105,7 +105,7 @@ public class BladeBracesMatcher implements BracesMatcher {
                     if (projectOwner == null) {
                         return result;
                     }
-                    CustomDirectives customDirectives = CustomDirectives.getInstance(projectOwner);
+                    CustomDirectives customDirectives = CustomDirectives.forProject(projectOwner);
                     if (customDirectives == null) {
                         return result;
                     }
@@ -185,7 +185,7 @@ public class BladeBracesMatcher implements BracesMatcher {
             if (projectOwner == null) {
                 return null;
             }
-            CustomDirectives customDirectives = CustomDirectives.getInstance(projectOwner);
+            CustomDirectives customDirectives = CustomDirectives.forProject(projectOwner);
             if (customDirectives == null) {
                 return null;
             }

@@ -48,7 +48,9 @@ public final class BladePathUtils {
     public static final String[] BLADE_VIEW_METHODS = new String[]{"view", "render", "make"}; // NOI18N
 
     public static final Set<String> BLADE_VIEW_METHODS_SET = new HashSet<>(Arrays.asList(BLADE_VIEW_METHODS));
-    
+
+    public static final String PHP_EXTENSION = "php"; // NOI18N
+
     private BladePathUtils() {
 
     }
@@ -202,33 +204,44 @@ public final class BladePathUtils {
 
     public static List<FileObject> getCustomViewsRoots(Project project, FileObject contextFile) {
         List<FileObject> list = new ArrayList<>();
-
-        BladeProjectProperties bladeProperties = BladeProjectProperties.getInstance(project);
-        if (bladeProperties == null) {
-            return list;
-        }
+        BladeProjectProperties bladeProperties = BladeProjectProperties.forProject(project);
         String[] views = bladeProperties.getViewsFolderPathList();
 
-        if (views.length > 0) {
-            views = Arrays.stream(views).filter(s -> !s.isEmpty()).toArray(String[]::new);
-            Arrays.sort(views, (String s1, String s2) -> {
-                //clear empty configs
-                if (s1 == null || s2 == null) {
-                    return 0;
-                }
-                return s2.length() - s1.length();// comparision
-            });
-            for (String view : views) {
-                if (view.length() == 0) {
-                    continue;
-                }
-                File viewPath = new File(view);
-                if (!viewPath.exists()) {
-                    continue;
-                }
+        if (views.length == 0) {
+            return list;
+        }
 
-                list.add(FileUtil.toFileObject(viewPath));
+        FileObject projectDir = project.getProjectDirectory();
+        String dirPathName = projectDir.getName();
+
+        views = Arrays.stream(views).filter(s -> !s.isEmpty()).toArray(String[]::new);
+        Arrays.sort(views, (String s1, String s2) -> {
+            //clear empty configs
+            if (s1 == null || s2 == null) {
+                return 0;
             }
+            return s2.length() - s1.length();// comparision
+        });
+        for (String viewPath : views) {
+            if (viewPath.length() == 0) {
+                continue;
+            }
+
+            //if the absolute path doesn't contain the project name
+            //we can asume the path is relative
+            if (!viewPath.contains(dirPathName)) {
+                FileObject relativeFolder = projectDir.getFileObject(viewPath);
+                if (isValidFolder(relativeFolder)) {
+                    list.add(relativeFolder);
+                }
+                continue;
+            }
+            File viewFile = new File(viewPath);
+            if (!viewFile.exists()) {
+                continue;
+            }
+
+            list.add(FileUtil.toFileObject(viewFile));
         }
         return list;
     }
@@ -257,26 +270,35 @@ public final class BladePathUtils {
             }
         }
 
-        BladeProjectProperties bladeProperties = BladeProjectProperties.getInstance(project);
-
-        if (bladeProperties == null) {
-            return path;
-        }
+        BladeProjectProperties bladeProperties = BladeProjectProperties.forProject(project);
+        FileObject projectDir = project.getProjectDirectory();
+        String dirPathName = projectDir.getName();
 
         String[] viewFolders = bladeProperties.getViewsFolderPathList();
 
-        for (String viewFolder : viewFolders) {
-            if (viewFolder.length() == 0) {
-                continue;
-            }
-            File viewPath = new File(viewFolder);
-            if (!viewPath.exists()) {
+        for (String viewFolderPath : viewFolders) {
+            if (viewFolderPath.length() == 0) {
                 continue;
             }
 
+            FileObject viewFolder;
+            //if the absolute path doesn't contain the project name
+            //we can asume the path is relative
+            if (!viewFolderPath.contains(dirPathName)) {
+                viewFolder = projectDir.getFileObject(viewFolderPath);
+            } else {
+                File viewPathFile = new File(viewFolderPath);
+                if (!viewPathFile.exists()) {
+                    continue;
+                }
+                viewFolder = FileUtil.toFileObject(viewPathFile);
+            }
+
+            if (!isValidFolder(viewFolder)) {
+                continue;
+            }
             //we need to keep the same format
-            FileObject viewFile = FileUtil.toFileObject(viewPath);
-            String viewFileAbsPath = viewFile.getPath();
+            String viewFileAbsPath = viewFolder.getPath();
             if (filePath.startsWith(viewFileAbsPath)) {
                 String relativePath = filePath.replace(viewFileAbsPath, ""); //NOI18N
                 if (!relativePath.startsWith(StringUtils.FORWARD_SLASH)) {
@@ -309,6 +331,15 @@ public final class BladePathUtils {
 
     public static String toBladeViewPath(String filePath) {
         return filePath.replace(BladeLanguage.FILE_EXTENSION_WITH_DOT, "").replace(StringUtils.FORWARD_SLASH, StringUtils.DOT); //NOI18N
+    }
+
+    public static String relativeFilePath(File sources, FileObject projectDir) {
+        File projectDirFile = FileUtil.toFile(projectDir);
+        String absoulteProjectDir = projectDirFile.getAbsolutePath();
+        String absoluteFilePath = FileUtil.normalizeFile(sources).getAbsolutePath();
+        String unixPath = absoluteFilePath.replace(absoulteProjectDir, "")
+                .replace(StringUtils.BACK_DASH, StringUtils.FORWARD_SLASH).replaceAll("^[/]+", "");  //NOI18N
+        return unixPath;
     }
 
     public static String viewPathToFilePath(String viewPath) {
@@ -347,5 +378,18 @@ public final class BladePathUtils {
             return filePath;
         }
         return filePath.substring(viewsPos, filePath.length());
+    }
+
+    public static boolean isValidPhpFile(FileObject file) {
+        return file != null
+                && file.isValid()
+                && !file.isFolder()
+                && file.getExt().endsWith(PHP_EXTENSION);
+    }
+    
+    public static boolean isValidFolder(FileObject file) {
+        return file != null
+                && file.isValid()
+                && file.isFolder();
     }
 }

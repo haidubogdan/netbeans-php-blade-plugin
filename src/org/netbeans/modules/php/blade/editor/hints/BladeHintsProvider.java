@@ -70,7 +70,7 @@ public class BladeHintsProvider implements HintsProvider {
         BladeParserResult parserResult = (BladeParserResult) context.parserResult;
         FileObject fo = EditorDocumentUtils.getFileObject(context.doc);
         Project project = ProjectUtils.getMainOwner(fo);
-        CustomDirectives ct = CustomDirectives.getInstance(project);
+        CustomDirectives ct = CustomDirectives.forProject(project);
 
         if (directiveHints != null) {
             for (Rule.AstRule astRule : directiveHints) {

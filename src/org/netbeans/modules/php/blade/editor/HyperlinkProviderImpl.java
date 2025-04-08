@@ -193,7 +193,7 @@ public class HyperlinkProviderImpl implements HyperlinkProviderExt {
         if (projectOwner == null) {
             return false;
         }
-        BladeProjectProperties bladeProperties = BladeProjectProperties.getInstance(projectOwner);
+        BladeProjectProperties bladeProperties = BladeProjectProperties.forProject(projectOwner);
 
         return bladeProperties.getNonLaravelDeclFinderFlag();
     }

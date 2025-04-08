@@ -32,6 +32,7 @@ import org.netbeans.modules.php.blade.editor.components.ComponentModel;
 import org.netbeans.modules.php.blade.editor.components.annotation.Namespace;
 import org.netbeans.modules.php.blade.editor.components.annotation.NamespaceRegister;
 import org.netbeans.modules.php.blade.editor.parser.ParsingUtils;
+import org.netbeans.modules.php.blade.editor.path.BladePathUtils;
 import static org.netbeans.modules.php.blade.editor.path.BladePathUtils.BLADE_VIEW_METHODS;
 import org.netbeans.modules.php.blade.syntax.StringUtils;
 import org.netbeans.modules.php.editor.parser.PHPParseResult;
@@ -76,7 +77,6 @@ public class ComponentsSupport {
     public static final String COMPONENT_TAG_PREFIX = "<" + COMPONENT_TAG_NAME_PREFIX; //NOI18N
     public static final int COMPONENT_TAG_PREFIX_LENGTH = COMPONENT_TAG_PREFIX.length();
 
-    private static final Map<Project, ComponentsSupport> INSTANCES = new HashMap<>();
     private final Map<FileObject, Namespace> installedComponentNamespace = new HashMap<>();
     
     private static final RequestProcessor RP = new RequestProcessor(ComponentsSupport.class);
@@ -92,14 +92,12 @@ public class ComponentsSupport {
     }
 
     public static ComponentsSupport getInstance(Project project) {
-        synchronized (INSTANCES) {
-            if (INSTANCES.containsKey(project)) {
-                return INSTANCES.get(project);
-            }
-            ComponentsSupport instance = new ComponentsSupport(project);
-            INSTANCES.put(project, instance);
-            return instance;
-        }
+        return new ComponentsSupport(project);
+    }
+        
+    public static ComponentsSupport forProject(Project project) {
+        return BladeProjectSupport.getProjectSupport(project)
+                .getComponentsSupport();
     }
 
     public void scanForInstalledComponents() {
@@ -123,7 +121,7 @@ public class ComponentsSupport {
     }
 
     public void scanCustomComponentsFolders() {
-        BladeProjectProperties bladeProperties = BladeProjectProperties.getInstance(project);
+        BladeProjectProperties bladeProperties = BladeProjectProperties.forProject(project);
         String componentsFolder[] = bladeProperties.getBladeComponentsClassPathList();
         for (String folder : componentsFolder) {
             if (folder.length() == 0) {
@@ -218,7 +216,7 @@ public class ComponentsSupport {
             Enumeration<? extends FileObject> children = root.getChildren(true);
             while (children.hasMoreElements()) {
                 FileObject file = children.nextElement();
-                if (file.isFolder() || !file.getExt().endsWith("php")) { // NOI18N
+                if (!BladePathUtils.isValidPhpFile(file)) {
                     continue;
                 }
                 if (!cancelled) {

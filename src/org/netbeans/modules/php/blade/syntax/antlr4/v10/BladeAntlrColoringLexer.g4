@@ -116,6 +116,8 @@ D_SPATIE_ARG : ('@' ( ('unless' | 'has' ('any')? )?  'role') | 'haspermission') 
 D_SPATIE : ('@honeypot' //honeypot plugin
 | '@end' ('unless' | 'has' ('any')?)? 'role' | 'haspermission')->type(DIRECTIVE);
 
+D_INERTIA : ('@routes' | '@inertiaHead' | '@inertia')->type(DIRECTIVE);
+
 D_CSS_AT_RULE : ('@supports' | '@container' | '@scope' | '@media') (' ')* {this._input.LA(1) == '('}? ->type(HTML);
 //we will decide that a custom directive has expression to avoid email matching
 D_CUSTOM : ('@' NameString (' ')* {this._input.LA(1) == '('}? ) ->pushMode(INSIDE_PHP_EXPRESSION);

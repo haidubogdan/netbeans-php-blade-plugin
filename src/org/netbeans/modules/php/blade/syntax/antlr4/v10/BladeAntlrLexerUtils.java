@@ -65,6 +65,20 @@ public final class BladeAntlrLexerUtils extends BaseBladeAntlrUtils {
         return token;
     }
 
+    public static Token getPreviousToken(String text, int offset) {
+        AntlrTokenSequence tokens = lexerStringScan(text);
+        if (offset > text.length()) {
+            return null;
+        }
+        tokens.seekTo(offset);
+
+        if (!tokens.hasPrevious()) {
+            return null;
+        }
+        Token token = tokens.previous().get();
+        return token;
+    }
+    
     public static int getTagPairTokenType(int tokenType) {
         switch (tokenType) {
             case BLADE_CONTENT_OPEN_TAG:

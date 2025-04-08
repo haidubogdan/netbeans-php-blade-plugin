@@ -195,7 +195,7 @@ public class BladeHtmlCompletionProvider implements CompletionProvider {
                                     break;
                                 }
 
-                                ComponentsSupport componentSupport = ComponentsSupport.getInstance(projectOwner);
+                                ComponentsSupport componentSupport = ComponentsSupport.forProject(projectOwner);
 
                                 if (componentSupport == null){
                                     break;

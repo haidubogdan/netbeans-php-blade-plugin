@@ -312,5 +312,10 @@
             <artifactId>org-netbeans-modules-projectuiapi-base</artifactId>
             <version>${nbversion}</version>
         </dependency>
+        <dependency>
+            <groupId>org.netbeans.api</groupId>
+            <artifactId>org-netbeans-modules-project-ant</artifactId>
+            <version>${nbversion}</version>
+        </dependency>
     </dependencies>
 </project>

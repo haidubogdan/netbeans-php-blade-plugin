@@ -23,6 +23,7 @@ import java.io.File;
 import javax.swing.event.ChangeListener;
 import org.netbeans.api.project.Project;
 import org.netbeans.modules.php.blade.editor.indexing.IndexManager;
+import org.netbeans.modules.php.blade.editor.path.BladePathUtils;
 import org.netbeans.modules.php.blade.project.BladeProjectProperties;
 import org.netbeans.spi.options.OptionsPanelController;
 import org.openide.filesystems.*;
@@ -47,7 +48,7 @@ public final class BladeViewsFoldersPanel extends javax.swing.JPanel {
     BladeViewsFoldersPanel(Project project) {
         assert project != null;
         this.project = project;
-        bladeProperties = BladeProjectProperties.getInstance(project);
+        bladeProperties = BladeProjectProperties.forProject(project);
         initComponents();
         init();
     }
@@ -74,7 +75,6 @@ public final class BladeViewsFoldersPanel extends javax.swing.JPanel {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        toggleCommentButtonGroup = new javax.swing.ButtonGroup();
         jLabel1 = new javax.swing.JLabel();
         jScrollPane1 = new javax.swing.JScrollPane();
         viewsPathList = new javax.swing.JList<>();
@@ -178,15 +178,15 @@ public final class BladeViewsFoldersPanel extends javax.swing.JPanel {
 
     private void addViewFolderButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addViewFolderButtonActionPerformed
         assert EventQueue.isDispatchThread();
-        File sources = new FileChooserBuilder(BladeDirectives.class)
+        File source = new FileChooserBuilder(BladeDirectives.class)
                 .setDirectoriesOnly(true)
                 .setTitle("Select View Folder Path") // NOI18N
                 .setDefaultWorkingDirectory(FileUtil.toFile(project.getProjectDirectory()))
                 .forceUseOfDefaultWorkingDirectory(true)
                 .showOpenDialog();
-        if (sources != null) {
-            //TODO validate the path if it has blade files ?
-            bladeProperties.addViewsPath(FileUtil.normalizeFile(sources).getAbsolutePath());
+        if (source != null) {
+            String relativePath = BladePathUtils.relativeFilePath(source, project.getProjectDirectory());
+            bladeProperties.addViewsPath(relativePath);
         }
     }//GEN-LAST:event_addViewFolderButtonActionPerformed
 
@@ -221,7 +221,6 @@ public final class BladeViewsFoldersPanel extends javax.swing.JPanel {
     private javax.swing.JButton reindexViewFolderButton;
     private javax.swing.JButton reindexViewsButton;
     private javax.swing.JButton removeViewFolderButton;
-    private javax.swing.ButtonGroup toggleCommentButtonGroup;
     private javax.swing.JList<String> viewsPathList;
     // End of variables declaration//GEN-END:variables
 

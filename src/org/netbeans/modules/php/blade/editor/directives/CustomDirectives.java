@@ -25,13 +25,14 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.WeakHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.netbeans.api.project.Project;
 import org.netbeans.modules.csl.api.DeclarationFinder;
 import org.netbeans.modules.php.blade.editor.parser.ParsingUtils;
+import org.netbeans.modules.php.blade.editor.path.BladePathUtils;
 import org.netbeans.modules.php.blade.project.BladeProjectProperties;
+import org.netbeans.modules.php.blade.project.BladeProjectSupport;
 import static org.netbeans.modules.php.blade.project.BladeProjectSupport.APP_PROVIDER_RELATIVE_PATH;
 import static org.netbeans.modules.php.blade.syntax.BladeDirectivesUtils.AT;
 import static org.netbeans.modules.php.blade.syntax.BladeDirectivesUtils.DIRECTIVE_ELSE;
@@ -48,13 +49,13 @@ import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileUtil;
 
 /**
+ * TODO add a factory
  *
  * @author bhaidu
  */
 public final class CustomDirectives {
 
     private final Project project;
-    private static final Map<Project, CustomDirectives> INSTANCES = new WeakHashMap<>();
     private final Map<FileObject, List<CustomDirective>> customDirectives = new LinkedHashMap<>();
 
     public List<CustomDirective> customDirectiveList = new ArrayList<>();
@@ -64,27 +65,12 @@ public final class CustomDirectives {
     private static final Logger LOGGER = Logger.getLogger(CustomDirectives.class.getName());
 
     public static CustomDirectives getInstance(Project project) {
-        if (project == null) {
-            return new CustomDirectives();
-        }
-        synchronized (INSTANCES) {
-            CustomDirectives customDirective = INSTANCES.get(project);
-            if (customDirective == null) {
-                customDirective = new CustomDirectives(project);
-                INSTANCES.put(project, customDirective);
-            }
-            return customDirective;
-        }
+        return new CustomDirectives(project);
     }
 
-    public static CustomDirectives resetInstance(Project project) {
-        CustomDirectives customDirective = new CustomDirectives(project);
-        INSTANCES.put(project, customDirective);
-        return customDirective;
-    }
-
-    private CustomDirectives() {
-        this.project = null;
+    public static CustomDirectives forProject(Project project) {
+        return BladeProjectSupport.getProjectSupport(project)
+                .getCustomDirectives();
     }
 
     private CustomDirectives(Project project) {
@@ -95,50 +81,55 @@ public final class CustomDirectives {
 
     private void extractCustomDirectives() {
         LOGGER.info("Extracting custom directives");
-        String[] compilerPathList = BladeProjectProperties.getInstance(project).getCompilerPathList();
-        FileObject defaultAppProvider = project.getProjectDirectory().getFileObject(APP_PROVIDER_RELATIVE_PATH);
-        String defaultAppPath = ""; // NOI18N
+        String[] compilerPathList = BladeProjectProperties.forProject(project).getCompilerPathList();
+        FileObject projectDir = project.getProjectDirectory();
+        String dirPathName = projectDir.getName();
+        FileObject defaultAppProvider = projectDir.getFileObject(APP_PROVIDER_RELATIVE_PATH);
 
         if (defaultAppProvider != null) {
-            addDirectiveNamesFromFile(defaultAppProvider);
-            File defaultAppFile = new File(defaultAppProvider.getPath());
-            defaultAppPath = defaultAppFile.getAbsolutePath();
-            FileUtil.addRecursiveListener(fileChangeListener, defaultAppFile);
+            extractCustomDirectivesFromFile(defaultAppProvider);
+            defaultAppProvider.addFileChangeListener(fileChangeListener);
         }
 
-        if (compilerPathList.length == 0) {
+        if (compilerPathList == null || compilerPathList.length == 0) {
             return;
         }
+
         for (String path : compilerPathList) {
             if (path.equals("")) { // NOI18N
                 continue;
             }
-            File file = new File(path);
-            if (!file.exists()) {
-                //remove
+
+            //if the absolute path doesn't contain the project name
+            //we can asume the path is relative
+            if (!path.contains(dirPathName)) {
+                FileObject providerFo = projectDir.getFileObject(path);
+                if (!BladePathUtils.isValidPhpFile(providerFo)) {
+                    continue;
+                }
+                providerFo.addFileChangeListener(fileChangeListener);
+                extractCustomDirectivesFromFile(providerFo);
                 continue;
             }
 
-            String filePath = file.getPath();
-            if (defaultAppPath.equals(filePath)) {
+            File file = new File(path);
+            if (!file.exists()) {
+                //do nothing
                 continue;
             }
+
             FileUtil.addRecursiveListener(fileChangeListener, file);
             FileObject fileObj = FileUtil.toFileObject(file);
-            addDirectiveNamesFromFile(fileObj);
+            extractCustomDirectivesFromFile(fileObj);
         }
 
     }
 
     private void rescanFile(FileObject file) {
-        List<CustomDirective> entry = customDirectives.get(file);
-        if (entry == null || 
-                entry.isEmpty()) {
-            addDirectiveNamesFromFile(file);
-        }
+        extractCustomDirectivesFromFile(file);
     }
 
-    public void addDirectiveNamesFromFile(FileObject file) {
+    private void extractCustomDirectivesFromFile(FileObject file) {
         ParsingUtils parsingUtils = new ParsingUtils();
         parsingUtils.parseFileObject(file);
         FunctionInvocationVisitor functionInvocationVisitor = new FunctionInvocationVisitor();
@@ -233,7 +224,7 @@ public final class CustomDirectives {
         @Override
         public void visit(FunctionInvocation node) {
             String functionName = node.getFunctionName().toString();
-            
+
             if (!Arrays.stream(validFunctions).anyMatch(functionName::equals)) {
                 //in case of callback config
                 super.visit(node);
@@ -250,8 +241,8 @@ public final class CustomDirectives {
                 if (functionName.equals("if")) { // NOI18N
                     directives.add(new CustomDirective(AT + escapedDirectiveName, name.getStartOffset(), true));
                     directives.add(new CustomDirective(DIRECTIVE_UNLESS + escapedDirectiveName, name.getStartOffset())); // NOI18N
-                    directives.add(new CustomDirective(DIRECTIVE_ELSE + escapedDirectiveName, name.getStartOffset())); 
-                    directives.add(new CustomDirective(END_DIRECTIVE_PREFIX + escapedDirectiveName, name.getStartOffset())); 
+                    directives.add(new CustomDirective(DIRECTIVE_ELSE + escapedDirectiveName, name.getStartOffset()));
+                    directives.add(new CustomDirective(END_DIRECTIVE_PREFIX + escapedDirectiveName, name.getStartOffset()));
                 } else {
                     directives.add(new CustomDirective(AT + escapedDirectiveName, name.getStartOffset()));
                 }
@@ -280,9 +271,15 @@ public final class CustomDirectives {
 
         }
 
+        @Override
+        public void fileDeleted(FileEvent fe) {
+            //reset list
+            customDirectiveList = new ArrayList<>();
+        }
+
         private void processFile(FileObject file) {
             assert file.isData() : file;
-            CustomDirectives.getInstance(project).rescanFile(file);
+            CustomDirectives.forProject(project).rescanFile(file);
         }
 
     }

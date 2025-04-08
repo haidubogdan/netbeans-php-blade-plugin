@@ -329,7 +329,7 @@ public class BladeCompletionHandler implements CodeCompletionHandler2 {
         }
 
         Project project = ProjectUtils.getMainOwner(fo);
-        CustomDirectives.getInstance(project).filterAction(new CustomDirectives.FilterCallback() {
+        CustomDirectives.forProject(project).filterAction(new CustomDirectives.FilterCallback() {
             @Override
             public void filterDirectiveName(CustomDirectives.CustomDirective directive, FileObject file) {
                 DirectiveElement directiveEl = new DirectiveElement(directive.getName(), file);

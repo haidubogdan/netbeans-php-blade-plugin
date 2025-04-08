@@ -91,18 +91,18 @@ D_DEFAULT : '@default';
 D_ENDSWITCH : '@endswitch';
 
 //layouts
-D_EXTENDS : '@extends' (' ')* {lookupMode(PHP_EXPR_WITH_FIRST_IDENTIFIABLE_STRING);};
-D_INCLUDE : '@include' (' ')* {lookupMode(PHP_EXPR_WITH_FIRST_IDENTIFIABLE_STRING);};
-D_INCLUDE_IF : '@includeIf' (' ')* {lookupMode(PHP_EXPR_WITH_FIRST_IDENTIFIABLE_STRING);};
-D_INCLUDE_WHEN : '@includeWhen' (' ')* {this.identifierStringPos = 2; lookupMode(PHP_EXPR_WITH_CUSTOM_IDENTIFIABLE_STRING_POS);};
-D_INCLUDE_UNLESS : '@includeUnless' (' ')* {this.identifierStringPos = 2; lookupMode(PHP_EXPR_WITH_CUSTOM_IDENTIFIABLE_STRING_POS);};
-D_INCLUDE_FIRST : '@includeFirst' (' ')* {lookupMode(INCLUDE_FIRST_MODE);};
-D_EACH : '@each' (' ')* {lookupMode(PHP_EXPR_EACH);};
+D_EXTENDS : '@extends' (' ' | [\n\r])* {lookupMode(PHP_EXPR_WITH_FIRST_IDENTIFIABLE_STRING);};
+D_INCLUDE : '@include' (' ' | [\n\r])* {lookupMode(PHP_EXPR_WITH_FIRST_IDENTIFIABLE_STRING);};
+D_INCLUDE_IF : '@includeIf' (' ' | [\n\r])* {lookupMode(PHP_EXPR_WITH_FIRST_IDENTIFIABLE_STRING);};
+D_INCLUDE_WHEN : '@includeWhen' (' ' | [\n\r])* {this.identifierStringPos = 2; lookupMode(PHP_EXPR_WITH_CUSTOM_IDENTIFIABLE_STRING_POS);};
+D_INCLUDE_UNLESS : '@includeUnless' (' ' | [\n\r])* {this.identifierStringPos = 2; lookupMode(PHP_EXPR_WITH_CUSTOM_IDENTIFIABLE_STRING_POS);};
+D_INCLUDE_FIRST : '@includeFirst' (' ' | [\n\r])* {lookupMode(INCLUDE_FIRST_MODE);};
+D_EACH : '@each' (' ' | [\n\r])* {lookupMode(PHP_EXPR_EACH);};
 
-D_YIELD : '@yield' (' ')* {lookupMode(PHP_EXPR_WITH_FIRST_IDENTIFIABLE_STRING);};
-D_SECTION : '@section' (' ')* {lookupMode(PHP_EXPR_WITH_FIRST_IDENTIFIABLE_STRING);};
-D_HAS_SECTION : '@hasSection' (' ')* {lookupMode(PHP_EXPR_WITH_FIRST_IDENTIFIABLE_STRING);};
-D_SECTION_MISSING : '@sectionMissing' (' ')* {lookupMode(PHP_EXPR_WITH_FIRST_IDENTIFIABLE_STRING);};
+D_YIELD : '@yield' (' ' | [\n\r])* {lookupMode(PHP_EXPR_WITH_FIRST_IDENTIFIABLE_STRING);};
+D_SECTION : '@section' (' ' | [\n\r])* {lookupMode(PHP_EXPR_WITH_FIRST_IDENTIFIABLE_STRING);};
+D_HAS_SECTION : '@hasSection' (' ' | [\n\r])* {lookupMode(PHP_EXPR_WITH_FIRST_IDENTIFIABLE_STRING);};
+D_SECTION_MISSING : '@sectionMissing' (' ' | [\n\r])* {lookupMode(PHP_EXPR_WITH_FIRST_IDENTIFIABLE_STRING);};
 D_ENDSECTION : '@endsection';
 
 D_PARENT : '@parent';
@@ -113,14 +113,14 @@ D_APPEND : '@append';
 D_ONCE : '@once';
 D_ENDONCE : '@endonce';
 
-D_STACK : '@stack' (' ')* {lookupMode(PHP_EXPR_WITH_FIRST_IDENTIFIABLE_STRING);};
-D_PUSH : '@push' (' ')* {lookupMode(PHP_EXPR_WITH_FIRST_IDENTIFIABLE_STRING);};
+D_STACK : '@stack' (' ' | [\n\r])* {lookupMode(PHP_EXPR_WITH_FIRST_IDENTIFIABLE_STRING);};
+D_PUSH : '@push' (' ' | [\n\r])* {lookupMode(PHP_EXPR_WITH_FIRST_IDENTIFIABLE_STRING);};
 D_ENDPUSH : '@endpush';
-D_PUSH_IF : '@pushIf' (' ')* {lookupMode(PHP_EXPR_WITH_FIRST_IDENTIFIABLE_STRING);};
+D_PUSH_IF : '@pushIf' (' ' | [\n\r])* {lookupMode(PHP_EXPR_WITH_FIRST_IDENTIFIABLE_STRING);};
 D_ENDPUSH_IF : '@endPushIf';
-D_PUSH_ONCE : '@pushOnce' (' ')* {lookupMode(PHP_EXPR_WITH_FIRST_IDENTIFIABLE_STRING);};
+D_PUSH_ONCE : '@pushOnce' (' ' | [\n\r])* {lookupMode(PHP_EXPR_WITH_FIRST_IDENTIFIABLE_STRING);};
 D_ENDPUSH_ONCE : '@endPushOnce';
-D_PREPEND : '@prepend' (' ')* {lookupMode(PHP_EXPR_WITH_FIRST_IDENTIFIABLE_STRING);};
+D_PREPEND : '@prepend' (' ' | [\n\r])* {lookupMode(PHP_EXPR_WITH_FIRST_IDENTIFIABLE_STRING);};
 D_ENDPREPEND : '@endprepend';
 
 
@@ -212,6 +212,8 @@ D_LIVEWIRE : ('@livewireStyles' | '@bukStyles' | '@livewireScripts' | '@bukScrip
 
 D_SPATIE : '@honeypot'->type(D_DIRECTIVE);
 
+D_INERTIA : ('@routes' | '@inertiaHead' | '@inertia')->type(D_DIRECTIVE);
+
 //extra
 
 BLADE_CONTENT_OPEN_TAG : '{{' {htmlCurlyParenBalance=0;};
@@ -280,7 +282,7 @@ EXIT_E_EOF : EOF->type(ERROR),mode(DEFAULT_MODE);
 //==========================================
 mode PHP_EXPR_WITH_FIRST_IDENTIFIABLE_STRING;
 
-EI_IDENTIFIABLE_STRING : (' ')*  STRING_LITERAL (' ')* 
+EI_IDENTIFIABLE_STRING : (' ' | [\n\r])*  STRING_LITERAL (' ')* 
    {this._input.LA(1) == ',' || this._input.LA(1) == ')'}? ->type(IDENTIFIABLE_STRING),mode(INSIDE_PHP_EXPRESSION);
 
 START_EI_LPAREN: '(' {rparenBalance == 0}? {rparenBalance++;}->type(LPAREN);
@@ -333,10 +335,10 @@ EACH_RCURLYBRACE: '}' {curlyparenBalance--;}->skip;
 
 EACH_ARG_COMMA : ',' {rparenBalance == 1 && sqparenBalance == 0 && sqparenBalance == 0}? {this.argCounter++;} ->type(COMMA);
 
-EACH_IDENTIFIABLE_STRING : (' ')*  STRING_LITERAL (' ')* 
+EACH_IDENTIFIABLE_STRING : (' ' | [\n\r])*  STRING_LITERAL (' ')* 
    {this.argCounter == 1 && this.identifierStringPos == 1 }? { this.identifierStringPos = 4;  } ->type(IDENTIFIABLE_STRING);
 
-EACH_LAST_IDENTIFIABLE_STRING : (' ')*  STRING_LITERAL (' ')* 
+EACH_LAST_IDENTIFIABLE_STRING : (' ' | [\n\r] )*  STRING_LITERAL (' ')* 
    {this._input.LA(1) == ')' && this.argCounter == 4 && this.identifierStringPos == 4 }? { this.identifierStringPos = 0;  } ->type(IDENTIFIABLE_STRING);
 
 EACH_OTHER : . ->skip;
@@ -360,7 +362,7 @@ INCF_RCURLYBRACE: '}' {curlyparenBalance--;}->skip;
 
 INCF_ARG_COMMA : ',' {rparenBalance == 1 && sqparenBalance == 0 && curlyparenBalance == 0}? {this.argCounter++;} ->type(COMMA);
 
-INCF_IDENTIFIABLE_STRING : (' ')*  STRING_LITERAL (' ')*
+INCF_IDENTIFIABLE_STRING : (' ' | [\n\r])*  STRING_LITERAL (' ')*
     {rparenBalance == 1 && sqparenBalance == 1 && this.argCounter == 1}? ->type(IDENTIFIABLE_STRING)
     ;
 
@@ -384,7 +386,7 @@ MIXED_S_A_RCURLYBRACE: '}' {curlyparenBalance--;}->skip;
 
 MIXED_S_A_ARG_COMMA : ',' {rparenBalance == 1 && sqparenBalance == 1 && curlyparenBalance == 0}? ->type(COMMA);
 
-MIXED_S_A_IDENTIFIABLE_STRING : (' ')*  STRING_LITERAL (' ')*
+MIXED_S_A_IDENTIFIABLE_STRING : (' ' | [\n\r])*  STRING_LITERAL (' ')*
     {rparenBalance == 1}? ->type(IDENTIFIABLE_STRING)
     ;
 

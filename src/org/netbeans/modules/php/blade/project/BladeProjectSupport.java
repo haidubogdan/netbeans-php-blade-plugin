@@ -19,36 +19,47 @@
 package org.netbeans.modules.php.blade.project;
 
 import org.netbeans.api.project.Project;
+import org.netbeans.modules.php.blade.editor.directives.CustomDirectives;
 import org.netbeans.spi.project.ProjectServiceProvider;
 import org.netbeans.spi.project.ui.ProjectOpenedHook;
+
 /**
  *
  * @author bhaidu
  */
 public class BladeProjectSupport extends ProjectOpenedHook {
+
     public static final String APP_PROVIDER_RELATIVE_PATH = "app/Providers/AppServiceProvider.php"; // NOI18N
     private final Project project;
-        
-    public BladeProjectSupport(Project project) {
+
+    private BladeProjectProperties bladeProjectProperties;
+    private ComponentsSupport componentsSupport;
+    private CustomDirectives customDirective;
+
+    private BladeProjectSupport(Project project) {
         assert project != null;
         this.project = project;
     }
 
     private static BladeProjectSupport create(Project project) {
-        BladeProjectSupport support = new BladeProjectSupport(project);
-        return support;
+        return new BladeProjectSupport(project);
     }
-    
-    @ProjectServiceProvider(service = ProjectOpenedHook.class, projectType = "org-netbeans-modules-php-blade-project") // NOI18N
-    public static BladeProjectSupport forBladeProject(Project project) {
-        return create(project);
+
+    public static BladeProjectSupport getProjectSupport(Project project) {
+        assert project != null;
+        BladeProjectSupport bps = project.getLookup().lookup(BladeProjectSupport.class);
+        if (bps == null) {
+            //log
+            return create(project);
+        }
+        return bps;
     }
-    
+
     @ProjectServiceProvider(service = ProjectOpenedHook.class, projectType = "org-netbeans-modules-php-project") // NOI18N
     public static BladeProjectSupport forPhpProject(Project project) {
         return create(project);
     }
-    
+
     @ProjectServiceProvider(service = ProjectOpenedHook.class, projectType = "org-netbeans-modules-web-project") // NOI18N
     public static BladeProjectSupport forWebProject(Project project) {
         return create(project);
@@ -56,13 +67,24 @@ public class BladeProjectSupport extends ProjectOpenedHook {
 
     @Override
     protected void projectOpened() {
-        BladeProjectProperties.getInstance(project);
-        ComponentsSupport.getInstance(project);
+        bladeProjectProperties = BladeProjectProperties.getInstance(project);
+        customDirective = CustomDirectives.getInstance(project);
+        componentsSupport = ComponentsSupport.getInstance(project);
     }
 
     @Override
     protected void projectClosed() {
-        BladeProjectProperties.closeProject(project);
     }
-    
+
+    public BladeProjectProperties getBladeProjectProperties() {
+        return bladeProjectProperties;
+    }
+
+    public CustomDirectives getCustomDirectives() {
+        return customDirective;
+    }
+
+    public ComponentsSupport getComponentsSupport() {
+        return componentsSupport;
+    }
 }

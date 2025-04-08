@@ -56,7 +56,7 @@ public class ComponentsQueryService {
             return results;
         }
 
-        ComponentsSupport componentSupport = ComponentsSupport.getInstance(project);
+        ComponentsSupport componentSupport = ComponentsSupport.forProject(project);
 
         if (!componentSupport.isScanned()) {
             componentSupport.scanForInstalledComponents();
@@ -109,7 +109,7 @@ public class ComponentsQueryService {
     public Collection<PhpIndexResult> findIndexedComponentClass(String queryClassName, Project project) {
         Collection<PhpIndexResult> results = new ArrayList<>();
 
-        ComponentsSupport componentSupport = ComponentsSupport.getInstance(project);
+        ComponentsSupport componentSupport = ComponentsSupport.forProject(project);
         componentSupport.warmup();
 
         for (Map.Entry<FileObject, Namespace> namespace : componentSupport.getInstalledComponentNamespace().entrySet()) {

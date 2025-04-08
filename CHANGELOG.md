@@ -1,5 +1,71 @@
 # Change Log
 
+## [3.1.0.02]
+
+- decl finder for arguments adiacent to new line  (#84), inertia directives (#85)
+
+## [3.1.0.01]
+
+- major project properties update #78 , use public properties, store custom directories and files as relative paths
+
+## [3.0.0.29]
+
+- fix #83 mime resolver for detecting real blade files
+
+## [3.0.0.28]
+
+- fix parser error warning for else blocks on directive ending in `@endif`
+
+## [3.0.0.27]
+
+- add spatie honeypot directive, scan for directives inside callbacks, include resource path for components, code updates on components logic
+
+## [3.0.0.26]
+
+- fix custom directive parse lag
+## [3.0.0.25]
+
+- include `@props` directive
+
+## [3.0.0.24]
+
+- fix wrong `@php` echo  syntax error
+
+## [3.0.0.22]
+
+- fix wrong `@empty` `@else` syntax error
+
+## [3.0.0.21]
+
+- fix issue #75, wrong parser error in foreach directive
+
+## [3.0.0.20]
+
+- using nb php parser for `@php` directive syntax check
+
+## [3.0.0.19] - removing php syntax error checks
+add some interactions to hint warnings
+don't detect url parts with at (@) symbols as directives
+##[3.0.0.18] - fixing @foreach wrong syntax error
+##[3.0.0.17] - updating unit tests for source code
+- improve lexer coloring for component attributes
+##[3.0.0.1 - 3.0.0.16] - major refactoring for lexer & parser
+    - custom blade components config for autocomplete & declaration finder
+    - autocomplete constructor properties for blade components
+##[2.5.0.8] - regression fix adjustments for directive php embedding
+##[2.5.0.7] - regression fix for directive php embedding
+##[2.5.0.6] - include `@when`, `@bool` directive, no more php embedding on directive parenthesis wrapping
+##[2.5.0.5] -simplifying php brace matcher freeze issue for chars with ":" wrapped in brackets
+##[2.5.0.4] - lexer for css at rules
+##[2.5.0.3] - brace higlight for custom directive
+## [2.5.0.2] 
+
+- fix syntax highlight issue 67
+
+## [2.5.0.1] 
+
+- fix syntax highlight issue 66, stop completion inside php strings
+
 ## [2.5.0.0] 
 
 **syntax highlight**
@@ -12,15 +78,15 @@
 
 ## [2.4.9.9] 
 
-- limited go to file + completion for vite assets (#64), decl finder fixes + refactor for Php<br>
+- limited go to file + completion for vite assets (#64), decl finder fixes + refactor for Php
 
 ## [2.4.9.8] 
 
-- fix comment highlight issue (#62) in directive php expression, improvements on php namespace completion<br>
+- fix comment highlight issue (#62) in directive php expression, improvements on php namespace completion
 
 ## [2.4.9.7] 
 
-- fix livewire component formatting, display namespace path on class method completion<br>
+- fix livewire component formatting, display namespace path on class method completion
 
 ## [2.4.9.6] 
 
@@ -28,15 +94,15 @@
 
 ## [2.4.9.5] 
 
-- fix directive completion before double quote html, add attr directive to completion list<br>
+- fix directive completion before double quote html, add attr directive to completion list
 
 ## [2.4.9.4] 
 
-- fix issue 57 formatting with optgroup<br>
+- fix issue 57 formatting with optgroup
 
 ## [2.4.9.3] 
 
-- configurable declaration finder for view paths<br>
+- configurable declaration finder for view paths
 
 ## [2.4.9.1]
 

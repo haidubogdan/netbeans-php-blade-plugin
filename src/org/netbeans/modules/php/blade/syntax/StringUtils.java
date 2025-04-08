@@ -26,6 +26,7 @@ public final class StringUtils {
 
     public static final String DOT = "."; //NOI18N
     public static final String ESCAPED_DOT = "\\."; //NOI18N
+    public static final String BACK_DASH = "\\"; //NOI18N
     public static final String FORWARD_SLASH = "/"; //NOI18N
 
     private StringUtils() {

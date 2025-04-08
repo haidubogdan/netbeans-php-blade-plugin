@@ -21,10 +21,10 @@ package org.netbeans.modules.php.blade.editor.ui.customizer;
 import java.awt.EventQueue;
 import java.io.File;
 import org.netbeans.api.project.Project;
+import org.netbeans.modules.php.blade.editor.path.BladePathUtils;
 import org.netbeans.modules.php.blade.project.BladeProjectProperties;
 import org.netbeans.modules.php.blade.project.ComponentsSupport;
 import org.openide.filesystems.FileChooserBuilder;
-import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileUtil;
 
 /**
@@ -44,7 +44,7 @@ public class BladeComponents extends javax.swing.JPanel {
      */
     public BladeComponents(Project project) {
         this.project = project;
-        bladeProperties = BladeProjectProperties.getInstance(project);
+        bladeProperties = BladeProjectProperties.forProject(project);
         initComponents();
         init();
     }
@@ -56,7 +56,7 @@ public class BladeComponents extends javax.swing.JPanel {
 
     public void storeData() {
         bladeProperties.storeBladeComponentsFolder();
-        ComponentsSupport componentSupport = ComponentsSupport.getInstance(project);
+        ComponentsSupport componentSupport = ComponentsSupport.forProject(project);
 
         if (bladeComponentFolder != null) {
             componentSupport.scanBladeComponentsClassFolder(bladeComponentFolder);
@@ -152,7 +152,8 @@ public class BladeComponents extends javax.swing.JPanel {
                 .forceUseOfDefaultWorkingDirectory(true)
                 .showOpenDialog();
         if (bladeComponentFolder != null) {
-            bladeProperties.addCustomBladeComponentClassFolder(FileUtil.normalizeFile(bladeComponentFolder).getAbsolutePath());
+            String relativePath = BladePathUtils.relativeFilePath(bladeComponentFolder, project.getProjectDirectory());
+            bladeProperties.addCustomBladeComponentClassFolder(relativePath);
         }
     }//GEN-LAST:event_compilerPathFileButtonActionPerformed
 

@@ -14,4 +14,11 @@
             <resolver mime="text/x-blade"/>
         </name>
     </file>
+    <file>
+        <!-- Ignore files with following extensions. -->
+        <ext name="xml"/>
+        <ext name="json"/>
+        <ext name="html"/>
+        <exit/>
+    </file>
 </MIME-resolver>

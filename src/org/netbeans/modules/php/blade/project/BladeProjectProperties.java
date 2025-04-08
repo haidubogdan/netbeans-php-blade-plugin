@@ -18,15 +18,22 @@
  */
 package org.netbeans.modules.php.blade.project;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.prefs.PreferenceChangeListener;
 import java.util.prefs.Preferences;
 import javax.swing.DefaultListModel;
 import org.netbeans.api.project.Project;
+import org.netbeans.api.project.ProjectManager;
 import org.netbeans.api.project.ProjectUtils;
 import org.netbeans.modules.php.blade.editor.ui.customizer.UiOptionsUtils;
+import org.netbeans.modules.php.blade.syntax.StringUtils;
+import org.netbeans.spi.project.support.ant.AntProjectHelper;
+import org.netbeans.spi.project.support.ant.EditableProperties;
+import org.openide.filesystems.FileObject;
+import org.openide.util.Exceptions;
+import org.openide.util.Mutex;
+import org.openide.util.MutexException;
 import org.openide.util.NbPreferences;
 
 /**
@@ -36,12 +43,11 @@ import org.openide.util.NbPreferences;
  */
 public final class BladeProjectProperties {
 
-    private static final Map<Project, BladeProjectProperties> INSTANCES = new HashMap<>();
+    private final Project project;
     private static final String DIRECTIVE_CUSTOMIZER_PATH_LIST = "directive_customizer.path.list"; // NOI18N
     private static final String VIEW_PATH_LIST = "views.path.list"; // NOI18N
     private static final String BLADE_COMPONENT_CLASS_FOLDER_LIST = "blade_component_class.folder.list"; // NOI18N
     private static final String NON_LARAVEL_DECL_FINDER = "non_laravel.decl.finder"; // NOI18N
-    private final Project project;
 
     private DefaultListModel<String> directiveCustomizerPathList = new DefaultListModel();
     private DefaultListModel<String> viewsPathList = new DefaultListModel();
@@ -50,27 +56,22 @@ public final class BladeProjectProperties {
     private final AtomicBoolean nonLaravelDeclFinder = new AtomicBoolean(false);
     // the pipe "|" char needs to be escaped
     public static final String ESCAPED_VIEW_PATH_SEPARATOR = "\\|"; // NOI18N
+    
+    private final EditableProperties editableProperties;
 
-    private BladeProjectProperties(Project project) {
+    public BladeProjectProperties(Project project) {
         this.project = project;
+        this.editableProperties = getPublicProperties();
         initModelsFromPreferences();
     }
 
     public static BladeProjectProperties getInstance(Project project) {
-        synchronized (INSTANCES) {
-            if (INSTANCES.containsKey(project)) {
-                return INSTANCES.get(project);
-            }
-            BladeProjectProperties instance = new BladeProjectProperties(project);
-            INSTANCES.put(project, instance);
-            return instance;
-        }
+        return new BladeProjectProperties(project);
     }
 
-    public static void closeProject(Project project) {
-        synchronized (INSTANCES) {
-            INSTANCES.remove(project);
-        }
+    public static BladeProjectProperties forProject(Project project) {
+        return BladeProjectSupport.getProjectSupport(project)
+                .getBladeProjectProperties();
     }
 
     private Preferences getPreferences() {
@@ -83,23 +84,36 @@ public final class BladeProjectProperties {
     private void initModelsFromPreferences() {
         directiveCustomizerPathList = createModelForDirectiveCusomizerPathList();
         viewsPathList = createModelForViewsPathList();
-        nonLaravelDeclFinder.set(getPreferences().getBoolean(NON_LARAVEL_DECL_FINDER, false));
+        if (editableProperties.getProperty(NON_LARAVEL_DECL_FINDER) != null) {
+            nonLaravelDeclFinder.set(Boolean.parseBoolean(editableProperties.getProperty(NON_LARAVEL_DECL_FINDER)));
+        } else {
+            nonLaravelDeclFinder.set(getPreferences().getBoolean(NON_LARAVEL_DECL_FINDER, false));
+        }
         this.bladeComponentsClassFolderList = createModelForBladeComponentFolderList();
     }
 
     public void storeDirectiveCustomizerPaths() {
         String includePath = UiOptionsUtils.encodeToStrings(directiveCustomizerPathList.elements());
         getPreferences().put(DIRECTIVE_CUSTOMIZER_PATH_LIST, includePath);
+        putPublicProperty(DIRECTIVE_CUSTOMIZER_PATH_LIST, includePath);
     }
 
     public void storeViewsPaths() {
         String includePath = UiOptionsUtils.encodeToStrings(viewsPathList.elements());
         getPreferences().put(VIEW_PATH_LIST, includePath);
+        putPublicProperty(VIEW_PATH_LIST, includePath);
+    }
+
+    public void storeBladeComponentsFolder() {
+        String includePath = UiOptionsUtils.encodeToStrings(bladeComponentsClassFolderList.elements());
+        getPreferences().put(BLADE_COMPONENT_CLASS_FOLDER_LIST, includePath);
+        putPublicProperty(BLADE_COMPONENT_CLASS_FOLDER_LIST, includePath);
     }
 
     public void storeNonLaravelDeclFinderFlag(boolean status) {
         nonLaravelDeclFinder.set(status);
         getPreferences().putBoolean(NON_LARAVEL_DECL_FINDER, status);
+        putBooleanProperty(NON_LARAVEL_DECL_FINDER, status);
     }
 
     public void addDirectiveCustomizerPath(String path) {
@@ -118,17 +132,12 @@ public final class BladeProjectProperties {
         viewsPathList.remove(index);
     }
 
-    public void setViewsPathList(DefaultListModel<String> list) {
-        String includePath = UiOptionsUtils.encodeToStrings(list.elements());
-        getPreferences().put(VIEW_PATH_LIST, includePath);
-    }
-
     public DefaultListModel<String> createModelForDirectiveCusomizerPathList() {
-        return creatModelFromPreferences(DIRECTIVE_CUSTOMIZER_PATH_LIST);
+        return createModelFromPreferences(DIRECTIVE_CUSTOMIZER_PATH_LIST);
     }
 
     public DefaultListModel<String> createModelForViewsPathList() {
-        return creatModelFromPreferences(VIEW_PATH_LIST);
+        return createModelFromPreferences(VIEW_PATH_LIST);
     }
 
     public DefaultListModel<String> getModelForDirectiveCusomizerPathList() {
@@ -147,27 +156,23 @@ public final class BladeProjectProperties {
     public void addCustomBladeComponentClassFolder(String path) {
         bladeComponentsClassFolderList.addElement(path);
     }
-    
+
     public void removeCustomBladeComponentClassFolder(int index) {
         bladeComponentsClassFolderList.remove(index);
     }
-    
+
     public DefaultListModel<String> createModelForBladeComponentFolderList() {
-        return creatModelFromPreferences(BLADE_COMPONENT_CLASS_FOLDER_LIST);
+        return createModelFromPreferences(BLADE_COMPONENT_CLASS_FOLDER_LIST);
     }
-    
+
     public DefaultListModel<String> getModelForBladeComponentsClassFolderList() {
         return bladeComponentsClassFolderList;
     }
-    
-    public void storeBladeComponentsFolder() {
-        String includePath = UiOptionsUtils.encodeToStrings(bladeComponentsClassFolderList.elements());
-        getPreferences().put(BLADE_COMPONENT_CLASS_FOLDER_LIST, includePath);
-    }
-    
-    private DefaultListModel<String> creatModelFromPreferences(String pathName) {
+
+    private DefaultListModel<String> createModelFromPreferences(String configName) {
         DefaultListModel<String> model = new DefaultListModel<>();
-        String encodedCompilerPathList = getPreferences().get(pathName, null);
+        String encodedCompilerPathList = getMixedSourceProjectProperty(configName);
+
         String[] paths;
 
         if (encodedCompilerPathList != null) {
@@ -179,15 +184,19 @@ public final class BladeProjectProperties {
             return model;
         }
 
+        String projectDirectory = project.getProjectDirectory().getPath() + StringUtils.FORWARD_SLASH;
+
         for (String path : paths) {
-            model.addElement(path);
+            //sanitize for public properties
+            String relativePath = path.replace(StringUtils.BACK_DASH, StringUtils.FORWARD_SLASH).replace(projectDirectory, "");
+            model.addElement(relativePath);
         }
 
         return model;
     }
 
     public String[] getCompilerPathList() {
-        String encodedCompilerPathList = getPreferences().get(DIRECTIVE_CUSTOMIZER_PATH_LIST, null);
+        String encodedCompilerPathList = getMixedSourceProjectProperty(DIRECTIVE_CUSTOMIZER_PATH_LIST);
         String[] paths = new String[]{};
         if (encodedCompilerPathList != null) {
             return encodedCompilerPathList.split(ESCAPED_VIEW_PATH_SEPARATOR, -1);
@@ -196,16 +205,17 @@ public final class BladeProjectProperties {
     }
 
     public String[] getViewsFolderPathList() {
-        String encodedViewsFolderPathList = getPreferences().get(VIEW_PATH_LIST, null);
+        String encodedViewsFolderPathList = getMixedSourceProjectProperty(VIEW_PATH_LIST);
         String[] paths = new String[]{};
         if (encodedViewsFolderPathList != null) {
             return encodedViewsFolderPathList.split(ESCAPED_VIEW_PATH_SEPARATOR, -1);
         }
         return paths;
     }
-    
+
     public String[] getBladeComponentsClassPathList() {
-        String encodedBladeComponentFolderPathList = getPreferences().get(BLADE_COMPONENT_CLASS_FOLDER_LIST, null);
+        String encodedBladeComponentFolderPathList = getMixedSourceProjectProperty(BLADE_COMPONENT_CLASS_FOLDER_LIST);
+
         String[] paths = new String[]{};
         if (encodedBladeComponentFolderPathList != null) {
             return encodedBladeComponentFolderPathList.split(ESCAPED_VIEW_PATH_SEPARATOR, -1);
@@ -213,12 +223,52 @@ public final class BladeProjectProperties {
         return paths;
     }
 
-    public void addPreferenceChangeListener(PreferenceChangeListener preferenceChangeListener) {
-        getPreferences().addPreferenceChangeListener(preferenceChangeListener);
+    private void putBooleanProperty(String property, boolean value) {
+        putPublicProperty(property, String.valueOf(value));
     }
 
-    public void removePreferenceChangeListener(PreferenceChangeListener preferenceChangeListener) {
-        getPreferences().removePreferenceChangeListener(preferenceChangeListener);
+    public void putPublicProperty(String property, String value) {
+        editableProperties.setProperty(property, value);
+        try {
+            storeEditableProperties(project, AntProjectHelper.PROJECT_PROPERTIES_PATH, editableProperties);
+        } catch (IOException ex) {
+            Exceptions.printStackTrace(ex);
+        }
     }
 
+    private EditableProperties getPublicProperties() {
+        AntProjectHelper helper = project.getLookup().lookup(AntProjectHelper.class);
+        return helper.getProperties(AntProjectHelper.PROJECT_PROPERTIES_PATH);
+    }
+    
+    private String getMixedSourceProjectProperty(String property) {
+        String publicProperty = editableProperties.getProperty(property);
+        return publicProperty != null ? publicProperty : getPreferences().get(property, null);
+    }
+
+    //save public properties
+    private static void storeEditableProperties(final Project prj, final String propertiesPath, final EditableProperties ep)
+            throws IOException {
+        try {
+            ProjectManager.mutex().writeAccess(new Mutex.ExceptionAction<Void>() {
+                @Override
+                public Void run() throws IOException {
+                    FileObject propertiesFo = prj.getProjectDirectory().getFileObject(propertiesPath);
+                    if (propertiesFo != null) {
+                        OutputStream os = null;
+                        try {
+                            os = propertiesFo.getOutputStream();
+                            ep.store(os);
+                        } finally {
+                            if (os != null) {
+                                os.close();
+                            }
+                        }
+                    }
+                    return null;
+                }
+            });
+        } catch (MutexException ex) {
+        }
+    }
 }

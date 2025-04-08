@@ -25,7 +25,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import org.netbeans.api.project.Project;
-import org.netbeans.modules.php.blade.editor.directives.CustomDirectives;
+import org.netbeans.modules.php.blade.editor.path.BladePathUtils;
 import org.netbeans.modules.php.blade.project.BladeProjectProperties;
 import org.openide.filesystems.FileChooserBuilder;
 import org.openide.filesystems.FileUtil;
@@ -46,8 +46,9 @@ public class BladeDirectives extends javax.swing.JPanel {
      * @param project
      */
     public BladeDirectives(Project project) {
+        assert project != null;
         this.project = project;
-        bladeProperties = BladeProjectProperties.getInstance(project);
+        bladeProperties = BladeProjectProperties.forProject(project);
         initComponents();
         init();
     }
@@ -59,7 +60,6 @@ public class BladeDirectives extends javax.swing.JPanel {
 
     public void storeData() {
         bladeProperties.storeDirectiveCustomizerPaths();
-        CustomDirectives.resetInstance(project);
     }
 
     /**
@@ -77,7 +77,7 @@ public class BladeDirectives extends javax.swing.JPanel {
         customDirectivePathList = new javax.swing.JList<>();
         removePathButton = new javax.swing.JButton();
         jLabel1 = new javax.swing.JLabel();
-        jLabel3 = new javax.swing.JLabel();
+        LaravelLink = new javax.swing.JLabel();
 
         org.openide.awt.Mnemonics.setLocalizedText(includePathLabel, org.openide.util.NbBundle.getMessage(BladeDirectives.class, "BladeDirectives.includePathLabel.text_1")); // NOI18N
 
@@ -101,11 +101,11 @@ public class BladeDirectives extends javax.swing.JPanel {
 
         org.openide.awt.Mnemonics.setLocalizedText(jLabel1, org.openide.util.NbBundle.getMessage(BladeDirectives.class, "BladeDirectives.jLabel1.text")); // NOI18N
 
-        jLabel3.setForeground(new java.awt.Color(0, 51, 255));
-        org.openide.awt.Mnemonics.setLocalizedText(jLabel3, org.openide.util.NbBundle.getMessage(BladeDirectives.class, "BladeDirectives.jLabel3.text")); // NOI18N
-        jLabel3.addMouseListener(new java.awt.event.MouseAdapter() {
+        LaravelLink.setForeground(new java.awt.Color(0, 51, 255));
+        org.openide.awt.Mnemonics.setLocalizedText(LaravelLink, org.openide.util.NbBundle.getMessage(BladeDirectives.class, "BladeDirectives.LaravelLink.text")); // NOI18N
+        LaravelLink.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
-                jLabel3MouseClicked(evt);
+                LaravelLinkMouseClicked(evt);
             }
         });
 
@@ -128,9 +128,9 @@ public class BladeDirectives extends javax.swing.JPanel {
                             .addGroup(layout.createSequentialGroup()
                                 .addGap(10, 10, 10)
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(jLabel3)
+                                    .addComponent(LaravelLink)
                                     .addComponent(jLabel1))))
-                        .addGap(0, 306, Short.MAX_VALUE)))
+                        .addGap(0, 308, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -141,7 +141,7 @@ public class BladeDirectives extends javax.swing.JPanel {
                 .addGap(15, 15, 15)
                 .addComponent(jLabel1)
                 .addGap(8, 8, 8)
-                .addComponent(jLabel3)
+                .addComponent(LaravelLink)
                 .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 143, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -162,8 +162,8 @@ public class BladeDirectives extends javax.swing.JPanel {
                 .forceUseOfDefaultWorkingDirectory(true)
                 .showOpenDialog();
         if (sources != null) {
-            //TODO validate the path if it has directives
-            bladeProperties.addDirectiveCustomizerPath(FileUtil.normalizeFile(sources).getAbsolutePath());
+            String relativePath = BladePathUtils.relativeFilePath(sources, project.getProjectDirectory());
+            bladeProperties.addDirectiveCustomizerPath(relativePath);
         }
     }//GEN-LAST:event_compilerPathFileButtonActionPerformed
 
@@ -175,21 +175,21 @@ public class BladeDirectives extends javax.swing.JPanel {
 
     }//GEN-LAST:event_removePathButtonActionPerformed
 
-    private void jLabel3MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabel3MouseClicked
+    private void LaravelLinkMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_LaravelLinkMouseClicked
         try {
-            Desktop.getDesktop().browse(new URI("https://laravel.com/docs/10.x/blade#extending-blade")); // NOI18N
+            Desktop.getDesktop().browse(new URI("https://laravel.com/docs/blade#extending-blade")); // NOI18N
         } catch (URISyntaxException | IOException ex) {
             Exceptions.printStackTrace(ex);
         }
 
-    }//GEN-LAST:event_jLabel3MouseClicked
+    }//GEN-LAST:event_LaravelLinkMouseClicked
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JLabel LaravelLink;
     private javax.swing.JButton compilerPathFileButton;
     private javax.swing.JList<String> customDirectivePathList;
     private javax.swing.JLabel includePathLabel;
     private javax.swing.JLabel jLabel1;
-    private javax.swing.JLabel jLabel3;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JButton removePathButton;
     // End of variables declaration//GEN-END:variables

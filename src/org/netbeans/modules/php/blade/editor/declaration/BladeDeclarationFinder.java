@@ -195,7 +195,7 @@ public class BladeDeclarationFinder implements DeclarationFinder {
             return offsetRange;
         }
 
-        if (snippetLength > document.getLength()) {
+        if (start + snippetLength > document.getLength()) {
             return offsetRange;
         }
 
@@ -432,7 +432,7 @@ public class BladeDeclarationFinder implements DeclarationFinder {
             return location;
         }
 
-        CustomDirectives.getInstance(projectOwner).filterAction(new CustomDirectives.FilterCallbackDeclaration(location) {
+        CustomDirectives.forProject(projectOwner).filterAction(new CustomDirectives.FilterCallbackDeclaration(location) {
             @Override
             public void filterDirectiveName(CustomDirective directive, FileObject file) {
                 if (directive.getName().equals(customDirectiveOccurence.directiveName)) {
@@ -474,7 +474,7 @@ public class BladeDeclarationFinder implements DeclarationFinder {
             ComponentsQueryService componentQueryService = new ComponentsQueryService();
             String tagName = tag.substring(COMPONENT_TAG_NAME_PREFIX.length());
             String className = StringUtils.kebabToCamel(tagName);
-            ComponentsSupport componentSupport = ComponentsSupport.getInstance(projectOwner);
+            ComponentsSupport componentSupport = ComponentsSupport.forProject(projectOwner);
 
             if (componentSupport == null) {
                 return location;
