@@ -10,15 +10,13 @@
         <exit/>
     </file>
     <file>
-        <name name=".blade.php" substring="true">
-            <resolver mime="text/x-blade"/>
+        <name name=".blade.php." substring="true">
+            <exit/>
         </name>
     </file>
     <file>
-        <!-- Ignore files with following extensions. -->
-        <ext name="xml"/>
-        <ext name="json"/>
-        <ext name="html"/>
-        <exit/>
+        <name name=".blade.php" substring="true">
+            <resolver mime="text/x-blade"/>
+        </name>
     </file>
 </MIME-resolver>
