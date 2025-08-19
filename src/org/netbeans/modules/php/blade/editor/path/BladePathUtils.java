@@ -45,7 +45,7 @@ public final class BladePathUtils {
     public static final String LARAVEL_VIEW_FOLDER = "views"; //NOI18N
     public static final String LARAVEL_VIEW_PATH = LARAVEL_RESOURCES + StringUtils.FORWARD_SLASH + LARAVEL_VIEW_FOLDER;
 
-    public static final String[] BLADE_VIEW_METHODS = new String[]{"view", "render", "make"}; // NOI18N
+    public static final String[] BLADE_VIEW_METHODS = new String[]{"view", "render", "make", "send", "loadView"}; // NOI18N
 
     public static final Set<String> BLADE_VIEW_METHODS_SET = new HashSet<>(Arrays.asList(BLADE_VIEW_METHODS));
 

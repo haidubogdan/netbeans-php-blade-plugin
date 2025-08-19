@@ -1,10 +1,13 @@
 # Change Log
 
-## [3.1.0.02]
+## [3.0.0.32]
+- enchancement #88 hard coded click to blade view file support for : `loadView`, `send`
+
+## [3.0.0.31]
 
 - decl finder for arguments adiacent to new line  (#84), inertia directives (#85)
 
-## [3.1.0.01]
+## [3.0.0.30]
 
 - major project properties update #78 , use public properties, store custom directories and files as relative paths
 
