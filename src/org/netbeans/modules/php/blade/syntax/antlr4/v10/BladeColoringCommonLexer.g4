@@ -73,7 +73,7 @@ D_ESCAPES
        | '@keyframes' | '@counter-style' | '@font-feature-values' | '@property'
        | '@scope' | '@starting-style' | '@view-transition' | '@container'
        | '@color-profile' | '@styleset' | '@font-palette-values' | '@media'
-      ) [ ]*
+      ) [ ]* '{' ?
     )->type(HTML);
 
 mode INSIDE_BLADE_COMMENT;

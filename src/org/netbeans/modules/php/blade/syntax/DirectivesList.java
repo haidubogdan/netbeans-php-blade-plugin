@@ -95,6 +95,7 @@ import org.netbeans.modules.php.blade.syntax.annotation.DirectiveRegister;
     @Directive(name = "@can", params = true, endtag = "@endcan", since = "5.1"),//spatie?
     @Directive(name = "@canany", params = true, endtag = "@endcanany", since = "5.8"),
     @Directive(name = "@cannot", params = true, endtag = "@endcannot", since = "5.3"),
+    @Directive(name = "@context", params = true, endtag = "@endcontext", since = "12.0"),
     //php
     @Directive(name = "@php", endtag = "@endphp"),
     @Directive(name = "@use", params = true),

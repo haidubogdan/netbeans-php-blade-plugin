@@ -536,6 +536,7 @@ public class BladeCompletionProposal implements CompletionProposal {
                 case BladeDirectivesUtils.DIRECTIVE_FOREACH: {
                     return getName() + "($$${array} as $$${item})\n    ${selection}${cursor}\n" + getDirective().endtag(); // NOI18N
                 }
+                case BladeDirectivesUtils.DIRECTIVE_CONTEXT:
                 case BladeDirectivesUtils.DIRECTIVE_SECTION:
                 case BladeDirectivesUtils.DIRECTIVE_SESSION: {
                     return getName() + "('${id}')\n    ${cursor}\n" + getDirective().endtag(); // NOI18N

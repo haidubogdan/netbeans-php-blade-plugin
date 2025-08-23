@@ -58,7 +58,7 @@ D_ESCAPES
        | '@keyframes' | '@counter-style' | '@font-feature-values' | '@property'
        | '@scope' | '@starting-style' | '@supports' | '@view-transition'
        | '@container' | '@color-profile' | '@styleset' | '@font-palette-values' | '@media'
-      ) [ ]*
+      ) [ ]* '{'?
     )->skip;
 
 mode INSIDE_BLADE_COMMENT;

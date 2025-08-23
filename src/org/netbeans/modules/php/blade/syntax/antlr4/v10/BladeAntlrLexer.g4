@@ -150,6 +150,9 @@ D_ENDVERBATIM : '@endverbatim';
 D_SESSION : '@session' (' ')* {lookupMode(INSIDE_PHP_EXPRESSION);};
 D_ENDSESSION : '@endsession';
 
+D_CONTEXT : '@context' (' ')* {lookupMode(INSIDE_PHP_EXPRESSION);};
+D_ENDCONTEXT : '@endcontext';
+
 //forms
 D_CSRF  : '@csrf';
 D_METHOD : '@method' (' ')* {lookupMode(INSIDE_PHP_EXPRESSION);};

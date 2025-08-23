@@ -2,4 +2,6 @@
 
 ## What's changed
 
-- enchancement #88 hard coded click to blade view file support for : `loadView`, `send`
+- fix #89 inline at rule coloring issue
+- include `@context` directive
+- include `$errors` as global variable in echo tag autocomplete

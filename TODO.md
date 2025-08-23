@@ -1,5 +1,11 @@
 # TODO
 
+## 23.08.2024
+
+- Components important files
+- $attributes variable completion
+- $errror var completion
+
 ## 05.12.2024
 
 - refactor checks

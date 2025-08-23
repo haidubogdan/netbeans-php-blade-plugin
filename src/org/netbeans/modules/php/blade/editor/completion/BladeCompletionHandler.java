@@ -21,6 +21,7 @@ package org.netbeans.modules.php.blade.editor.completion;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -80,6 +81,20 @@ public class BladeCompletionHandler implements CodeCompletionHandler2 {
     private static final String AT = "@"; //NOI18N
     private static final String BLADE_LOOP_VAR = "$loop"; //NOI18N
 
+    private static final Set<String> DEFAULT_VARIABLE_NAMES = new HashSet<>();
+
+    static {
+        DEFAULT_VARIABLE_NAMES.add("$errors"); //NOI18N
+    }
+
+    private static final Set<String> COMPONENT_VARIABLE_NAMES = new HashSet<>();
+
+    static {
+        COMPONENT_VARIABLE_NAMES.add("$slot"); //NOI18N
+        COMPONENT_VARIABLE_NAMES.add("$attributes"); //NOI18N
+        COMPONENT_VARIABLE_NAMES.add("$component"); //NOI18N
+    }
+
     @Override
     public CodeCompletionResult complete(CodeCompletionContext completionContext) {
         if (CancelSupport.getDefault().isCancelled()) {
@@ -136,11 +151,11 @@ public class BladeCompletionHandler implements CodeCompletionHandler2 {
 
             if (reference != null) {
                 completeBladeReference(completionProposals, fo, reference, offset);
-            } else if (isNotPhpAssignmentExpr(contextPrefix)) { 
+            } else if (isNotPhpAssignmentExpr(contextPrefix)) {
                 BladeDirectiveScope scope = parserResult.getBladeScope().findScope(offset);
+                int anchorOffset = computeAnchorOffset(contextPrefix, offset);
 
                 if (scope != null) {
-                    int anchorOffset = computeAnchorOffset(contextPrefix, offset);
                     for (String variableName : scope.getScopeVariables()) {
                         if (variableName.startsWith(contextPrefix)) {
                             NamedElement variableElement = new NamedElement(variableName, fo, ElementType.VARIABLE);
@@ -153,6 +168,8 @@ public class BladeCompletionHandler implements CodeCompletionHandler2 {
                         completionProposals.add(new BladeCompletionProposal.VariableItem(variableElement, anchorOffset, BLADE_LOOP_VAR));
                     }
                 }
+
+                completeGlobalVariables(completionProposals, contextPrefix, fo, anchorOffset);
             } else {
                 CharSequence snapshotExpr = completionContext.getParserResult().getSnapshot().getText().subSequence(phpExprRange.getStart(), phpExprRange.getEnd());
                 PhpCodeCompletionService.completePhpCode(completionProposals,
@@ -170,8 +187,8 @@ public class BladeCompletionHandler implements CodeCompletionHandler2 {
         }
         return new DefaultCompletionResult(completionProposals, false);
     }
-    
-    private boolean isNotPhpAssignmentExpr(String contextPrefix){
+
+    private boolean isNotPhpAssignmentExpr(String contextPrefix) {
         return contextPrefix.startsWith("$") && !contextPrefix.contains("="); //NOI18N
     }
 
@@ -207,6 +224,16 @@ public class BladeCompletionHandler implements CodeCompletionHandler2 {
                 String assetPath = reference.identifier;
                 completeResourcePath(completionProposals, assetPath, fo, offset);
                 break;
+            }
+        }
+    }
+
+    private void completeGlobalVariables(final List<CompletionProposal> completionProposals,
+            String contextPrefix, FileObject fo, int anchorOffset) {
+        for (String variableName : DEFAULT_VARIABLE_NAMES) {
+            if (variableName.startsWith(contextPrefix)) {
+                NamedElement variableElement = new NamedElement(variableName, fo, ElementType.VARIABLE);
+                completionProposals.add(new BladeCompletionProposal.VariableItem(variableElement, anchorOffset, variableName));
             }
         }
     }
@@ -266,7 +293,7 @@ public class BladeCompletionHandler implements CodeCompletionHandler2 {
             String pathPrefix, FileObject fo, int offset) {
 
         FileObject projectDir = ProjectUtils.getProjectDirectory(fo);
-        
+
         if (projectDir == null) {
             return;
         }

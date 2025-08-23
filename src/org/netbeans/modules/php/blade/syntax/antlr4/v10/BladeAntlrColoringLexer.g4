@@ -61,7 +61,7 @@ tokens {
 }
 
 fragment DirectivesWithEndTag : 'for' ('each' | 'else')? | 'if' | 'while' 
-   | 'section' | 'session' | 'once' | 'push' | 'PushOnce'
+   | 'section' | 'session' | 'context' | 'once' | 'push' | 'PushOnce'
    | 'switch' | 'unless' | 'can' ('any' | 'not')? | 'env'
    | 'auth' | 'guest'  | 'error' | 'empty' | 'isset'
    //11.x

@@ -19,9 +19,7 @@
 package org.netbeans.modules.php.blade.editor;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.EnumSet;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import javax.swing.text.Document;

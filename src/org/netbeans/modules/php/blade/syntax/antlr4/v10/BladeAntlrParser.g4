@@ -76,6 +76,7 @@ blockDirective :
     | D_EMPTY directiveArguments statement* (D_ELSE statement*)? D_ENDEMPTY
     | D_ISSET directiveArguments statement* (D_ELSE statement*)? D_ENDISSET
     | D_SESSION directiveArguments statement* D_ENDSESSION
+    | D_CONTEXT directiveArguments statement* D_ENDCONTEXT
     //permission
     | D_CAN directiveArguments statement* (D_ELSECAN directiveArguments statement*)* (D_ELSE statement*)? D_ENDCAN
     | D_CANNOT directiveArguments statement* (D_ELSECAN directiveArguments statement*)* (D_ELSE statement*)? D_ENDCANNOT

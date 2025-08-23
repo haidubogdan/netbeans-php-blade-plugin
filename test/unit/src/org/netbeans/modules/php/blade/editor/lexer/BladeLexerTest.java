@@ -67,16 +67,24 @@ public class BladeLexerTest extends BladeLexerTestBase {
         performTest("css_at_rules");
     }
 
+    public void testIssue89() throws Exception {
+        performTest("issues/issue89_inline_css_at_rules");
+    }
+
     public void testHtmlJavascript_01() throws Exception {
         performTest("html_javascript_01");
     }
-    
+
     public void testNewDirectivesLaravel_9() throws Exception {
         performTest("laravel_9/directives");
     }
     
     public void testNewDirectivesLaravel_11() throws Exception {
         performTest("laravel_11/new_directives");
+    }
+    
+    public void testNewDirectivesLaravel_12() throws Exception {
+        performTest("laravel_12/new_directives");
     }
     
     public void testIssue10_directives() throws Exception {

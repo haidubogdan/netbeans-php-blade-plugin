@@ -48,6 +48,7 @@ public final class BladeDirectivesUtils {
     public static final String DIRECTIVE_INCLUDE = "@include"; // NOI18N
     public static final String DIRECTIVE_EXTENDS = "@extends"; // NOI18N
     public static final String DIRECTIVE_SESSION = "@session"; // NOI18N
+    public static final String DIRECTIVE_CONTEXT = "@context"; // NOI18N
     public static final String DIRECTIVE_CAN = "@can"; // NOI18N
     public static final String DIRECTIVE_UNLESS = "@unless"; // NOI18N
 

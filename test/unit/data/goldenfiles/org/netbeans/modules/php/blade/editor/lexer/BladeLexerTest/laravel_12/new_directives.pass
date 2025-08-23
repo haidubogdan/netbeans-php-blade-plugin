@@ -1,0 +1,7 @@
+Token #0 BLADE_DIRECTIVE [@context]
+Token #1 BLADE_PAREN [(]
+Token #2 PHP_BLADE_EXPRESSION ['test']
+Token #3 BLADE_PAREN [)]
+Token #4 HTML [\n    <div></div>\n]
+Token #5 BLADE_DIRECTIVE [@endcontext]
+Token #6 HTML [\n]
