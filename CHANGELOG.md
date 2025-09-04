@@ -1,5 +1,10 @@
 # Change Log
 
+## [3.0.0.33]
+- fix #89 inline css at rule coloring issue
+- include `@context` directive
+- include `$errors` as global variable in echo tag autocomplete
+
 ## [3.0.0.32]
 - enchancement #88 hard coded click to blade view file support for : `loadView`, `send`
 
