@@ -47,6 +47,7 @@ public final class BladeDirectivesUtils {
     public static final String DIRECTIVE_FOREACH = "@foreach"; // NOI18N
     public static final String DIRECTIVE_INCLUDE = "@include"; // NOI18N
     public static final String DIRECTIVE_EXTENDS = "@extends"; // NOI18N
+    public static final String DIRECTIVE_ERROR = "@error"; // NOI18N
     public static final String DIRECTIVE_SESSION = "@session"; // NOI18N
     public static final String DIRECTIVE_CONTEXT = "@context"; // NOI18N
     public static final String DIRECTIVE_CAN = "@can"; // NOI18N
@@ -80,9 +81,10 @@ public final class BladeDirectivesUtils {
                 return new String[]{DIRECTIVE_IF, DIRECTIVE_HAS_SECTION, DIRECTIVE_SECTION_MISSING};
             }
             case DIRECTIVE_ELSEIF:
-                return new String[]{DIRECTIVE_IF, DIRECTIVE_ELSEIF};
+                return new String[]{DIRECTIVE_IF, DIRECTIVE_ELSEIF, DIRECTIVE_ERROR};
             case DIRECTIVE_ELSE:{
-                return new String[]{DIRECTIVE_IF, DIRECTIVE_ELSEIF, DIRECTIVE_CAN, DIRECTIVE_HAS_SECTION, DIRECTIVE_SECTION_MISSING};
+                return new String[]{DIRECTIVE_IF, DIRECTIVE_ELSEIF, DIRECTIVE_CAN,
+                    DIRECTIVE_HAS_SECTION, DIRECTIVE_SECTION_MISSING, DIRECTIVE_ERROR};
             }
             case DIRECTIVE_ENDSECTION:
             case DIRECTIVE_APPEND:

@@ -1,5 +1,8 @@
 # Change Log
 
+## [3.0.0.34]
+- fix #90 `@error` directive parser error display
+
 ## [3.0.0.33]
 - fix #89 inline css at rule coloring issue
 - include `@context` directive

@@ -168,7 +168,7 @@ loopBreaks :
 
 
 formStatements:
-   D_ERROR '(' ','? ')' statement* (D_ELSE statement*)? D_ENDERROR
+   D_ERROR '(' ','? ')' statement* elseifStatement* (D_ELSE statement*)? D_ENDERROR
    | D_CSRF
    | D_METHOD directiveArguments
    ;
