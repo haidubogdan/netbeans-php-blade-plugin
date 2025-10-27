@@ -58,7 +58,6 @@ import org.netbeans.modules.php.blade.editor.indexing.BladeIndex;
 import org.netbeans.modules.php.blade.editor.lexer.BladeLexerUtils;
 import org.netbeans.modules.php.blade.editor.lexer.BladeTokenId;
 import static org.netbeans.modules.php.blade.editor.lexer.BladeTokenId.BLADE_DIRECTIVE_UNKNOWN;
-import org.netbeans.modules.php.blade.editor.parser.BladeDirectiveScope;
 import org.netbeans.modules.php.blade.editor.parser.BladeParserResult;
 import org.netbeans.modules.php.blade.editor.path.BladePathUtils;
 import org.netbeans.modules.php.blade.project.AssetsBundlerSupport;
@@ -79,7 +78,7 @@ public class BladeCompletionHandler implements CodeCompletionHandler2 {
 
     private static final Logger LOGGER = Logger.getLogger(BladeCompletionHandler.class.getName());
     private static final String AT = "@"; //NOI18N
-    private static final String BLADE_LOOP_VAR = "$loop"; //NOI18N
+    public static final String BLADE_LOOP_VAR = "$loop"; //NOI18N
 
     private static final Set<String> DEFAULT_VARIABLE_NAMES = new HashSet<>();
 
@@ -132,7 +131,7 @@ public class BladeCompletionHandler implements CodeCompletionHandler2 {
         if (!ts.moveNext() && !ts.movePrevious()) {
             return CodeCompletionResult.NONE;
         }
-
+        
         FileObject fo = parserResult.getSnapshot().getSource().getFileObject();
 
         final List<CompletionProposal> completionProposals = new ArrayList<>();
@@ -151,29 +150,18 @@ public class BladeCompletionHandler implements CodeCompletionHandler2 {
 
             if (reference != null) {
                 completeBladeReference(completionProposals, fo, reference, offset);
-            } else if (isNotPhpAssignmentExpr(contextPrefix)) {
-                BladeDirectiveScope scope = parserResult.getBladeScope().findScope(offset);
-                int anchorOffset = computeAnchorOffset(contextPrefix, offset);
-
-                if (scope != null) {
-                    for (String variableName : scope.getScopeVariables()) {
-                        if (variableName.startsWith(contextPrefix)) {
-                            NamedElement variableElement = new NamedElement(variableName, fo, ElementType.VARIABLE);
-                            completionProposals.add(new BladeCompletionProposal.VariableItem(variableElement, anchorOffset, variableName));
-                        }
-                    }
-
-                    if (scope.getScopeType() == D_FOREACH && BLADE_LOOP_VAR.startsWith(contextPrefix)) {  //NOI18N
-                        NamedElement variableElement = new NamedElement(BLADE_LOOP_VAR, fo, ElementType.VARIABLE);
-                        completionProposals.add(new BladeCompletionProposal.VariableItem(variableElement, anchorOffset, BLADE_LOOP_VAR));
-                    }
-                }
-
-                completeGlobalVariables(completionProposals, contextPrefix, fo, anchorOffset);
             } else {
                 CharSequence snapshotExpr = completionContext.getParserResult().getSnapshot().getText().subSequence(phpExprRange.getStart(), phpExprRange.getEnd());
-                PhpCodeCompletionService.completePhpCode(completionProposals,
-                        snapshotExpr.toString(), phpExprRange.getStart(), offset, fo);
+                PhpCodeCompletionService phpCompletionService = new PhpCodeCompletionService(fo, offset);
+                phpCompletionService.setFileScope(parserResult.getBladeScope());
+                phpCompletionService.setDirectiveScope(parserResult.getBladeScope().findScope(offset));
+                phpCompletionService.completePhpCode(
+                        completionProposals,
+                        snapshotExpr.toString(),
+                        phpExprRange.getStart());
+                
+                int anchorOffset = computeAnchorOffset(contextPrefix, offset);
+                completeGlobalVariables(completionProposals, contextPrefix, fo, anchorOffset);
             }
         }
 
@@ -186,10 +174,6 @@ public class BladeCompletionHandler implements CodeCompletionHandler2 {
             LOGGER.info(String.format("complete() with results took %d ms", time)); //NOI18N
         }
         return new DefaultCompletionResult(completionProposals, false);
-    }
-
-    private boolean isNotPhpAssignmentExpr(String contextPrefix) {
-        return contextPrefix.startsWith("$") && !contextPrefix.contains("="); //NOI18N
     }
 
     private void completeBladeReference(final List<CompletionProposal> completionProposals,

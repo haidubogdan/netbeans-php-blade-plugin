@@ -20,8 +20,10 @@ package org.netbeans.modules.php.blade.editor.parser;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 import javax.swing.text.Document;
 import org.netbeans.modules.csl.api.Error;
@@ -62,14 +64,14 @@ import org.openide.util.Exceptions;
 public class BladePhpSnippetParser {
 
     private final String snippet;
-    private final FileObject originFile;
     private final int snippetOffset;
     private final List<Error> errors = new ArrayList<>();
     private final Map<OffsetRange, PhpReference> identifierReference = new TreeMap<>();
     private final Map<OffsetRange, FieldAcces> fieldAccessReference = new TreeMap<>();
     public static final String PHP_START = "<?php "; //NOI18N
     public static final String PHP_END = "?>"; //NOI18N
-    
+    private final Map<String, Integer> offsetPhpVariable = new TreeMap<>();
+
     public enum PhpReferenceType {
         PHP_NAMESPACE,
         PHP_CLASS,
@@ -78,9 +80,8 @@ public class BladePhpSnippetParser {
         PHP_CLASS_CONSTANT
     }
 
-    public BladePhpSnippetParser(String snippet, FileObject originFile, int snippetOffset) {
+    public BladePhpSnippetParser(String snippet, int snippetOffset) {
         this.snippet = snippet;
-        this.originFile = originFile;
         this.snippetOffset = snippetOffset;
     }
 
@@ -90,20 +91,30 @@ public class BladePhpSnippetParser {
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         BladePhpAntlrParser parser = new BladePhpAntlrParser(tokens);
         parser.removeErrorListeners();
-        parser.setErrorHandler(new RustANTLRErrorStrategy());
-        parser.addErrorListener(createErrorListener());
-
+        parser.setErrorHandler(new CustomANTLRErrorStrategy());
         parser.addParseListener(createIdentifiablePhpElementReferences());
+        parser.addParseListener(variableDefinitions());
         parser.expression();
     }
     
-    public void syntaxAnalysis(){
+    public void extractVariables() {
+        CharStream cs = CharStreams.fromString(snippet);
+        BladePhpAntlrLexer lexer = new BladePhpAntlrLexer(cs);
+        CommonTokenStream tokens = new CommonTokenStream(lexer);
+        BladePhpAntlrParser parser = new BladePhpAntlrParser(tokens);
+        parser.removeErrorListeners();
+        parser.setErrorHandler(new CustomANTLRErrorStrategy());
+        parser.addParseListener(variableDefinitions());
+        parser.expression();
+    }
+
+    public void syntaxAnalysis(FileObject originFile) {
         ParsingUtils parsingUtils = new ParsingUtils();
         BaseDocument doc = parsingUtils.createPhpBaseDocument(snippet);
         if (doc == null) {
             return;
         }
-        
+
         try {
             Source source = Source.create(doc);
 
@@ -291,6 +302,17 @@ public class BladePhpSnippetParser {
         };
     }
 
+    private ParseTreeListener variableDefinitions() {
+        return new BladePhpAntlrParserBaseListener() {
+            @Override
+            public void exitVarDefinition(BladePhpAntlrParser.VarDefinitionContext ctx) {
+                String varName = ctx.PHP_VARIABLE().getText();
+                int offset = ctx.start.getStartIndex();
+                offsetPhpVariable.put(varName, offset);
+            }
+        };
+    }
+
     public PhpReference findIdentifierReference(int offset) {
         for (Map.Entry<OffsetRange, PhpReference> entry : identifierReference.entrySet()) {
             OffsetRange range = entry.getKey();
@@ -325,7 +347,11 @@ public class BladePhpSnippetParser {
         return null;
     }
 
-    private final class RustANTLRErrorStrategy extends DefaultErrorStrategy {
+    public Map<String, Integer> getOffsetPhpVariables() {
+        return offsetPhpVariable;
+    }
+
+    private final class CustomANTLRErrorStrategy extends DefaultErrorStrategy {
 
         @Override
         protected void reportFailedPredicate(Parser recognizer, FailedPredicateException e) {
@@ -339,21 +365,6 @@ public class BladePhpSnippetParser {
             }
             super.reportError(recognizer, e);
         }
-    }
-
-    private ANTLRErrorListener createErrorListener() {
-        return new BaseErrorListener() {
-            @Override
-            public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line, int charPositionInLine, String msg, RecognitionException e) {
-                int errorPosition = snippetOffset;
-                if (offendingSymbol instanceof Token) {
-                    Token offendingToken = (Token) offendingSymbol;
-                    errorPosition += offendingToken.getStartIndex();
-                }
-                errors.add(new BladeError(null, "PHP error: " + msg, null, originFile, errorPosition, errorPosition, Severity.ERROR));
-            }
-
-        };
     }
 
     public List<? extends org.netbeans.modules.csl.api.Error> getDiagnostics() {

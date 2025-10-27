@@ -2,4 +2,6 @@
 
 ## What's changed
 
-- fix #90 error display for `@error` `@elseif` directive
+- completion of defined variable in php directives
+- fix go to view if variable string is on new line
+- include 'bladeRender' as go to blade view method

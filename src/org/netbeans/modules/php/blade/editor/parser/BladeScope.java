@@ -23,17 +23,17 @@ import java.util.TreeMap;
 import org.netbeans.modules.csl.api.OffsetRange;
 
 /**
- * helps identifying block directive context.
- * Ex: identifying if we have nested loops for foreach variable autocomplete
- *    @foreach($array1 as $item1)
- *       @foreach($array2 as $item2)
- * 
+ * helps identifying block directive context. Ex: identifying if we have nested
+ * loops for foreach variable autocomplete
+ *
+ * @foreach($array1 as $item1)
+ * @foreach($array2 as $item2)
+ *
  * @author bogdan
  */
 public class BladeScope {
 
     private final Map<OffsetRange, BladeDirectiveScope> scopeRange = new TreeMap<>();
-
 
     public void markScope(OffsetRange range, BladeDirectiveScope scope) {
         scopeRange.put(range, scope);
@@ -56,4 +56,20 @@ public class BladeScope {
         return null;
     }
 
+    public Map<String, Integer> getFileVariables(int offset) {
+        Map<String, Integer> variablesList = new TreeMap<>();
+
+        for (Map.Entry<OffsetRange, BladeDirectiveScope> entry : scopeRange.entrySet()) {
+            OffsetRange range = entry.getKey();
+
+            if (offset < range.getStart()) {
+                //excedeed the offset range
+                break;
+            }
+
+            variablesList.putAll(entry.getValue().getDeclaredVariableNames());
+        }
+
+        return variablesList;
+    }
 }

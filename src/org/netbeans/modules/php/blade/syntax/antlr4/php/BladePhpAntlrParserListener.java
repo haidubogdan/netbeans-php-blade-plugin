@@ -308,6 +308,16 @@ public interface BladePhpAntlrParserListener extends ParseTreeListener {
 	 */
 	void exitMisc(BladePhpAntlrParser.MiscContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link BladePhpAntlrParser#varDefinition}.
+	 * @param ctx the parse tree
+	 */
+	void enterVarDefinition(BladePhpAntlrParser.VarDefinitionContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link BladePhpAntlrParser#varDefinition}.
+	 * @param ctx the parse tree
+	 */
+	void exitVarDefinition(BladePhpAntlrParser.VarDefinitionContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link BladePhpAntlrParser#output}.
 	 * @param ctx the parse tree
 	 */

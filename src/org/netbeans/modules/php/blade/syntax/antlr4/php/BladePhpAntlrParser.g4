@@ -55,6 +55,7 @@ exprStatement :
     | COMPARISON_OPERATOR exprStatement
     | LOGICAL_UNION_OPERATOR functionalExpr+
     | 'foreach' '(' foreachArguments ')'
+    | varDefinition
     | functionalExpr
     | ifStatement
     | foreachDirectiveStatement
@@ -204,6 +205,10 @@ misc:
   'new' PHP_VARIABLE arguments?
   | 'new' namespace //incomplete namespcace
   | namespace className=IDENTIFIER
+;
+
+varDefinition:
+    PHP_VARIABLE | array EQ functionalExpr
 ;
 
 output: 

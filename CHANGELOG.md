@@ -1,5 +1,10 @@
 # Change Log
 
+## [3.0.0.35]
+- completion of defined variable in php directives
+- fix go to view if variable string is on new line
+- include 'bladeRender' as go to blade view method
+
 ## [3.0.0.34]
 - fix #90 `@error` directive parser error display
 

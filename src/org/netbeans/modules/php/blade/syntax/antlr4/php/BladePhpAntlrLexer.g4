@@ -93,6 +93,8 @@ SEMI_COLON : ';';
 
 COMPARISON_OPERATOR : ('==' | '!=' | '>' | '<') '='?;
 
+EQ : '=';
+
 LOGICAL_UNION_OPERATOR : '&&' | '||';
 
 STRING_LITERAL : StringLiteral;

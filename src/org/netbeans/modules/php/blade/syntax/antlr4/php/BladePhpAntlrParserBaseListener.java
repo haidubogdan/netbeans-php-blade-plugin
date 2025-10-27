@@ -373,6 +373,18 @@ public class BladePhpAntlrParserBaseListener implements BladePhpAntlrParserListe
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterVarDefinition(BladePhpAntlrParser.VarDefinitionContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitVarDefinition(BladePhpAntlrParser.VarDefinitionContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterOutput(BladePhpAntlrParser.OutputContext ctx) { }
 	/**
 	 * {@inheritDoc}

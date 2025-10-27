@@ -87,7 +87,7 @@ public class HyperlinkProviderImpl implements HyperlinkProviderExt {
         }
 
         BaseDocument baseDoc = (BaseDocument) doc;
-        int lineStart = LineDocumentUtils.getLineStart(baseDoc, offset);
+        int lineStartOffset = LineDocumentUtils.getLineStart(baseDoc, offset);
         TokenSequence<PHPTokenId> tokensq = BladeLexerUtils.getLockedPhpTokenSequence(doc, offset);
 
         if (tokensq == null) {
@@ -103,6 +103,10 @@ public class HyperlinkProviderImpl implements HyperlinkProviderExt {
 
         String focusedText = currentToken.text().toString();
 
+        if (focusedText == null) {
+            return null;
+        }
+        
         //2 char config are not that relevant
         if (focusedText.length() < MIN_STRING_IDENTIIFER_LENGTH || !EditorStringUtils.isQuotedString(focusedText)) {
             return null;
@@ -111,14 +115,25 @@ public class HyperlinkProviderImpl implements HyperlinkProviderExt {
         identifiableText = focusedText.substring(1, focusedText.length() - 1);
         PHPTokenId prevTokenId = null;
 
-        while (tokensq.movePrevious() && tokensq.offset() >= lineStart) {
+        while (tokensq.movePrevious()) {
+            int tokenOffset = tokensq.offset();
+            if (tokenOffset >= lineStartOffset) {
+                break;
+            }
+
             Token<PHPTokenId> token = tokensq.token();
+
             if (token == null) {
                 break;
             }
+
             String text = token.text().toString();
             PHPTokenId id = token.id();
 
+            if (id.equals(PHPTokenId.WHITESPACE)) {
+                continue;
+            }
+            
             if (prevTokenId != null && id.equals(PHPTokenId.PHP_STRING)) {
                 methodName = text;
                 //tooltip text

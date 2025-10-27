@@ -95,9 +95,6 @@ public class BladeParserResult extends ParserResult {
             parser.addErrorListener(createErrorListener());
             parser.addParseListener(new ReferenceIdListener(bladeRreferenceIdsCollection));
 
-            if (taskClassL.contains("completion")) { //NOI18N
-                parser.addParseListener(new ScopeListener(bladeScope));
-            }
 
             //avoid on index
             if (!taskClassL.contains(".indexing.repository")) { //NOI18N
@@ -107,7 +104,11 @@ public class BladeParserResult extends ParserResult {
                 parser.addParseListener(new CustomDirectivesListener(bladeCustomDirectiveOccurences));
                 parser.addParseListener(new StructureListener(structure, folds, getFileObject()));
             }
-
+            
+            if (taskClassL.contains("completion")) { //NOI18N
+                parser.addParseListener(new ScopeListener(bladeScope, getSnapshot().getText()));
+            }
+            
             evaluateParser(parser);
 
             if (allowPhpSyntaxParsingForTask(taskClassL) 
@@ -181,12 +182,13 @@ public class BladeParserResult extends ParserResult {
     }
 
     public void phpSyntaxAnalyzer() {
+        CharSequence snapshotText = getSnapshot().getText();
         for (OffsetRange range : getBladePhpExpressionOccurences().getPhpInlineOccurences()) {
             String prefix = BladePhpSnippetParser.PHP_START;
-            CharSequence snapshotExpr = getSnapshot().getText().subSequence(range.getStart(), range.getEnd());
+            CharSequence snapshotExpr = snapshotText.subSequence(range.getStart(), range.getEnd());
             int start = range.getStart() + prefix.length() - BladeDirectivesUtils.DIRECTIVE_PHP.length();
-            BladePhpSnippetParser phpSnippetParser = new BladePhpSnippetParser(prefix + snapshotExpr.toString() + BladePhpSnippetParser.PHP_END, getFileObject(), start);
-            phpSnippetParser.syntaxAnalysis();
+            BladePhpSnippetParser phpSnippetParser = new BladePhpSnippetParser(prefix + snapshotExpr.toString() + BladePhpSnippetParser.PHP_END, start);
+            phpSnippetParser.syntaxAnalysis(getFileObject());
             errors.addAll(phpSnippetParser.getDiagnostics());
         }
     }

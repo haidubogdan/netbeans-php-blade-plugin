@@ -18,10 +18,13 @@
  */
 package org.netbeans.modules.php.blade.editor.parser.listeners;
 
+import java.util.Map;
 import org.antlr.v4.runtime.Token;
 import org.netbeans.modules.csl.api.OffsetRange;
 import org.netbeans.modules.php.blade.editor.parser.BladeDirectiveScope;
+import org.netbeans.modules.php.blade.editor.parser.BladePhpSnippetParser;
 import org.netbeans.modules.php.blade.editor.parser.BladeScope;
+import org.netbeans.modules.php.blade.syntax.BladeDirectivesUtils;
 import org.netbeans.modules.php.blade.syntax.antlr4.v10.BladeAntlrParser;
 import org.netbeans.modules.php.blade.syntax.antlr4.v10.BladeAntlrParserBaseListener;
 
@@ -34,9 +37,11 @@ public class ScopeListener extends BladeAntlrParserBaseListener {
     private final BladeScope bladeScope;
     private BladeDirectiveScope bufferScope;
     int bladeScopeBalance = 0;
+    CharSequence snapshotText;
 
-    public ScopeListener(BladeScope bladeScope) {
+    public ScopeListener(BladeScope bladeScope, CharSequence snapshotText) {
         this.bladeScope = bladeScope;
+        this.snapshotText = snapshotText;
     }
 
     @Override
@@ -66,15 +71,15 @@ public class ScopeListener extends BladeAntlrParserBaseListener {
         }
 
         if (ctx.main_array != null) {
-            bufferScope.addVariable(ctx.main_array.getText());
+            bufferScope.addPhpVariable(ctx.main_array.getText());
         }
 
         if (ctx.array_item != null) {
-            bufferScope.addVariable(ctx.array_item.getText());
+            bufferScope.addPhpVariable(ctx.array_item.getText());
         }
 
         if (ctx.array_value != null) {
-            bufferScope.addVariable(ctx.array_value.getText());
+            bufferScope.addPhpVariable(ctx.array_value.getText());
         }
     }
 
@@ -91,5 +96,36 @@ public class ScopeListener extends BladeAntlrParserBaseListener {
             bladeScope.markScope(range, bufferScope);
             bufferScope = null;
         }
+    }
+    
+    @Override
+    public void exitBladePhpBlock(BladeAntlrParser.BladePhpBlockContext ctx) {
+        Token openTag = ctx.start;
+        Token closeTag = ctx.stop;
+
+        if (bufferScope == null) {
+            bufferScope = new BladeDirectiveScope(ctx.start.getType());
+        } else {
+            bufferScope.setChild(new BladeDirectiveScope(ctx.start.getType()));
+        }
+
+        String prefix = BladePhpSnippetParser.PHP_START;
+        int startOffset = openTag.getStopIndex() + 1;
+        int endOffset = closeTag.getStartIndex();
+        CharSequence snapshotExpr = snapshotText.subSequence(startOffset, endOffset);
+        int start = startOffset + prefix.length() - BladeDirectivesUtils.DIRECTIVE_PHP.length();
+        String snippetText = prefix + snapshotExpr.toString() + BladePhpSnippetParser.PHP_END;
+        BladePhpSnippetParser phpSnippetParser = new BladePhpSnippetParser(snippetText, start);
+        phpSnippetParser.extractVariables();
+
+        for (Map.Entry<String, Integer> entry : phpSnippetParser.getOffsetPhpVariables().entrySet()) {
+            bufferScope.addDeclaredPhpVariable(entry.getKey(), entry.getValue() + start);
+        }
+
+        OffsetRange range = new OffsetRange(openTag.getStartIndex(),
+                closeTag.getStopIndex() + 1);
+        
+        bladeScope.markScope(range, bufferScope);
+        bufferScope = null;
     }
 }

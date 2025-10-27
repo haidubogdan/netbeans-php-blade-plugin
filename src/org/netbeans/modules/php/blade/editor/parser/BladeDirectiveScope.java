@@ -19,7 +19,9 @@
 package org.netbeans.modules.php.blade.editor.parser;
 
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 
 /**
  *
@@ -28,19 +30,28 @@ import java.util.Set;
 public class BladeDirectiveScope {
 
     private final int bladeAntlrTokenType;
-    private final Set<String> variables = new HashSet<>();
+    private final Set<String> phpVariables = new HashSet<>();
+    private final Map<String, Integer> phpDeclaredVariableNames = new TreeMap<>();
     private BladeDirectiveScope child;
 
     public BladeDirectiveScope(int tokenType) {
         this.bladeAntlrTokenType = tokenType;
     }
 
-    public void addVariable(String varName) {
-        variables.add(varName);
+    public void addPhpVariable(String varName) {
+        phpVariables.add(varName);
     }
 
     public Set<String> getScopeVariables() {
-        return variables;
+        return phpVariables;
+    }
+
+    public void addDeclaredPhpVariable(String varName, int offset) {
+        phpDeclaredVariableNames.put(varName, offset);
+    }
+
+    public Map<String, Integer> getDeclaredVariableNames() {
+        return phpDeclaredVariableNames;
     }
 
     public int getScopeType() {

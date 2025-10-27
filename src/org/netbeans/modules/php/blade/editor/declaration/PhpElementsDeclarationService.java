@@ -40,7 +40,7 @@ public class PhpElementsDeclarationService {
 
     public PhpReference findReferenceAtCaret(ParserResult info, OffsetRange phpExprRange, int referenceOffset, FileObject file) {
         CharSequence phpExprSnippet = info.getSnapshot().getText().subSequence(phpExprRange.getStart(), phpExprRange.getEnd());
-        BladePhpSnippetParser phpSnippetParser = new BladePhpSnippetParser(phpExprSnippet.toString(), file, referenceOffset);
+        BladePhpSnippetParser phpSnippetParser = new BladePhpSnippetParser(phpExprSnippet.toString(), referenceOffset);
         phpSnippetParser.parse();
         return phpSnippetParser.findIdentifierReference(referenceOffset);
     }
