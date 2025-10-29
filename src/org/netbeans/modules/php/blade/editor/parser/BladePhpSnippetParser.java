@@ -306,6 +306,9 @@ public class BladePhpSnippetParser {
         return new BladePhpAntlrParserBaseListener() {
             @Override
             public void exitVarDefinition(BladePhpAntlrParser.VarDefinitionContext ctx) {
+                if (ctx.start == null || ctx.PHP_VARIABLE() == null) {
+                    return;
+                }
                 String varName = ctx.PHP_VARIABLE().getText();
                 int offset = ctx.start.getStartIndex();
                 offsetPhpVariable.put(varName, offset);
