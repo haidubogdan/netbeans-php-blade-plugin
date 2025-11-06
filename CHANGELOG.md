@@ -1,5 +1,9 @@
 # Change Log
 
+## [3.0.0.36]
+- fix regression on goto view blade goto click
+- include `@aware` directive
+
 ## [3.0.0.35]
 - completion of defined variable in php directives
 - fix go to view if variable string is on new line

@@ -87,7 +87,6 @@ public class HyperlinkProviderImpl implements HyperlinkProviderExt {
         }
 
         BaseDocument baseDoc = (BaseDocument) doc;
-        int lineStartOffset = LineDocumentUtils.getLineStart(baseDoc, offset);
         TokenSequence<PHPTokenId> tokensq = BladeLexerUtils.getLockedPhpTokenSequence(doc, offset);
 
         if (tokensq == null) {
@@ -114,10 +113,11 @@ public class HyperlinkProviderImpl implements HyperlinkProviderExt {
 
         identifiableText = focusedText.substring(1, focusedText.length() - 1);
         PHPTokenId prevTokenId = null;
+        int searchTokenCount = 0;
+        int tokenCountLimit = 4; //string (whitespace) paren method name
 
         while (tokensq.movePrevious()) {
-            int tokenOffset = tokensq.offset();
-            if (tokenOffset >= lineStartOffset) {
+            if (searchTokenCount > tokenCountLimit) {
                 break;
             }
 
@@ -163,6 +163,7 @@ public class HyperlinkProviderImpl implements HyperlinkProviderExt {
             if (id.equals(PHPTokenId.PHP_TOKEN) && text.equals("(")) { // NOI18N
                 prevTokenId = id;
             }
+            searchTokenCount++;
         }
         return null;
     }
