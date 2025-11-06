@@ -2,5 +2,5 @@
 
 ## What's changed
 
-- regression on goto view blade goto click
-- include `@aware` directive
+- project indexing defensive check for project load
+- pom.xml deployment updates

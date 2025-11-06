@@ -1,5 +1,9 @@
 # Change Log
 
+## [3.0.0.38]
+- project indexing defensive check for project load
+- pom.xml deployment updates
+
 ## [3.0.0.37]
 - fix regression on goto view blade goto click
 - include `@aware` directive

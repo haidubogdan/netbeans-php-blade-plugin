@@ -205,6 +205,11 @@ public final class BladePathUtils {
     public static List<FileObject> getCustomViewsRoots(Project project, FileObject contextFile) {
         List<FileObject> list = new ArrayList<>();
         BladeProjectProperties bladeProperties = BladeProjectProperties.forProject(project);
+
+        if (bladeProperties == null) {
+            return list;
+        }
+        
         String[] views = bladeProperties.getViewsFolderPathList();
 
         if (views.length == 0) {

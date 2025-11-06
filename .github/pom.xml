@@ -90,8 +90,7 @@
                     <verifyRuntime>warn</verifyRuntime>
                     <licenseName>LICENSE</licenseName>
                     <licenseFile>LICENSE</licenseFile>
-                    <!--not working-->
-                    <nbmNeedsRestart>true</nbmNeedsRestart>
+                    <requiresRestart>true</requiresRestart>
                     <additionalArguments>
                     </additionalArguments>
                     <publicPackages>

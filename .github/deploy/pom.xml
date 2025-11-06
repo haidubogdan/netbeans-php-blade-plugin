@@ -17,7 +17,7 @@
     </properties>
     <!--use snapshot when testing-->
     <!--<version>2.4.9-SNAPSHOT</version>-->
-    <version>2.5.1.4</version>
+    <version>2.5.1.7</version>
     <packaging>nbm</packaging>
     
     <developers>
@@ -96,6 +96,7 @@
                     <verifyRuntime>warn</verifyRuntime>
                     <licenseName>LICENSE</licenseName>
                     <licenseFile>LICENSE</licenseFile>
+                    <requiresRestart>true</requiresRestart>
                     <additionalArguments>
                     </additionalArguments>
                     <publicPackages>
@@ -387,6 +388,11 @@
         <dependency>
             <groupId>org.netbeans.api</groupId>
             <artifactId>org-netbeans-modules-projectuiapi-base</artifactId>
+            <version>${nbversion}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.netbeans.api</groupId>
+            <artifactId>org-netbeans-modules-project-ant</artifactId>
             <version>${nbversion}</version>
         </dependency>
     </dependencies>
