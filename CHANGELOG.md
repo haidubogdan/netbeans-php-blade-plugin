@@ -1,6 +1,6 @@
 # Change Log
 
-## [3.0.0.36]
+## [3.0.0.37]
 - fix regression on goto view blade goto click
 - include `@aware` directive
 
