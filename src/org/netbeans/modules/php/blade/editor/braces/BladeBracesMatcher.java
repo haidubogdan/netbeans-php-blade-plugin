@@ -35,7 +35,7 @@ import org.netbeans.modules.php.blade.editor.directives.CustomDirectives.CustomD
 import org.netbeans.modules.php.blade.editor.lexer.BladeLexerUtils;
 import org.netbeans.modules.php.blade.editor.lexer.BladeTokenId;
 import org.netbeans.modules.php.blade.syntax.BladeDirectivesUtils;
-import static org.netbeans.modules.php.blade.syntax.BladeDirectivesUtils.END_DIRECTIVE_PREFIX;
+import static org.netbeans.modules.php.blade.syntax.BladeDirectivesUtils.*;
 import org.netbeans.modules.php.blade.syntax.BladeTagsUtils;
 import org.netbeans.modules.php.blade.syntax.antlr4.utils.BaseBladeAntlrUtils;
 import static org.netbeans.modules.php.blade.syntax.BladeTagsUtils.*;
@@ -280,10 +280,15 @@ public class BladeBracesMatcher implements BracesMatcher {
     }
 
     private BraceDirectionType findDirectiveBlockDirectionType(String tokenText) {
-        if (tokenText.startsWith(BladeDirectivesUtils.END_DIRECTIVE_PREFIX)
-                || tokenText.equals(BladeDirectivesUtils.DIRECTIVE_SHOW)
-                || tokenText.equals(BladeDirectivesUtils.DIRECTIVE_ELSEIF)
-                || tokenText.equals(BladeDirectivesUtils.DIRECTIVE_ELSE)) {
+        switch(tokenText) {
+            case DIRECTIVE_SHOW:
+            case DIRECTIVE_ELSEIF: 
+            case DIRECTIVE_ELSE: 
+            case DIRECTIVE_OVERWRITE: {
+                return BraceDirectionType.BLOCK_DIRECTIVE_END_TO_START;
+            }
+        }
+        if (tokenText.startsWith(BladeDirectivesUtils.END_DIRECTIVE_PREFIX)) {
             return BraceDirectionType.BLOCK_DIRECTIVE_END_TO_START;
         } else if (BladeDirectivesUtils.blockDirectiveEndings(tokenText) != null) {
             return BraceDirectionType.BLOCK_DIRECTIVE_START_TO_END;

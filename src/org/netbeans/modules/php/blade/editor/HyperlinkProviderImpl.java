@@ -26,11 +26,9 @@ import javax.swing.text.Document;
 import org.netbeans.api.editor.mimelookup.MimeRegistration;
 import org.netbeans.lib.editor.hyperlink.spi.HyperlinkProviderExt;
 import org.netbeans.lib.editor.hyperlink.spi.HyperlinkType;
-import org.netbeans.api.editor.document.LineDocumentUtils;
 import org.netbeans.api.lexer.Token;
 import org.netbeans.api.lexer.TokenSequence;
 import org.netbeans.api.project.Project;
-import org.netbeans.editor.BaseDocument;
 import static org.netbeans.lib.editor.hyperlink.spi.HyperlinkType.GO_TO_DECLARATION;
 import org.netbeans.modules.php.blade.editor.lexer.BladeLexerUtils;
 import org.netbeans.modules.php.blade.editor.path.BladePathUtils;
@@ -86,7 +84,6 @@ public class HyperlinkProviderImpl implements HyperlinkProviderExt {
             return null;
         }
 
-        BaseDocument baseDoc = (BaseDocument) doc;
         TokenSequence<PHPTokenId> tokensq = BladeLexerUtils.getLockedPhpTokenSequence(doc, offset);
 
         if (tokensq == null) {
@@ -106,7 +103,7 @@ public class HyperlinkProviderImpl implements HyperlinkProviderExt {
             return null;
         }
         
-        //2 char config are not that relevant
+        //2-char identifier or non quoted text is not relevant
         if (focusedText.length() < MIN_STRING_IDENTIIFER_LENGTH || !EditorStringUtils.isQuotedString(focusedText)) {
             return null;
         }
@@ -204,10 +201,16 @@ public class HyperlinkProviderImpl implements HyperlinkProviderExt {
      */
     private boolean nonLaravelDeclFinderEnabled(Document doc) {
         Project projectOwner = FileSystemUtils.getProjectOwner(doc);
+
         if (projectOwner == null) {
             return false;
         }
+
         BladeProjectProperties bladeProperties = BladeProjectProperties.forProject(projectOwner);
+
+        if (bladeProperties == null) {
+            return false;
+        }
 
         return bladeProperties.getNonLaravelDeclFinderFlag();
     }

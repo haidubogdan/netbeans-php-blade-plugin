@@ -1,10 +1,17 @@
 # TODO
 
+## 25.12.2025
+
+- components view folder ?
+- variable under $props completion
+- occurence highlight for variable
+- comment handler for blade echo tags
+
 ## 23.08.2024
 
 - Components important files
 - $attributes variable completion
-- $errror var completion
+- $errror var completion ~~
 
 ## 05.12.2024
 

@@ -172,19 +172,20 @@ public class BladeLanguage extends DefaultLanguageConfig {
     }
 
     /**
-     * flag for detecting if we are in a string context enables to select the
-     * blade view "layout.index" string value on double click without
-     * interpreting the same thing for javascript objects
+     * dynamic flag to allow full highlight of string text containing '.' separator
+     * used for blade paths ex: "layout.main"
+     * It will always reset to false
+     * 
+     * the reason for it's dynamic state is the fact that javascript uses '.' for properties chain
+     * linked to 
+     * @see org.netbeans.modules.php.blade.editor.highlighting.BladeHighlightsContainer
+     * 
      */
     public static volatile Boolean hasQuote = false;
 
     @Override
     public boolean isIdentifierChar(char c) {
-        /**
-         * Includes things you'd want selected as a unit when double clicking in
-         * the editor
-         */
-        //also used for completion items filtering!
+        //dynamic highlighting switch of the language to enable blade view paths selection
         if (c == '"' || c == '\'') {
             hasQuote = true;
         }

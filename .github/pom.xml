@@ -6,7 +6,7 @@
     <description>BladePlugin for netbeans</description>
     <url>https://github.com/haidubogdan/netbeans-php-blade-plugin</url>
 
-    <groupId>netbeans.modules.php.blade</groupId>
+    <groupId>io.github.haidubogdan.netbeans.modules</groupId>
     <artifactId>php.blade</artifactId>
     
     <properties>

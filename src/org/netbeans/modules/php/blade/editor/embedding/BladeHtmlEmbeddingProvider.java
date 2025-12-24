@@ -30,6 +30,7 @@ import org.netbeans.modules.parsing.api.Snapshot;
 import org.netbeans.modules.parsing.spi.EmbeddingProvider;
 import org.netbeans.modules.php.blade.editor.BladeLanguage;
 import org.netbeans.modules.php.blade.editor.lexer.BladeTokenId;
+import static org.netbeans.modules.php.blade.syntax.BladeTagsUtils.CONTENT_TAG_CLOSE;
 
 /**
  * this will enable braces matches of html elements
@@ -60,6 +61,10 @@ public class BladeHtmlEmbeddingProvider extends EmbeddingProvider {
         String fake;
 
         try {
+            //some interpolation can trigger css parser error
+            //<div style="width:{{ $val }}%">
+            //
+            boolean existingEchoCloseDelimitor = false;
             while (sequence.moveNext()) {
                 Token<?> t = sequence.token();
                 offset = sequence.offset();
@@ -69,11 +74,25 @@ public class BladeHtmlEmbeddingProvider extends EmbeddingProvider {
                 if (len == 0) {
                     continue;
                 }
+
+                int tokenLength = t.length();
+                //offseting the embedding for some css units near a blade echo delimitor
+                if (tokenLength > 1 && existingEchoCloseDelimitor && tText.startsWith("%")) { //NOI18N
+                    offset+=1;
+                    tokenLength-=1;
+                }
+
                 if (id.equals(BladeTokenId.HTML)) {
-                    embeddings.add(snapshot.create(offset, t.length(), TARGET_MIME_TYPE));
+                    embeddings.add(snapshot.create(offset, tokenLength, TARGET_MIME_TYPE));
                 } else {
                     fake = new String(new char[tText.length()]).replace("\0", FILLER); //NOI18N
                     embeddings.add(snapshot.create(fake, TARGET_MIME_TYPE));
+                }
+
+                existingEchoCloseDelimitor = false;
+
+                if (id.equals(BladeTokenId.BLADE_ECHO_DELIMITOR) && tText.equals(CONTENT_TAG_CLOSE)) { 
+                    existingEchoCloseDelimitor = true;
                 }
             }
         } catch (Exception ex) {

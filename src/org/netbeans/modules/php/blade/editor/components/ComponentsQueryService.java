@@ -119,33 +119,4 @@ public class ComponentsQueryService {
         return results;
     }
 
-    @CheckForNull
-    public FileObject getComponentResourceFile(String componentId, String classQualifiedName, FileObject sourceFo, ComponentModel componentModel) {
-        if (classQualifiedName.toLowerCase().contains(LivewireComponentResource.LIVEWIRE_NAME)) {
-            return getLivewireComponentResourceFile(componentId, sourceFo);
-        }
-
-        if (componentModel != null && componentModel.getViewPath() != null) {
-            String viewPath = componentModel.getViewPath();
-            List<FileObject> includedFiles = BladePathUtils.findFileObjectsForBladeViewPath(sourceFo, viewPath);
-            return !includedFiles.isEmpty() ?  includedFiles.get(0) : null;
-        }
-        return null;
-    }
-
-    @CheckForNull
-    public FileObject getLivewireComponentResourceFile(String componentId, FileObject sourceFo) {
-        Project project = ProjectUtils.getMainOwner(sourceFo);
-        if (project == null) {
-            return null;
-        }
-
-        FileObject componentResource = project.getProjectDirectory().getFileObject(LivewireComponentResource.RESOURCE_PATH + componentId + BladeLanguage.FILE_EXTENSION_WITH_DOT); // NOI18N
-
-        if (componentResource != null && componentResource.isValid()) {
-            return componentResource;
-        }
-
-        return null;
-    }
 }

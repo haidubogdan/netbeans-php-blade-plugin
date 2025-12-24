@@ -39,6 +39,7 @@ import org.netbeans.modules.php.blade.csl.elements.PathElement;
 import org.netbeans.modules.php.blade.csl.elements.PhpFunctionElement;
 import org.netbeans.modules.php.blade.editor.components.ComponentModel;
 import org.netbeans.modules.php.blade.editor.components.ComponentsQueryService;
+import static org.netbeans.modules.php.blade.editor.components.plugins.LivewireComponentResource.LIVEWIRE_NAME;
 import org.netbeans.modules.php.blade.editor.directives.CustomDirectives;
 import org.netbeans.modules.php.blade.editor.directives.CustomDirectives.CustomDirective;
 import org.netbeans.modules.php.blade.editor.indexing.BladeIndex;
@@ -86,6 +87,11 @@ public class BladeDeclarationFinder implements DeclarationFinder {
 
     public static final String COMPONENT_CLASS_LABEL_PREFIX = "Component class : ";  // NOI18N
     public static final String COMPONENT_VIEW_LABEL_PREFIX = "View file : ";  // NOI18N
+    
+    public static final String[] COMPONENTS_RELATIVE_VIEW_FOLDERS = new String[] {
+                "components", // NOI18N
+                LIVEWIRE_NAME
+            };
 
     @Override
     public OffsetRange getReferenceSpan(Document document, int caretOffset) {
@@ -252,7 +258,7 @@ public class BladeDeclarationFinder implements DeclarationFinder {
                 return findCustomDirectiveDeclaration(parserResult, caretOffset, currentFile, location);
             }
             case HTML: {
-                return findComponentClassDeclaration(th, caretOffset, currentFile, location);
+                return findComponentClassDeclarationAndBladeFile(th, caretOffset, currentFile, location);
             }
         }
         //we can have string or php reference
@@ -451,7 +457,7 @@ public class BladeDeclarationFinder implements DeclarationFinder {
         return location;
     }
 
-    private DeclarationLocation findComponentClassDeclaration(
+    private DeclarationLocation findComponentClassDeclarationAndBladeFile(
             TokenHierarchy<?> th, int caretOffset, FileObject currentFile, DeclarationLocation location) {
         Project projectOwner = ProjectConvertors.getNonConvertorOwner(currentFile);
         if (projectOwner == null) {
@@ -472,6 +478,7 @@ public class BladeDeclarationFinder implements DeclarationFinder {
                 return location;
             }
             ComponentsQueryService componentQueryService = new ComponentsQueryService();
+            //removing the "x-" prefix
             String tagName = tag.substring(COMPONENT_TAG_NAME_PREFIX.length());
             String className = StringUtils.kebabToCamel(tagName);
             ComponentsSupport componentSupport = ComponentsSupport.forProject(projectOwner);
@@ -513,8 +520,8 @@ public class BladeDeclarationFinder implements DeclarationFinder {
                 Collection<PhpIndexResult> indexedReferences = componentQueryService.findIndexedComponentClass(className, projectOwner);
 
                 for (PhpIndexResult indexReference : indexedReferences) {
-                    NamedElement resultHandle = new NamedElement(COMPONENT_CLASS_LABEL_PREFIX + className,
-                            indexReference.declarationFile, ElementType.LARAVEL_COMPONENT); // NOI18N
+                    PathElement resultHandle = new PathElement(COMPONENT_CLASS_LABEL_PREFIX + className,
+                            indexReference.declarationFile); // NOI18N
                     DeclarationLocation constantLocation = new DeclarationFinder.DeclarationLocation(indexReference.declarationFile, indexReference.getStartOffset(), resultHandle);
                     if (location.equals(DeclarationLocation.NONE)) {
                         location = constantLocation;
@@ -522,6 +529,26 @@ public class BladeDeclarationFinder implements DeclarationFinder {
                     location.addAlternative(new AlternativeLocationImpl(constantLocation));
                 }
             }
+
+            if (!location.equals(DeclarationLocation.NONE)) {
+                return location;
+            }
+
+            for (String relativeFolder : COMPONENTS_RELATIVE_VIEW_FOLDERS) {
+                String pathToSearch = relativeFolder + "." + tagName;  // NOI18N
+                List<FileObject> componentsViewFiles = BladePathUtils.findFileObjectsForBladeViewPath(currentFile, pathToSearch);
+
+                for (FileObject componentViewFile : componentsViewFiles) {
+                    PathElement elHandle = new PathElement(tag, componentViewFile);
+                    DeclarationLocation dln = new DeclarationFinder.DeclarationLocation(componentViewFile, 0, elHandle);
+                    if (location.equals(DeclarationLocation.NONE)) {
+                        location = dln;
+                    }
+                    location.addAlternative(new AlternativeLocationImpl(dln));
+                }
+            }
+
+            return location;
         }
         return location;
     }

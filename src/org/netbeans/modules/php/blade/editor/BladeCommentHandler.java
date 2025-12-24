@@ -31,7 +31,7 @@ import org.netbeans.modules.php.blade.editor.lexer.BladeTokenId;
 
 /**
  * known issues 
- * currently blade tag comment not working inside htmtl tags <div>{{ $x }}</div>
+ * currently blade tag comment not working inside html tags <div>{{ $x }}</div>
  * 
  * 
  * @author bhaidu
@@ -99,6 +99,10 @@ public class BladeCommentHandler extends CommentHandler.DefaultCommentHandler {
                             } catch (BadLocationException ex) {
                                 LOGGER.log(Level.WARNING, "Invalid offset: {0}", ex.offsetRequested()); // NOI18N
                             }
+                            break;
+                        case BLADE_ECHO_DELIMITOR:
+                            //todo implement commenting from open delimitor to close delimitor
+                            break;
 
                     }
 

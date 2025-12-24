@@ -76,7 +76,7 @@ public class BladeLexer extends AbstractAntlrLexerBridge<BladeAntlrColoringLexer
                 return groupToken(PHP_BLADE_EXPRESSION, BladeAntlrColoringLexer.PHP_EXPRESSION);
             case BladeAntlrColoringLexer.BLADE_PHP_INLINE:
                 return groupToken(PHP_BLADE_INLINE_CODE, BladeAntlrColoringLexer.BLADE_PHP_INLINE);
-            case BladeAntlrColoringLexer.ERROR:
+            case BladeAntlrColoringLexer.ERROR: //??
                 return token(WS_D);
             default:
                 return token(OTHER);
