@@ -1,4 +1,4 @@
-// Generated from BladeHtmlAntlrParser.g4 by ANTLR 4.13.2
+// Generated from BladeHtmlAntlrParser.g4 by ANTLR 4.13.1
 
   /**
    * Parser generated for netbeans blade editor

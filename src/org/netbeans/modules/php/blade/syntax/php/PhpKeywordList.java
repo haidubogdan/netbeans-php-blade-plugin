@@ -23,10 +23,10 @@ import org.netbeans.modules.php.blade.syntax.annotation.PhpKeywordRegister;
 
 /**
  *
- * @author bogdan
+ * Generic php keywords
+ * To be added in the embedded php context code completion list
  */
 @PhpKeywordRegister({
-    //conditionals
     @PhpKeyword(name = "empty", parenExpr = true),
     @PhpKeyword(name = "isset", parenExpr = true),
     @PhpKeyword(name = "class"),

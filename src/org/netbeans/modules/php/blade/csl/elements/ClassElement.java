@@ -24,9 +24,9 @@ import org.openide.filesystems.FileObject;
 
 /**
  *
- * @author bhaidu <haidubogdan@gmail.com>
+ * Used for php class element completion
  */
-public class ClassElement extends NamedElement {
+public class ClassElement extends BladeElement {
 
     @NullAllowed
     private final String namespace;

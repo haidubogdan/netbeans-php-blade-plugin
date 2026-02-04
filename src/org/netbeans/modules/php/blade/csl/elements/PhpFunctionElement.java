@@ -25,9 +25,10 @@ import org.openide.filesystems.FileObject;
 
 /**
  *
- * @author bhaidu
+ * for php method/function completion
+ * can include namespace info
  */
-public class PhpFunctionElement extends NamedElement {
+public class PhpFunctionElement extends BladeElement {
 
     @NullAllowed
     private final List<String> params;

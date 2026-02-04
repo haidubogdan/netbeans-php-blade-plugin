@@ -22,13 +22,15 @@ import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import org.netbeans.modules.csl.api.OffsetRange;
 import org.netbeans.modules.php.blade.editor.parser.BladeReferenceIdsCollection;
+import org.netbeans.modules.php.blade.syntax.antlr4.utils.BaseBladeAntlrUtils;
 import static org.netbeans.modules.php.blade.syntax.antlr4.v10.BladeAntlrLexer.*;
 import org.netbeans.modules.php.blade.syntax.antlr4.v10.BladeAntlrParser;
 import org.netbeans.modules.php.blade.syntax.antlr4.v10.BladeAntlrParserBaseListener;
 
 /**
  *
- * @author bogdan
+ * Listener for directive references
+ * ex: view paths, yield ids, stack ids
  */
 public class ReferenceIdListener extends BladeAntlrParserBaseListener {
 
@@ -47,8 +49,8 @@ public class ReferenceIdListener extends BladeAntlrParserBaseListener {
         }
 
         Token token = ctx.IDENTIFIABLE_STRING().getSymbol();
-        String identifier = referenceIdsCollection.sanitizeIdentifier(token);
-        OffsetRange range = referenceIdsCollection.extractOffset(token);
+        String identifier = BaseBladeAntlrUtils.sanitizeIdentifier(token);
+        OffsetRange range = BaseBladeAntlrUtils.extractOffset(token);
 
         referenceIdsCollection.addReferenceId(tokenType, identifier, range);
 
@@ -89,8 +91,8 @@ public class ReferenceIdListener extends BladeAntlrParserBaseListener {
         for (TerminalNode identifierNode : ctx.IDENTIFIABLE_STRING()) {
             Token identifierToken = identifierNode.getSymbol();
             if (identifierToken != null) {
-                String identifier = referenceIdsCollection.sanitizeIdentifier(identifierToken);
-                OffsetRange range = referenceIdsCollection.extractOffset(identifierToken);
+                String identifier = BaseBladeAntlrUtils.sanitizeIdentifier(identifierToken);
+                OffsetRange range = BaseBladeAntlrUtils.extractOffset(identifierToken);
 
                 referenceIdsCollection.addReferenceId(tokenType, identifier, range);
 
@@ -105,8 +107,8 @@ public class ReferenceIdListener extends BladeAntlrParserBaseListener {
     }
 
     private void addIdentifierReference(Token directive, Token token) {
-        String identifier = referenceIdsCollection.sanitizeIdentifier(token);
-        OffsetRange range = referenceIdsCollection.extractOffset(token);
+        String identifier = BaseBladeAntlrUtils.sanitizeIdentifier(token);
+        OffsetRange range = BaseBladeAntlrUtils.extractOffset(token);
 
         referenceIdsCollection.addReferenceId(directive.getType(), identifier, range);
     }

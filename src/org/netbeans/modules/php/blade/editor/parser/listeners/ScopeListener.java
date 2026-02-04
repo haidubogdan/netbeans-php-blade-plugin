@@ -20,28 +20,32 @@ package org.netbeans.modules.php.blade.editor.parser.listeners;
 
 import java.util.Map;
 import org.antlr.v4.runtime.Token;
+import org.antlr.v4.runtime.tree.TerminalNode;
 import org.netbeans.modules.csl.api.OffsetRange;
+import org.netbeans.modules.parsing.api.Snapshot;
 import org.netbeans.modules.php.blade.editor.parser.BladeDirectiveScope;
 import org.netbeans.modules.php.blade.editor.parser.BladePhpSnippetParser;
 import org.netbeans.modules.php.blade.editor.parser.BladeScope;
 import org.netbeans.modules.php.blade.syntax.BladeDirectivesUtils;
+import org.netbeans.modules.php.blade.syntax.antlr4.utils.BaseBladeAntlrUtils;
 import org.netbeans.modules.php.blade.syntax.antlr4.v10.BladeAntlrParser;
 import org.netbeans.modules.php.blade.syntax.antlr4.v10.BladeAntlrParserBaseListener;
 
 /**
  *
- * @author bogdan
+ * generates scope information. Used for foreach and php block directives to
+ * extract variables
  */
 public class ScopeListener extends BladeAntlrParserBaseListener {
 
     private final BladeScope bladeScope;
     private BladeDirectiveScope bufferScope;
-    int bladeScopeBalance = 0;
-    CharSequence snapshotText;
+    private int bladeScopeBalance = 0;
+    private final Snapshot snapshot;
 
-    public ScopeListener(BladeScope bladeScope, CharSequence snapshotText) {
+    public ScopeListener(BladeScope bladeScope, Snapshot snapshot) {
         this.bladeScope = bladeScope;
-        this.snapshotText = snapshotText;
+        this.snapshot = snapshot;
     }
 
     @Override
@@ -97,7 +101,7 @@ public class ScopeListener extends BladeAntlrParserBaseListener {
             bufferScope = null;
         }
     }
-    
+
     @Override
     public void exitBladePhpBlock(BladeAntlrParser.BladePhpBlockContext ctx) {
         Token openTag = ctx.start;
@@ -112,7 +116,7 @@ public class ScopeListener extends BladeAntlrParserBaseListener {
         String prefix = BladePhpSnippetParser.PHP_START;
         int startOffset = openTag.getStopIndex() + 1;
         int endOffset = closeTag.getStartIndex();
-        CharSequence snapshotExpr = snapshotText.subSequence(startOffset, endOffset);
+        CharSequence snapshotExpr = snapshot.getText().subSequence(startOffset, endOffset);
         int start = startOffset + prefix.length() - BladeDirectivesUtils.DIRECTIVE_PHP.length();
         String snippetText = prefix + snapshotExpr.toString() + BladePhpSnippetParser.PHP_END;
         BladePhpSnippetParser phpSnippetParser = new BladePhpSnippetParser(snippetText, start);
@@ -124,8 +128,31 @@ public class ScopeListener extends BladeAntlrParserBaseListener {
 
         OffsetRange range = new OffsetRange(openTag.getStartIndex(),
                 closeTag.getStopIndex() + 1);
-        
+
         bladeScope.markScope(range, bufferScope);
         bufferScope = null;
+    }
+
+    @Override
+    public void exitPropsDirective(BladeAntlrParser.PropsDirectiveContext ctx) {
+        for (TerminalNode identifierNode : ctx.IDENTIFIABLE_STRING()) {
+            Token identifierToken = identifierNode.getSymbol();
+            if (identifierToken != null) {
+                String identifier = BaseBladeAntlrUtils.sanitizeIdentifier(identifierToken);
+                OffsetRange range = BaseBladeAntlrUtils.extractOffset(identifierToken);
+                if (bufferScope == null) {
+                    bufferScope = new BladeDirectiveScope(ctx.start.getType());
+                }
+                //force association
+                bufferScope.addDeclaredPhpVariable("$" + identifier, range.getStart()); //NOI18N
+            }
+        }
+
+        if (bladeScope != null) {
+            OffsetRange range = new OffsetRange(ctx.start.getStartIndex(),
+                    ctx.stop.getStopIndex() + 1);
+            bladeScope.markScope(range, bufferScope);
+            bufferScope = null;
+        }
     }
 }

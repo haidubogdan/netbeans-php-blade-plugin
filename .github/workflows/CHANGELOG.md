@@ -2,7 +2,10 @@
 
 ## What's changed
 
-- Relative declaration finder for blade files of components inside `view/components` or `view/livewire`
-- fix project blade config check on stand alone php file (null project) on hyperlink action
-- include `@overwrite` brace matcher back search to `@section`
-- fix css unit '%' style attribute error near blade tag
+- allow control `@` error operator inside echo statement Closes #93
+- `@props` variable completion from array list
+- code refactoring and renaming
+   - implement livewire plugin class to handle new directives. Part of #92
+- enable comment handler for echo tags outside of html
+- fix customDirectives NPE when no project available
+- fix formatting missing indentation for directive block start

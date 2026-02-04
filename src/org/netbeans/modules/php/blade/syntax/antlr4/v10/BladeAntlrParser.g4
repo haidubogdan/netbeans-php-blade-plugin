@@ -120,12 +120,14 @@ bladePhpBlock :
 //
 inlineDirective:
     D_SIMPLE_DIRECTIVE directiveArguments
-    | D_PROPS directiveArguments
+    | propsDirective
     | D_AWARE directiveArguments
     | D_PHP directiveArguments
     | D_DIRECTIVE
     | D_VITE_REFRESH
 ;
+
+propsDirective : D_PROPS '(' IDENTIFIABLE_STRING? (',' IDENTIFIABLE_STRING?)* ')';
 
 identifiableArgDirective :
   D_SECTION '(' IDENTIFIABLE_STRING? ',' ')'
@@ -182,7 +184,7 @@ authStatements:
 ;
     
 bladeContentTags: 
-    '{{' '}}'
+    '{{' D_CUSTOM? '}}'
 ;
 
 bladeRawTags: 

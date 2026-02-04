@@ -25,10 +25,6 @@ import org.netbeans.modules.php.blade.project.ProjectUtils;
 import org.openide.filesystems.FileObject;
 import org.openide.loaders.DataObject;
 
-/**
- *
- * @author bogdan
- */
 public final class FileSystemUtils {
         
     private FileSystemUtils() {

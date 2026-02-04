@@ -32,6 +32,7 @@ import org.netbeans.modules.php.blade.editor.BladeLanguage;
 import org.netbeans.modules.php.blade.editor.FileSystemUtils;
 import org.netbeans.modules.php.blade.editor.directives.CustomDirectives;
 import org.netbeans.modules.php.blade.editor.directives.CustomDirectives.CustomDirective;
+import org.netbeans.modules.php.blade.editor.directives.PluginDirectives;
 import org.netbeans.modules.php.blade.editor.lexer.BladeLexerUtils;
 import org.netbeans.modules.php.blade.editor.lexer.BladeTokenId;
 import org.netbeans.modules.php.blade.syntax.BladeDirectivesUtils;
@@ -101,6 +102,20 @@ public class BladeBracesMatcher implements BracesMatcher {
                 }
                 case BLADE_CUSTOM_DIRECTIVE: {
                     tokenText = token.text().toString().trim();
+                    
+                    PluginDirectives pluginDirectives = new PluginDirectives();
+                    
+                    //plugin directive brace matcher
+                    for (List<PluginDirectives.PluginDirective> directiveCollection : pluginDirectives.getPluginDirectives().values()) {
+                        for (PluginDirectives.PluginDirective pluginDirective : directiveCollection) {
+                            if (pluginDirective.isBlockDirective()
+                                    && tokenText.equals(pluginDirective.getName())) {
+                                currentDirection = BraceDirectionType.CUSTOM_START_TO_END;
+                                return new int[]{tokenOffset, tokenOffset + token.length()};
+                            }
+                        }
+                    }
+                    
                     Project projectOwner = FileSystemUtils.getProjectOwner(document);
                     if (projectOwner == null) {
                         return result;
@@ -181,6 +196,21 @@ public class BladeBracesMatcher implements BracesMatcher {
             if (!directive.startsWith(END_DIRECTIVE_PREFIX)){
                 return null;
             }
+
+            String startTag = BladeDirectivesUtils.AT +  directive.substring(END_DIRECTIVE_PREFIX.length()); // NOI18N
+            PluginDirectives pluginDirectives = new PluginDirectives();
+
+            //plugin directive brace matcher
+            for (List<PluginDirectives.PluginDirective> directiveCollection : pluginDirectives.getPluginDirectives().values()) {
+                for (PluginDirectives.PluginDirective pluginDirective : directiveCollection) {
+                    if (pluginDirective.isBlockDirective()
+                            && tokenText.equals(directive)) {
+                        openings = new String[]{startTag};
+                        break;
+                    }
+                }
+            }        
+            
             Project projectOwner = FileSystemUtils.getProjectOwner(context.getDocument());
             if (projectOwner == null) {
                 return null;
@@ -189,7 +219,7 @@ public class BladeBracesMatcher implements BracesMatcher {
             if (customDirectives == null) {
                 return null;
             }
-            String startTag = BladeDirectivesUtils.AT +  directive.substring(END_DIRECTIVE_PREFIX.length()); // NOI18N
+            
             for (List<CustomDirective> directiveCollection : customDirectives.getCustomDirectives().values()) {
                 for (CustomDirective customDirective : directiveCollection) {
                     if (customDirective.isBlockDirective()
@@ -249,7 +279,8 @@ public class BladeBracesMatcher implements BracesMatcher {
         startDirectiveForBalance.add(directive);
 
         AntlrTokenSequence ats = BladeAntlrLexerUtils.getTokens(context.getDocument());
-        int searchOffset = tokenOffset - 1;
+        //bugged for simple directive blocks
+        int searchOffset = tokenOffset + directive.length();
         Token endToken = BaseBladeAntlrUtils.findForward(ats,
                 searchOffset,
                 stopDirectives,

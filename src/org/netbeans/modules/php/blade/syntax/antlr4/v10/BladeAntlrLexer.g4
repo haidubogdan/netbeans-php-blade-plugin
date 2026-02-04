@@ -199,7 +199,7 @@ D_SIMPLE_DIRECTIVE : ('@dd' | '@dump' | '@json' | '@style' | '@class'
 | '@checked'  | '@disabled' | '@selected' | '@required' | '@readonly' 
 | '@when' | '@bool') (' ')* {lookupMode(INSIDE_PHP_EXPRESSION);};
 
-D_PROPS : '@props' (' ')* {lookupMode(INSIDE_PHP_EXPRESSION);};
+D_PROPS : '@props' (' ')* {lookupMode(MIXED_STRING_AND_ARRAY_IDENTIFIER);};
 D_AWARE : '@aware' (' ')* {lookupMode(INSIDE_PHP_EXPRESSION);};
 
 D_VITE : '@vite' (' ')* {lookupMode(MIXED_STRING_AND_ARRAY_IDENTIFIER);}; 
@@ -210,10 +210,11 @@ D_LANG : '@lang' {lookupMode(PHP_EXPR_WITH_FIRST_IDENTIFIABLE_STRING);};
 D_INJECT : '@inject' (' ')* {this.identifierStringPos = 2; lookupMode(PHP_EXPR_WITH_CUSTOM_IDENTIFIABLE_STRING_POS);};
 D_USE : '@use' {lookupMode(PHP_EXPR_WITH_FIRST_IDENTIFIABLE_STRING);};
 
-//spatie
+//livewire
 D_LIVEWIRE_ARG : '@livewire' (' ')* {lookupMode(INSIDE_PHP_EXPRESSION);}->type(D_SIMPLE_DIRECTIVE);
-D_LIVEWIRE : ('@livewireStyles' | '@bukStyles' | '@livewireScripts' | '@bukScripts' | '@click' ('.away')? '=')->type(D_DIRECTIVE);
+D_LIVEWIRE : ('@click' ('.away')? '=')->type(D_DIRECTIVE);
 
+//spatie
 D_SPATIE : '@honeypot'->type(D_DIRECTIVE);
 
 D_INERTIA : ('@routes' | '@inertiaHead' | '@inertia')->type(D_DIRECTIVE);
@@ -389,6 +390,9 @@ MIXED_S_A_LCURLYBRACE: '{' {curlyparenBalance++;}->skip;
 MIXED_S_A_RCURLYBRACE: '}' {curlyparenBalance--;}->skip;
 
 MIXED_S_A_ARG_COMMA : ',' {rparenBalance == 1 && sqparenBalance == 1 && curlyparenBalance == 0}? ->type(COMMA);
+
+//Skip associated value
+MIXED_ASSOCIATED_VALUE_STRING : '=>' (' ')* STRING_LITERAL ->skip;
 
 MIXED_S_A_IDENTIFIABLE_STRING : (' ' | [\n\r])*  STRING_LITERAL (' ')*
     {rparenBalance == 1}? ->type(IDENTIFIABLE_STRING)

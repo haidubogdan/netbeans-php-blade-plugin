@@ -48,7 +48,7 @@ import org.netbeans.modules.csl.spi.ParserResult;
 import org.netbeans.modules.csl.spi.support.CancelSupport;
 import org.netbeans.modules.php.blade.csl.elements.DirectiveElement;
 import org.netbeans.modules.php.blade.csl.elements.ElementType;
-import org.netbeans.modules.php.blade.csl.elements.NamedElement;
+import org.netbeans.modules.php.blade.csl.elements.BladeElement;
 import org.netbeans.modules.php.blade.csl.elements.PathElement;
 import org.netbeans.modules.php.blade.csl.elements.PhpFunctionElement;
 import org.netbeans.modules.php.blade.editor.BladeLanguage;
@@ -62,7 +62,7 @@ import org.netbeans.modules.php.blade.editor.parser.BladeParserResult;
 import org.netbeans.modules.php.blade.editor.path.BladePathUtils;
 import org.netbeans.modules.php.blade.project.AssetsBundlerSupport;
 import org.netbeans.modules.php.blade.project.ProjectUtils;
-import org.netbeans.modules.php.blade.syntax.DirectivesList;
+import org.netbeans.modules.php.blade.editor.directives.DirectivesList;
 import org.netbeans.modules.php.blade.syntax.StringUtils;
 import org.netbeans.modules.php.blade.syntax.ViewPathUtils;
 import org.netbeans.modules.php.blade.syntax.annotation.Directive;
@@ -216,7 +216,7 @@ public class BladeCompletionHandler implements CodeCompletionHandler2 {
             String contextPrefix, FileObject fo, int anchorOffset) {
         for (String variableName : DEFAULT_VARIABLE_NAMES) {
             if (variableName.startsWith(contextPrefix)) {
-                NamedElement variableElement = new NamedElement(variableName, fo, ElementType.VARIABLE);
+                BladeElement variableElement = new BladeElement(variableName, fo, ElementType.VARIABLE);
                 completionProposals.add(new BladeCompletionProposal.VariableItem(variableElement, anchorOffset, variableName));
             }
         }
@@ -247,7 +247,7 @@ public class BladeCompletionHandler implements CodeCompletionHandler2 {
             bladeIndex = BladeIndex.get(project);
             List<BladeIndex.IndexedReferenceId> indexedReferences = bladeIndex.queryYieldIds(prefixIdentifier);
             for (BladeIndex.IndexedReferenceId indexReference : indexedReferences) {
-                NamedElement yieldIdEl = new NamedElement(indexReference.getIdenfiier(), fo, ElementType.YIELD_ID);
+                BladeElement yieldIdEl = new BladeElement(indexReference.getIdenfiier(), fo, ElementType.YIELD_ID);
                 completionProposals.add(new BladeCompletionProposal.LayoutIdentifierProposal(yieldIdEl, anchorOffset, indexReference.getIdenfiier()));
             }
         } catch (IOException ex) {
@@ -265,7 +265,7 @@ public class BladeCompletionHandler implements CodeCompletionHandler2 {
             bladeIndex = BladeIndex.get(project);
             List<BladeIndex.IndexedReferenceId> indexedReferences = bladeIndex.queryStacksIndexedReferences(prefixIdentifier);
             for (BladeIndex.IndexedReferenceId indexReference : indexedReferences) {
-                NamedElement yieldIdEl = new NamedElement(indexReference.getIdenfiier(), fo, ElementType.STACK_ID);
+                BladeElement yieldIdEl = new BladeElement(indexReference.getIdenfiier(), fo, ElementType.STACK_ID);
                 completionProposals.add(new BladeCompletionProposal.LayoutIdentifierProposal(yieldIdEl, anchorOffset, indexReference.getIdenfiier()));
             }
         } catch (IOException ex) {
@@ -340,21 +340,24 @@ public class BladeCompletionHandler implements CodeCompletionHandler2 {
         }
 
         Project project = ProjectUtils.getMainOwner(fo);
-        CustomDirectives.forProject(project).filterAction(new CustomDirectives.FilterCallback() {
-            @Override
-            public void filterDirectiveName(CustomDirectives.CustomDirective directive, FileObject file) {
-                DirectiveElement directiveEl = new DirectiveElement(directive.getName(), file);
-                if (directive.getName().startsWith(prefix)) {
-                    int anchorOffset = computeAnchorOffset(prefix, caretOffset);
-                    completionProposals.add(
-                            new BladeCompletionProposal.CustomDirective(
-                                    directiveEl,
-                                    anchorOffset,
-                                    directive.getName()
-                            ));
+        
+        if (project != null) {
+            CustomDirectives.forProject(project).filterAction(new CustomDirectives.FilterCallback() {
+                @Override
+                public void filterDirectiveName(CustomDirectives.CustomDirective directive, FileObject file) {
+                    DirectiveElement directiveEl = new DirectiveElement(directive.getName(), file);
+                    if (directive.getName().startsWith(prefix)) {
+                        int anchorOffset = computeAnchorOffset(prefix, caretOffset);
+                        completionProposals.add(
+                                new BladeCompletionProposal.CustomDirective(
+                                        directiveEl,
+                                        anchorOffset,
+                                        directive.getName()
+                                ));
+                    }
                 }
-            }
-        });
+            });
+        }
     }
 
     @Override
@@ -456,8 +459,8 @@ public class BladeCompletionHandler implements CodeCompletionHandler2 {
             return TooltipDoc.generateFunctionDoc((PhpFunctionElement) elementHandle);
         } else if (elementHandle instanceof DirectiveElement) {
             return result;
-        } else if (elementHandle instanceof NamedElement) {
-            return TooltipDoc.generateDoc((NamedElement) elementHandle);
+        } else if (elementHandle instanceof BladeElement) {
+            return TooltipDoc.generateDoc((BladeElement) elementHandle);
         }
         return result;
     }

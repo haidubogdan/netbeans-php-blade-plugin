@@ -23,9 +23,9 @@ import org.openide.filesystems.FileObject;
 
 /**
  *
- * @author bhaidu
+ * for blade view paths
  */
-public class PathElement extends NamedElement {
+public class PathElement extends BladeElement {
 
     public PathElement(String name, FileObject file) {
         super(name, file, ElementType.PATH);
@@ -33,6 +33,6 @@ public class PathElement extends NamedElement {
 
     @Override
     public ElementKind getKind() {
-        return ElementKind.PACKAGE;
+        return ElementKind.PACKAGE; //looks better than file on decl finder
     }
 }

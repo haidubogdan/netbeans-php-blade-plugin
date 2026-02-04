@@ -22,11 +22,6 @@ import org.netbeans.modules.csl.api.ElementKind;
 import org.netbeans.modules.csl.api.HtmlFormatter;
 
 
-/**
- * Formatter just for testing purposses
- *
- * @author Petr Pisl
- */
 public class TestHtmlFormatter extends HtmlFormatter {
 
     private StringBuilder sb = new StringBuilder();

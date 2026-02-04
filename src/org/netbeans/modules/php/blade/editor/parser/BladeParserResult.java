@@ -106,7 +106,7 @@ public class BladeParserResult extends ParserResult {
             }
             
             if (taskClassL.contains("completion")) { //NOI18N
-                parser.addParseListener(new ScopeListener(bladeScope, getSnapshot().getText()));
+                parser.addParseListener(new ScopeListener(bladeScope, getSnapshot()));
             }
             
             evaluateParser(parser);

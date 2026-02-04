@@ -215,7 +215,7 @@ public class BladeLanguage extends DefaultLanguageConfig {
             persistenceType = TopComponent.PERSISTENCE_ONLY_OPENED,
             mimeType = BladeLanguage.MIME_TYPE,
             preferredID = "blade.source",
-            position = 100
+            position = 2
     )
     public static MultiViewEditorElement createMultiViewEditorElement(Lookup context) {
         return new MultiViewEditorElement(context);

@@ -20,12 +20,10 @@ package org.netbeans.modules.php.blade.syntax.antlr4.utils;
 
 import java.util.Set;
 import org.antlr.v4.runtime.Token;
+import org.netbeans.modules.csl.api.OffsetRange;
+import org.netbeans.modules.php.blade.editor.EditorStringUtils;
 import org.netbeans.spi.lexer.antlr4.AntlrTokenSequence;
 
-/**
- *
- * @author bogdan
- */
 public class BaseBladeAntlrUtils {
 
     public static Token getToken(AntlrTokenSequence tokens, int offset) {
@@ -127,5 +125,16 @@ public class BaseBladeAntlrUtils {
 
         return null;
     }
+    
+    public static String sanitizeIdentifier(Token identifiableStringToken) {
+        String rawReferenceId = identifiableStringToken.getText();
+        return EditorStringUtils.stripSurroundingQuotes(rawReferenceId.trim());
+    }
 
+    public static OffsetRange extractOffset(Token identifiableStringToken) {
+        //TODO extract the whitespace fragment
+        return new OffsetRange(identifiableStringToken.getStartIndex(),
+                identifiableStringToken.getStopIndex() + 1);
+    }
+    
 }

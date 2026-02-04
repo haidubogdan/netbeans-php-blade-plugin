@@ -1,4 +1,4 @@
-// Generated from BladeAntlrParser.g4 by ANTLR 4.13.2
+// Generated from BladeAntlrParser.g4 by ANTLR 4.13.1
 
  /*
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -176,6 +176,18 @@ public class BladeAntlrParserBaseListener implements BladeAntlrParserListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitInlineDirective(BladeAntlrParser.InlineDirectiveContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterPropsDirective(BladeAntlrParser.PropsDirectiveContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitPropsDirective(BladeAntlrParser.PropsDirectiveContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *

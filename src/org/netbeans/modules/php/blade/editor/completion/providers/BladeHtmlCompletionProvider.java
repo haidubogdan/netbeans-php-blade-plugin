@@ -185,6 +185,8 @@ public class BladeHtmlCompletionProvider implements CompletionProvider {
                             stopTokens.add(BladeHtmlAntlrLexer.GT);
                             String attributeIdentifier = queryText.startsWith(":") ? queryText.substring(1) : queryText; //NOI18N
                             Token componentToken = BladeHtmlAntlrUtils.findBackwardWithStop(tokens, BladeHtmlAntlrLexer.HTML_COMPONENT_OPEN_TAG, stopTokens);
+                            //TODO
+                            //this can refactored using html extension
                             if (componentToken != null && componentToken.getType() == BladeHtmlAntlrLexer.HTML_COMPONENT_OPEN_TAG) {
                                 ComponentsQueryService componentQueryService = new ComponentsQueryService();
                                 String tag = componentToken.getText();

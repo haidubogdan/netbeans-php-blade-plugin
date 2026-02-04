@@ -18,10 +18,6 @@
  */
 package org.netbeans.modules.php.blade.editor;
 
-/**
- *
- * @author bhaidu
- */
 public final class EditorStringUtils {
 
     public static final String NAMESPACE_SEPARATOR = "\\"; // NOI18N

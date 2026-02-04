@@ -30,7 +30,8 @@ import org.openide.filesystems.FileObject;
 
 /**
  *
- * @author bogdan
+ * For generic PhpKeyword completion
+ * See @org.netbeans.modules.php.blade.syntax.annotation.PhpKeywordRegister
  */
 public class PhpKeywordElement implements ElementHandle {
 

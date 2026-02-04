@@ -33,12 +33,13 @@ import org.netbeans.modules.php.blade.syntax.antlr4.formatter.BladeAntlrFormatte
 import org.openide.util.Exceptions;
 
 /**
- * 
- * 
+ *
+ *
  * @author bhaidu
  */
 public class BladeFormatterService {
-    public final Map<Integer, FormatToken> formattedLineIndentList = new TreeMap<>();
+
+    private final Map<Integer, FormatToken> formattedLineIndentList = new TreeMap<>();
     boolean debugMode = false;
     public boolean isIndentation;
 
@@ -55,7 +56,7 @@ public class BladeFormatterService {
         final int cstart = context.startOffset();
         final int cend = context.endOffset();
         int textDelta = 0;
-        
+
         for (Map.Entry<Integer, FormatToken> entry : formattedLineIndentList.entrySet()) {
             int tstart = entry.getValue().getTokenStart();
             int indent = entry.getValue().getIndent();
@@ -97,6 +98,14 @@ public class BladeFormatterService {
         }
     }
 
+    private void addFormattedLineIndentList(int line, FormatToken formatToken) {
+        formattedLineIndentList.put(line, formatToken);
+    }
+
+    private void removeFormattedLineIndentList(int line) {
+        formattedLineIndentList.remove(line);
+    }
+
     private ParseTreeListener createFormatterListener() {
         return new BladeAntlrFormatterParserBaseListener() {
             int indent = 0;
@@ -108,13 +117,23 @@ public class BladeFormatterService {
             public void exitBlock_start(BladeAntlrFormatterParser.Block_startContext ctx) {
 
                 Token start = ctx.getStart();
+
+                Token endDefinition = ctx.getStop();
                 blockBalance++;
-                if (ctx.getStop() != null && !formattedLineIndentList.containsKey(start.getLine())) {
-                    Token endDefinition = ctx.getStop();
-                    //hack to indent after blade block
-                    int offset = isIndentation ? 1 : 0;
-                    formattedLineIndentList.put(endDefinition.getLine(),
-                            new FormatToken(endDefinition.getStopIndex() + 1 + offset, indent+offset, htmlBlockBalance, null));
+                if (endDefinition != null) {
+                    int lineToIndent = start.getLine();
+
+                    //generic block correction
+                    if (endDefinition.getLine() == start.getLine() || endDefinition.getLine() == start.getLine() + 1) {
+                        lineToIndent = endDefinition.getLine();
+                    }
+                    //TODO implement a delta if the directive is on multiple lines
+                    if (!formattedLineIndentList.containsKey(lineToIndent)) {
+                        //hack to indent after blade block
+                        int offset = isIndentation ? 1 : 0;
+                        addFormattedLineIndentList(lineToIndent,
+                                new FormatToken(endDefinition.getStopIndex() + 1 + offset, indent + offset, htmlBlockBalance, null));
+                    }
                 }
                 indent++;
             }
@@ -130,9 +149,9 @@ public class BladeFormatterService {
                 }
                 if (!formattedLineIndentList.containsKey(line)) {
                     String debugText = debugMode ? start.getText() : null;
-                    formattedLineIndentList.put(line, new FormatToken(start.getStartIndex(), indent, htmlBlockBalance, debugText));
+                    addFormattedLineIndentList(line, new FormatToken(start.getStartIndex(), indent, htmlBlockBalance, debugText));
                 } else {
-                    formattedLineIndentList.remove(line);
+                    removeFormattedLineIndentList(line);
                 }
 
                 blockBalance--;
@@ -145,7 +164,7 @@ public class BladeFormatterService {
                 if (ctx.getStop() != null && !formattedLineIndentList.containsKey(start.getLine())) {
                     Token rArgParent = ctx.getStop();
                     String debugText = debugMode ? rArgParent.getText() : null;
-                    formattedLineIndentList.put(rArgParent.getLine(), new FormatToken(rArgParent.getStopIndex() + 1, indent, htmlBlockBalance, debugText));
+                    addFormattedLineIndentList(rArgParent.getLine(), new FormatToken(rArgParent.getStopIndex() + 1, indent, htmlBlockBalance, debugText));
                     indent++;
                 }
             }
@@ -159,9 +178,9 @@ public class BladeFormatterService {
                     if (indent < 0) {
                         indent = 0;
                     }
-                    formattedLineIndentList.put(line, new FormatToken(start.getStartIndex(), indent, htmlBlockBalance, start.getText()));
+                    addFormattedLineIndentList(line, new FormatToken(start.getStartIndex(), indent, htmlBlockBalance, start.getText()));
                 } else {
-                    formattedLineIndentList.remove(line);
+                    removeFormattedLineIndentList(line);
                 }
                 //correction
                 if (indent < 0) {
@@ -176,7 +195,7 @@ public class BladeFormatterService {
                 int line = start.getLine();
                 if (!formattedLineIndentList.containsKey(line)) {
                     if ((htmlBlockBalance > 0 || blockBalance > 0)) {
-                        formattedLineIndentList.put(line, new FormatToken(start.getStartIndex(), indent, htmlBlockBalance, start.getText()));
+                        addFormattedLineIndentList(line, new FormatToken(start.getStartIndex(), indent, htmlBlockBalance, start.getText()));
                     }
                 }
             }
@@ -190,7 +209,7 @@ public class BladeFormatterService {
                 Token start = ctx.WS(0).getSymbol();
                 int line = start.getLine();
                 if (!formattedLineIndentList.containsKey(line)) {
-                    formattedLineIndentList.put(line, new FormatToken(start.getStartIndex(), indent, "ws"));
+                    addFormattedLineIndentList(line, new FormatToken(start.getStartIndex(), indent, "ws"));
                 }
             }
 
@@ -199,7 +218,7 @@ public class BladeFormatterService {
 
                 Token start = ctx.getStart();
                 int line = start.getLine();
-                if (line > 0 && lastIncrementedLine != line){
+                if (line > 0 && lastIncrementedLine != line) {
                     if (htmlBlockBalance > 0) {
                         htmlBlockBalance--;
                     } else {
@@ -208,7 +227,7 @@ public class BladeFormatterService {
                     lastIncrementedLine = line;
                 }
                 if (!formattedLineIndentList.containsKey(line)) {
-                    formattedLineIndentList.put(line, new FormatToken(start.getStartIndex(), indent, htmlBlockBalance, start.getText()));
+                    addFormattedLineIndentList(line, new FormatToken(start.getStartIndex(), indent, htmlBlockBalance, start.getText()));
                 }
             }
 
@@ -218,7 +237,7 @@ public class BladeFormatterService {
                 int line = start.getLine();
                 if (!formattedLineIndentList.containsKey(line)) {
                     if ((htmlBlockBalance > 0 || blockBalance > 0)) {
-                        formattedLineIndentList.put(line, new FormatToken(start.getStartIndex(), indent, htmlBlockBalance, start.getText()));
+                        addFormattedLineIndentList(line, new FormatToken(start.getStartIndex(), indent, htmlBlockBalance, start.getText()));
                     }
                     htmlBlockBalance++;
                 }
@@ -230,7 +249,7 @@ public class BladeFormatterService {
                 int line = start.getLine();
                 if (!formattedLineIndentList.containsKey(line)) {
                     if ((htmlBlockBalance > 0 || blockBalance > 0)) {
-                        formattedLineIndentList.put(line, new FormatToken(start.getStartIndex(), indent, htmlBlockBalance, start.getText()));
+                        addFormattedLineIndentList(line, new FormatToken(start.getStartIndex(), indent, htmlBlockBalance, start.getText()));
                     }
                 }
             }
@@ -241,7 +260,7 @@ public class BladeFormatterService {
                 int line = start.getLine();
                 if (!formattedLineIndentList.containsKey(line)) {
                     String debugText = debugMode ? start.getText() : null;
-                    formattedLineIndentList.put(line, new FormatToken(start.getStartIndex(), indent, htmlBlockBalance, debugText));
+                    addFormattedLineIndentList(line, new FormatToken(start.getStartIndex(), indent, htmlBlockBalance, debugText));
                 }
                 htmlBlockBalance++;
             }
@@ -252,7 +271,7 @@ public class BladeFormatterService {
                 int line = start.getLine();
                 if (!formattedLineIndentList.containsKey(line)) {
                     if ((htmlBlockBalance > 0 || blockBalance > 0)) {
-                        formattedLineIndentList.put(line, new FormatToken(start.getStartIndex(), indent - 1, htmlBlockBalance, start.getText()));
+                        addFormattedLineIndentList(line, new FormatToken(start.getStartIndex(), indent - 1, htmlBlockBalance, start.getText()));
                     }
                 }
             }

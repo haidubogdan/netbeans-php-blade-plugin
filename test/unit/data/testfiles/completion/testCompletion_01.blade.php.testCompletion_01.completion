@@ -18,14 +18,17 @@ CONSTRUCTO <font><b>@endprepend</b></font
 CONSTRUCTO <font><b>@endpush</b></font>               
 CONSTRUCTO <font><b>@endsection</b></font             
 CONSTRUCTO <font><b>@honeypot</b></font>              spatie plugin
+CONSTRUCTO <font><b>@island</b></font>                livewire
 CONSTRUCTO <font><b>@once</b></font>                  
 CONSTRUCTO <font><b>@overwrite</b></font>             
 CONSTRUCTO <font><b>@php</b></font>                   
+CONSTRUCTO <font><b>@placeholder</b></fon             livewire
 CONSTRUCTO <font><b>@production</b></font             
 CONSTRUCTO <font><b>@stop</b></font>                  
 CONSTRUCTO <font><b>@verbatim</b></font>              
 CONSTRUCTO @auth()                                    
 CONSTRUCTO @auth() ... @endauth                       
+CONSTRUCTO @aware()                                   v8
 CONSTRUCTO @bool()                                    v11
 CONSTRUCTO @can()                                     v5.1
 CONSTRUCTO @can() ... @endcan                         v5.1
@@ -36,6 +39,8 @@ CONSTRUCTO @cannot() ... @endcannot                   v5.3
 CONSTRUCTO @case()                                    
 CONSTRUCTO @checked()                                 v9
 CONSTRUCTO @class()                                   v8
+CONSTRUCTO @context()                                 v12.0
+CONSTRUCTO @context() ... @endcontext                 v12.0
 CONSTRUCTO @dd()                                      
 CONSTRUCTO @disabled()                                v9
 CONSTRUCTO @dump()                                    
@@ -68,6 +73,7 @@ CONSTRUCTO @includeIf()
 CONSTRUCTO @includeUnless()                           
 CONSTRUCTO @includeWhen()                             
 CONSTRUCTO @inject()                                  
+CONSTRUCTO @island ... @endisland                     livewire
 CONSTRUCTO @isset()                                   
 CONSTRUCTO @isset() ... @endisset                     
 CONSTRUCTO @json()                                    
@@ -75,6 +81,7 @@ CONSTRUCTO @lang()
 CONSTRUCTO @method()                                  
 CONSTRUCTO @once ... @endonce                         
 CONSTRUCTO @php ... @endphp                           
+CONSTRUCTO @placeholder ... @endplacehold             livewire
 CONSTRUCTO @prepend()                                 
 CONSTRUCTO @prepend() ... @endprepend                 
 CONSTRUCTO @production ... @endproduction             

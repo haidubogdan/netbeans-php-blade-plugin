@@ -1,4 +1,4 @@
-// Generated from BladeAntlrParser.g4 by ANTLR 4.13.2
+// Generated from BladeAntlrParser.g4 by ANTLR 4.13.1
 
  /*
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -147,6 +147,16 @@ public interface BladeAntlrParserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitInlineDirective(BladeAntlrParser.InlineDirectiveContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link BladeAntlrParser#propsDirective}.
+	 * @param ctx the parse tree
+	 */
+	void enterPropsDirective(BladeAntlrParser.PropsDirectiveContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link BladeAntlrParser#propsDirective}.
+	 * @param ctx the parse tree
+	 */
+	void exitPropsDirective(BladeAntlrParser.PropsDirectiveContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link BladeAntlrParser#identifiableArgDirective}.
 	 * @param ctx the parse tree

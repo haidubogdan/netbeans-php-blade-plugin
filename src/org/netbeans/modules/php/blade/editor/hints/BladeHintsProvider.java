@@ -37,6 +37,7 @@ import org.netbeans.modules.csl.api.RuleContext;
 import org.netbeans.modules.csl.api.HintsProvider;
 import org.netbeans.modules.php.blade.editor.BladeLanguage;
 import org.netbeans.modules.php.blade.editor.directives.CustomDirectives;
+import org.netbeans.modules.php.blade.editor.directives.PluginDirectives;
 import static org.netbeans.modules.php.blade.editor.hints.PhpDirectiveSyntaxErrorRule.PHP_SYNTAX_ERROR_HINT_ID;
 import org.netbeans.modules.php.blade.editor.parser.BladeParserResult;
 import org.netbeans.modules.php.blade.editor.path.BladePathUtils;
@@ -71,7 +72,8 @@ public class BladeHintsProvider implements HintsProvider {
         FileObject fo = EditorDocumentUtils.getFileObject(context.doc);
         Project project = ProjectUtils.getMainOwner(fo);
         CustomDirectives ct = CustomDirectives.forProject(project);
-
+        PluginDirectives pluginDirectives = new PluginDirectives();
+        
         if (directiveHints != null) {
             for (Rule.AstRule astRule : directiveHints) {
                 if (!manager.isEnabled(astRule)) {
@@ -80,6 +82,8 @@ public class BladeHintsProvider implements HintsProvider {
                 if (astRule instanceof UnknownDirective) {
                     for (Map.Entry<OffsetRange, String> entry : parserResult.getBladeCustomDirectiveOccurences().getAll().entrySet()) {
                         if (ct.customDirectiveConfigured(entry.getValue())) {
+                            continue;
+                        } else if (pluginDirectives.isPluginDirective(entry.getValue())) {
                             continue;
                         }
                         hints.add(new Hint(astRule,

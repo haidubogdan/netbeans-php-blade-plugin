@@ -50,6 +50,7 @@ For more information refer yourself to: http://platform.netbeans.org/tutorials/n
     - yield ids (section)
     - stack elements
 - Php code completion inside expressions, and echo tags
+- Directive completion
 
 ![completion](resources/completion.png)
 
@@ -75,7 +76,7 @@ This will help the yield and view path completion
 
 **Global declaration finder for views paths**
 
-Possiblity to go to declaration finder for string parameters inside `render`, `make`, `view` methods.
+Possiblity to go to declaration finder for string parameters inside `render`, `make`, `view`, 'send', `loadView`, `bladeRender` methods.
 
 ![image](https://github.com/user-attachments/assets/d3f872dc-e786-40f3-ae6c-cf83ba239c23)
 ![image](https://github.com/user-attachments/assets/e102a7df-b74a-442e-96ce-6a585d57d046)
@@ -94,6 +95,10 @@ Experimental formatting and indenting
 
 ![image](https://github.com/user-attachments/assets/4b143b75-81ad-4ec4-b50a-b262aad6089d)
 
+**laravel plugins**
+
+- livewire4 directives
+- inertia directives
 
 ---
 
@@ -108,6 +113,7 @@ Experimental formatting and indenting
 
 **completion**
 
+[windows.os]
 - lag, when changing between projects, or on idle after indexing has finished
 
 **formatting**

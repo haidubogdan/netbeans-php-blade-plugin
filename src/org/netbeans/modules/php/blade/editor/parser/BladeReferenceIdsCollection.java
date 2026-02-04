@@ -23,9 +23,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-import org.antlr.v4.runtime.Token;
 import org.netbeans.modules.csl.api.OffsetRange;
-import org.netbeans.modules.php.blade.editor.EditorStringUtils;
 import static org.netbeans.modules.php.blade.editor.parser.BladeParserResult.BladeStringReference;
 
 /**
@@ -40,16 +38,6 @@ public class BladeReferenceIdsCollection {
     private final Map<String, OffsetRange> yieldIdsOccurences = new HashMap<>();
     private final Map<String, OffsetRange> stackIdsOccurences = new HashMap<>();
 
-    public String sanitizeIdentifier(Token identifiableStringToken) {
-        String rawReferenceId = identifiableStringToken.getText();
-        return EditorStringUtils.stripSurroundingQuotes(rawReferenceId.trim());
-    }
-
-    public OffsetRange extractOffset(Token identifiableStringToken) {
-        //TODO extract the whitespace fragment
-        return new OffsetRange(identifiableStringToken.getStartIndex(),
-                identifiableStringToken.getStopIndex() + 1);
-    }
 
     public void addReferenceId(int type, String referenceId, OffsetRange range) {
         BladeStringReference reference = new BladeStringReference(type, referenceId);

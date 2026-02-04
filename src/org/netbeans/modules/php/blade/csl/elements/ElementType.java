@@ -18,10 +18,6 @@
  */
 package org.netbeans.modules.php.blade.csl.elements;
 
-/**
- *
- * @author bhaidu <haidubogdan@gmail.com>
- */
 public enum ElementType {
     NA,
     CUSTOM_DIRECTIVE,

@@ -15,7 +15,7 @@ import org.netbeans.modules.csl.api.HtmlFormatter;
 import org.netbeans.modules.csl.api.Modifier;
 import org.netbeans.modules.php.blade.csl.elements.ClassElement;
 import org.netbeans.modules.php.blade.csl.elements.ElementType;
-import org.netbeans.modules.php.blade.csl.elements.NamedElement;
+import org.netbeans.modules.php.blade.csl.elements.BladeElement;
 import org.netbeans.modules.php.blade.csl.elements.PhpKeywordElement;
 import org.netbeans.modules.php.blade.editor.EditorStringUtils;
 import static org.netbeans.modules.php.blade.editor.completion.BladeCompletionHandler.BLADE_LOOP_VAR;
@@ -104,13 +104,13 @@ public class PhpCodeCompletionService {
             if (directiveScope != null) {
                 for (String variableName : directiveScope.getScopeVariables()) {
                     if (variableName.startsWith(phpIdentifier)) {
-                        NamedElement variableElement = new NamedElement(variableName, fo, ElementType.VARIABLE);
+                        BladeElement variableElement = new BladeElement(variableName, fo, ElementType.VARIABLE);
                         completionProposals.add(new BladeCompletionProposal.VariableItem(variableElement, anchorOffset, variableName));
                     }
                 }
 
                 if (directiveScope.getScopeType() == D_FOREACH && BLADE_LOOP_VAR.startsWith(phpIdentifier)) {  
-                    NamedElement variableElement = new NamedElement(BLADE_LOOP_VAR, fo, ElementType.VARIABLE);
+                    BladeElement variableElement = new BladeElement(BLADE_LOOP_VAR, fo, ElementType.VARIABLE);
                     completionProposals.add(new BladeCompletionProposal.VariableItem(variableElement, anchorOffset, BLADE_LOOP_VAR));
                 }
             }
@@ -119,7 +119,7 @@ public class PhpCodeCompletionService {
                 int varOffset = varEntry.getValue();
                 String variableName = varEntry.getKey();
                 if (varOffset < offset && variableName.startsWith(phpIdentifier)) {
-                    NamedElement variableElement = new NamedElement(variableName, fo, ElementType.VARIABLE);
+                    BladeElement variableElement = new BladeElement(variableName, fo, ElementType.VARIABLE);
                     completionProposals.add(new BladeCompletionProposal.VariableItem(variableElement, anchorOffset, variableName));
                 }
             }
@@ -295,7 +295,7 @@ public class PhpCodeCompletionService {
 
         for (String variableName : phpVariables) {
             if (variableName.startsWith(prefix) && !variableName.equals(prefix)) {
-                NamedElement variableElement = new NamedElement(variableName, fo, ElementType.VARIABLE);
+                BladeElement variableElement = new BladeElement(variableName, fo, ElementType.VARIABLE);
                 completionProposals.add(new BladeCompletionProposal.VariableItem(variableElement, anchorOffset, variableName));
             }
         }
@@ -307,25 +307,25 @@ public class PhpCodeCompletionService {
                 indexResult.declarationFile);
     }
 
-    private static NamedElement namespaceElement(PhpIndexResult indexResult) {
+    private static BladeElement namespaceElement(PhpIndexResult indexResult) {
         return namedElement(indexResult, ElementType.PHP_NAMESPACE);
     }
 
-    private static NamedElement functionElement(PhpIndexResult indexResult) {
+    private static BladeElement functionElement(PhpIndexResult indexResult) {
         String inputString = indexResult.name + "()"; // NOI18N
         return namedElement(inputString, indexResult, ElementType.PHP_FUNCTION);
     }
 
-    private static NamedElement constantElement(PhpIndexResult indexResult) {
+    private static BladeElement constantElement(PhpIndexResult indexResult) {
         return namedElement(indexResult, ElementType.PHP_CONSTANT);
     }
 
-    private static NamedElement namedElement(PhpIndexResult indexResult, ElementType type) {
-        return new NamedElement(indexResult.name, indexResult.declarationFile, type);
+    private static BladeElement namedElement(PhpIndexResult indexResult, ElementType type) {
+        return new BladeElement(indexResult.name, indexResult.declarationFile, type);
     }
 
-    private static NamedElement namedElement(String preview, PhpIndexResult indexResult, ElementType type) {
-        return new NamedElement(preview, indexResult.declarationFile, type);
+    private static BladeElement namedElement(String preview, PhpIndexResult indexResult, ElementType type) {
+        return new BladeElement(preview, indexResult.declarationFile, type);
     }
 
     public static int computeAnchorOffset(@NonNull String prefix, int offset) {

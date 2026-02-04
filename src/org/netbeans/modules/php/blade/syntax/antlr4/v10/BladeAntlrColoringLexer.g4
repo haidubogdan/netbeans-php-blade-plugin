@@ -65,7 +65,8 @@ fragment DirectivesWithEndTag : 'for' ('each' | 'else')? | 'if' | 'while'
    | 'switch' | 'unless' | 'can' ('any' | 'not')? | 'env'
    | 'auth' | 'guest'  | 'error' | 'empty' | 'isset'
    //11.x
-   | 'fragment';
+   | 'fragment'
+;
 
 fragment Include : '@include' ('If' | 'When' | 'First' | 'Unless')?;
 
@@ -121,6 +122,8 @@ D_INERTIA : ('@routes' | '@inertiaHead' | '@inertia')->type(DIRECTIVE);
 D_CSS_AT_RULE : ('@supports' | '@container' | '@scope' | '@media') (' ')* {this._input.LA(1) == '('}? ->type(HTML);
 //we will decide that a custom directive has expression to avoid email matching
 D_CUSTOM : ('@' NameString (' ')* {this._input.LA(1) == '('}? ) ->pushMode(INSIDE_PHP_EXPRESSION);
+
+D_PLUGIN_DIRECTIVES : ('@island' | '@endisland' | '@placeholder' | '@endplaceholder' | '@endpersist' | '@endteleport')->type(D_CUSTOM);
 
 D_UNKNOWN : '@' NameString->pushMode(ADIACENT_DIRECTIVE_TOKENS);
 

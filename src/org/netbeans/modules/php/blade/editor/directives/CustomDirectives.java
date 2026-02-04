@@ -79,7 +79,7 @@ public final class CustomDirectives {
         LOGGER.log(Level.INFO, "Finished extracting directives. Found ({0})", customDirectives.size()); // NOI18N
     }
 
-    private void extractCustomDirectives() {
+    private synchronized void extractCustomDirectives() {
         LOGGER.info("Extracting custom directives");
         String[] compilerPathList = BladeProjectProperties.forProject(project).getCompilerPathList();
         FileObject projectDir = project.getProjectDirectory();

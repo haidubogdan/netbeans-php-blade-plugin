@@ -28,6 +28,7 @@ import org.netbeans.api.lexer.TokenSequence;
 import org.netbeans.editor.BaseDocument;
 import org.netbeans.modules.csl.spi.CommentHandler;
 import org.netbeans.modules.php.blade.editor.lexer.BladeTokenId;
+import static org.netbeans.modules.php.blade.editor.lexer.BladeTokenId.BLADE_ECHO_DELIMITOR;
 
 /**
  * known issues 
@@ -71,7 +72,8 @@ public class BladeCommentHandler extends CommentHandler.DefaultCommentHandler {
 
                 if (token != null && token.id() instanceof BladeTokenId) {
                     //handle uncomment
-                    switch ((BladeTokenId) token.id()) {
+                    BladeTokenId bladeTokenId = (BladeTokenId) token.id();
+                    switch (bladeTokenId) {
                         case BLADE_COMMENT_START:
                             bounds[0] = ts.offset();
 
@@ -83,6 +85,7 @@ public class BladeCommentHandler extends CommentHandler.DefaultCommentHandler {
                             }
                             break;
                         case BLADE_DIRECTIVE:
+                        case BLADE_ECHO_DELIMITOR:    
                             bounds[0] = ts.offset();
 
                             //looking for directive arguments bounds
@@ -99,9 +102,6 @@ public class BladeCommentHandler extends CommentHandler.DefaultCommentHandler {
                             } catch (BadLocationException ex) {
                                 LOGGER.log(Level.WARNING, "Invalid offset: {0}", ex.offsetRequested()); // NOI18N
                             }
-                            break;
-                        case BLADE_ECHO_DELIMITOR:
-                            //todo implement commenting from open delimitor to close delimitor
                             break;
 
                     }

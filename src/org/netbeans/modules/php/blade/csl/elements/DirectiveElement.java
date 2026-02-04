@@ -23,9 +23,9 @@ import org.openide.filesystems.FileObject;
 
 /**
  *
- * @author bhaidu <haidubogdan@gmail.com>
+ * used for blade directive completion
  */
-public class DirectiveElement extends NamedElement {
+public class DirectiveElement extends BladeElement {
 
     public DirectiveElement(String name, FileObject file) {
         super(name, file, ElementType.DIRECTIVE);

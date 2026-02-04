@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.netbeans.modules.php.blade.syntax;
+package org.netbeans.modules.php.blade.editor.directives;
 
 import org.netbeans.modules.php.blade.syntax.annotation.Directive;
 import org.netbeans.modules.php.blade.syntax.annotation.DirectiveRegister;
@@ -122,6 +122,8 @@ import org.netbeans.modules.php.blade.syntax.annotation.DirectiveRegister;
     //plugins
     //spatie / honeypot
     @Directive(name = "@honeypot", description="spatie plugin"),
+    @Directive(name = "@island",  description="livewire", endtag = "@endisland"),
+    @Directive(name = "@placeholder",  description="livewire", endtag = "@endplaceholder"),
     }
 )
 //to do add a static cache directiveList with only blocks
