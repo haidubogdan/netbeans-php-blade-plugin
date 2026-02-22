@@ -38,10 +38,12 @@ public final class GeneralPreferencesUtils {
     public static final String ENABLE_FORMATTING = "enable-blade-format"; // NOI18N
     public static final String ENABLE_INDENTATION = "enable-blade-indent"; // NOI18N
     public static final String ENABLE_AUTO_TAG_COMPLETION = "enable-auto-tag-completion"; // NOI18N
+    public static final String BLADE_COMMENTS_EVERYWHERE = "blade-comments-everywhere"; // NOI18N
 
     private static Boolean enableFormatting = null;
     private static Boolean enableIndentation = null;
     private static Boolean enableAutoTagCompletion = null;
+    private static Boolean bladeCommentsEverywhere = null;
 
     // default values
     private static Preferences PREFERENCES;
@@ -52,6 +54,7 @@ public final class GeneralPreferencesUtils {
             enableFormatting = PREFERENCES.getBoolean(ENABLE_FORMATTING, false);
             enableIndentation = PREFERENCES.getBoolean(ENABLE_INDENTATION, false);
             enableAutoTagCompletion = PREFERENCES.getBoolean(ENABLE_AUTO_TAG_COMPLETION, false);
+            bladeCommentsEverywhere = PREFERENCES.getBoolean(BLADE_COMMENTS_EVERYWHERE, true);
         }
     };
 
@@ -72,6 +75,12 @@ public final class GeneralPreferencesUtils {
         lazyInit();
         return enableAutoTagCompletion;
     }
+    
+    public static boolean bladeCommentsEverywhere(){
+        lazyInit();
+        return bladeCommentsEverywhere;
+    }
+    
     
     private static void lazyInit() {
         if (INITED.compareAndSet(false, true)) {

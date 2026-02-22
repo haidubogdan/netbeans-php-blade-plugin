@@ -23,11 +23,57 @@
                         </folder>
                     </folder>
                 </folder>
+                <file name="language.instance">
+                    <attr name="instanceCreate" methodvalue="org.netbeans.modules.php.blade.editor.BladeLanguage.getStaticLexerLanguage"/>
+                    <attr name="instanceOf" stringvalue="org.netbeans.api.lexer.Language"/>
+                </file>
                 <folder name="Preferences">
                     <folder name="Defaults">
                         <file name="org-netbeans-modules-php-blade-resources-preferences.xml" url="preferences.xml"/>
                     </folder>
-                </folder>    
+                </folder>
+
+                <folder name="RefactoringActions">
+                    <file name="org-netbeans-modules-html-editor-refactoring-actions-ExtractInlinedStyleAction.shadow">
+                        <attr name="originalFile" stringvalue="Actions/Refactoring/org-netbeans-modules-html-editor-refactoring-actions-ExtractInlinedStyleAction.instance"/>
+                        <attr name="position" intvalue="430"/>
+                    </file>
+                </folder>
+
+                <folder name="CompletionProviders">
+                    <file name="org-netbeans-modules-html-editor-completion-HtmlCompletionProvider.instance"/>
+                    <file name="org-netbeans-modules-csl-editor-completion-GsfCompletionProvider.instance"/>
+                    <file name="org-netbeans-modules-html-editor-completion-HtmlPaletteCompletionProvider.instance"/>
+                    <file name="org-netbeans-lib-editor-codetemplates-CodeTemplateCompletionProvider.instance"/>
+                </folder>
+                
+               <folder name="HyperlinkProviders">
+                    <file name="GsfHyperlinkProvider.instance">
+                        <attr name="instanceClass" stringvalue="org.netbeans.modules.csl.editor.hyperlink.GsfHyperlinkProvider"/>
+                        <attr name="instanceOf" stringvalue="org.netbeans.lib.editor.hyperlink.spi.HyperlinkProviderExt"/>
+                        <attr name="position" intvalue="1000"/>
+                    </file>
+                </folder>
+                
+                <file name="org-netbeans-modules-html-editor-coloring-EmbeddingHighlightsLayerFactory.instance">
+                    <attr name="instanceOf" stringvalue="org.netbeans.spi.editor.highlighting.HighlightsLayerFactory"/>
+                </file>
+                <file name="org-netbeans-modules-csl-core-GsfParserFactory.instance">
+                    <attr name="instanceOf" stringvalue="org.netbeans.modules.parsing.spi.ParserFactory"/>
+                    <attr name="instanceCreate" methodvalue="org.netbeans.modules.csl.core.GsfParserFactory.create"/>
+                </file>
+
+                <file name="org-netbeans-modules-javascript2-editor-embedding-JsEmbeddingProvider$Factory.instance">
+                    <attr name="instanceOf" stringvalue="org.netbeans.modules.parsing.spi.TaskFactory"/>
+                </file>
+                <file name="org-netbeans-modules-html-editor-HtmlCaretAwareSourceTask$Factory.instance">
+                    <attr name="instanceOf" stringvalue="org.netbeans.modules.parsing.spi.TaskFactory"/>
+                </file>
+
+                <folder name="UpToDateStatusProvider">
+                    <file name="org-netbeans-modules-csl-hints-GsfUpToDateStateProviderFactory.instance"/>
+                </folder>
+                <file name="org-netbeans-modules-csl-editor-semantic-HighlightsLayerFactoryImpl.instance"/>
             </folder>
         </folder>
     </folder>
