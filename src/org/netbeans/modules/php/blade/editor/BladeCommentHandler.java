@@ -18,9 +18,6 @@
  */
 package org.netbeans.modules.php.blade.editor;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 import org.netbeans.api.lexer.Token;
 import org.netbeans.api.lexer.TokenHierarchy;
@@ -39,11 +36,9 @@ import static org.netbeans.modules.php.blade.editor.lexer.BladeTokenId.BLADE_ECH
  */
 public class BladeCommentHandler extends CommentHandler.DefaultCommentHandler {
 
-    private static final String COMMENT_START_DELIMITER = "{{--"; //NOI18N
-    private static final String COMMENT_END_DELIMITER = "--}}"; //NOI18N
+    public static final String COMMENT_START_DELIMITER = "{{--"; //NOI18N
+    public static final String COMMENT_END_DELIMITER = "--}}"; //NOI18N
     
-    private static final Logger LOGGER = Logger.getLogger(BladeCommentHandler.class.getName());
-
     @Override
     public String getCommentStartDelimiter() {
         return COMMENT_START_DELIMITER;
@@ -92,16 +87,7 @@ public class BladeCommentHandler extends CommentHandler.DefaultCommentHandler {
                             if (ts.moveNext() && ts.token().id() == BladeTokenId.PHP_BLADE_EXPRESSION) {
                                 bounds[1] =  ts.offset() + ts.token().length();
                             }
-                            
-                            try {
-                                //manually inserting the delimiters
-                                doc.insertString(bounds[0], COMMENT_START_DELIMITER, null);
-                                doc.insertString(Math.max(bounds[1], to) + COMMENT_END_DELIMITER.length(), COMMENT_END_DELIMITER, null);
-                                bounds[0] = 0;
-                                bounds[1] = 0;
-                            } catch (BadLocationException ex) {
-                                LOGGER.log(Level.WARNING, "Invalid offset: {0}", ex.offsetRequested()); // NOI18N
-                            }
+
                             break;
 
                     }

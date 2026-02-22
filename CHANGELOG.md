@@ -1,5 +1,13 @@
 # Change Log
 
+## [3.0.0.42]
+
+- global blade comment handler Closes #95
+
+## [3.0.0.41]
+
+- props parser error fix Closes #97
+
 ## [3.0.0.40]
 
 - allow control `@` error operator inside echo statement Closes #93
