@@ -23,6 +23,10 @@
                         </folder>
                     </folder>
                 </folder>
+                <file name="language.instance">
+                    <attr name="instanceCreate" methodvalue="org.netbeans.modules.php.blade.editor.BladeLanguage.getStaticLexerLanguage"/>
+                    <attr name="instanceOf" stringvalue="org.netbeans.api.lexer.Language"/>
+                </file>
                 <folder name="Preferences">
                     <folder name="Defaults">
                         <file name="org-netbeans-modules-php-blade-resources-preferences.xml" url="preferences.xml"/>

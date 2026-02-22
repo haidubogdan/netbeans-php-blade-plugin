@@ -24,8 +24,9 @@
                   <Component id="jLabel1" min="-2" max="-2" attributes="0"/>
                   <Component id="indentation_enabled" alignment="0" min="-2" max="-2" attributes="0"/>
                   <Component id="jLabel2" alignment="0" min="-2" max="-2" attributes="0"/>
+                  <Component id="blade_comments_everywhere" alignment="0" min="-2" max="-2" attributes="0"/>
               </Group>
-              <EmptySpace pref="119" max="32767" attributes="0"/>
+              <EmptySpace pref="55" max="32767" attributes="0"/>
           </Group>
       </Group>
     </DimensionLayout>
@@ -41,7 +42,9 @@
               <Component id="jLabel2" min="-2" max="-2" attributes="0"/>
               <EmptySpace min="-2" pref="11" max="-2" attributes="0"/>
               <Component id="auto_tag_completion" min="-2" max="-2" attributes="0"/>
-              <EmptySpace min="0" pref="170" max="32767" attributes="0"/>
+              <EmptySpace max="-2" attributes="0"/>
+              <Component id="blade_comments_everywhere" min="-2" max="-2" attributes="0"/>
+              <EmptySpace min="0" pref="141" max="32767" attributes="0"/>
           </Group>
       </Group>
     </DimensionLayout>
@@ -79,6 +82,13 @@
       <Properties>
         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
           <ResourceString bundle="org/netbeans/modules/php/blade/editor/ui/customizer/Bundle.properties" key="BladeGeneralSettings.jLabel2.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
+        </Property>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JCheckBox" name="blade_comments_everywhere">
+      <Properties>
+        <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+          <ResourceString bundle="org/netbeans/modules/php/blade/editor/ui/customizer/Bundle.properties" key="BladeGeneralSettings.blade_comments_everywhere.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
         </Property>
       </Properties>
     </Component>
