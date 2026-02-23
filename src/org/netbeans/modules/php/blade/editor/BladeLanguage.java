@@ -66,7 +66,7 @@ import org.netbeans.modules.php.blade.syntax.StringUtils;
 @NbBundle.Messages({
     "LBL_Blade_LOADER=Blade template files"
 })
-@LanguageRegistration(mimeType = BladeLanguage.MIME_TYPE, useMultiview = true)
+@LanguageRegistration(mimeType = BladeLanguage.MIME_TYPE, useMultiview = true, useCustomEditorKit = true)
 @ActionReferences({
     @ActionReference(id = @ActionID(category = "System", id = "org.openide.actions.OpenAction"), path = ACTIONS, position = 100),
     @ActionReference(id = @ActionID(category = "Edit", id = "org.openide.actions.CutAction"), path = ACTIONS, position = 300, separatorBefore = 200),
@@ -209,16 +209,12 @@ public class BladeLanguage extends DefaultLanguageConfig {
 
             }.language();
 
-    @NbBundle.Messages("Source=&Source Blade")
-    @MultiViewElement.Registration(
-            displayName = "#Source",
-            persistenceType = TopComponent.PERSISTENCE_ONLY_OPENED,
-            mimeType = BladeLanguage.MIME_TYPE,
-            preferredID = "blade.source",
-            position = 2
-    )
+
+    public static Language<BladeTokenId> getStaticLexerLanguage() {
+        return language;
+    }
+    
     public static MultiViewEditorElement createMultiViewEditorElement(Lookup context) {
         return new MultiViewEditorElement(context);
     }
-
 }
