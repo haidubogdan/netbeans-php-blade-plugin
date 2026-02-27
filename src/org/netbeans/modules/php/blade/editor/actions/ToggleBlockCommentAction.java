@@ -32,6 +32,7 @@ import org.netbeans.editor.BaseDocument;
 import org.netbeans.editor.Utilities;
 import org.netbeans.editor.ext.ExtKit;
 import org.netbeans.modules.csl.api.CslActions;
+import org.netbeans.modules.php.blade.editor.BladeCommentHandler;
 
 public class ToggleBlockCommentAction extends BaseAction {
 
@@ -39,6 +40,7 @@ public class ToggleBlockCommentAction extends BaseAction {
     private static final Logger LOGGER = Logger.getLogger(ToggleBlockCommentAction.class.getName());
     private static final String FORCE_COMMENT = "force-comment";
     private static final String FORCE_UNCOMMENT = "force-uncomment";
+    private final BladeCommentHandler commentHandler = new BladeCommentHandler();
 
     public ToggleBlockCommentAction() {
         super(ExtKit.toggleCommentAction);
@@ -53,6 +55,7 @@ public class ToggleBlockCommentAction extends BaseAction {
                 return;
             }
             final Positions positions = Positions.create(target);
+            commentHandler.getAdjustedBlocks(target.getDocument(), positions.getStart(), positions.getEnd());
             final BaseDocument doc = (BaseDocument) target.getDocument();
             doc.runAtomic(new Runnable() {
 

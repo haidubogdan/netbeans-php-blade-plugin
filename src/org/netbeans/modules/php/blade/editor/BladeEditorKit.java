@@ -24,7 +24,6 @@ import javax.swing.text.EditorKit;
 import javax.swing.text.TextAction;
 import org.netbeans.api.editor.mimelookup.MimeRegistration;
 import org.netbeans.modules.php.blade.editor.actions.ToggleBlockCommentAction;
-import org.netbeans.modules.csl.api.CslActions;
 import org.netbeans.modules.editor.NbEditorKit;
 
 @MimeRegistration(mimeType = BladeLanguage.MIME_TYPE, service = EditorKit.class)
@@ -43,7 +42,7 @@ public class BladeEditorKit extends NbEditorKit {
     @Override
     protected Action[] createActions() {
         return TextAction.augmentList(super.createActions(), new Action[] {
-            new ToggleBlockCommentAction(),
-            CslActions.createInstantRenameAction()});
+            new ToggleBlockCommentAction()
+        });
     }
 }
