@@ -67,6 +67,9 @@ public class BladeScope {
                 break;
             }
 
+            if (entry.getValue() == null) {
+                continue;
+            }
             variablesList.putAll(entry.getValue().getDeclaredVariableNames());
         }
 

@@ -47,6 +47,7 @@ import BladeCommonLexer;
     int sqparenBalance = 0;
     int curlyparenBalance = 0;
     int htmlCurlyParenBalance = 0;
+    boolean inAssociativeMode = false;
 }
 
 options { 
@@ -199,7 +200,7 @@ D_SIMPLE_DIRECTIVE : ('@dd' | '@dump' | '@json' | '@style' | '@class'
 | '@checked'  | '@disabled' | '@selected' | '@required' | '@readonly' 
 | '@when' | '@bool') (' ')* {lookupMode(INSIDE_PHP_EXPRESSION);};
 
-D_PROPS : '@props' (' ')* {lookupMode(MIXED_STRING_AND_ARRAY_IDENTIFIER);};
+D_PROPS : '@props' (' ')* {lookupMode(MIXED_STRING_AND_ARRAY_IDENTIFIER_V2);};
 D_AWARE : '@aware' (' ')* {lookupMode(INSIDE_PHP_EXPRESSION);};
 
 D_VITE : '@vite' (' ')* {lookupMode(MIXED_STRING_AND_ARRAY_IDENTIFIER);}; 
@@ -401,6 +402,32 @@ MIXED_S_A_IDENTIFIABLE_STRING : (' ' | [\n\r])*  STRING_LITERAL (' ')*
 MIXED_S_A_OTHER : . ->skip;
 
 EXIT_MIXED_S_A_EOF : EOF->type(ERROR),mode(DEFAULT_MODE);
+
+mode MIXED_STRING_AND_ARRAY_IDENTIFIER_V2;
+
+START_MIXED_S_A_LPAREN_V2: '(' {rparenBalance == 0}? {rparenBalance++;}->type(LPAREN);
+MIXED_S_A_LPAREN_V2: '(' {rparenBalance++;}->skip;
+EXIT_MIXED_S_A_RPAREN_V2: ')' {rparenBalance == 1}? {rparenBalance--; inAssociativeMode = false;}  ->type(RPAREN),mode(DEFAULT_MODE);
+MIXED_S_A_RPAREN_V2: ')' {rparenBalance--;} ->skip;
+
+MIXED_S_A_LSQUAREBRACKET_V2: '[' {sqparenBalance++;} ->skip;
+MIXED_S_A_RSQUAREBRACKET_V2: ']' {sqparenBalance--;}->skip;
+
+MIXED_S_A_LCURLYBRACE_V2: '{' {curlyparenBalance++;}->skip;
+MIXED_S_A_RCURLYBRACE_V2: '}' {curlyparenBalance--;}->skip;
+
+MIXED_S_A_ARG_COMMA_V2 : ',' {rparenBalance == 1 && sqparenBalance == 1 && curlyparenBalance == 0}? {inAssociativeMode = false;} ->type(COMMA);
+
+//Skip associated value
+MIXED_ASSOCIATED_VALUE_STRING_V2 : '=>' {inAssociativeMode = true;} ->skip;
+
+MIXED_S_A_IDENTIFIABLE_STRING_V2 : {!inAssociativeMode}? (' ' | [\n\r])*  STRING_LITERAL (' ')*
+    {rparenBalance == 1}? ->type(IDENTIFIABLE_STRING)
+    ;
+
+MIXED_S_A_OTHER_V2 : . ->skip;
+
+EXIT_MIXED_S_A_EOF_V2 : EOF->type(ERROR),mode(DEFAULT_MODE);
 
 //==========================================
 //@foreach expr

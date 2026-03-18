@@ -127,7 +127,7 @@ inlineDirective:
     | D_VITE_REFRESH
 ;
 
-propsDirective : D_PROPS '(' IDENTIFIABLE_STRING? (',' IDENTIFIABLE_STRING?)* ')';
+propsDirective : D_PROPS '(' IDENTIFIABLE_STRING* (',' IDENTIFIABLE_STRING*)* ')';
 
 identifiableArgDirective :
   D_SECTION '(' IDENTIFIABLE_STRING? ',' ')'
