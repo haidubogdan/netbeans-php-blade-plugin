@@ -31,7 +31,33 @@
                     <folder name="Defaults">
                         <file name="org-netbeans-modules-php-blade-resources-preferences.xml" url="preferences.xml"/>
                     </folder>
-                </folder>    
+                </folder>
+                
+                <folder name="FoldManager">
+                    <file name="org-netbeans-modules-csl-editor-fold-GsfFoldManagerFactory.instance">
+                	<attr name="position" intvalue="1100"/>
+                    </file>
+                </folder>
+
+                <folder name="SideBar">
+                    <file name="org-netbeans-modules-csl-editor-GsfCodeFoldingSideBarFactory.instance">
+                        <attr name="position" intvalue="1200"/>
+                    </file>
+                </folder>
+
+                <file name="org-netbeans-modules-csl-core-EmbeddingIndexerFactoryImpl.instance">
+                    <attr methodvalue="org.netbeans.modules.csl.core.EmbeddingIndexerFactoryImpl.create" name="instanceCreate"/>
+                    <attr name="instanceOf" stringvalue="org.netbeans.modules.parsing.spi.indexing.EmbeddingIndexerFactory"/>
+                </file>
+                <file name="org-netbeans-modules-javascript2-editor-embedding-JsEmbeddingProvider$Factory.instance">
+                    <attr name="instanceOf" stringvalue="org.netbeans.modules.parsing.spi.TaskFactory"/>
+                </file>
+                <folder name="RefactoringActions">
+                    <file name="org-netbeans-modules-html-editor-refactoring-actions-ExtractInlinedStyleAction.shadow">
+                        <attr name="originalFile" stringvalue="Actions/Refactoring/org-netbeans-modules-html-editor-refactoring-actions-ExtractInlinedStyleAction.instance"/>
+                        <attr name="position" intvalue="430"/>
+                    </file>
+                </folder>   
             </folder>
         </folder>
     </folder>

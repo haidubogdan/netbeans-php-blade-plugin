@@ -58,7 +58,7 @@ public class ToggleBlockCommentAction extends BaseAction {
                 target.getToolkit().beep();
                 return;
             }
-            
+
             if (GeneralPreferencesUtils.bladeCommentsEverywhere()) {
                 final Positions positions = Positions.create(target);
 
@@ -109,13 +109,15 @@ public class ToggleBlockCommentAction extends BaseAction {
                     token = ts.token();
                 }
             }
-            if (token != null && isInComment(token.id())) {
+            if (token != null && (isInComment(token.id()))) {
                 if (token.id().equals(BLADE_COMMENT)) {
                     uncommentToken(ts, baseDocument);
                 } else {
                     //let default comment handler handle
                     return;
                 }
+            } else if (token != null && isInPhpExpression(token.id())) {
+                return;
             } else {
                 positions.comment(baseDocument);
             }
@@ -153,6 +155,19 @@ public class ToggleBlockCommentAction extends BaseAction {
 
         }
         return isInComment;
+    }
+
+    private static boolean isInPhpExpression(BladeTokenId tokenId) {
+        boolean isInPhpExpression = false;
+        switch (tokenId) {
+            case PHP_BLADE_INLINE_CODE:
+            case PHP_INLINE:
+            case PHP_BLADE_ECHO_EXPR:
+                isInPhpExpression = true;
+                break;
+
+        }
+        return isInPhpExpression;
     }
 
     private static final class Positions {
