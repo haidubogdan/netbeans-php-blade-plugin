@@ -205,7 +205,7 @@ public class ToggleBlockCommentAction extends BaseAction {
                 offsetCommentEnd = getEnd();
             } else {
                 offsetCommentStart = LineDocumentUtils.getPreviousWhitespace(baseDocument, getStart());
-                offsetCommentEnd = LineDocumentUtils.getLineEndOffset(baseDocument, getEnd());
+                offsetCommentEnd = LineDocumentUtils.getLineEnd(baseDocument, getEnd());
             }
             baseDocument.insertString(offsetCommentStart, BladeCommentHandler.COMMENT_START_DELIMITER, null);
             baseDocument.insertString(offsetCommentEnd + BladeCommentHandler.COMMENT_START_DELIMITER.length(), BladeCommentHandler.COMMENT_END_DELIMITER, null);
