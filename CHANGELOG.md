@@ -1,5 +1,9 @@
 # Change Log
 
+## [3.0.0.43]
+
+- fix identifier highlight regression Closes #7
+
 ## [3.0.0.42]
 
 - global blade comment handler Closes #95
