@@ -24,6 +24,8 @@ import javax.swing.text.Document;
 import javax.swing.text.EditorKit;
 import javax.swing.text.TextAction;
 import org.netbeans.api.editor.mimelookup.MimeRegistration;
+import org.netbeans.modules.csl.api.CslActions;
+import org.netbeans.modules.editor.NbEditorDocument;
 import org.netbeans.modules.editor.NbEditorKit;
 
 @MimeRegistration(mimeType = BladeLanguage.MIME_TYPE, service = EditorKit.class)
@@ -31,18 +33,30 @@ public class BladeEditorKit extends NbEditorKit {
 
     @Override
     public Document createDefaultDocument() {
-        return super.createDefaultDocument();
+        return new BladeDocument();
     }
 
     @Override
     public String getContentType() {
         return BladeLanguage.MIME_TYPE;
     }
-    
+
     @Override
     protected Action[] createActions() {
-        return TextAction.augmentList(super.createActions(), new Action[] {
-            new ToggleBlockCommentAction()
-        });
+        return TextAction.augmentList(super.createActions(), new Action[]{
+            new ToggleBlockCommentAction()});
+    }
+
+    private static final class BladeDocument extends NbEditorDocument {
+
+        public BladeDocument() {
+            super(BladeLanguage.MIME_TYPE);
+        }
+
+        public @Override
+        boolean isIdentifierPart(char ch) {
+            BladeLanguage lang = new BladeLanguage();
+            return lang.isIdentifierChar(ch);
+        }
     }
 }
