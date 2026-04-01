@@ -16,17 +16,31 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.netbeans.modules.php.blade.project;
+package org.netbeans.modules.php.blade.editor.lexer;
 
-/**
- *
- * @author bogdan
- */
-public class AssetsBundlerSupport {
+import org.netbeans.api.editor.mimelookup.MimeRegistration;
+import org.netbeans.api.html.lexer.HtmlLexerPlugin;
 
-    public static final String RESOURCE_ROOT = "resources"; // NOI18N
-    public static final String JS_ASSET_FOLDER = RESOURCE_ROOT + "/js"; // NOI18N
-    public static final String CSS_ASSET_FOLDER = RESOURCE_ROOT + "/css"; // NOI18N
-    
-    
+@MimeRegistration(mimeType = "text/html", service = HtmlLexerPlugin.class)
+public class BladeHtmlLexerPlugin extends HtmlLexerPlugin {
+
+    @Override
+    public String getContentMimeType() {
+        return "text/x-php5"; //NOI18N
+    }
+
+    /**
+     * components
+     * 
+     * @param elementName
+     * @param attributeName
+     * @return 
+     */
+    @Override
+    public String createAttributeEmbedding(String elementName, String attributeName) {
+        if (elementName.startsWith("x-") && attributeName.startsWith(":")) {  //NOI18N
+            return getContentMimeType();
+        }
+        return null;
+    }
 }

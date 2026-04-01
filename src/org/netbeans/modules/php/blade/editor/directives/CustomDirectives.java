@@ -55,6 +55,8 @@ import org.openide.filesystems.FileUtil;
  */
 public final class CustomDirectives {
 
+    public static final String  APP_PROVIDER_RELATIVE_PATH = "app/Providers/AppServiceProvider.php"; // NOI18N
+
     private final Project project;
     private final Map<FileObject, List<CustomDirective>> customDirectives = new LinkedHashMap<>();
 

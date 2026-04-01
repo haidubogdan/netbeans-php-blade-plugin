@@ -32,21 +32,14 @@ import org.antlr.v4.runtime.Token;
 import org.netbeans.api.editor.document.EditorDocumentUtils;
 import org.netbeans.api.editor.mimelookup.MimeRegistration;
 import org.netbeans.api.editor.mimelookup.MimeRegistrations;
-import org.netbeans.api.project.Project;
 import org.netbeans.modules.php.blade.editor.BladeLanguage;
-import org.netbeans.modules.php.blade.editor.FileSystemUtils;
 import static org.netbeans.modules.php.blade.editor.ResourceUtilities.CUSTOM_HTML_ICON;
 import static org.netbeans.modules.php.blade.editor.ResourceUtilities.XML_ATTRIBUTE_ICON;
-import org.netbeans.modules.php.blade.editor.components.ComponentModel;
 import org.netbeans.modules.php.blade.editor.components.ComponentsQueryService;
 import org.netbeans.modules.php.blade.editor.indexing.PhpIndexResult;
 import org.netbeans.modules.php.blade.project.ComponentsSupport;
-import static org.netbeans.modules.php.blade.project.ComponentsSupport.COMPONENT_TAG_NAME_PREFIX;
 import org.netbeans.modules.php.blade.syntax.BladeTagsUtils;
 import org.netbeans.modules.php.blade.syntax.StringUtils;
-import org.netbeans.modules.php.blade.syntax.antlr4.html_components.BladeHtmlAntlrLexer;
-import org.netbeans.modules.php.blade.syntax.antlr4.html_components.BladeHtmlAntlrUtils;
-import org.netbeans.modules.php.editor.parser.astnodes.FormalParameter;
 import org.netbeans.spi.editor.completion.CompletionItem;
 import org.netbeans.spi.editor.completion.CompletionProvider;
 import static org.netbeans.spi.editor.completion.CompletionProvider.COMPLETION_QUERY_TYPE;
@@ -109,123 +102,7 @@ public class BladeHtmlCompletionProvider implements CompletionProvider {
 
         @Override
         protected void query(CompletionResultSet resultSet, Document doc, int caretOffset) {
-            long startTime = System.currentTimeMillis();
-            AbstractDocument adoc = (AbstractDocument) doc;
-            try {
-                FileObject fo = EditorDocumentUtils.getFileObject(doc);
 
-                if (fo == null || !fo.getMIMEType().equals(BladeLanguage.MIME_TYPE)) {
-                    return;
-                }
-
-                adoc.readLock();
-                AntlrTokenSequence tokens;
-                String typedText;
-                try {
-                    String text = doc.getText(0, doc.getLength());
-                    typedText = doc.getText(caretOffset - 1, 1);
-                    tokens = new AntlrTokenSequence(new BladeHtmlAntlrLexer(CharStreams.fromString(text)));
-                } catch (BadLocationException ex) {
-                    return;
-                } finally {
-                    adoc.readUnlock();
-                }
-
-                if (!tokens.isEmpty()) {
-                    tokens.seekTo(caretOffset);
-                    Token queryToken;
-
-                    if (tokens.hasNext()) {
-                        queryToken = tokens.next().get();
-                    } else if (tokens.hasPrevious()) {
-                        queryToken = tokens.previous().get();
-                    } else {
-                        return;
-                    }
-
-                    int queryTokenOffset = queryToken.getStartIndex();
-
-                    //check for context where we have inline css code or offseted blade tags
-                    if (queryTokenOffset > caretOffset) {
-                        int correction = typedText.equals("!") //NOI18N
-                                || typedText.equals("}")  ? 0 : 1; //NOI18N
-                        tokens.seekTo(caretOffset - correction);
-                        queryToken = tokens.next().get();
-                        queryTokenOffset = queryToken.getStartIndex();
-                    }
-
-                    String queryText = queryToken.getText();
-                    int textLength = queryText.length();
-                    int endOffset = queryTokenOffset + textLength;
-
-                    if (endOffset < caretOffset){
-                        //out of range
-                        return;
-                    }
-
-                    switch (queryToken.getType()) {
-                        case BladeHtmlAntlrLexer.TAG_PART: {
-                            tokens.seekTo(queryToken.getStartIndex() - 1);
-                            if (tokens.hasNext()){
-                                Token previousToken = tokens.next().get();
-                                if (previousToken.getType() == BladeHtmlAntlrLexer.RAW_TAG_OPEN && queryText.equals("!")){ //NOI18N
-                                    addBladeTagCompletionItem(BladeTagsUtils.RAW_TAG_CLOSE, caretOffset, resultSet); //NOI18N
-                                }
-                            }
-                            break;
-                        }
-                        case BladeHtmlAntlrLexer.HTML_COMPONENT_OPEN_TAG: {
-                            String identifier = ComponentsSupport.tag2ClassName(queryToken.getText());
-                            completeComponents(identifier, fo, caretOffset, resultSet);
-                            break;
-                        }
-                        case BladeHtmlAntlrLexer.COMPONENT_ATTRIBUTE: {
-                            Set<Integer> stopTokens = new HashSet<>();
-                            stopTokens.add(BladeHtmlAntlrLexer.HTML_COMPONENT_OPEN_TAG);
-                            stopTokens.add(BladeHtmlAntlrLexer.GT);
-                            String attributeIdentifier = queryText.startsWith(":") ? queryText.substring(1) : queryText; //NOI18N
-                            Token componentToken = BladeHtmlAntlrUtils.findBackwardWithStop(tokens, BladeHtmlAntlrLexer.HTML_COMPONENT_OPEN_TAG, stopTokens);
-                            //TODO
-                            //this can refactored using html extension
-                            if (componentToken != null && componentToken.getType() == BladeHtmlAntlrLexer.HTML_COMPONENT_OPEN_TAG) {
-                                ComponentsQueryService componentQueryService = new ComponentsQueryService();
-                                String tag = componentToken.getText();
-                                String tagName = tag.substring(COMPONENT_TAG_NAME_PREFIX.length());
-                                Project projectOwner = FileSystemUtils.getProjectOwner(doc);
-                                
-                                if (projectOwner == null){
-                                    break;
-                                }
-
-                                ComponentsSupport componentSupport = ComponentsSupport.forProject(projectOwner);
-
-                                if (componentSupport == null){
-                                    break;
-                                }
-
-                                Collection<ComponentModel> compModels = componentQueryService.findComponentClassModels(tagName, componentSupport);
-
-                                for (ComponentModel compModel : compModels) {
-                                    for (FormalParameter parameter : compModel.getConstructorProperties()){
-                                        String parameterName = parameter.getParameterName().toString().substring(1);
-                                        if (parameterName.startsWith(attributeIdentifier)){
-                                            addSimplAttributeItem(attributeIdentifier, parameterName, caretOffset, resultSet);
-                                        }
-                                    }
-                                }
-                            }
-                            break;
-                        }
-                    }
-
-                }
-            } finally {
-                long time = System.currentTimeMillis() - startTime;
-                if (time > 2000) {
-                    LOGGER.log(Level.INFO, "Slow completion time detected. {0}ms", time); //NOI18N
-                }
-                resultSet.finish();
-            }
         }
     }
 

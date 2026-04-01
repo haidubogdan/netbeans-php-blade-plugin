@@ -46,8 +46,6 @@ public class BladeLexer extends AbstractAntlrLexerBridge<BladeAntlrColoringLexer
             case BladeAntlrColoringLexer.HTML_TAG:
             case BladeAntlrColoringLexer.HTML:
                 return groupToken(HTML, BladeAntlrColoringLexer.HTML);
-            case BladeAntlrColoringLexer.COMPONENT_ATTR:
-                return groupToken(BLADE_COMPONENT_ATTRIBUTE, BladeAntlrColoringLexer.COMPONENT_ATTR);
             case BladeAntlrColoringLexer.DIRECTIVE:
             case BladeAntlrColoringLexer.D_PHP:
             case BladeAntlrColoringLexer.D_ENDPHP:

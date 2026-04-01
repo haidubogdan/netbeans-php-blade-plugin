@@ -112,8 +112,6 @@ public class AntlrDebugAction extends AbstractAction implements ContextAwareActi
             arr.add(new ViewAntlrColoringTokensAction(node));
             arr.add(new ViewAntlrFormatterTokensAction(node));
             arr.add(new ViewLexerColoringTokens(node));
-            arr.add(new ViewAntlrHtmlLexerTokensAction(node));
-            arr.add(new ViewAntlrPhpLexerTokensAction(node));
         }
 
         return arr;
