@@ -1,5 +1,14 @@
 # Change Log
 
+## [3.0.0.45]
+
+- fix issue #99 part 2
+
+
+## [3.0.0.44]
+
+- fix issue #99 part 1
+
 ## [3.0.0.43]
 
 - fix identifier highlight regression Closes #7
