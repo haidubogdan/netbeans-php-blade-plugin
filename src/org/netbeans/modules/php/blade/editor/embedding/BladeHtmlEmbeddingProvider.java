@@ -57,6 +57,8 @@ public class BladeHtmlEmbeddingProvider extends EmbeddingProvider {
 
         int offset = 0;
         int len = 0;
+        boolean inStyleTag = false;
+        boolean doStyleTagCheck = true;
 
         String fake;
 
@@ -82,8 +84,24 @@ public class BladeHtmlEmbeddingProvider extends EmbeddingProvider {
                     tokenLength-=1;
                 }
 
+                //patch for embedding css interpolation
+                if (id.equals(BladeTokenId.HTML)) {
+                    if (doStyleTagCheck) {
+                        inStyleTag = tText.contains("<style");
+                        doStyleTagCheck = false;
+                    }
+
+                    if (tText.contains("</style")) {
+                        inStyleTag = false;
+                        doStyleTagCheck = true;
+                    }
+                }
+
                 if (id.equals(BladeTokenId.HTML)) {
                     embeddings.add(snapshot.create(offset, tokenLength, TARGET_MIME_TYPE));
+                } else if (inStyleTag && (id.equals(BladeTokenId.BLADE_ECHO_DELIMITOR))) {
+                    fake = new String(new char[tText.length() - 1]).replace("\0", FILLER); //NOI18N
+                    embeddings.add(snapshot.create("z" + fake, TARGET_MIME_TYPE));  //NOI18N
                 } else {
                     fake = new String(new char[tText.length()]).replace("\0", FILLER); //NOI18N
                     embeddings.add(snapshot.create(fake, TARGET_MIME_TYPE));
