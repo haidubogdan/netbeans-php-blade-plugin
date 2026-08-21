@@ -2,5 +2,4 @@
 
 ## What's changed
 
-- fix issue #97 identifier highlight regression
-- fix issue #95 support for global blade comments
+- fix issue #99 css parser error due to blade interpolation embedding
